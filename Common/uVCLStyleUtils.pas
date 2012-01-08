@@ -2,6 +2,7 @@
 {                                                                                                  }
 { Unit uVCLStyleUtils                                                                              }
 { unit for the VCL Styles Utils                                                                    }
+{ http://code.google.com/p/vcl-styles-utils/                                                       }
 {                                                                                                  }
 { The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
 { you may not use this file except in compliance with the License. You may obtain a copy of the    }
@@ -25,14 +26,12 @@ interface
 {$DEFINE USE_VCL_STYLESAPI}
 
 Uses
-  Rtti,
   Vcl.Themes,
   Vcl.Styles,
+  Vcl.Forms,
   Generics.Collections,
-{$IFDEF USE_VCL_STYLESAPI}
   Winapi.Windows,
   Vcl.Graphics,
-{$ENDIF}
   Classes;
 
 type
@@ -57,20 +56,20 @@ Procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
 Procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
 function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
 function  GetRegisteredStylesHooks(ControlClass: TClass) : TStyleHookList;
+procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string);
 
 
 {$IFDEF USE_VCL_STYLESAPI}
 type
-  TVCLStyleExt = class(TCustomStyle)
+  TCustomStyleExt = class(TCustomStyle)
   strict private
-    FOwnStream : boolean;
-    FStream    : TStream;  public
+    FStream    : TStream;
+  public
     function  GetStyleInfo : TStyleInfo;
   public
     constructor Create(const FileName :string);overload;
-    constructor Create(const Stream:TStream;OwnStream:Boolean);overload;
+    constructor Create(const Stream:TStream);overload;
     destructor Destroy;override;
-    procedure  DrawSampleWindow(Canvas:TCanvas;ARect:TRect;const ACaption : string);
     property StyleInfo : TStyleInfo read GetStyleInfo;
   end;
 
@@ -89,7 +88,6 @@ uses
  Vcl.StdCtrls,
  Vcl.ImgList,
  Vcl.Consts,
- Vcl.Forms,
  Vcl.GraphUtil,
  Vcl.Imaging.pngimage,
  Messages,
@@ -154,7 +152,7 @@ begin
   LRegisteredStyles:=TStyleManager.GetRegisteredStyles;
   try
     if LRegisteredStyles.ContainsKey(StyleName) then
-      Result:=TStyleManager.GetRegisteredStyles[StyleName];
+      Result:=LRegisteredStyles[StyleName];
   finally
      LRegisteredStyles.Free;
   end;
@@ -265,37 +263,49 @@ end;
 
 { TVCLStyleExt }
 
-constructor TVCLStyleExt.Create(const FileName: string);
+constructor TCustomStyleExt.Create(const FileName: string);
 var
   LStream: TFileStream;
 begin
   LStream := TFileStream.Create(FileName, fmOpenRead);
   try
-    FStream:=TMemoryStream.Create;
-    LStream.Position:=0;
-    FStream.CopyFrom(LStream, LStream.Size);
-    Create(LStream, True);
+    Create(LStream);
   finally
     LStream.Free;
   end;
 end;
 
-constructor TVCLStyleExt.Create(const Stream: TStream;OwnStream:Boolean);
+constructor TCustomStyleExt.Create(const Stream: TStream);
 begin
   inherited Create;
-  FOwnStream:=OwnStream;
-  Stream.Position:=0;
-  TseStyle(Source).LoadFromStream(Stream);
+  FStream:=TMemoryStream.Create;
+
+  Stream.Seek(0, soBeginning); //index 0 to load
+  FStream.CopyFrom(Stream, Stream.Size);
+  Stream.Seek(0, soBeginning); //restore index 0 after
+
+  FStream.Seek(0, soBeginning);//index 0 to load
+  TseStyle(Source).LoadFromStream(FStream);
 end;
 
-destructor TVCLStyleExt.Destroy;
+destructor TCustomStyleExt.Destroy;
 begin
-  if FOwnStream and Assigned(FStream) then
+  if Assigned(FStream) then
     FStream.Free;
   inherited Destroy;
 end;
 
-procedure TVCLStyleExt.DrawSampleWindow(Canvas: TCanvas; ARect: TRect;const ACaption : string);
+function TCustomStyleExt.GetStyleInfo: TStyleInfo;
+begin
+ Result.Name        :=  TseStyle(Source).StyleSource.Name;
+ Result.Author      :=  TseStyle(Source).StyleSource.Author;
+ Result.AuthorEMail :=  TseStyle(Source).StyleSource.AuthorEMail;
+ Result.AuthorURL   :=  TseStyle(Source).StyleSource.AuthorURL;
+ Result.Version     :=  TseStyle(Source).StyleSource.Version;
+end;
+{$ENDIF}
+
+procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string);
 var
   LDetails        : TThemedElementDetails;
   CaptionDetails  : TThemedElementDetails;
@@ -315,20 +325,20 @@ var
     begin
       Result  := Rect(0, 0, 0, 0);
       Detail  := twCaptionActive;
-      Details := GetElementDetails(Detail);
-      GetElementSize(0, Details, esActual, Size);
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
       Result.Top := Size.cy;
       Detail := twFrameLeftActive;
-      Details := GetElementDetails(Detail);
-      GetElementSize(0, Details, esActual, Size);
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
       Result.Left := Size.cx;
       Detail := twFrameRightActive;
-      Details := GetElementDetails(Detail);
-      GetElementSize(0, Details, esActual, Size);
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
       Result.Right := Size.cx;
       Detail := twFrameBottomActive;
-      Details := GetElementDetails(Detail);
-      GetElementSize(0, Details, esActual, Size);
+      Details := Style.GetElementDetails(Detail);
+      Style.GetElementSize(0, Details, esActual, Size);
       Result.Bottom := Size.cy;
     end;
 
@@ -349,18 +359,18 @@ begin
   //Draw background
   LDetails.Element := teWindow;
   LDetails.Part := 0;
-  DrawElement(Canvas.Handle, LDetails, ARect);
+  Style.DrawElement(Canvas.Handle, LDetails, ARect);
 
   //Draw caption border
   CaptionRect := Rect(0, 0, CaptionBitmap.Width, CaptionBitmap.Height);
-  LDetails := GetElementDetails(twCaptionActive);
-  DrawElement(CaptionBitmap.Canvas.Handle, LDetails, CaptionRect);
+  LDetails := Style.GetElementDetails(twCaptionActive);
+  Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, CaptionRect);
   TextRect := CaptionRect;
   CaptionDetails := LDetails;
 
   //Draw icon
-  IconDetails := GetElementDetails(twSysButtonNormal);
-  if not GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
+  IconDetails := Style.GetElementDetails(twSysButtonNormal);
+  if not Style.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
     ButtonRect := Rect(0, 0, 0, 0);
   IconRect := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
   RectVCenter(IconRect, ButtonRect);
@@ -373,31 +383,31 @@ begin
   //Draw buttons
 
   //Close button
-  LDetails := GetElementDetails(twCloseButtonNormal);
-  if GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-   DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+  LDetails := Style.GetElementDetails(twCloseButtonNormal);
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+   Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
 
   //Maximize button
-  LDetails := GetElementDetails(twMaxButtonNormal);
-  if GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-    DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+  LDetails := Style.GetElementDetails(twMaxButtonNormal);
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
 
   //Minimize button
-  LDetails := GetElementDetails(twMinButtonNormal);
+  LDetails := Style.GetElementDetails(twMinButtonNormal);
 
-  if GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-    DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
 
   //Help button
-  LDetails := GetElementDetails(twHelpButtonNormal);
-  if GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-    DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
+  LDetails := Style.GetElementDetails(twHelpButtonNormal);
+  if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
+    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
 
   if ButtonRect.Left > 0 then
     TextRect.Right := ButtonRect.Left;
 
   //Draw text
-  Self.DrawText(CaptionBitmap.Canvas.Handle, CaptionDetails, ACaption, TextRect, [tfLeft, tfSingleLine, tfVerticalCenter]);
+  Style.DrawText(CaptionBitmap.Canvas.Handle, CaptionDetails, ACaption, TextRect, [tfLeft, tfSingleLine, tfVerticalCenter]);
 
   //Draw caption
   Canvas.Draw(0, 0, CaptionBitmap);
@@ -405,35 +415,20 @@ begin
 
   //Draw left border
   CaptionRect := Rect(0, BorderRect.Top, BorderRect.Left, ARect.Height - BorderRect.Bottom);
-  LDetails := GetElementDetails(twFrameLeftActive);
+  LDetails := Style.GetElementDetails(twFrameLeftActive);
   if CaptionRect.Bottom - CaptionRect.Top > 0 then
-    DrawElement(Canvas.Handle, LDetails, CaptionRect);
+    Style.DrawElement(Canvas.Handle, LDetails, CaptionRect);
 
   //Draw right border
   CaptionRect := Rect(ARect.Width - BorderRect.Right, BorderRect.Top, ARect.Width, ARect.Height - BorderRect.Bottom);
-  LDetails := GetElementDetails(twFrameRightActive);
-  if CaptionRect.Bottom - CaptionRect.Top > 0 then
-    DrawElement(Canvas.Handle, LDetails, CaptionRect);
+  LDetails := Style.GetElementDetails(twFrameRightActive);
+  Style.DrawElement(Canvas.Handle, LDetails, CaptionRect);
 
   //Draw Bottom border
   CaptionRect := Rect(0, ARect.Height - BorderRect.Bottom, ARect.Width, ARect.Height);
-  LDetails := GetElementDetails(twFrameBottomActive);
-  if CaptionRect.Bottom - CaptionRect.Top > 0 then
-    DrawElement(Canvas.Handle, LDetails, CaptionRect);
+  LDetails := Style.GetElementDetails(twFrameBottomActive);
+  Style.DrawElement(Canvas.Handle, LDetails, CaptionRect);
 end;
-
-function TVCLStyleExt.GetStyleInfo: TStyleInfo;
-begin
- Result.Name        :=  TseStyle(Source).StyleSource.Name;
- Result.Author      :=  TseStyle(Source).StyleSource.Author;
- Result.AuthorEMail :=  TseStyle(Source).StyleSource.AuthorEMail;
- Result.AuthorURL   :=  TseStyle(Source).StyleSource.AuthorURL;
- Result.Version     :=  TseStyle(Source).StyleSource.Version;
-end;
-
-{$ENDIF}
-
-
 
 initialization
 {$IFDEF USE_VCL_STYLESAPI}
