@@ -1,6 +1,6 @@
 {**************************************************************************************************}
 {                                                                                                  }
-{ Unit uVCLStyleUtils                                                                              }
+{ Unit Vcl.Styles.Ext                                                                              }
 { unit for the VCL Styles Utils                                                                    }
 { http://code.google.com/p/vcl-styles-utils/                                                       }
 {                                                                                                  }
@@ -12,14 +12,14 @@
 { ANY KIND, either express or implied. See the License for the specific language governing rights  }
 { and limitations under the License.                                                               }
 {                                                                                                  }
-{ The Original Code is uVCLStyleUtils.pas.                                                         }
+{ The Original Code is Vcl.Styles.Ext.pas.                                                         }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2012 Rodrigo Ruz V.                         }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
-unit uVCLStyleUtils;
+unit Vcl.Styles.Ext;
 
 interface
 
@@ -45,11 +45,16 @@ type
 
   TStyleManagerHelper = Class Helper for TStyleManager
   strict private
-    class function GetStyleSourceInfo(const StyleName: string): TSourceInfo; static;
+   class function GetStyleSourceInfo(const StyleName: string): TSourceInfo; static;
+   class function GetStyles: TList<TCustomStyleServices>;
+   class function _GetStyles: TList<TCustomStyleServices>; static;
   public
    class function GetRegisteredStyles: TDictionary<string, TSourceInfo>;
    class property StyleSourceInfo[const StyleName: string]: TSourceInfo read GetStyleSourceInfo;
-  end;
+   class procedure RefreshCurrentTheme;
+   class property Styles: TList<TCustomStyleServices> read _GetStyles;
+   class procedure ReloadStyle(const Name: string);overload;
+   end;
 
 
 Procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
@@ -66,11 +71,19 @@ type
     FStream    : TStream;
   public
     function  GetStyleInfo : TStyleInfo;
+  private
+    function GetBitmapList: TObjectList<TBitmap>;
   public
     constructor Create(const FileName :string);overload;
     constructor Create(const Stream:TStream);overload;
+    constructor Create(const Style:TCustomStyle);overload;
     destructor Destroy;override;
+    procedure ReplaceBitmap(DestIndex : Integer;Src: TBitmap);
     property StyleInfo : TStyleInfo read GetStyleInfo;
+    property BitmapList: TObjectList<TBitmap> read GetBitmapList;
+    property LocalStream : TStream read FStream;
+    //Copy the modified tyle to an Stream
+    procedure CopyToStream(Stream : TStream);
   end;
 
 procedure ReadVCLStyleInfo(const StyleFileName:string;var StyleInfo : TStyleInfo;Bitmap:TBitmap);overload;
@@ -145,6 +158,11 @@ begin
 end;
 
 
+class function TStyleManagerHelper.GetStyles: TList<TCustomStyleServices>;
+begin
+  Result:=Self.FStyles;
+end;
+
 class function TStyleManagerHelper.GetStyleSourceInfo(const StyleName: string): TSourceInfo;
 Var
  LRegisteredStyles : TDictionary<string, TSourceInfo>;
@@ -156,6 +174,42 @@ begin
   finally
      LRegisteredStyles.Free;
   end;
+end;
+
+class procedure TStyleManagerHelper.RefreshCurrentTheme;
+var
+  I: Integer;
+begin
+  for I := 0 to Screen.FormCount - 1 do
+    if Screen.Forms[I].HandleAllocated then
+      if IsWindowVisible(Screen.Forms[I].Handle) then
+        PostMessage(Screen.Forms[I].Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
+      else
+        SendMessage(Screen.Forms[I].Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
+end;
+
+
+class procedure TStyleManagerHelper.ReloadStyle(const Name: string);
+var
+  LStyle: TCustomStyleServices;
+begin
+
+ if SameText(Name, ActiveStyle.Name, loUserLocale) then
+   SetStyle(SystemStyle);
+
+ for LStyle in Styles do
+  if SameText(Name, LStyle.Name, loUserLocale) then
+  begin
+    LStyle.Free;
+    Styles.Remove(LStyle);
+  end;
+
+ SetStyle(Name);
+end;
+
+class function TStyleManagerHelper._GetStyles: TList<TCustomStyleServices>;
+begin
+  Result:=TStyleManager.GetStyles;
 end;
 
 function  GetRegisteredStylesHooks(ControlClass: TClass) : TStyleHookList;
@@ -275,6 +329,33 @@ begin
   end;
 end;
 
+procedure TCustomStyleExt.CopyToStream(Stream: TStream);
+var
+ I :  Integer;
+begin
+  Stream.Size:=0;
+  Stream.Position:=0;
+
+  //Replace the updated bitmaps
+  for i := 0 to TseStyle(Source).FCleanCopy.Bitmaps.Count-1  do
+   TseStyle(Source).FCleanCopy.Bitmaps[i].Assign(TseStyle(Source).StyleSource.Bitmaps[i]);
+
+  TseStyle(Source).SaveToStream(Stream);
+  {
+  TseStyle(Source).StyleSource.Fonts.Assign(TseStyle(Source).Fonts);
+  TseStyle(Source).StyleSource.Colors.Assign(TseStyle(Source).Colors);
+  TseStyle(Source).StyleSource.SysColors.Assign(TseStyle(Source).SysColors);
+  TseStyle(Source).StyleSource.SaveToStream(Stream);
+  }
+end;
+
+constructor TCustomStyleExt.Create(const Style: TCustomStyle);
+begin
+  //Style.Source
+  //inherited Create(TStream(Style.));
+
+end;
+
 constructor TCustomStyleExt.Create(const Stream: TStream);
 begin
   inherited Create;
@@ -284,15 +365,80 @@ begin
   FStream.CopyFrom(Stream, Stream.Size);
   Stream.Seek(0, soBeginning); //restore index 0 after
 
+
   FStream.Seek(0, soBeginning);//index 0 to load
   TseStyle(Source).LoadFromStream(FStream);
 end;
+
+
 
 destructor TCustomStyleExt.Destroy;
 begin
   if Assigned(FStream) then
     FStream.Free;
   inherited Destroy;
+end;
+
+function TCustomStyleExt.GetBitmapList: TObjectList<TBitmap>;
+var
+  I: Integer;
+begin
+  Result:=TObjectList<TBitmap>.Create;
+  for I:=0 to TseStyle(Source).StyleSource.Bitmaps.Count-1 do
+  begin
+    Result.Add(TBitmap.Create);
+    Result[I].PixelFormat:=pf32bit;
+    Result[I].Width := TseStyle(Source).StyleSource.Bitmaps[I].Width;
+    Result[I].Height:= TseStyle(Source).StyleSource.Bitmaps[I].Height;
+    TseStyle(Source).StyleSource.Bitmaps[I].Draw(Result[I].Canvas,0,0);
+  end;
+
+  {
+  SetLength(Result, TseStyle(Source).StyleSource.Bitmaps.Count);
+  for I:=0 to TseStyle(Source).StyleSource.Bitmaps.Count-1 do
+  begin
+    Result[I] := TBitmap.Create;
+    Result[I].PixelFormat:=pf32bit;
+    Result[I].Width := TseStyle(Source).StyleSource.Bitmaps[I].Width;
+    Result[I].Height:= TseStyle(Source).StyleSource.Bitmaps[I].Height;
+    TseStyle(Source).StyleSource.Bitmaps[I].Draw(Result[I].Canvas,0,0);
+  end;
+  }
+end;
+
+procedure TCustomStyleExt.ReplaceBitmap(DestIndex: Integer; Src: TBitmap);
+var
+  BF          : TBlendFunction;
+  Canvas      : TCanvas;
+  BitMap      : TseBitmap;
+  DstRect, SrcRect: TRect;
+begin
+  BitMap:=TseStyle(Source).StyleSource.Bitmaps[DestIndex];
+  SrcRect:=Rect(0 ,0, Src.Width, Src.Height);
+  DstRect:=Rect(0 ,0, Src.Width, Src.Height);
+
+  Canvas:= BitMap.Canvas;
+  SetStretchBltMode(Canvas.Handle, COLORONCOLOR);
+  if BitMap.AlphaBlend then
+  begin
+    BF.BlendOp := AC_SRC_OVER;
+    BF.BlendFlags := 0;
+    BF.SourceConstantAlpha := 255;
+    BF.AlphaFormat := AC_SRC_ALPHA;
+    Winapi.Windows.AlphaBlend(Canvas.Handle, DstRect.Left, DstRect.Top, DstRect.Right - DstRect.Left, DstRect.Bottom - DstRect.Top,
+      Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, BF);
+  end
+  else
+  if BitMap.Transparent then
+  begin
+    Winapi.Windows.TransparentBlt(Canvas.Handle, DstRect.Left, DstRect.Top, DstRect.Right - DstRect.Left, DstRect.Bottom - DstRect.Top,
+      Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, seTransparent);
+  end
+  else
+  begin
+    Winapi.Windows.StretchBlt(Canvas.Handle, DstRect.Left, DstRect.Top, DstRect.Right - DstRect.Left, DstRect.Bottom - DstRect.Top,
+      Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, SRCCOPY);
+  end;
 end;
 
 function TCustomStyleExt.GetStyleInfo: TStyleInfo;
@@ -303,6 +449,8 @@ begin
  Result.AuthorURL   :=  TseStyle(Source).StyleSource.AuthorURL;
  Result.Version     :=  TseStyle(Source).StyleSource.Version;
 end;
+
+
 {$ENDIF}
 
 procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string);
@@ -316,6 +464,7 @@ var
   ButtonRect      : TRect;
   TextRect        : TRect;
   CaptionBitmap   : TBitmap;
+  ThemeTextColor  : TColor;
 
     function GetBorderSize: TRect;
     var
@@ -428,6 +577,28 @@ begin
   CaptionRect := Rect(0, ARect.Height - BorderRect.Bottom, ARect.Width, ARect.Height);
   LDetails := Style.GetElementDetails(twFrameBottomActive);
   Style.DrawElement(Canvas.Handle, LDetails, CaptionRect);
+
+
+  //Draw Ok button
+  LDetails := Style.GetElementDetails(tbPushButtonNormal);
+  ButtonRect.Left:=30;
+  ButtonRect.Top:=ARect.Height-45;
+  ButtonRect.Width:=75;
+  ButtonRect.Height:=25;
+  Style.DrawElement(Canvas.Handle, LDetails, ButtonRect);
+
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  Style.DrawText(Canvas.Handle, LDetails, 'OK', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+
+  //Draw Cancel button
+  ButtonRect.Left:=110;
+  ButtonRect.Top:=ARect.Height-45;
+  ButtonRect.Width:=75;
+  ButtonRect.Height:=25;
+  Style.DrawElement(Canvas.Handle, LDetails, ButtonRect);
+
+  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  Style.DrawText(Canvas.Handle, LDetails, 'Cancel', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
 end;
 
 initialization
