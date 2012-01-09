@@ -1,9 +1,9 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{E0464792-A3A8-444C-9018-2579CE8F7FEA}</ProjectGuid>
+			<ProjectGuid>{256F6422-C55B-4F80-BEB5-805D910BEFE1}</ProjectGuid>
 			<ProjectVersion>13.4</ProjectVersion>
 			<FrameworkType>VCL</FrameworkType>
-			<MainSource>VCLStylePreview.dpr</MainSource>
+			<MainSource>VisualStylesEQU.dpr</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
@@ -40,11 +40,12 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<VCL_Custom_Styles>&quot;Amethyst Kamri|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\AmethystKamri.vsf&quot;;&quot;Aqua Graphite|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\AquaGraphite.vsf&quot;;&quot;Cobalt XEMedia|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\CobaltXEMedia.vsf&quot;;&quot;Golden Graphite|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\GoldenGraphite.vsf&quot;;&quot;Lavender Classico|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\LavenderClassico.vsf&quot;;&quot;Ruby Graphite|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\RubyGraphite.vsf&quot;;&quot;Sapphire Kamri|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\SapphireKamri.vsf&quot;;&quot;Smokey Quartz Kamri|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\SmokeyQuartzKamri.vsf&quot;</VCL_Custom_Styles>
+			<VCL_Custom_Styles>&quot;Amakrits|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\Amakrits.vsf&quot;;&quot;Aqua Graphite|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\AquaGraphite.vsf&quot;;&quot;Aqua Light Slate|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\AquaLightSlate.vsf&quot;;&quot;Cobalt XEMedia|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\CobaltXEMedia.vsf&quot;;&quot;Iceberg Classico|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\IcebergClassico.vsf&quot;;&quot;Sapphire Kamri|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\SapphireKamri.vsf&quot;</VCL_Custom_Styles>
 			<DCC_UsePackage>fmx;IndySystem;DBXInterBaseDriver;DataSnapClient;DataSnapCommon;DataSnapServer;DataSnapProviderClient;DbxCommonDriver;dbxcds;DBXOracleDriver;dsnap;IndyCore;fmxase;inetdbxpress;IPIndyImpl;bindcompfmx;rtl;dbrtl;DbxClientDriver;bindcomp;inetdb;xmlrtl;IndyProtocols;DBXMySQLDriver;soaprtl;bindengine;DBXInformixDriver;DBXFirebirdDriver;inet;fmxobj;DBXSybaseASADriver;fmxdae;dbexpress;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
 			<Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+			<DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_E>false</DCC_E>
 			<DCC_N>false</DCC_N>
 			<DCC_S>false</DCC_S>
@@ -55,7 +56,7 @@
 			<DCC_UsePackage>DBXSybaseASEDriver;vclimg;vcldb;vcldsnap;DBXDb2Driver;vcl;DBXMSSQLDriver;webdsnap;adortl;DBXOdbcDriver;SynEdit_RXE2;vclactnband;bindcompvcl;vclie;vcltouch;websnap;VclSmp;dsnapcon;vclx;$(DCC_UsePackage)</DCC_UsePackage>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win32)'!=''">
-			<DCC_UsePackage>JvGlobus;JvMM;JvManagedThreads;JvDlgs;JvCrypt;TeeDB;vclib;inetdbbde;JvNet;JvDotNetCtrls;DBXSybaseASEDriver;vclimg;fmi;JvXPCtrls;vcldb;vcldsnap;DBXDb2Driver;JvCore;vclribbon;vcl;CloudService;DBXMSSQLDriver;FmxTeeUI;JvAppFrm;JvDB;JvRuntimeDesign;webdsnap;JclDeveloperTools;JvDocking;adortl;JvWizards;mbColorLibDXE2;JvHMI;JvBands;vcldbx;JvPluginSystem;Tee;JclContainers;DBXOdbcDriver;JvCmp;JvSystem;svnui;ibxpress;SynEdit_RXE2;JvControls;JvTimeFramework;vclactnband;FMXTee;TeeUI;JvJans;bindcompvcl;JvStdCtrls;JvCustom;Jcl;vclie;JvPageComps;JvPrintPreview;vcltouch;websnap;VclSmp;DataSnapConnectors;dsnapcon;JclVcl;JvPascalInterpreter;vclx;svn;bdertl;JvBDE;$(DCC_UsePackage)</DCC_UsePackage>
+			<DCC_UsePackage>JvGlobus;JvMM;JvManagedThreads;JvDlgs;JvCrypt;TeeDB;vclib;inetdbbde;JvNet;JvDotNetCtrls;DBXSybaseASEDriver;vclimg;fmi;JvXPCtrls;vcldb;vcldsnap;DBXDb2Driver;DelphiIDEColorizerXE;JvCore;vclribbon;vcl;CloudService;DBXMSSQLDriver;FmxTeeUI;JvAppFrm;JvDB;JvRuntimeDesign;webdsnap;GR32_DSGN_RSXE2;JclDeveloperTools;GR32_RSXE2;JvDocking;adortl;JvWizards;mbColorLibDXE2;JvHMI;JvBands;vcldbx;JvPluginSystem;Tee;JclContainers;DBXOdbcDriver;JvCmp;JvSystem;svnui;ibxpress;SynEdit_RXE2;JvControls;JvTimeFramework;vclactnband;FMXTee;TeeUI;JvJans;bindcompvcl;JvStdCtrls;JvCustom;Jcl;vclie;JvPageComps;JvPrintPreview;vcltouch;websnap;ExceptionExpert16;VclSmp;DataSnapConnectors;dsnapcon;JclVcl;JvPascalInterpreter;vclx;svn;bdertl;JvBDE;$(DCC_UsePackage)</DCC_UsePackage>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_Locale>1033</VerInfo_Locale>
@@ -70,8 +71,6 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<DCC_MapFile>3</DCC_MapFile>
-			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -86,10 +85,11 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="uMain.pas">
-				<Form>FrmMain</Form>
-				<FormType>dfm</FormType>
+			<DCCReference Include="uHueSat.pas">
+				<Form>FrmHueSat</Form>
 			</DCCReference>
+			<DCCReference Include="..\Common\uHSLUtils.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Ext.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
@@ -136,7 +136,7 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Source>
-						<Source Name="MainSource">VCLStylePreview.dpr</Source>
+						<Source Name="MainSource">VisualStylesEQU.dpr</Source>
 					</Source>
 					<Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
@@ -639,5 +639,5 @@ Count mtException_AntiFreeze=1
 mtException_AntiFreeze0="The application seems to be frozen."
 Count mtInvalidEmailMsg=1
 mtInvalidEmailMsg0="Invalid email."
-TextsCollection=
+TextsCollection=English
 EurekaLog Last Line -->

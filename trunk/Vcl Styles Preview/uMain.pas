@@ -41,7 +41,7 @@ uses
   IOUtils,
   Vcl.Themes,
   Vcl.Styles,
-  uVCLStyleUtils;
+  Vcl.Styles.Ext;
 
 {$R *.dfm}
 
@@ -126,7 +126,7 @@ Var
  VCLStyleExt:TCustomStyleServices;
 begin
    Loading:=True;
-
+               {
    for FileName in TDirectory.GetFiles(FStylesPath,'*.vsf') do
    begin
       Item:=ListView1.Items.Add;
@@ -138,7 +138,7 @@ begin
       Item.SubItems.Add(StyleInfo.AuthorURL);
       Item.SubItems.Add(StyleInfo.Version);
    end;
-
+            }
 
    for StyleName in  TStyleManager.StyleNames do
    if CompareText(StyleName,'Windows')<>0 then

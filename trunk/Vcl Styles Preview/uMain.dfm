@@ -3,8 +3,8 @@ object FrmMain: TFrmMain
   Top = 0
   BorderStyle = bsSingle
   Caption = 'Demo'
-  ClientHeight = 470
-  ClientWidth = 971
+  ClientHeight = 480
+  ClientWidth = 928
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -1855,6 +1855,9 @@ object FrmMain: TFrmMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
+  DesignSize = (
+    928
+    480)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -1865,15 +1868,17 @@ object FrmMain: TFrmMain
     Caption = 'VCL Styles'
   end
   object Image1: TImage
-    Left = 551
+    Left = 495
     Top = 27
-    Width = 412
-    Height = 398
+    Width = 422
+    Height = 400
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    AutoSize = True
   end
   object ListView1: TListView
     Left = 8
     Top = 27
-    Width = 537
+    Width = 481
     Height = 400
     Columns = <
       item
@@ -1912,6 +1917,7 @@ object FrmMain: TFrmMain
     Width = 105
     Height = 25
     Action = ActionApplyStyle
+    Anchors = [akLeft, akBottom]
     Caption = 'Apply Style'
     TabOrder = 1
   end
