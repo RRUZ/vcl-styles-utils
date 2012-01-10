@@ -57,8 +57,8 @@ type
    end;
 
 
-Procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
-Procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
+procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
+procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
 function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
 function  GetRegisteredStylesHooks(ControlClass: TClass) : TStyleHookList;
 procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string);
@@ -83,7 +83,7 @@ type
     property StyleInfo : TStyleInfo read GetStyleInfo write SetStyleInfo;
     property BitmapList: TObjectList<TBitmap> read GetBitmapList;
     property LocalStream : TStream read FStream;
-    //Copy the modified tyle to an Stream
+    //Copy the modified style to an Stream
     procedure CopyToStream(Stream : TStream);
   end;
 

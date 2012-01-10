@@ -429,7 +429,9 @@ end;
 
 procedure TFrmHueSat.LoadStyle;
 begin
+  CheckBoxSepia.Checked:=False;
   DrawSeletedVCLStyle;
+
   OriginalBitMap.Assign(ImageVCLStyle.Picture.Bitmap);
   ModifiedBitMap.Assign(OriginalBitMap);
 

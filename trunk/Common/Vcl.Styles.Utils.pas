@@ -54,65 +54,6 @@ uses
   Classes;
 
 
-{
-procedure ApplyFiltersToVclStyle(const  StyleName, FileName: string; Filters : TObjectList<TBitmap32Filter>;Apply:Boolean);
-var
-  LBitmap   : TBitmap;
-  LStyle    : TCustomStyleExt;
-  SourceInfo: TSourceInfo;
-  BitmapList: TArray<TBitmap>;
-  Index     : Integer;
-  FileStream: TFileStream;
-  Filter    : TBitmap32Filter;
-
-begin
-   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
-   begin
-    try
-       SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
-       LStyle:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
-       try
-         BitmapList:=LStyle.BitmapList;
-         Index:=0;
-         for LBitmap in BitmapList do
-         begin
-
-           for Filter in Filters do
-             Filter.Apply(LBitmap);
-
-            LStyle.ReplaceBitmap(Index, LBitmap);
-            Inc(Index);
-         end;
-
-         //Copy changes to current style
-         if Apply then
-         begin
-           TStream(SourceInfo.Data).Size:=0;
-           LStyle.CopyToStream(TStream(SourceInfo.Data));
-           TStream(SourceInfo.Data).Seek(0,soFromBeginning);
-         end;
-
-         //Save To file
-         if FileName<>'' then
-         begin
-           FileStream:=TFile.Create(FileName);
-           try
-             LStyle.CopyToStream(FileStream);
-           finally
-             FileStream.Free;
-           end;
-         end;
-
-       finally
-         LStyle.Free;
-       end;
-    finally
-      LBitmap.Free;
-    end;
-   end;
-end;
-    }
-
 { TVclStylesUtils }
 
 constructor TVclStylesUtils.Create(const  StyleName : string);
