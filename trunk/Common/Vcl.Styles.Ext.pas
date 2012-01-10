@@ -32,10 +32,11 @@ Uses
   Generics.Collections,
   Winapi.Windows,
   Vcl.Graphics,
-  Classes;
+  System.Classes;
 
 type
   TStyleHookList = TList<TStyleHookClass>;
+
 
   TStyleServicesHandle = type Pointer;
   TSourceInfo = record
@@ -43,6 +44,10 @@ type
     StyleClass: TCustomStyleServicesClass;
   end;
 
+  {$REGION 'Documentation'}
+  ///	<summary>Heper for the TStyleManager class
+  ///	</summary>
+  {$ENDREGION}
   TStyleManagerHelper = Class Helper for TStyleManager
   strict private
    class function GetStyleSourceInfo(const StyleName: string): TSourceInfo; static;
@@ -50,9 +55,25 @@ type
    class function _GetStyles: TList<TCustomStyleServices>; static;
   public
    class function GetRegisteredStyles: TDictionary<string, TSourceInfo>;
+   {$REGION 'Documentation'}
+   ///	<summary>Get the TSourceInfo for a Style
+   ///	</summary>
+   {$ENDREGION}
    class property StyleSourceInfo[const StyleName: string]: TSourceInfo read GetStyleSourceInfo;
+   {$REGION 'Documentation'}
+   ///	<summary>Send the CM_CUSTOMSTYLECHANGED message to all the forms
+   ///	</summary>
+   {$ENDREGION}
    class procedure RefreshCurrentTheme;
+   {$REGION 'Documentation'}
+   ///	<summary>Return the loaded styles (TCustomStyleServices) in the system
+   ///	</summary>
+   {$ENDREGION}
    class property Styles: TList<TCustomStyleServices> read _GetStyles;
+   {$REGION 'Documentation'}
+   ///	<summary>Force to reload a modified vcl style
+   ///	</summary>
+   {$ENDREGION}
    class procedure ReloadStyle(const Name: string);overload;
    end;
 
@@ -75,20 +96,41 @@ type
     function GetBitmapList: TObjectList<TBitmap>;
     procedure SetStyleInfo(const Value: TStyleInfo);
   public
+    {$REGION 'Documentation'}
+    ///	<summary>Create a  TCustomStyleExt using a vcl style stored in a file
+    ///	</summary>
+    {$ENDREGION}
     constructor Create(const FileName :string);overload;
+    {$REGION 'Documentation'}
+    ///	<summary>Create a  TCustomStyleExt using a vcl style stored in a stream
+    ///	</summary>
+    {$ENDREGION}
     constructor Create(const Stream:TStream);overload;
     constructor Create(const Style:TCustomStyle);overload;
     destructor Destroy;override;
+    {$REGION 'Documentation'}
+    ///	<summary>Replace a internal bitmap of the Style
+    ///	</summary>
+    {$ENDREGION}
     procedure ReplaceBitmap(DestIndex : Integer;Src: TBitmap);
+    {$REGION 'Documentation'}
+    ///	<summary>Set a returns the TStyleInfo fo the current style
+    ///	</summary>
+    {$ENDREGION}
     property StyleInfo : TStyleInfo read GetStyleInfo write SetStyleInfo;
+    {$REGION 'Documentation'}
+    ///	<summary>Return the list of the bitmaps of the style
+    ///	</summary>
+    {$ENDREGION}
     property BitmapList: TObjectList<TBitmap> read GetBitmapList;
     property LocalStream : TStream read FStream;
-    //Copy the modified style to an Stream
+    {$REGION 'Documentation'}
+    ///	<summary>Copy the modified style to an Stream
+    ///	</summary>
+    {$ENDREGION}
     procedure CopyToStream(Stream : TStream);
   end;
 
-procedure ReadVCLStyleInfo(const StyleFileName:string;var StyleInfo : TStyleInfo;Bitmap:TBitmap);overload;
-function  GetVCLStyleImage(const StyleFileName:string):TBitmap;
 {$ENDIF}
 
 implementation
@@ -98,15 +140,15 @@ uses
 {$IFDEF USE_VCL_STYLESAPI}
  System.ZLib,
  System.UITypes,
- Vcl.Controls,
  Vcl.StdCtrls,
  Vcl.ImgList,
  Vcl.Consts,
  Vcl.GraphUtil,
  Vcl.Imaging.pngimage,
- Messages,
+ Winapi.Messages,
 {$ENDIF}
- Sysutils;
+ Vcl.Controls,
+ System.Sysutils;
 
 {$IFDEF USE_VCL_STYLESAPI}
 {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleUtils.inc'}
@@ -127,8 +169,6 @@ type
   public
     class function GetRegisteredStyleHooks : TStyleHookDictionary;
   END;
-
-
 
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
 begin
@@ -246,76 +286,6 @@ end;
 
 
 {$IFDEF USE_VCL_STYLESAPI}
-
-function  GetVCLStyleImage(const StyleFileName:string):TBitmap;
-var
-  FileStream : TFileStream;
-  StyleSource: TSeStyleSource;
-  StyleFilter : TSeStyleFilter;
-  Index : integer;
-begin
-  Result    := TBitmap.Create;
-  FileStream:=TFileStream.Create(StyleFileName, fmOpenRead);
-  StyleFilter := TSeStyleFilter.Create;
-  StyleSource := TSeStyleSource.Create(nil);
-  try
-    StyleFilter.SetStyleSource(StyleSource);
-    StyleFilter.ReadStyle(FileStream);
-
-    if StyleFilter.StyleSource.Bitmaps.Count>0 then
-    //StyleFilter.StyleSource.Bitmaps.Count-1 do
-    begin
-        Index:=0;//only read the first bitmap of the style (for the moment).
-        Result.PixelFormat:=pf32bit;
-        Result.Width:= StyleFilter.StyleSource.Bitmaps[Index].Width;
-        Result.Height:= StyleFilter.StyleSource.Bitmaps[Index].Height;
-        StyleFilter.StyleSource.Bitmaps[Index].Draw(Result.Canvas,0,0);
-    end;
-  finally
-    FileStream.Free;
-    StyleFilter.Free;
-    StyleSource.Free;
-  end;
-end;
-
-procedure ReadVCLStyleInfo(const StyleFileName:string;var StyleInfo : TStyleInfo;Bitmap:TBitmap);
-var
-  FileStream : TFileStream;
-  StyleSource: TSeStyleSource;
-  StyleFilter : TSeStyleFilter;
-  Index : integer;
-begin
-
-  FileStream:=TFileStream.Create(StyleFileName, fmOpenRead);
-  StyleFilter := TSeStyleFilter.Create;
-  StyleSource := TSeStyleSource.Create(nil);
-  try
-    StyleFilter.SetStyleSource(StyleSource);
-    StyleFilter.ReadStyle(FileStream);
-    StyleInfo.Name := StyleFilter.StyleSource.Name;
-    StyleInfo.Version := StyleFilter.StyleSource.Version;
-    StyleInfo.Author := StyleFilter.StyleSource.Author;
-    StyleInfo.AuthorEMail := StyleFilter.StyleSource.AuthorEMail;
-    StyleInfo.AuthorURL := StyleFilter.StyleSource.AuthorURL;
-
-    if Assigned(Bitmap) and (StyleFilter.StyleSource.Bitmaps.Count>0) then
-    //StyleFilter.StyleSource.Bitmaps.Count-1 do
-    begin
-        Index:=0;//only read the first bitmap of the style (for the moment).
-        Bitmap.PixelFormat:=pf32bit;
-        Bitmap.Width:= StyleFilter.StyleSource.Bitmaps[Index].Width;
-        Bitmap.Height:= StyleFilter.StyleSource.Bitmaps[Index].Height;
-        StyleFilter.StyleSource.Bitmaps[Index].Draw(Bitmap.Canvas,0,0);
-        //b.SaveToFile(ChangeFileExt(StyleFileName,'.'+IntToStr(i)+'.bmp'));
-        //StyleFilter.StyleSource.Bitmaps[i].SaveToFile(ChangeFileExt(StyleFileName,'.'+IntToStr(i)+'.bmp'));
-    end;
-  finally
-    FileStream.Free;
-    StyleFilter.Free;
-    StyleSource.Free;
-  end;
-end;
-
 { TVCLStyleExt }
 
 constructor TCustomStyleExt.Create(const FileName: string);
@@ -401,6 +371,8 @@ begin
     Result[I].Height:= TseStyle(Source).StyleSource.Bitmaps[I].Height;
     TseStyle(Source).StyleSource.Bitmaps[I].Draw(Result[I].Canvas,0,0);
   end;
+
+//  TseStyle(Source).StyleSource.Colors
 end;
 
 procedure TCustomStyleExt.ReplaceBitmap(DestIndex: Integer; Src: TBitmap);

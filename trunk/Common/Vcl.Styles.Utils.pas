@@ -48,10 +48,10 @@ type
 implementation
 
 uses
-  IOUtils,
-  SysUtils,
-  Graphics,
-  Classes;
+  System.IOUtils,
+  System.SysUtils,
+  Vcl.Graphics,
+  System.Classes;
 
 
 { TVclStylesUtils }

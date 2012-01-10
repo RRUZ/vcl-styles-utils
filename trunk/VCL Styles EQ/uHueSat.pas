@@ -154,8 +154,7 @@ begin
     LoadStyle;
   except
     on E: Exception do
-      ShowMessage(Format('Error saving vcl style - Message : %s : Trace %s',
-        [E.Message, E.StackTrace]));
+      ShowMessage(Format('Error saving vcl style - Message : %s : Trace %s', [E.Message, E.StackTrace]));
   end;
 end;
 
