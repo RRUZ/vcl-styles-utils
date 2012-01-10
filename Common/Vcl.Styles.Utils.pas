@@ -32,13 +32,14 @@ uses
 type
   TVclStylesUtils = class
   private
-     StyleExt  : TCustomStyleExt;
+     FStyleExt  : TCustomStyleExt;
      FSourceInfo: TSourceInfo;
   public
      procedure SetFilters(Filters : TObjectList<TBitmap32Filter>);
      procedure ApplyChanges;
      procedure SaveToFile(const FileName: string);
      property  SourceInfo: TSourceInfo read FSourceInfo;
+     property  StyleExt  :  TCustomStyleExt read FStyleExt;
      constructor Create(const  StyleName : string);
      destructor Destroy;override;
   end;
@@ -116,11 +117,11 @@ end;
 
 constructor TVclStylesUtils.Create(const  StyleName : string);
 begin
-  StyleExt:=nil;
+  FStyleExt:=nil;
   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
   begin
    FSourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
-   StyleExt:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
+   FStyleExt:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
   end;
 end;
 
