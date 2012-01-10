@@ -105,7 +105,6 @@ implementation
 {$R *.dfm}
 
 uses
-  IOUtils,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
   Vcl.Themes,

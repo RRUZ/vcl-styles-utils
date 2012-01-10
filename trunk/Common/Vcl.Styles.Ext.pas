@@ -73,13 +73,14 @@ type
     function  GetStyleInfo : TStyleInfo;
   private
     function GetBitmapList: TObjectList<TBitmap>;
+    procedure SetStyleInfo(const Value: TStyleInfo);
   public
     constructor Create(const FileName :string);overload;
     constructor Create(const Stream:TStream);overload;
     constructor Create(const Style:TCustomStyle);overload;
     destructor Destroy;override;
     procedure ReplaceBitmap(DestIndex : Integer;Src: TBitmap);
-    property StyleInfo : TStyleInfo read GetStyleInfo;
+    property StyleInfo : TStyleInfo read GetStyleInfo write SetStyleInfo;
     property BitmapList: TObjectList<TBitmap> read GetBitmapList;
     property LocalStream : TStream read FStream;
     //Copy the modified tyle to an Stream
@@ -336,6 +337,14 @@ begin
   Stream.Size:=0;
   Stream.Position:=0;
 
+
+   TseStyle(Source).FCleanCopy.Name        :=  TseStyle(Source).StyleSource.Name;
+   TseStyle(Source).FCleanCopy.Author      :=  TseStyle(Source).StyleSource.Author;
+   TseStyle(Source).FCleanCopy.AuthorEMail :=  TseStyle(Source).StyleSource.AuthorEMail;
+   TseStyle(Source).FCleanCopy.AuthorURL   :=  TseStyle(Source).StyleSource.AuthorURL;
+   TseStyle(Source).FCleanCopy.Version     :=  TseStyle(Source).StyleSource.Version;
+
+
   //Replace the updated bitmaps
   for i := 0 to TseStyle(Source).FCleanCopy.Bitmaps.Count-1  do
    TseStyle(Source).FCleanCopy.Bitmaps[i].Assign(TseStyle(Source).StyleSource.Bitmaps[i]);
@@ -392,18 +401,6 @@ begin
     Result[I].Height:= TseStyle(Source).StyleSource.Bitmaps[I].Height;
     TseStyle(Source).StyleSource.Bitmaps[I].Draw(Result[I].Canvas,0,0);
   end;
-
-  {
-  SetLength(Result, TseStyle(Source).StyleSource.Bitmaps.Count);
-  for I:=0 to TseStyle(Source).StyleSource.Bitmaps.Count-1 do
-  begin
-    Result[I] := TBitmap.Create;
-    Result[I].PixelFormat:=pf32bit;
-    Result[I].Width := TseStyle(Source).StyleSource.Bitmaps[I].Width;
-    Result[I].Height:= TseStyle(Source).StyleSource.Bitmaps[I].Height;
-    TseStyle(Source).StyleSource.Bitmaps[I].Draw(Result[I].Canvas,0,0);
-  end;
-  }
 end;
 
 procedure TCustomStyleExt.ReplaceBitmap(DestIndex: Integer; Src: TBitmap);
@@ -439,6 +436,15 @@ begin
     Winapi.Windows.StretchBlt(Canvas.Handle, DstRect.Left, DstRect.Top, DstRect.Right - DstRect.Left, DstRect.Bottom - DstRect.Top,
       Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, SRCCOPY);
   end;
+end;
+
+procedure TCustomStyleExt.SetStyleInfo(const Value: TStyleInfo);
+begin
+ TseStyle(Source).StyleSource.Name:=Value.Name;
+ TseStyle(Source).StyleSource.Author:=Value.Author;
+ TseStyle(Source).StyleSource.AuthorEMail:=Value.AuthorEMail;
+ TseStyle(Source).StyleSource.AuthorURL:=Value.AuthorURL;
+ TseStyle(Source).StyleSource.Version:=Value.Version;
 end;
 
 function TCustomStyleExt.GetStyleInfo: TStyleInfo;
