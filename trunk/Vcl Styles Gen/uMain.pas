@@ -15,6 +15,7 @@ type
     Label1: TLabel;
     EditPath: TEdit;
     Label2: TLabel;
+    CheckBoxSepia: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ComboBoxVclStylesChange(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -63,6 +64,9 @@ begin
     while Hue<=180 do
     begin
       LFilters:=TObjectList<TBitmap32Filter>.Create;
+      if CheckBoxSepia.Checked then
+      LFilters.Add(TBitmap32SepiaFilter.Create(20));
+
       LFilters.Add(TBitmap32HueFilter.Create(Hue));
       VclUtils:=TVclStylesUtils.Create(StyleName);
       try

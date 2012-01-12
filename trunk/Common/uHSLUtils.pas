@@ -73,6 +73,7 @@ procedure _Lightness32(const ABitMap: TBitmap; Value: integer);
 procedure _Darkness32(const ABitMap: TBitmap; Value: integer);
 procedure _Saturation32(const ABitMap: TBitmap; Value: integer);
 procedure _Sepia32(const ABitMap: TBitmap;Value : Byte=32);
+procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Byte);
 
 
 Type
@@ -101,6 +102,21 @@ Type
   end;
 
   TBitmap32SepiaFilter=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32RedFilter=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32GreenFilter=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlueFilter=class(TBitmap32Filter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
@@ -259,6 +275,34 @@ begin
       PRGBArray32(Line)[x].R := r;
       PRGBArray32(Line)[x].G := g;
       PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Byte);
+var
+  r, g, b, a: byte;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+  H, S, L: double;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      PRGBArray32(Line)[x].R := r+DR;
+      PRGBArray32(Line)[x].G := g+DG;
+      PRGBArray32(Line)[x].B := b+DB;
       PRGBArray32(Line)[x].A := a;
     end;
     Inc(Line, Delta);
@@ -561,6 +605,27 @@ constructor TBitmap32Filter.Create(AValue: Integer);
 begin
  inherited Create;
  FValue:=AValue;
+end;
+
+{ TBitmap32BlueFilter }
+
+procedure TBitmap32BlueFilter.Apply(ABitMap: TBitmap);
+begin
+ _SetRGB32(ABitMap,0,0,Value);
+end;
+
+{ TBitmap32RedFilter }
+
+procedure TBitmap32RedFilter.Apply(ABitMap: TBitmap);
+begin
+ _SetRGB32(ABitMap,Value,0,0);
+end;
+
+{ TBitmap32GreenFilter }
+
+procedure TBitmap32GreenFilter.Apply(ABitMap: TBitmap);
+begin
+ _SetRGB32(ABitMap,0,Value,0);
 end;
 
 end.

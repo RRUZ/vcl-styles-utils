@@ -34,27 +34,8 @@ uses
 type
   TFrmHueSat = class(TForm)
     BtnApply:    TButton;
-    Bevel1:      TBevel;
-    TrackBarHue: TTrackBar;
-    ButtonLightness: TButton;
-    TrackBarLightness: TTrackBar;
-    ButtonSaturation: TButton;
-    TrackBarSaturation: TTrackBar;
-    ButtonHue:   TButton;
-    Bevel3:      TBevel;
-    Label3:      TLabel;
-    Bevel2:      TBevel;
-    Label2:      TLabel;
-    Bevel4:      TBevel;
-    Label1:      TLabel;
     BtnSave: TButton;
-    UpDownHue: TUpDown;
-    EditHue: TEdit;
     ImageList1: TImageList;
-    UpDownSat: TUpDown;
-    EditSat: TEdit;
-    UpDownLight: TUpDown;
-    EditLight: TEdit;
     ImageVCLStyle: TImage;
     Label4: TLabel;
     ComboBoxVclStyles: TComboBox;
@@ -63,6 +44,45 @@ type
     ActionApplyStyle: TAction;
     CheckBoxSepia: TCheckBox;
     SaveDialog1: TSaveDialog;
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    TrackBarHue: TTrackBar;
+    EditLight: TEdit;
+    UpDownLight: TUpDown;
+    EditSat: TEdit;
+    UpDownSat: TUpDown;
+    EditHue: TEdit;
+    UpDownHue: TUpDown;
+    ButtonHue: TButton;
+    TrackBarSaturation: TTrackBar;
+    ButtonSaturation: TButton;
+    TrackBarLightness: TTrackBar;
+    ButtonLightness: TButton;
+    Label1: TLabel;
+    Bevel4: TBevel;
+    Label2: TLabel;
+    Bevel2: TBevel;
+    Label3: TLabel;
+    Bevel3: TBevel;
+    TabSheet2: TTabSheet;
+    TrackBarRed: TTrackBar;
+    Label5: TLabel;
+    Bevel5: TBevel;
+    EditRed: TEdit;
+    UpDownRed: TUpDown;
+    Button2: TButton;
+    TrackBarGreen: TTrackBar;
+    Label6: TLabel;
+    EditGreen: TEdit;
+    UpDownGreen: TUpDown;
+    Button3: TButton;
+    Bevel6: TBevel;
+    TrackBarBlue: TTrackBar;
+    Label7: TLabel;
+    EditBlue: TEdit;
+    UpDownBlue: TUpDown;
+    Button4: TButton;
+    Bevel7: TBevel;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -83,11 +103,16 @@ type
     procedure ActionApplyStyleExecute(Sender: TObject);
     procedure CheckBoxSepiaClick(Sender: TObject);
     procedure BtnSaveClick(Sender: TObject);
+    procedure TrackBarRedChange(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
     OriginalBitMap : TBitmap;
     SepiaBitMap    : TBitmap;
     ModifiedBitMap : TBitmap;
     FStyleName     : string;
+    procedure SetRGB(DR, DG, DB: integer);
     procedure Saturation(Value: integer);
     procedure Lightness(Value: integer);
     procedure Hue(Value: integer);
@@ -118,7 +143,7 @@ end;
 
 procedure TFrmHueSat.ActionApplyStyleUpdate(Sender: TObject);
 begin
- TCustomAction(Sender).Enabled:=SameText(StyleName, TStyleManager.ActiveStyle.Name, loUserLocale);
+ TCustomAction(Sender).Enabled:=not SameText(StyleName, TStyleManager.ActiveStyle.Name, loUserLocale);
 end;
 
 procedure TFrmHueSat.BtnApplyClick(Sender: TObject);
@@ -140,6 +165,15 @@ begin
 
     If UpDownLight.Position<>0 then
       LFilters.Add(TBitmap32LightnessFilter.Create(Trunc(UpDownLight.Position)));
+
+    If UpDownRed.Position>0 then
+      LFilters.Add(TBitmap32RedFilter.Create(Trunc(UpDownRed.Position)));
+
+    If UpDownGreen.Position>0 then
+      LFilters.Add(TBitmap32GreenFilter.Create(Trunc(UpDownGreen.Position)));
+
+    If UpDownBlue.Position>0 then
+      LFilters.Add(TBitmap32BlueFilter.Create(Trunc(UpDownBlue.Position)));
 
     VclUtils:=TVclStylesUtils.Create(StyleName);
     try
@@ -195,6 +229,25 @@ begin
           [E.Message, E.StackTrace]));
     end;
  end;
+end;
+
+procedure TFrmHueSat.Button2Click(Sender: TObject);
+begin
+  UpDownRed.Position   := 0;
+  TrackBarRed.Position := 0;
+end;
+
+procedure TFrmHueSat.Button3Click(Sender: TObject);
+begin
+  UpDownGreen.Position   := 0;
+  TrackBarGreen.Position := 0;
+
+end;
+
+procedure TFrmHueSat.Button4Click(Sender: TObject);
+begin
+  UpDownBlue.Position   := 0;
+  TrackBarBlue.Position := 0;
 end;
 
 procedure TFrmHueSat.ButtonHueClick(Sender: TObject);
@@ -426,6 +479,29 @@ begin
 end;
 
 
+procedure TFrmHueSat.SetRGB(DR, DG, DB: integer);
+var
+  Bitmap: TBitmap;
+begin
+  Bitmap := TBitmap.Create;
+  try
+    if CheckBoxSepia.Checked then
+     Bitmap.Assign(SepiaBitMap)
+    else
+     Bitmap.Assign(OriginalBitMap);
+
+    _SetRGB32(Bitmap, DR, DG, DB);
+
+
+
+    ImageVCLStyle.Picture.Assign(Bitmap);
+    ModifiedBitMap.Assign(Bitmap);
+  finally
+    Bitmap.Free;
+  end;
+end;
+
+
 procedure TFrmHueSat.LoadStyle;
 begin
   CheckBoxSepia.Checked:=False;
@@ -442,6 +518,23 @@ begin
 
   UpDownLight.Position       := DefLig;
   TrackBarLightness.Position := DefLig;
+
+  UpDownRed.Position       := 0;
+  TrackBarRed.Position     := 0;
+
+  UpDownGreen.Position       := 0;
+  TrackBarGreen.Position     := 0;
+
+  UpDownBlue.Position       := 0;
+  TrackBarBlue.Position     := 0;
+end;
+
+procedure TFrmHueSat.TrackBarRedChange(Sender: TObject);
+begin
+  UpDownRed.Position   := TrackBarRed.Position;
+  UpDownGreen.Position := TrackBarGreen.Position;
+  UpDownBlue.Position  := TrackBarBlue.Position;
+  SetRGB(Trunc(UpDownRed.Position),Trunc(UpDownGreen.Position),Trunc(UpDownBlue.Position));
 end;
 
 procedure TFrmHueSat.TrackBarHueChange(Sender: TObject);

@@ -2,7 +2,7 @@ object FrmMain: TFrmMain
   Left = 0
   Top = 0
   Caption = 'Batch Vcl Styles generator'
-  ClientHeight = 305
+  ClientHeight = 333
   ClientWidth = 324
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -30,14 +30,14 @@ object FrmMain: TFrmMain
   end
   object Label2: TLabel
     Left = 8
-    Top = 258
+    Top = 284
     Width = 67
     Height = 13
     Caption = 'Folder Output'
   end
   object Button1: TButton
-    Left = 239
-    Top = 275
+    Left = 241
+    Top = 301
     Width = 75
     Height = 25
     Caption = 'Generate'
@@ -62,9 +62,17 @@ object FrmMain: TFrmMain
   end
   object EditPath: TEdit
     Left = 8
-    Top = 277
+    Top = 303
     Width = 225
     Height = 21
     TabOrder = 3
+  end
+  object CheckBoxSepia: TCheckBox
+    Left = 8
+    Top = 258
+    Width = 97
+    Height = 17
+    Caption = 'Sepia'
+    TabOrder = 4
   end
 end
