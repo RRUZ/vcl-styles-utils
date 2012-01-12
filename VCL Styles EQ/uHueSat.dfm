@@ -4,8 +4,8 @@ object FrmHueSat: TFrmHueSat
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
-  ClientHeight = 526
-  ClientWidth = 352
+  ClientHeight = 572
+  ClientWidth = 382
   Color = clBtnFace
   TransparentColorValue = clFuchsia
   DoubleBuffered = True
@@ -21,59 +21,10 @@ object FrmHueSat: TFrmHueSat
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object Bevel1: TBevel
-    Left = 8
-    Top = 424
-    Width = 329
-    Height = 9
-    Shape = bsTopLine
-  end
-  object Bevel3: TBevel
-    Left = 59
-    Top = 382
-    Width = 278
-    Height = 5
-    Shape = bsTopLine
-  end
-  object Label3: TLabel
-    Left = 8
-    Top = 374
-    Width = 45
-    Height = 13
-    Caption = 'Lightness'
-  end
-  object Bevel2: TBevel
-    Left = 8
-    Top = 333
-    Width = 329
-    Height = 5
-    Shape = bsTopLine
-  end
-  object Label2: TLabel
-    Left = 8
-    Top = 318
-    Width = 50
-    Height = 13
-    Caption = 'Saturation'
-  end
-  object Bevel4: TBevel
-    Left = 8
-    Top = 276
-    Width = 329
-    Height = 5
-    Shape = bsTopLine
-  end
-  object Label1: TLabel
-    Left = 8
-    Top = 262
-    Width = 19
-    Height = 13
-    Caption = 'Hue'
-  end
   object ImageVCLStyle: TImage
     Left = 8
     Top = 54
-    Width = 330
+    Width = 357
     Height = 202
   end
   object Label4: TLabel
@@ -85,155 +36,21 @@ object FrmHueSat: TFrmHueSat
   end
   object BtnApply: TButton
     Left = 8
-    Top = 479
+    Top = 539
     Width = 225
     Height = 25
     Caption = 'Apply changes to the current style'
-    TabOrder = 12
-    OnClick = BtnApplyClick
-  end
-  object TrackBarHue: TTrackBar
-    Left = 0
-    Top = 281
-    Width = 249
-    Height = 30
-    DoubleBuffered = True
-    Max = 180
-    Min = -180
-    ParentDoubleBuffered = False
     TabOrder = 0
-    TickStyle = tsManual
-    OnChange = TrackBarHueChange
-  end
-  object ButtonLightness: TButton
-    Left = 311
-    Top = 393
-    Width = 26
-    Height = 25
-    ImageAlignment = iaCenter
-    ImageIndex = 0
-    Images = ImageList1
-    TabOrder = 11
-    OnClick = ButtonLightnessClick
-  end
-  object TrackBarLightness: TTrackBar
-    Left = 0
-    Top = 393
-    Width = 249
-    Height = 30
-    DoubleBuffered = False
-    Max = 255
-    Min = -255
-    ParentDoubleBuffered = False
-    TabOrder = 8
-    TickStyle = tsManual
-    OnChange = TrackBarLightnessChange
-  end
-  object ButtonSaturation: TButton
-    Left = 309
-    Top = 344
-    Width = 26
-    Height = 25
-    ImageAlignment = iaCenter
-    ImageIndex = 0
-    Images = ImageList1
-    TabOrder = 7
-    OnClick = ButtonSaturationClick
-  end
-  object TrackBarSaturation: TTrackBar
-    Left = 0
-    Top = 338
-    Width = 249
-    Height = 30
-    DoubleBuffered = True
-    Max = 100
-    ParentDoubleBuffered = False
-    TabOrder = 6
-    TickStyle = tsManual
-    OnChange = TrackBarSaturationChange
-  end
-  object ButtonHue: TButton
-    Left = 311
-    Top = 281
-    Width = 26
-    Height = 25
-    BiDiMode = bdRightToLeftNoAlign
-    ImageAlignment = iaCenter
-    ImageIndex = 0
-    Images = ImageList1
-    ParentBiDiMode = False
-    TabOrder = 1
-    OnClick = ButtonHueClick
+    OnClick = BtnApplyClick
   end
   object BtnSave: TButton
     Left = 239
-    Top = 479
+    Top = 539
     Width = 96
     Height = 25
     Caption = 'Save'
-    TabOrder = 13
+    TabOrder = 1
     OnClick = BtnSaveClick
-  end
-  object UpDownHue: TUpDown
-    Left = 287
-    Top = 283
-    Width = 16
-    Height = 21
-    Associate = EditHue
-    Min = -180
-    Max = 180
-    TabOrder = 3
-    OnChanging = UpDownHueChanging
-  end
-  object EditHue: TEdit
-    Left = 255
-    Top = 283
-    Width = 32
-    Height = 21
-    NumbersOnly = True
-    TabOrder = 2
-    Text = '0'
-    OnExit = EditHueExit
-  end
-  object UpDownSat: TUpDown
-    Left = 287
-    Top = 337
-    Width = 16
-    Height = 21
-    Associate = EditSat
-    TabOrder = 5
-    OnChanging = UpDownSatChanging
-  end
-  object EditSat: TEdit
-    Left = 255
-    Top = 337
-    Width = 32
-    Height = 21
-    NumbersOnly = True
-    TabOrder = 4
-    Text = '0'
-    OnExit = EditSatExit
-  end
-  object UpDownLight: TUpDown
-    Left = 287
-    Top = 393
-    Width = 16
-    Height = 21
-    Associate = EditLight
-    Min = -255
-    Max = 255
-    TabOrder = 10
-    OnChanging = UpDownLightChanging
-  end
-  object EditLight: TEdit
-    Left = 255
-    Top = 393
-    Width = 32
-    Height = 21
-    NumbersOnly = True
-    TabOrder = 9
-    Text = '0'
-    OnExit = EditLightExit
   end
   object ComboBoxVclStyles: TComboBox
     Left = 8
@@ -241,7 +58,7 @@ object FrmHueSat: TFrmHueSat
     Width = 249
     Height = 21
     Style = csDropDownList
-    TabOrder = 14
+    TabOrder = 2
     OnChange = ComboBoxVclStylesChange
   end
   object Button1: TButton
@@ -251,23 +68,395 @@ object FrmHueSat: TFrmHueSat
     Height = 25
     Action = ActionApplyStyle
     Caption = 'Apply Style'
-    TabOrder = 15
+    TabOrder = 3
   end
   object CheckBoxSepia: TCheckBox
     Left = 8
-    Top = 439
+    Top = 499
     Width = 73
     Height = 17
     Caption = 'Sepia'
-    TabOrder = 16
+    TabOrder = 4
     OnClick = CheckBoxSepiaClick
+  end
+  object PageControl1: TPageControl
+    Left = 8
+    Top = 274
+    Width = 361
+    Height = 219
+    ActivePage = TabSheet1
+    TabOrder = 5
+    object TabSheet1: TTabSheet
+      Caption = 'HSL'
+      ExplicitWidth = 281
+      ExplicitHeight = 165
+      object Label1: TLabel
+        Left = 11
+        Top = 14
+        Width = 19
+        Height = 13
+        Caption = 'Hue'
+      end
+      object Bevel4: TBevel
+        Left = 11
+        Top = 28
+        Width = 329
+        Height = 5
+        Shape = bsTopLine
+      end
+      object Label2: TLabel
+        Left = 11
+        Top = 70
+        Width = 50
+        Height = 13
+        Caption = 'Saturation'
+      end
+      object Bevel2: TBevel
+        Left = 11
+        Top = 85
+        Width = 329
+        Height = 5
+        Shape = bsTopLine
+      end
+      object Label3: TLabel
+        Left = 11
+        Top = 126
+        Width = 45
+        Height = 13
+        Caption = 'Lightness'
+      end
+      object Bevel3: TBevel
+        Left = 62
+        Top = 134
+        Width = 278
+        Height = 5
+        Shape = bsTopLine
+      end
+      object TrackBarHue: TTrackBar
+        Left = 3
+        Top = 33
+        Width = 249
+        Height = 30
+        DoubleBuffered = True
+        Max = 180
+        Min = -180
+        ParentDoubleBuffered = False
+        TabOrder = 0
+        TickStyle = tsManual
+        OnChange = TrackBarHueChange
+      end
+      object EditLight: TEdit
+        Left = 258
+        Top = 145
+        Width = 32
+        Height = 21
+        NumbersOnly = True
+        TabOrder = 1
+        Text = '0'
+        OnExit = EditLightExit
+      end
+      object UpDownLight: TUpDown
+        Left = 290
+        Top = 145
+        Width = 16
+        Height = 21
+        Associate = EditLight
+        Min = -255
+        Max = 255
+        TabOrder = 2
+        OnChanging = UpDownLightChanging
+      end
+      object EditSat: TEdit
+        Left = 258
+        Top = 89
+        Width = 32
+        Height = 21
+        NumbersOnly = True
+        TabOrder = 3
+        Text = '0'
+        OnExit = EditSatExit
+      end
+      object UpDownSat: TUpDown
+        Left = 290
+        Top = 89
+        Width = 16
+        Height = 21
+        Associate = EditSat
+        TabOrder = 4
+        OnChanging = UpDownSatChanging
+      end
+      object EditHue: TEdit
+        Left = 258
+        Top = 35
+        Width = 32
+        Height = 21
+        NumbersOnly = True
+        TabOrder = 5
+        Text = '0'
+        OnExit = EditHueExit
+      end
+      object UpDownHue: TUpDown
+        Left = 290
+        Top = 35
+        Width = 16
+        Height = 21
+        Associate = EditHue
+        Min = -180
+        Max = 180
+        TabOrder = 6
+        OnChanging = UpDownHueChanging
+      end
+      object ButtonHue: TButton
+        Left = 314
+        Top = 33
+        Width = 26
+        Height = 25
+        BiDiMode = bdRightToLeftNoAlign
+        ImageAlignment = iaCenter
+        ImageIndex = 0
+        Images = ImageList1
+        ParentBiDiMode = False
+        TabOrder = 7
+        OnClick = ButtonHueClick
+      end
+      object TrackBarSaturation: TTrackBar
+        Left = 3
+        Top = 90
+        Width = 249
+        Height = 30
+        DoubleBuffered = True
+        Max = 100
+        ParentDoubleBuffered = False
+        TabOrder = 8
+        TickStyle = tsManual
+        OnChange = TrackBarSaturationChange
+      end
+      object ButtonSaturation: TButton
+        Left = 312
+        Top = 90
+        Width = 26
+        Height = 25
+        ImageAlignment = iaCenter
+        ImageIndex = 0
+        Images = ImageList1
+        TabOrder = 9
+        OnClick = ButtonSaturationClick
+      end
+      object TrackBarLightness: TTrackBar
+        Left = 3
+        Top = 145
+        Width = 249
+        Height = 30
+        DoubleBuffered = False
+        Max = 255
+        Min = -255
+        ParentDoubleBuffered = False
+        TabOrder = 10
+        TickStyle = tsManual
+        OnChange = TrackBarLightnessChange
+      end
+      object ButtonLightness: TButton
+        Left = 312
+        Top = 145
+        Width = 26
+        Height = 25
+        ImageAlignment = iaCenter
+        ImageIndex = 0
+        Images = ImageList1
+        TabOrder = 11
+        OnClick = ButtonLightnessClick
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = 'RGB'
+      ImageIndex = 1
+      ExplicitWidth = 559
+      ExplicitHeight = 469
+      object Label5: TLabel
+        Left = 11
+        Top = 14
+        Width = 19
+        Height = 13
+        Caption = 'Red'
+      end
+      object Bevel5: TBevel
+        Left = 11
+        Top = 28
+        Width = 329
+        Height = 5
+        Shape = bsTopLine
+      end
+      object Label6: TLabel
+        Left = 11
+        Top = 62
+        Width = 29
+        Height = 13
+        Caption = 'Green'
+      end
+      object Bevel6: TBevel
+        Left = 11
+        Top = 76
+        Width = 329
+        Height = 5
+        Shape = bsTopLine
+      end
+      object Label7: TLabel
+        Left = 11
+        Top = 118
+        Width = 20
+        Height = 13
+        Caption = 'Blue'
+      end
+      object Bevel7: TBevel
+        Left = 11
+        Top = 132
+        Width = 329
+        Height = 5
+        Shape = bsTopLine
+      end
+      object TrackBarRed: TTrackBar
+        Left = 3
+        Top = 33
+        Width = 249
+        Height = 30
+        DoubleBuffered = True
+        Max = 255
+        ParentDoubleBuffered = False
+        TabOrder = 0
+        TickStyle = tsManual
+        OnChange = TrackBarRedChange
+      end
+      object EditRed: TEdit
+        Left = 258
+        Top = 35
+        Width = 32
+        Height = 21
+        NumbersOnly = True
+        TabOrder = 1
+        Text = '0'
+        OnExit = EditHueExit
+      end
+      object UpDownRed: TUpDown
+        Left = 290
+        Top = 35
+        Width = 16
+        Height = 21
+        Associate = EditRed
+        Max = 255
+        TabOrder = 2
+        OnChanging = UpDownHueChanging
+      end
+      object Button2: TButton
+        Left = 314
+        Top = 33
+        Width = 26
+        Height = 25
+        BiDiMode = bdRightToLeftNoAlign
+        ImageAlignment = iaCenter
+        ImageIndex = 0
+        Images = ImageList1
+        ParentBiDiMode = False
+        TabOrder = 3
+        OnClick = Button2Click
+      end
+      object TrackBarGreen: TTrackBar
+        Left = 3
+        Top = 81
+        Width = 249
+        Height = 30
+        DoubleBuffered = True
+        Max = 255
+        ParentDoubleBuffered = False
+        TabOrder = 4
+        TickStyle = tsManual
+        OnChange = TrackBarRedChange
+      end
+      object EditGreen: TEdit
+        Left = 258
+        Top = 83
+        Width = 32
+        Height = 21
+        NumbersOnly = True
+        TabOrder = 5
+        Text = '0'
+        OnExit = EditHueExit
+      end
+      object UpDownGreen: TUpDown
+        Left = 290
+        Top = 83
+        Width = 16
+        Height = 21
+        Associate = EditGreen
+        Max = 255
+        TabOrder = 6
+        OnChanging = UpDownHueChanging
+      end
+      object Button3: TButton
+        Left = 314
+        Top = 81
+        Width = 26
+        Height = 25
+        BiDiMode = bdRightToLeftNoAlign
+        ImageAlignment = iaCenter
+        ImageIndex = 0
+        Images = ImageList1
+        ParentBiDiMode = False
+        TabOrder = 7
+        OnClick = Button3Click
+      end
+      object TrackBarBlue: TTrackBar
+        Left = 3
+        Top = 137
+        Width = 249
+        Height = 30
+        DoubleBuffered = True
+        Max = 255
+        ParentDoubleBuffered = False
+        TabOrder = 8
+        TickStyle = tsManual
+        OnChange = TrackBarRedChange
+      end
+      object EditBlue: TEdit
+        Left = 258
+        Top = 139
+        Width = 32
+        Height = 21
+        NumbersOnly = True
+        TabOrder = 9
+        Text = '0'
+        OnExit = EditHueExit
+      end
+      object UpDownBlue: TUpDown
+        Left = 290
+        Top = 139
+        Width = 16
+        Height = 21
+        Associate = EditBlue
+        Max = 255
+        TabOrder = 10
+        OnChanging = UpDownHueChanging
+      end
+      object Button4: TButton
+        Left = 312
+        Top = 143
+        Width = 26
+        Height = 25
+        BiDiMode = bdRightToLeftNoAlign
+        ImageAlignment = iaCenter
+        ImageIndex = 0
+        Images = ImageList1
+        ParentBiDiMode = False
+        TabOrder = 11
+        OnClick = Button4Click
+      end
+    end
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 216
     Top = 136
     Bitmap = {
-      494C010101000800240010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010008002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
