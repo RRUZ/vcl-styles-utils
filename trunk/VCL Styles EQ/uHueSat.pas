@@ -130,6 +130,7 @@ implementation
 {$R *.dfm}
 
 uses
+  IOUtils,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
   Vcl.Themes,
@@ -581,5 +582,23 @@ begin
   TrackBarSaturation.Position := UpDownSat.Position;
   AllowChange:=True;
 end;
+
+procedure RegisterVCLStyle(const StyleFileName: string);
+begin
+   if TStyleManager.IsValidStyle(StyleFileName) then
+     TStyleManager.LoadFromFile(StyleFileName);
+end;
+
+procedure RegisterVCLStyles;
+var
+  Style   : string;
+begin
+  for Style in TDirectory.GetFiles(IncludeTrailingPathDelimiter(ExpandFileName(ExtractFilePath(ParamStr(0))  + '\..\Styles')), '*.vsf') do
+    RegisterVCLStyle(Style);
+end;
+
+
+initialization
+ RegisterVCLStyles;
 
 end.
