@@ -88,8 +88,6 @@ object FrmHueSat: TFrmHueSat
     TabOrder = 5
     object TabSheet1: TTabSheet
       Caption = 'HSL'
-      ExplicitWidth = 281
-      ExplicitHeight = 165
       object Label1: TLabel
         Left = 11
         Top = 14
@@ -270,6 +268,8 @@ object FrmHueSat: TFrmHueSat
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 559
       ExplicitHeight = 469
       object Label5: TLabel
@@ -456,7 +456,7 @@ object FrmHueSat: TFrmHueSat
     Left = 216
     Top = 136
     Bitmap = {
-      494C0101010008002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
