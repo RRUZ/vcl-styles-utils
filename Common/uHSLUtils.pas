@@ -31,22 +31,6 @@ uses
   Classes,
   SysUtils;
 
-type
-  PRGB24     = ^TRGB24;
-
-  TRGB24 = record
-    B, G, R: byte;
-  end;
-  PRGBArray24 = ^TRGBArray24;
-  TRGBArray24 = array[0..0] of TRGB24;
-
-  PRGB32     = ^TRGB32;
-  TRGB32 = record
-    B, G, R, A: byte;
-  end;
-  PRGBArray32 = ^TRGBArray32;
-  TRGBArray32 = array[0..0] of TRGB32;
-
 const
   MaxHue = 180;
   MinHue = -180;
@@ -75,6 +59,15 @@ procedure _Saturation32(const ABitMap: TBitmap; Value: integer);
 procedure _Sepia32(const ABitMap: TBitmap;Value : Byte=32);
 procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Byte);
 
+procedure _BlendBurn32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendMultiply32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendAdditive32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDodge32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendOverlay32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDifference32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendLighten32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDarken32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendScreen32(const ABitMap: TBitmap;Value: Integer);
 
 Type
   TBitmap32Filter=class
@@ -121,7 +114,72 @@ Type
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
+  TBitmap32BlendBurn=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlendMultiply=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+
+  TBitmap32BlendAdditive=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlendDodge=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlendOverlay=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlendDifference=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlendLighten=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlendDarken=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+  TBitmap32BlendScreen=class(TBitmap32Filter)
+  public
+   procedure Apply(ABitMap: TBitmap);override;
+  end;
+
+
 implementation
+
+Uses
+  Math;
+
+type
+  PRGB24     = ^TRGB24;
+  TRGB24 = record
+    B, G, R: byte;
+  end;
+  PRGBArray24 = ^TRGBArray24;
+  TRGBArray24 = array[0..0] of TRGB24;
+
+  PRGB32     = ^TRGB32;
+  TRGB32 = record
+    B, G, R, A: byte;
+  end;
+  PRGBArray32 = ^TRGBArray32;
+  TRGBArray32 = array[0..0] of TRGB32;
 
 function RoundIntToByte(i: integer): byte;
 begin
@@ -150,7 +208,6 @@ var
   x, y:    integer;
   ARGB:    TColor;
   Line, Delta: integer;
-  H, S, L: double;
 begin
   Line  := integer(ABitMap.ScanLine[0]);
   Delta := integer(ABitMap.ScanLine[1]) - Line;
@@ -164,10 +221,10 @@ begin
       a    := PRGBArray32(Line)[x].A;
 
       ARGB:=(r+g+b) div 3;
-      //then convert it to sepia
+
       r:=ARGB+(Value*2);
-      g:=ARGB+Value;
-      b:=ARGB;
+      g:=ARGB+(Value*1);
+      b:=ARGB+(Value*1);
 
       if r <= ((Value*2)-1) then
         r:=255;
@@ -182,40 +239,7 @@ begin
     Inc(Line, Delta);
   end;
 end;
-{
-var
-    gcolor:integer;//greyscale color
-    r,g,b:byte;
-    h,w:integer;
-    RowOriginal :  PRGBArray32;
-begin
-  //modify
-  for h := 0 to bmp.height-1 do
-  begin
-    RowOriginal  := pRGBArray(bmp.Scanline[h]);
-    for w := 0 to bmp.width-1 do
-    begin
-      //get greyscale
-      r:=RowOriginal[w].rgbtRed;
-      g:=RowOriginal[w].rgbtGreen;
-      b:=RowOriginal[w].rgbtBlue;
-      gcolor:=(r+g+b) div 3;
-      //then convert it to sepia
-      r:=gcolor+(depth*2);
-      g:=gcolor+depth;
-      b:=gcolor;
-      if r <= ((depth*2)-1) then
-        r:=255;
-      if g <= (depth-1) then
-        g:=255;
-      //output
-      RowOriginal[w].rgbtRed:=r;
-      RowOriginal[w].rgbtGreen:=g;
-      RowOriginal[w].rgbtBlue:=b;
-    end;
-  end;
-end;
-  }
+
 
 procedure _Hue24(var ABitMap: TBitmap; Value: integer);
 var
@@ -281,13 +305,22 @@ begin
   end;
 end;
 
-procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Byte);
+{
+if b = 0 then
+  result := 0
+else begin
+  c := 255 - (((255-a) SHL 8) DIV b);
+  if c < 0 then result := 0 else result := c;
+end;
+}
+procedure _BlendBurn32(const ABitMap: TBitmap;Value: Integer);
 var
-  r, g, b, a: byte;
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  c: Integer;
   x, y:    integer;
   ARGB:    TColor;
   Line, Delta: integer;
-  H, S, L: double;
 begin
   Line  := integer(ABitMap.ScanLine[0]);
   Delta := integer(ABitMap.ScanLine[1]) - Line;
@@ -300,9 +333,433 @@ begin
       b    := PRGBArray32(Line)[x].B;
       a    := PRGBArray32(Line)[x].A;
 
-      PRGBArray32(Line)[x].R := r+DR;
-      PRGBArray32(Line)[x].G := g+DG;
-      PRGBArray32(Line)[x].B := b+DB;
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      if br=0 then
+       r:=0
+      else
+      begin
+       c:=RoundIntToByte(255-(((255-r) SHL 8) DIV br));
+       r:=c;
+      end;
+
+      if bg=0 then
+       g:=0
+      else
+      begin
+       c:=RoundIntToByte(255-(((255-g) SHL 8) DIV bg));
+       g:=c;
+      end;
+
+      if bb=0 then
+       b:=0
+      else
+      begin
+       c:=RoundIntToByte(255-(((255-b) SHL 8) DIV bb));
+       b:=c;
+      end;
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+{result := (a*b) SHR 8;}
+procedure _BlendMultiply32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      r:=(r*br) shr 8;
+      g:=(g*bg) shr 8;
+      b:=(b*bb) shr 8;
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+
+{
+c := a+b;
+if c > 255 then result := 255 else result := c;
+}
+procedure _BlendAdditive32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  c: Integer;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      c:=RoundIntToByte(r+br);
+      r:=c;
+      c:=RoundIntToByte(g+bg);
+      g:=c;
+      c:=RoundIntToByte(b+bb);
+      b:=c;
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+{
+if b = 255 then
+  result := 255
+else begin
+  c := (a SHL 8) DIV (255-b);
+  if c > 255 then result := 255 else result := c;
+end;
+}
+
+procedure _BlendDodge32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  c: Integer;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      if br=255 then
+       r:=255
+      else
+      begin
+        c := RoundIntToByte((r SHL 8) DIV (255-br));
+        r := c;
+      end;
+
+      if bg=255 then
+       g:=255
+      else
+      begin
+        c := RoundIntToByte((g SHL 8) DIV (255-bg));
+        g := c;
+      end;
+
+      if bb=255 then
+       b:=255
+      else
+      begin
+        c := RoundIntToByte((b SHL 8) DIV (255-bb));
+        b := c;
+      end;
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+{
+if a < 128 then
+  result := (a*b) SHR 7
+else
+  result := 255 - ((255-a) * (255-b) SHR 7);
+}
+procedure _BlendOverlay32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  c: Integer;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      if r<128 then
+       r:=RoundIntToByte((r*br) shr 7)
+      else
+      begin
+        c := RoundIntToByte(255 - ((255-r) * (255-br) SHR 7));
+        r := c;
+      end;
+
+      if g<128 then
+       g:=RoundIntToByte((g*bg) shr 7)
+      else
+      begin
+        c := RoundIntToByte(255 - ((255-g) * (255-bg) SHR 7));
+        g := c;
+      end;
+
+      if b<128 then
+       b:=RoundIntToByte((r*bb) shr 7)
+      else
+      begin
+        c := RoundIntToByte(255 - ((255-b) * (255-bb) SHR 7));
+        b := c;
+      end;
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+{
+result := abs(a-b);
+}
+procedure _BlendDifference32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      r:=abs(r-br);
+      g:=abs(g-bg);
+      b:=abs(b-bb);
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+{
+if a > b then
+  result := a
+else
+  result := b;
+}
+procedure _BlendLighten32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      r:=IfThen(r>br, r, br);
+      g:=IfThen(g>bg, g, bg);
+      b:=IfThen(b>bb, b, bb);
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+{
+if a < b then
+  result := a
+else
+  result := b;
+}
+procedure _BlendDarken32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      r:=IfThen(r<br, r, br);
+      g:=IfThen(g<bg, g, bg);
+      b:=IfThen(b<bb, b, bb);
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+{
+result := 255 - ((255-a) * (255-b) SHR 8);
+}
+procedure _BlendScreen32(const ABitMap: TBitmap;Value: Integer);
+var
+  r, g, b, a   : byte;
+  br, bg, bb   : byte;
+  c: Integer;
+  x, y:    integer;
+  ARGB:    TColor;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+
+      ARGB := Value;
+      GetRGB(ARGB, br,bg, bb);
+
+      c := RoundIntToByte(255 - ((255-r) * (255-br) SHR 8));
+      r := c;
+
+      c := RoundIntToByte(255 - ((255-g) * (255-bg) SHR 8));
+      g := c;
+
+      c := RoundIntToByte(255 - ((255-b) * (255-bb) SHR 8));
+      b := c;
+
+      PRGBArray32(Line)[x].R := r;
+      PRGBArray32(Line)[x].G := g;
+      PRGBArray32(Line)[x].B := b;
+      PRGBArray32(Line)[x].A := a;
+    end;
+    Inc(Line, Delta);
+  end;
+end;
+
+
+procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Byte);
+var
+  r, g, b, a: byte;
+  x, y:    integer;
+  Line, Delta: integer;
+begin
+  Line  := integer(ABitMap.ScanLine[0]);
+  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  for y := 0 to ABitMap.Height - 1 do
+  begin
+    for x := 0 to ABitMap.Width - 1 do
+    begin
+      r    := PRGBArray32(Line)[x].R;
+      g    := PRGBArray32(Line)[x].G;
+      b    := PRGBArray32(Line)[x].B;
+      a    := PRGBArray32(Line)[x].A;
+      PRGBArray32(Line)[x].R := RoundIntToByte(r+DR);
+      PRGBArray32(Line)[x].G := RoundIntToByte(g+DG);
+      PRGBArray32(Line)[x].B := RoundIntToByte(b+DB);
       PRGBArray32(Line)[x].A := a;
     end;
     Inc(Line, Delta);
@@ -626,6 +1083,69 @@ end;
 procedure TBitmap32GreenFilter.Apply(ABitMap: TBitmap);
 begin
  _SetRGB32(ABitMap,0,Value,0);
+end;
+
+{ TBitmap32BlendBurn }
+
+procedure TBitmap32BlendBurn.Apply(ABitMap: TBitmap);
+begin
+ _BlendBurn32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendMultiply }
+
+procedure TBitmap32BlendMultiply.Apply(ABitMap: TBitmap);
+begin
+ _BlendMultiply32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendAdditive }
+
+procedure TBitmap32BlendAdditive.Apply(ABitMap: TBitmap);
+begin
+ _BlendAdditive32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendDodge }
+
+procedure TBitmap32BlendDodge.Apply(ABitMap: TBitmap);
+begin
+ _BlendDodge32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendOverlay }
+
+procedure TBitmap32BlendOverlay.Apply(ABitMap: TBitmap);
+begin
+ _BlendOverlay32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendLighten }
+
+procedure TBitmap32BlendLighten.Apply(ABitMap: TBitmap);
+begin
+ _BlendLighten32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendDarken }
+
+procedure TBitmap32BlendDarken.Apply(ABitMap: TBitmap);
+begin
+ _BlendDarken32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendScreen }
+
+procedure TBitmap32BlendScreen.Apply(ABitMap: TBitmap);
+begin
+ _BlendScreen32(ABitMap, Value);
+end;
+
+{ TBitmap32BlendDifference }
+
+procedure TBitmap32BlendDifference.Apply(ABitMap: TBitmap);
+begin
+  _BlendDifference32(ABitMap, Value);
 end;
 
 end.

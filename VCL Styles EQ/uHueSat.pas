@@ -83,6 +83,17 @@ type
     UpDownBlue: TUpDown;
     Button4: TButton;
     Bevel7: TBevel;
+    TabSheet3: TTabSheet;
+    ButtonApplyBlend: TButton;
+    RadioButtonHSL: TRadioButton;
+    RadioButtonRGB: TRadioButton;
+    RadioButtonBlend: TRadioButton;
+    ColorBoxblend: TColorBox;
+    Button6: TButton;
+    ComboBoxBlend: TComboBox;
+    Label8: TLabel;
+    Label9: TLabel;
+    ColorDialog1: TColorDialog;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -107,6 +118,9 @@ type
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure ButtonApplyBlendClick(Sender: TObject);
+    procedure RadioButtonHSLClick(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
   private
     OriginalBitMap : TBitmap;
     SepiaBitMap    : TBitmap;
@@ -120,6 +134,8 @@ type
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
     procedure LoadStyle;
+    procedure SetPageActive(Index:integer);
+    function GetFilters  : TObjectList<TBitmap32Filter>;
   end;
 
 var
@@ -130,6 +146,7 @@ implementation
 {$R *.dfm}
 
 uses
+  Rtti,
   IOUtils,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
@@ -147,34 +164,61 @@ begin
  TCustomAction(Sender).Enabled:=not SameText(StyleName, TStyleManager.ActiveStyle.Name, loUserLocale);
 end;
 
+
+function TFrmHueSat.GetFilters: TObjectList<TBitmap32Filter>;
+var
+  LFilter : TValue;
+  ctx     : TRttiContext;
+  RttiInstanceType : TRttiInstanceType;
+begin
+  Result:=TObjectList<TBitmap32Filter>.Create;
+
+    if RadioButtonHSL.Checked then
+    begin
+      If CheckBoxSepia.Checked then
+        Result.Add(TBitmap32SepiaFilter.Create(20));
+
+      If UpDownHue.Position<>0 then
+        Result.Add(TBitmap32HueFilter.Create(Trunc(UpDownHue.Position)));
+
+      If UpDownSat.Position<>0 then
+        Result.Add(TBitmap32SaturationFilter.Create(Trunc(UpDownSat.Position)));
+
+      If UpDownLight.Position<>0 then
+        Result.Add(TBitmap32LightnessFilter.Create(Trunc(UpDownLight.Position)));
+    end;
+
+
+    if RadioButtonRGB.Checked then
+    begin
+      If UpDownRed.Position>0 then
+        Result.Add(TBitmap32RedFilter.Create(Trunc(UpDownRed.Position)));
+
+      If UpDownGreen.Position>0 then
+        Result.Add(TBitmap32GreenFilter.Create(Trunc(UpDownGreen.Position)));
+
+      If UpDownBlue.Position>0 then
+        Result.Add(TBitmap32BlueFilter.Create(Trunc(UpDownBlue.Position)));
+    end;
+
+    if RadioButtonBlend.Checked then
+    begin
+      ctx := TRttiContext.Create;
+      RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
+      LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
+      Result.Add(TBitmap32Filter(LFilter.AsObject));
+      ctx.Free;
+    end;
+end;
+
+
 procedure TFrmHueSat.BtnApplyClick(Sender: TObject);
 Var
   LFilters : TObjectList<TBitmap32Filter>;
   VclUtils : TVclStylesUtils;
 begin
   try
-    LFilters:=TObjectList<TBitmap32Filter>.Create;
-
-    If CheckBoxSepia.Checked then
-      LFilters.Add(TBitmap32SepiaFilter.Create(20));
-
-    If UpDownHue.Position<>0 then
-      LFilters.Add(TBitmap32HueFilter.Create(Trunc(UpDownHue.Position)));
-
-    If UpDownSat.Position<>0 then
-      LFilters.Add(TBitmap32SaturationFilter.Create(Trunc(UpDownSat.Position)));
-
-    If UpDownLight.Position<>0 then
-      LFilters.Add(TBitmap32LightnessFilter.Create(Trunc(UpDownLight.Position)));
-
-    If UpDownRed.Position>0 then
-      LFilters.Add(TBitmap32RedFilter.Create(Trunc(UpDownRed.Position)));
-
-    If UpDownGreen.Position>0 then
-      LFilters.Add(TBitmap32GreenFilter.Create(Trunc(UpDownGreen.Position)));
-
-    If UpDownBlue.Position>0 then
-      LFilters.Add(TBitmap32BlueFilter.Create(Trunc(UpDownBlue.Position)));
+    LFilters:=GetFilters;
 
     VclUtils:=TVclStylesUtils.Create(StyleName);
     try
@@ -201,24 +245,14 @@ begin
  if SaveDialog1.Execute then
  begin
     try
-      LFilters:=TObjectList<TBitmap32Filter>.Create;
-
-      If CheckBoxSepia.Checked then
-        LFilters.Add(TBitmap32SepiaFilter.Create(20));
-
-      If UpDownHue.Position<>0 then
-        LFilters.Add(TBitmap32HueFilter.Create(Trunc(UpDownHue.Position)));
-
-      If UpDownSat.Position<>0 then
-        LFilters.Add(TBitmap32SaturationFilter.Create(Trunc(UpDownSat.Position)));
-
-      If UpDownLight.Position<>0 then
-        LFilters.Add(TBitmap32LightnessFilter.Create(Trunc(UpDownLight.Position)));
+      LFilters:=GetFilters;
 
       VclUtils:=TVclStylesUtils.Create(StyleName);
       try
         VclUtils.SetFilters(LFilters);
         VclUtils.SaveToFile(SaveDialog1.FileName);
+
+        ImageVCLStyle.Picture.Bitmap.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.bmp'));
       finally
         LFilters.Free;
         VclUtils.Free;
@@ -251,6 +285,37 @@ begin
   TrackBarBlue.Position := 0;
 end;
 
+procedure TFrmHueSat.ButtonApplyBlendClick(Sender: TObject);
+var
+  Bitmap  : TBitmap;
+  LFilter : TValue;
+  ctx     : TRttiContext;
+  RttiInstanceType : TRttiInstanceType;
+begin
+  Bitmap := TBitmap.Create;
+  try
+    Bitmap.Assign(OriginalBitMap);
+
+    ctx := TRttiContext.Create;
+    RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
+    LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
+    RttiInstanceType.GetMethod('Apply').Invoke(LFilter,[Bitmap]);
+    ctx.Free;
+    RttiInstanceType.GetMethod('Free').Invoke(LFilter,[]);
+
+    ImageVCLStyle.Picture.Assign(Bitmap);
+    ModifiedBitMap.Assign(Bitmap);
+  finally
+    Bitmap.Free;
+  end;
+end;
+
+procedure TFrmHueSat.Button6Click(Sender: TObject);
+begin
+ if ColorDialog1.Execute then
+  ColorBoxblend.Selected:=ColorDialog1.Color;
+end;
+
 procedure TFrmHueSat.ButtonHueClick(Sender: TObject);
 begin
   UpDownHue.Position   := DefHue;
@@ -281,7 +346,8 @@ begin
      _Sepia32(Bitmap,20);
 
     ImageVCLStyle.Picture.Assign(Bitmap);
-    SepiaBitMap.Assign(Bitmap);
+    //SepiaBitMap.Assign(Bitmap);
+    ModifiedBitMap.Assign(Bitmap);
   finally
     Bitmap.Free;
   end;
@@ -400,6 +466,23 @@ begin
   ModifiedBitMap := TBitmap.Create;
   SepiaBitMap    := TBitmap.Create;
   LoadStyle;
+
+
+  With ComboBoxBlend.Items do
+  begin
+   AddObject('Burn', TypeInfo(TBitmap32BlendBurn));
+   AddObject('Multiply', TypeInfo(TBitmap32BlendMultiply));
+   AddObject('Additive', TypeInfo(TBitmap32BlendAdditive));
+   AddObject('Dodge', TypeInfo(TBitmap32BlendDodge));
+   AddObject('Overlay', TypeInfo(TBitmap32BlendOverlay));
+   AddObject('Difference', TypeInfo(TBitmap32BlendDifference));
+   AddObject('Lighten', TypeInfo(TBitmap32BlendLighten));
+   AddObject('Darken', TypeInfo(TBitmap32BlendDarken));
+   AddObject('Screen', TypeInfo(TBitmap32BlendScreen));
+  end;
+
+  ComboBoxBlend.ItemIndex:=0;
+  SetPageActive(0);
 end;
 
 procedure TFrmHueSat.FormDestroy(Sender: TObject);
@@ -420,8 +503,9 @@ var
 begin
   Bitmap := TBitmap.Create;
   try
+
     if CheckBoxSepia.Checked then
-     Bitmap.Assign(SepiaBitMap)
+     Bitmap.Assign(ModifiedBitMap)//Bitmap.Assign(SepiaBitMap)
     else
      Bitmap.Assign(OriginalBitMap);
 
@@ -480,21 +564,23 @@ begin
 end;
 
 
+procedure TFrmHueSat.SetPageActive(Index: integer);
+var
+ i : Integer;
+begin
+  PageControl1.ActivePageIndex:=Index;
+  for i := 0 to PageControl1.PageCount-1 do
+   PageControl1.Pages[i].TabVisible:=i=Index;
+end;
+
 procedure TFrmHueSat.SetRGB(DR, DG, DB: integer);
 var
   Bitmap: TBitmap;
 begin
   Bitmap := TBitmap.Create;
   try
-    if CheckBoxSepia.Checked then
-     Bitmap.Assign(SepiaBitMap)
-    else
-     Bitmap.Assign(OriginalBitMap);
-
+    Bitmap.Assign(OriginalBitMap);
     _SetRGB32(Bitmap, DR, DG, DB);
-
-
-
     ImageVCLStyle.Picture.Assign(Bitmap);
     ModifiedBitMap.Assign(Bitmap);
   finally
@@ -528,6 +614,12 @@ begin
 
   UpDownBlue.Position       := 0;
   TrackBarBlue.Position     := 0;
+end;
+
+procedure TFrmHueSat.RadioButtonHSLClick(Sender: TObject);
+begin
+  SetPageActive(TRadioButton(Sender).Tag);
+  LoadStyle;
 end;
 
 procedure TFrmHueSat.TrackBarRedChange(Sender: TObject);
