@@ -72,7 +72,7 @@ object FrmHueSat: TFrmHueSat
   end
   object CheckBoxSepia: TCheckBox
     Left = 8
-    Top = 499
+    Top = 516
     Width = 73
     Height = 17
     Caption = 'Sepia'
@@ -81,7 +81,7 @@ object FrmHueSat: TFrmHueSat
   end
   object PageControl1: TPageControl
     Left = 8
-    Top = 274
+    Top = 291
     Width = 361
     Height = 219
     ActivePage = TabSheet1
@@ -268,10 +268,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 559
-      ExplicitHeight = 469
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -450,13 +446,97 @@ object FrmHueSat: TFrmHueSat
         OnClick = Button4Click
       end
     end
+    object TabSheet3: TTabSheet
+      Caption = 'Blend'
+      ImageIndex = 2
+      ExplicitLeft = -52
+      ExplicitTop = 28
+      object Label8: TLabel
+        Left = 3
+        Top = 52
+        Width = 26
+        Height = 13
+        Caption = 'Mode'
+      end
+      object Label9: TLabel
+        Left = 3
+        Top = 5
+        Width = 25
+        Height = 13
+        Caption = 'Color'
+      end
+      object ButtonApplyBlend: TButton
+        Left = 3
+        Top = 103
+        Width = 75
+        Height = 25
+        Caption = 'Apply Blend'
+        TabOrder = 0
+        OnClick = ButtonApplyBlendClick
+      end
+      object ColorBoxblend: TColorBox
+        Left = 3
+        Top = 24
+        Width = 145
+        Height = 22
+        TabOrder = 1
+      end
+      object Button6: TButton
+        Left = 154
+        Top = 24
+        Width = 27
+        Height = 22
+        Caption = '...'
+        TabOrder = 2
+        OnClick = Button6Click
+      end
+      object ComboBoxBlend: TComboBox
+        Left = 3
+        Top = 71
+        Width = 145
+        Height = 21
+        Style = csDropDownList
+        TabOrder = 3
+      end
+    end
+  end
+  object RadioButtonHSL: TRadioButton
+    Left = 8
+    Top = 268
+    Width = 50
+    Height = 17
+    Caption = 'HSL'
+    Checked = True
+    TabOrder = 6
+    TabStop = True
+    OnClick = RadioButtonHSLClick
+  end
+  object RadioButtonRGB: TRadioButton
+    Tag = 1
+    Left = 74
+    Top = 268
+    Width = 58
+    Height = 17
+    Caption = 'RGB'
+    TabOrder = 7
+    OnClick = RadioButtonHSLClick
+  end
+  object RadioButtonBlend: TRadioButton
+    Tag = 2
+    Left = 138
+    Top = 268
+    Width = 55
+    Height = 17
+    Caption = 'Blend'
+    TabOrder = 8
+    OnClick = RadioButtonHSLClick
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 216
     Top = 136
     Bitmap = {
-      494C010101000800340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -610,5 +690,10 @@ object FrmHueSat: TFrmHueSat
     Filter = 'Visual Style Files|*.vsf'
     Left = 112
     Top = 152
+  end
+  object ColorDialog1: TColorDialog
+    Options = [cdFullOpen, cdShowHelp, cdSolidColor, cdAnyColor]
+    Left = 224
+    Top = 328
   end
 end
