@@ -449,8 +449,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheet3: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
-      ExplicitLeft = -52
-      ExplicitTop = 28
       object Label8: TLabel
         Left = 3
         Top = 52
@@ -479,6 +477,8 @@ object FrmHueSat: TFrmHueSat
         Top = 24
         Width = 145
         Height = 22
+        Selected = clRed
+        Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames, cbCustomColors]
         TabOrder = 1
       end
       object Button6: TButton
@@ -536,7 +536,7 @@ object FrmHueSat: TFrmHueSat
     Left = 216
     Top = 136
     Bitmap = {
-      494C010101000800380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010008003C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
