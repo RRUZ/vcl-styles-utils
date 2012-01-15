@@ -137,6 +137,8 @@ type
     procedure SetPageActive(Index:integer);
     function GetFilters  : TObjectList<TBitmap32Filter>;
     procedure SetBlend;
+    procedure AcceptFiles(var msg : TMessage); message WM_DROPFILES;
+    procedure FillListStyles;
   end;
 
 var
@@ -148,12 +150,48 @@ implementation
 
 uses
   Rtti,
+  ShellAPI,
   IOUtils,
+  StrUtils,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
   Vcl.Themes,
-  Vcl.Styles;
+  Vcl.Styles, uVCLStylesInfo;
 
+
+procedure TFrmHueSat.AcceptFiles(var msg: TMessage);
+const
+  cb = 255;
+var
+  FileIndex,
+  nCount     : integer;
+  FileName   : array [0..cb] of Char;
+  StyleInfo  : TStyleInfo;
+  StyleName  : string;
+begin
+  StyleName :='';
+  nCount := DragQueryFile( msg.WParam, $FFFFFFFF, FileName, cb);
+  for FileIndex := 0 to nCount-1 do
+  begin
+    DragQueryFile( msg.WParam, FileIndex, FileName, cb );
+    if TStyleManager.IsValidStyle(FileName, StyleInfo) then
+    if not MatchText(StyleInfo.Name, TStyleManager.StyleNames) then
+    begin
+      TStyleManager.LoadFromFile(FileName);
+      StyleName:=StyleInfo.Name;
+    end;
+  end;
+
+  FillListStyles;
+  if StyleName<>'' then
+  begin
+   ComboBoxVclStyles.ItemIndex:=ComboBoxVclStyles.Items.IndexOf(StyleName);
+   LoadStyle;
+  end;
+
+
+  DragFinish( msg.WParam );
+end;
 
 procedure TFrmHueSat.ActionApplyStyleExecute(Sender: TObject);
 begin
@@ -162,7 +200,7 @@ end;
 
 procedure TFrmHueSat.ActionApplyStyleUpdate(Sender: TObject);
 begin
- TCustomAction(Sender).Enabled:=not SameText(StyleName, TStyleManager.ActiveStyle.Name, loUserLocale);
+ TCustomAction(Sender).Enabled:=(StyleName<>'') and not SameText(StyleName, TStyleManager.ActiveStyle.Name, loUserLocale);
 end;
 
 
@@ -218,6 +256,7 @@ Var
   LFilters : TObjectList<TBitmap32Filter>;
   VclUtils : TVclStylesUtils;
 begin
+  if StyleName='' then exit;
   try
     LFilters:=GetFilters;
 
@@ -242,18 +281,29 @@ procedure TFrmHueSat.BtnSaveClick(Sender: TObject);
 Var
   LFilters : TObjectList<TBitmap32Filter>;
   VclUtils : TVclStylesUtils;
+  Frm      : TFrmVCLStyleInfoDialog;
 begin
+ if StyleName='' then exit;
+
  if SaveDialog1.Execute then
  begin
     try
       LFilters:=GetFilters;
-
       VclUtils:=TVclStylesUtils.Create(StyleName);
       try
+        Frm:=TFrmVCLStyleInfoDialog.Create(Self);
+        try
+         Frm.StyleInfo:=VclUtils.StyleExt.StyleInfo;
+         if Frm.Execute then
+          VclUtils.StyleExt.StyleInfo:=Frm.StyleInfo;
+        finally
+         Frm.Free;
+        end;
+
         VclUtils.SetFilters(LFilters);
         VclUtils.SaveToFile(SaveDialog1.FileName);
-
         ImageVCLStyle.Picture.Bitmap.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.bmp'));
+        MessageDlg('Vcl Style Saved', mtInformation, [mbOK], 0);
       finally
         LFilters.Free;
         VclUtils.Free;
@@ -277,7 +327,6 @@ procedure TFrmHueSat.Button3Click(Sender: TObject);
 begin
   UpDownGreen.Position   := 0;
   TrackBarGreen.Position := 0;
-
 end;
 
 procedure TFrmHueSat.Button4Click(Sender: TObject);
@@ -288,7 +337,7 @@ end;
 
 procedure TFrmHueSat.ButtonApplyBlendClick(Sender: TObject);
 begin
- SetBlend();
+  SetBlend();
 end;
 
 procedure TFrmHueSat.Button6Click(Sender: TObject);
@@ -319,6 +368,8 @@ procedure TFrmHueSat.CheckBoxSepiaClick(Sender: TObject);
 var
   Bitmap: TBitmap;
 begin
+  if StyleName='' then exit;
+
   Bitmap := TBitmap.Create;
   try
     Bitmap.Assign(OriginalBitMap);
@@ -431,16 +482,23 @@ begin
 end;
 
 
-procedure TFrmHueSat.FormCreate(Sender: TObject);
+procedure TFrmHueSat.FillListStyles;
 var
   s : string;
 begin
+ ComboBoxVclStyles.Items.Clear;
+ for s in TStyleManager.StyleNames do
+  if not SameText(s,'Windows') then
+   ComboBoxVclStyles.Items.Add(s);
+end;
+
+procedure TFrmHueSat.FormCreate(Sender: TObject);
+begin
+ DragAcceptFiles( Handle, True );
  ReportMemoryLeaksOnShutdown:=True;
 
- for s in TStyleManager.StyleNames do
-  if CompareText(s,'Windows')<>0 then
-   ComboBoxVclStyles.Items.Add(s);
-
+  FillListStyles;
+  if ComboBoxVclStyles.Items.Count>0 then
   ComboBoxVclStyles.ItemIndex:=0;
 
   OriginalBitMap := TBitmap.Create;
@@ -482,9 +540,10 @@ procedure TFrmHueSat.Hue(Value: integer);
 var
   Bitmap: TBitmap;
 begin
+  if StyleName='' then exit;
+
   Bitmap := TBitmap.Create;
   try
-
     if CheckBoxSepia.Checked then
      Bitmap.Assign(ModifiedBitMap)//Bitmap.Assign(SepiaBitMap)
     else
@@ -508,6 +567,8 @@ var
   Bitmap: TBitmap;
   BackUp: TBitmap;
 begin
+  if StyleName='' then exit;
+
   Bitmap := TBitmap.Create;
   BackUp := TBitmap.Create;
   try
@@ -531,6 +592,8 @@ var
   Bitmap: TBitmap;
   BackUp: TBitmap;
 begin
+  if StyleName='' then exit;
+
   Bitmap := TBitmap.Create;
   BackUp := TBitmap.Create;
   try
@@ -552,6 +615,7 @@ var
   ctx     : TRttiContext;
   RttiInstanceType : TRttiInstanceType;
 begin
+  if StyleName='' then exit;
   Bitmap := TBitmap.Create;
   try
     Bitmap.Assign(OriginalBitMap);
@@ -583,6 +647,7 @@ procedure TFrmHueSat.SetRGB(DR, DG, DB: integer);
 var
   Bitmap: TBitmap;
 begin
+  if StyleName='' then exit;
   Bitmap := TBitmap.Create;
   try
     Bitmap.Assign(OriginalBitMap);
@@ -708,10 +773,13 @@ end;
 
 procedure RegisterVCLStyles;
 var
-  Style   : string;
+  Style     : string;
+  StylesDir : string;
 begin
-  for Style in TDirectory.GetFiles(IncludeTrailingPathDelimiter(ExpandFileName(ExtractFilePath(ParamStr(0))  + '\..\Styles')), '*.vsf') do
-    RegisterVCLStyle(Style);
+  StylesDir:=ExpandFileName(ExtractFilePath(ParamStr(0))  + '\..\Styles');
+  if DirectoryExists(StylesDir) then
+    for Style in TDirectory.GetFiles(IncludeTrailingPathDelimiter(StylesDir), '*.vsf') do
+      RegisterVCLStyle(Style);
 end;
 
 
