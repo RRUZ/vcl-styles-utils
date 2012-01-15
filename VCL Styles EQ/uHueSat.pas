@@ -136,6 +136,7 @@ type
     procedure LoadStyle;
     procedure SetPageActive(Index:integer);
     function GetFilters  : TObjectList<TBitmap32Filter>;
+    procedure SetBlend;
   end;
 
 var
@@ -286,28 +287,8 @@ begin
 end;
 
 procedure TFrmHueSat.ButtonApplyBlendClick(Sender: TObject);
-var
-  Bitmap  : TBitmap;
-  LFilter : TValue;
-  ctx     : TRttiContext;
-  RttiInstanceType : TRttiInstanceType;
 begin
-  Bitmap := TBitmap.Create;
-  try
-    Bitmap.Assign(OriginalBitMap);
-
-    ctx := TRttiContext.Create;
-    RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
-    LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
-    RttiInstanceType.GetMethod('Apply').Invoke(LFilter,[Bitmap]);
-    ctx.Free;
-    RttiInstanceType.GetMethod('Free').Invoke(LFilter,[]);
-
-    ImageVCLStyle.Picture.Assign(Bitmap);
-    ModifiedBitMap.Assign(Bitmap);
-  finally
-    Bitmap.Free;
-  end;
+ SetBlend();
 end;
 
 procedure TFrmHueSat.Button6Click(Sender: TObject);
@@ -564,6 +545,31 @@ begin
 end;
 
 
+procedure TFrmHueSat.SetBlend;
+var
+  Bitmap  : TBitmap;
+  LFilter : TValue;
+  ctx     : TRttiContext;
+  RttiInstanceType : TRttiInstanceType;
+begin
+  Bitmap := TBitmap.Create;
+  try
+    Bitmap.Assign(OriginalBitMap);
+
+    ctx := TRttiContext.Create;
+    RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
+    LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
+    RttiInstanceType.GetMethod('Apply').Invoke(LFilter,[Bitmap]);
+    ctx.Free;
+    RttiInstanceType.GetMethod('Free').Invoke(LFilter,[]);
+
+    ImageVCLStyle.Picture.Assign(Bitmap);
+    ModifiedBitMap.Assign(Bitmap);
+  finally
+    Bitmap.Free;
+  end;
+end;
+
 procedure TFrmHueSat.SetPageActive(Index: integer);
 var
  i : Integer;
@@ -620,6 +626,25 @@ procedure TFrmHueSat.RadioButtonHSLClick(Sender: TObject);
 begin
   SetPageActive(TRadioButton(Sender).Tag);
   LoadStyle;
+
+  if RadioButtonBlend.Checked then
+   SetBlend()
+   {
+  else
+  if RadioButtonHSL.Checked then
+  begin
+    Hue(Trunc(UpDownHue.Position));
+
+    if UpDownSat.Position <> 0 then
+      Saturation(Trunc(UpDownSat.Position));
+
+    if UpDownLight.Position <> 0 then
+      Lightness(Trunc(UpDownLight.Position));
+  end
+  else
+  if RadioButtonRGB.Checked then
+   SetRGB(Trunc(UpDownRed.Position),Trunc(UpDownGreen.Position),Trunc(UpDownBlue.Position));
+      }
 end;
 
 procedure TFrmHueSat.TrackBarRedChange(Sender: TObject);
