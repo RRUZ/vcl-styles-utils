@@ -18,9 +18,6 @@
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
-
-
-
 unit uHueSat;
 
 interface
@@ -123,10 +120,9 @@ type
     procedure RadioButtonHSLClick(Sender: TObject);
     procedure Button6Click(Sender: TObject);
     procedure ComboBoxBlendChange(Sender: TObject);
+    procedure ColorBoxblendGetColors(Sender: TCustomColorBox; Items: TStrings);
   private
     OriginalBitMap : TBitmap;
-    SepiaBitMap    : TBitmap;
-    ModifiedBitMap : TBitmap;
     FStyleName     : string;
     procedure DrawSeletedVCLStyle;
     function GetStyleName: string;
@@ -151,6 +147,7 @@ uses
   ShellAPI,
   IOUtils,
   StrUtils,
+  Vcl.GraphUtil,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
   Vcl.Themes,
@@ -188,7 +185,6 @@ begin
    LoadStyle;
   end;
 
-
   DragFinish( msg.WParam );
 end;
 
@@ -218,30 +214,29 @@ begin
 
       If UpDownHue.Position<>0 then
       begin
-        if Trunc(UpDownHue.Position) >= 0 then
-           Result.Add(TBitmap32HueFilter.Create(Trunc(UpDownHue.Position)))
+        if UpDownHue.Position >= 0 then
+           Result.Add(TBitmap32HueFilter.Create(UpDownHue.Position))
         else
-            Result.Add(TBitmap32HueFilter.Create(360-Abs(Trunc(UpDownHue.Position))));
+            Result.Add(TBitmap32HueFilter.Create(360-Abs(UpDownHue.Position)));
       end;
 
       If UpDownSat.Position<>0 then
-        Result.Add(TBitmap32SaturationFilter.Create((255 - ((Trunc(UpDownSat.Position) * 255) div MaxSat))));
+        Result.Add(TBitmap32SaturationFilter.Create((255 - ((UpDownSat.Position) * 255) div MaxSat)));
 
       If UpDownLight.Position<>0 then
-        Result.Add(TBitmap32LightnessFilter.Create(Trunc(UpDownLight.Position)));
+        Result.Add(TBitmap32LightnessFilter.Create(UpDownLight.Position));
     end;
-
 
     if RadioButtonRGB.Checked then
     begin
       If UpDownRed.Position>0 then
-        Result.Add(TBitmap32RedFilter.Create(Trunc(UpDownRed.Position)));
+        Result.Add(TBitmap32RedFilter.Create(UpDownRed.Position));
 
       If UpDownGreen.Position>0 then
-        Result.Add(TBitmap32GreenFilter.Create(Trunc(UpDownGreen.Position)));
+        Result.Add(TBitmap32GreenFilter.Create(UpDownGreen.Position));
 
       If UpDownBlue.Position>0 then
-        Result.Add(TBitmap32BlueFilter.Create(Trunc(UpDownBlue.Position)));
+        Result.Add(TBitmap32BlueFilter.Create(UpDownBlue.Position));
     end;
 
     if RadioButtonBlend.Checked then
@@ -286,39 +281,70 @@ Var
   LFilters : TObjectList<TBitmap32Filter>;
   VclUtils : TVclStylesUtils;
   Frm      : TFrmVCLStyleInfoDialog;
+  NewName  : string;
+  LBitmap  : TBitmap;
 begin
- if StyleName='' then exit;
+   if StyleName='' then exit;
+   VclUtils:=TVclStylesUtils.Create(StyleName, True);
+   try
 
- if SaveDialog1.Execute then
- begin
-    try
-      LFilters:=GetFilters;
-      VclUtils:=TVclStylesUtils.Create(StyleName);
-      try
-        Frm:=TFrmVCLStyleInfoDialog.Create(Self);
+     NewName := VclUtils.StyleExt.StyleInfo.Name;
+     if RadioButtonHSL.Checked then
+      NewName :=Format('%s H%d.S%d.L%d',[NewName,TrackBarHue.Position,TrackBarSaturation.Position, TrackBarLightness.Position])
+     else
+     if RadioButtonRGB.Checked then
+      NewName :=Format('%s R%d.G%d.B%d',[NewName,TrackBarRed.Position,TrackBarGreen.Position, TrackBarBlue.Position])
+     else
+     if RadioButtonBlend.Checked then
+      NewName :=Format('%s Blend %s %s',[NewName,ComboBoxBlend.Text,ColorToString(ColorBoxblend.Selected)]);
+
+     SaveDialog1.FileName:=NewName+'.vsf';
+
+     if SaveDialog1.Execute then
+     begin
         try
-         Frm.StyleInfo:=VclUtils.StyleExt.StyleInfo;
-         if Frm.Execute then
-          VclUtils.StyleExt.StyleInfo:=Frm.StyleInfo;
-        finally
-         Frm.Free;
+          LFilters:=GetFilters;
+          try
+            Frm:=TFrmVCLStyleInfoDialog.Create(Self);
+            try
+             Frm.StyleInfo:=VclUtils.StyleExt.StyleInfo;
+             Frm.EditName.Text:=NewName;
+             if Frm.Execute then
+              VclUtils.StyleExt.StyleInfo:=Frm.StyleInfo;
+            finally
+             Frm.Free;
+            end;
+
+            VclUtils.SetFilters(LFilters);
+            VclUtils.SaveToFile(SaveDialog1.FileName);
+
+            LBitmap:=TBitmap.Create;
+            try
+               LBitmap.PixelFormat:=pf32bit;
+               LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
+               LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
+               DrawSampleWindow(VclUtils.StyleExt, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName, Icon.Handle);
+               LBitmap.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.bmp'));
+            finally
+              LBitmap.Free;
+            end;
+
+
+            MessageDlg('Vcl Style Saved', mtInformation, [mbOK], 0);
+          finally
+            LFilters.Free;
+          end;
+
+        except
+          on E: Exception do
+            ShowMessage(Format('Error saving vcl style - Message : %s : Trace %s',
+              [E.Message, E.StackTrace]));
         end;
+     end;
+   finally
+      VclUtils.Free;
+   end;
 
-        VclUtils.SetFilters(LFilters);
-        VclUtils.SaveToFile(SaveDialog1.FileName);
-        ImageVCLStyle.Picture.Bitmap.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.bmp'));
-        MessageDlg('Vcl Style Saved', mtInformation, [mbOK], 0);
-      finally
-        LFilters.Free;
-        VclUtils.Free;
-      end;
-
-    except
-      on E: Exception do
-        ShowMessage(Format('Error saving vcl style - Message : %s : Trace %s',
-          [E.Message, E.StackTrace]));
-    end;
- end;
 end;
 
 
@@ -372,6 +398,15 @@ end;
 procedure TFrmHueSat.CheckBoxSepiaClick(Sender: TObject);
 begin
   BuildPreview;
+end;
+
+procedure TFrmHueSat.ColorBoxblendGetColors(Sender: TCustomColorBox;
+  Items: TStrings);
+Var
+ Item : TIdentMapEntry;
+begin
+  for Item in WebNamedColors do
+   Items.AddObject(Item.Name,TObject(Item.Value));
 end;
 
 procedure TFrmHueSat.ComboBoxBlendChange(Sender: TObject);
@@ -487,10 +522,7 @@ begin
   ComboBoxVclStyles.ItemIndex:=0;
 
   OriginalBitMap := TBitmap.Create;
-  ModifiedBitMap := TBitmap.Create;
-  SepiaBitMap    := TBitmap.Create;
   LoadStyle;
-
 
   With ComboBoxBlend.Items do
   begin
@@ -512,8 +544,6 @@ end;
 procedure TFrmHueSat.FormDestroy(Sender: TObject);
 begin
   OriginalBitMap.Free;
-  ModifiedBitMap.Free;
-  SepiaBitMap.Free;
 end;
 
 function TFrmHueSat.GetStyleName: string;
@@ -578,7 +608,6 @@ begin
   DrawSeletedVCLStyle;
 
   OriginalBitMap.Assign(ImageVCLStyle.Picture.Bitmap);
-  ModifiedBitMap.Assign(OriginalBitMap);
 
   UpDownHue.Position   := DefHue;
   TrackBarHue.Position := DefHue;
@@ -602,7 +631,8 @@ end;
 procedure TFrmHueSat.RadioButtonHSLClick(Sender: TObject);
 begin
   SetPageActive(TRadioButton(Sender).Tag);
-  LoadStyle;
+  //LoadStyle;
+  DrawSeletedVCLStyle;
   BuildPreview;
 end;
 
