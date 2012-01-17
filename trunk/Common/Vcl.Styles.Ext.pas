@@ -82,7 +82,7 @@ procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
 procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
 function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
 function  GetRegisteredStylesHooks(ControlClass: TClass) : TStyleHookList;
-procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string);
+procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string;hIcon:HICON=0);
 
 
 {$IFDEF USE_VCL_STYLESAPI}
@@ -431,7 +431,7 @@ end;
 
 {$ENDIF}
 
-procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string);
+procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string;hIcon:HICON=0);
 var
   LDetails        : TThemedElementDetails;
   CaptionDetails  : TThemedElementDetails;
@@ -502,8 +502,12 @@ begin
   IconRect := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
   RectVCenter(IconRect, ButtonRect);
   if ButtonRect.Width > 0 then
+  {
    if Assigned(Application.MainForm) then
     DrawIconEx(CaptionBitmap.Canvas.Handle, IconRect.Left, IconRect.Top, Application.MainForm.Icon.Handle, 0, 0, 0, 0, DI_NORMAL);
+  }
+   if hIcon<>0 then
+    DrawIconEx(CaptionBitmap.Canvas.Handle, IconRect.Left, IconRect.Top, hIcon, 0, 0, 0, 0, DI_NORMAL);
 
   Inc(TextRect.Left, ButtonRect.Width + 5);
 

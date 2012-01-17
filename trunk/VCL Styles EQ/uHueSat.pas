@@ -94,6 +94,7 @@ type
     Label8: TLabel;
     Label9: TLabel;
     ColorDialog1: TColorDialog;
+    Label10: TLabel;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -121,24 +122,21 @@ type
     procedure ButtonApplyBlendClick(Sender: TObject);
     procedure RadioButtonHSLClick(Sender: TObject);
     procedure Button6Click(Sender: TObject);
+    procedure ComboBoxBlendChange(Sender: TObject);
   private
     OriginalBitMap : TBitmap;
     SepiaBitMap    : TBitmap;
     ModifiedBitMap : TBitmap;
     FStyleName     : string;
-    procedure SetRGB(DR, DG, DB: integer);
-    procedure Saturation(Value: integer);
-    procedure Lightness(Value: integer);
-    procedure Hue(Value: integer);
     procedure DrawSeletedVCLStyle;
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
     procedure LoadStyle;
     procedure SetPageActive(Index:integer);
     function GetFilters  : TObjectList<TBitmap32Filter>;
-    procedure SetBlend;
     procedure AcceptFiles(var msg : TMessage); message WM_DROPFILES;
     procedure FillListStyles;
+    procedure BuildPreview;
   end;
 
 var
@@ -156,7 +154,8 @@ uses
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
   Vcl.Themes,
-  Vcl.Styles, uVCLStylesInfo;
+  Vcl.Styles,
+  uVCLStylesInfo;
 
 
 procedure TFrmHueSat.AcceptFiles(var msg: TMessage);
@@ -218,10 +217,15 @@ begin
         Result.Add(TBitmap32SepiaFilter.Create(20));
 
       If UpDownHue.Position<>0 then
-        Result.Add(TBitmap32HueFilter.Create(Trunc(UpDownHue.Position)));
+      begin
+        if Trunc(UpDownHue.Position) >= 0 then
+           Result.Add(TBitmap32HueFilter.Create(Trunc(UpDownHue.Position)))
+        else
+            Result.Add(TBitmap32HueFilter.Create(360-Abs(Trunc(UpDownHue.Position))));
+      end;
 
       If UpDownSat.Position<>0 then
-        Result.Add(TBitmap32SaturationFilter.Create(Trunc(UpDownSat.Position)));
+        Result.Add(TBitmap32SaturationFilter.Create((255 - ((Trunc(UpDownSat.Position) * 255) div MaxSat))));
 
       If UpDownLight.Position<>0 then
         Result.Add(TBitmap32LightnessFilter.Create(Trunc(UpDownLight.Position)));
@@ -317,6 +321,7 @@ begin
  end;
 end;
 
+
 procedure TFrmHueSat.Button2Click(Sender: TObject);
 begin
   UpDownRed.Position   := 0;
@@ -337,7 +342,7 @@ end;
 
 procedure TFrmHueSat.ButtonApplyBlendClick(Sender: TObject);
 begin
-  SetBlend();
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.Button6Click(Sender: TObject);
@@ -365,39 +370,19 @@ begin
 end;
 
 procedure TFrmHueSat.CheckBoxSepiaClick(Sender: TObject);
-var
-  Bitmap: TBitmap;
 begin
-  if StyleName='' then exit;
+  BuildPreview;
+end;
 
-  Bitmap := TBitmap.Create;
-  try
-    Bitmap.Assign(OriginalBitMap);
-
-    if CheckBoxSepia.Checked then
-     _Sepia32(Bitmap,20);
-
-    ImageVCLStyle.Picture.Assign(Bitmap);
-    //SepiaBitMap.Assign(Bitmap);
-    ModifiedBitMap.Assign(Bitmap);
-  finally
-    Bitmap.Free;
-  end;
-
-  if UpDownHue.Position<>0 then
-    Hue(Trunc(UpDownHue.Position));
-
-  if UpDownSat.Position <> 0 then
-    Saturation(Trunc(UpDownSat.Position));
-
-  if UpDownLight.Position <> 0 then
-    Lightness(Trunc(UpDownLight.Position));
-
+procedure TFrmHueSat.ComboBoxBlendChange(Sender: TObject);
+begin
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.ComboBoxVclStylesChange(Sender: TObject);
 begin
   LoadStyle;
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.DrawSeletedVCLStyle;
@@ -536,103 +521,46 @@ begin
   Result := ComboBoxVclStyles.Text;
 end;
 
-procedure TFrmHueSat.Hue(Value: integer);
+procedure TFrmHueSat.BuildPreview;
 var
-  Bitmap: TBitmap;
+  LFilters : TObjectList<TBitmap32Filter>;
+  //VclUtils : TVclStylesUtils;
+  LBitmap  : TBitmap;
+  Filter   : TBitmap32Filter;
 begin
   if StyleName='' then exit;
-
-  Bitmap := TBitmap.Create;
+  LFilters:=GetFilters;
+  //VclUtils:=TVclStylesUtils.Create(StyleName, True);
+  LBitmap:=TBitmap.Create;
   try
-    if CheckBoxSepia.Checked then
-     Bitmap.Assign(ModifiedBitMap)//Bitmap.Assign(SepiaBitMap)
-    else
-     Bitmap.Assign(OriginalBitMap);
+    LBitmap.Assign(OriginalBitMap);
+    for Filter in LFilters do
+     Filter.Apply(LBitmap);
 
-    if Value >= 0 then
-      _Hue32(Bitmap, Value)
-    else
-    if Value < 0 then
-      _Hue32(Bitmap, 360 - Abs(Value));
+    ImageVCLStyle.Picture.Assign(LBitmap);
 
-    ImageVCLStyle.Picture.Assign(Bitmap);
-    ModifiedBitMap.Assign(Bitmap);
+    {
+    VclUtils.SetFilters(LFilters);
+    VclUtils.ApplyChanges;
+      LBitmap:=TBitmap.Create;
+      try
+         ImageVCLStyle.Picture:=nil;
+         LBitmap.PixelFormat:=pf32bit;
+         LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
+         LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
+         DrawSampleWindow(VclUtils.StyleExt, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName, Icon.Handle);
+         ImageVCLStyle.Picture.Assign(LBitmap);
+      finally
+        LBitmap.Free;
+      end;
+     }
   finally
-    Bitmap.Free;
+    LFilters.Free;
+    LBitmap.Free;
+    //VclUtils.Free;
   end;
 end;
 
-procedure TFrmHueSat.Lightness(Value: integer);
-var
-  Bitmap: TBitmap;
-  BackUp: TBitmap;
-begin
-  if StyleName='' then exit;
-
-  Bitmap := TBitmap.Create;
-  BackUp := TBitmap.Create;
-  try
-    Bitmap.Assign(ModifiedBitMap);
-
-    if Value >= 0 then
-      _Lightness32(Bitmap, Value)
-    else
-      _Darkness32(Bitmap, Abs(Value));
-
-    BackUp.Assign(OriginalBitMap);
-    ImageVCLStyle.Picture.Assign(Bitmap);
-  finally
-    Bitmap.Free;
-    BackUp.Free;
-  end;
-end;
-
-procedure TFrmHueSat.Saturation(Value: integer);
-var
-  Bitmap: TBitmap;
-  BackUp: TBitmap;
-begin
-  if StyleName='' then exit;
-
-  Bitmap := TBitmap.Create;
-  BackUp := TBitmap.Create;
-  try
-    Bitmap.Assign(ModifiedBitMap);
-    _Saturation32(Bitmap, (255 - ((Value * 255) div MaxSat)));
-    BackUp.Assign(OriginalBitMap);
-    ImageVCLStyle.Picture.Assign(Bitmap);
-  finally
-    Bitmap.Free;
-    BackUp.Free;
-  end;
-end;
-
-
-procedure TFrmHueSat.SetBlend;
-var
-  Bitmap  : TBitmap;
-  LFilter : TValue;
-  ctx     : TRttiContext;
-  RttiInstanceType : TRttiInstanceType;
-begin
-  if StyleName='' then exit;
-  Bitmap := TBitmap.Create;
-  try
-    Bitmap.Assign(OriginalBitMap);
-
-    ctx := TRttiContext.Create;
-    RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
-    LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
-    RttiInstanceType.GetMethod('Apply').Invoke(LFilter,[Bitmap]);
-    ctx.Free;
-    RttiInstanceType.GetMethod('Free').Invoke(LFilter,[]);
-
-    ImageVCLStyle.Picture.Assign(Bitmap);
-    ModifiedBitMap.Assign(Bitmap);
-  finally
-    Bitmap.Free;
-  end;
-end;
 
 procedure TFrmHueSat.SetPageActive(Index: integer);
 var
@@ -641,22 +569,6 @@ begin
   PageControl1.ActivePageIndex:=Index;
   for i := 0 to PageControl1.PageCount-1 do
    PageControl1.Pages[i].TabVisible:=i=Index;
-end;
-
-procedure TFrmHueSat.SetRGB(DR, DG, DB: integer);
-var
-  Bitmap: TBitmap;
-begin
-  if StyleName='' then exit;
-  Bitmap := TBitmap.Create;
-  try
-    Bitmap.Assign(OriginalBitMap);
-    _SetRGB32(Bitmap, DR, DG, DB);
-    ImageVCLStyle.Picture.Assign(Bitmap);
-    ModifiedBitMap.Assign(Bitmap);
-  finally
-    Bitmap.Free;
-  end;
 end;
 
 
@@ -691,25 +603,7 @@ procedure TFrmHueSat.RadioButtonHSLClick(Sender: TObject);
 begin
   SetPageActive(TRadioButton(Sender).Tag);
   LoadStyle;
-
-  if RadioButtonBlend.Checked then
-   SetBlend()
-   {
-  else
-  if RadioButtonHSL.Checked then
-  begin
-    Hue(Trunc(UpDownHue.Position));
-
-    if UpDownSat.Position <> 0 then
-      Saturation(Trunc(UpDownSat.Position));
-
-    if UpDownLight.Position <> 0 then
-      Lightness(Trunc(UpDownLight.Position));
-  end
-  else
-  if RadioButtonRGB.Checked then
-   SetRGB(Trunc(UpDownRed.Position),Trunc(UpDownGreen.Position),Trunc(UpDownBlue.Position));
-      }
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.TrackBarRedChange(Sender: TObject);
@@ -717,31 +611,25 @@ begin
   UpDownRed.Position   := TrackBarRed.Position;
   UpDownGreen.Position := TrackBarGreen.Position;
   UpDownBlue.Position  := TrackBarBlue.Position;
-  SetRGB(Trunc(UpDownRed.Position),Trunc(UpDownGreen.Position),Trunc(UpDownBlue.Position));
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.TrackBarHueChange(Sender: TObject);
 begin
   UpDownHue.Position := TrackBarHue.Position;
-  Hue(Trunc(UpDownHue.Position));
-
-  if UpDownSat.Position <> 0 then
-    Saturation(Trunc(UpDownSat.Position));
-
-  if UpDownLight.Position <> 0 then
-    Lightness(Trunc(UpDownLight.Position));
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.TrackBarLightnessChange(Sender: TObject);
 begin
   UpDownLight.Position := TrackBarLightness.Position;
-  Lightness(Trunc(UpDownLight.Position));
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.TrackBarSaturationChange(Sender: TObject);
 begin
   UpDownSat.Position := TrackBarSaturation.Position;
-  Saturation(Trunc(UpDownSat.Position));
+  BuildPreview;
 end;
 
 procedure TFrmHueSat.UpDownHueChanging(Sender: TObject;

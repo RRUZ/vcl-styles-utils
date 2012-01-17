@@ -24,6 +24,7 @@ unit Vcl.Styles.Utils;
 interface
 uses
   uHSLUtils,
+  System.Classes,
   Vcl.Styles,
   Vcl.Themes,
   Vcl.Styles.Ext,
@@ -32,15 +33,17 @@ uses
 type
   TVclStylesUtils = class
   private
+     FClone     : Boolean;
+     FStream    : TStream;
      FStyleExt  : TCustomStyleExt;
-     FSourceInfo: TSourceInfo;
+     //FSourceInfo: TSourceInfo;
   public
      procedure SetFilters(Filters : TObjectList<TBitmap32Filter>);
      procedure ApplyChanges;
      procedure SaveToFile(const FileName: string);
-     property  SourceInfo: TSourceInfo read FSourceInfo;
+     //property  SourceInfo: TSourceInfo read FSourceInfo;
      property  StyleExt  :  TCustomStyleExt read FStyleExt;
-     constructor Create(const  StyleName : string);
+     constructor Create(const  StyleName : string;Clone:Boolean=False);
      destructor Destroy;override;
   end;
 
@@ -50,19 +53,29 @@ implementation
 uses
   System.IOUtils,
   System.SysUtils,
-  Vcl.Graphics,
-  System.Classes;
+  Vcl.Graphics;
 
 
 { TVclStylesUtils }
 
-constructor TVclStylesUtils.Create(const  StyleName : string);
+constructor TVclStylesUtils.Create(const  StyleName : string;Clone:Boolean=False);
 begin
+  FClone   :=Clone;
   FStyleExt:=nil;
+  FStream  :=nil;
   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
   begin
-   FSourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
-   FStyleExt:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
+   //FSourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
+   if FClone then
+   begin
+     FStream:=TMemoryStream.Create;
+     FStream.CopyFrom(TStream(TStyleManager.StyleSourceInfo[StyleName].Data),TStream(TStyleManager.StyleSourceInfo[StyleName].Data).Size);
+     TStream(TStyleManager.StyleSourceInfo[StyleName].Data).Position:=0;
+     FStream.Position:=0;
+   end
+   else
+   FStream:=TStream(TStyleManager.StyleSourceInfo[StyleName].Data);
+   FStyleExt:=TCustomStyleExt.Create(FStream);
   end;
 end;
 
@@ -71,6 +84,8 @@ destructor TVclStylesUtils.Destroy;
 begin
   if Assigned(StyleExt) then
     StyleExt.Free;
+  if FClone and Assigned(FStream) then
+    FStream.Free;
   inherited;
 end;
 
@@ -78,9 +93,9 @@ procedure TVclStylesUtils.ApplyChanges;
 begin
   if Assigned(StyleExt) then
   begin
-    TStream(FSourceInfo.Data).Size:=0;
-    StyleExt.CopyToStream(TStream(SourceInfo.Data));
-    TStream(SourceInfo.Data).Seek(0,soFromBeginning);
+    FStream.Size:=0;
+    StyleExt.CopyToStream(FStream);
+    FStream.Seek(0,soFromBeginning);
   end;
 end;
 
