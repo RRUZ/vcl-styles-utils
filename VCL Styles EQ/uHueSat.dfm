@@ -4,7 +4,7 @@ object FrmHueSat: TFrmHueSat
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
-  ClientHeight = 572
+  ClientHeight = 582
   ClientWidth = 382
   Color = clBtnFace
   TransparentColorValue = clFuchsia
@@ -2114,6 +2114,10 @@ object FrmHueSat: TFrmHueSat
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -2295,6 +2299,10 @@ object FrmHueSat: TFrmHueSat
     object TabSheet3: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label8: TLabel
         Left = 3
         Top = 52
@@ -2324,9 +2332,10 @@ object FrmHueSat: TFrmHueSat
         Width = 145
         Height = 22
         Selected = clRed
-        Style = [cbStandardColors, cbExtendedColors, cbSystemColors, cbCustomColor, cbPrettyNames, cbCustomColors]
+        Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
         TabOrder = 1
         OnChange = ComboBoxBlendChange
+        OnGetColors = ColorBoxblendGetColors
       end
       object Button6: TButton
         Left = 154
@@ -2384,7 +2393,7 @@ object FrmHueSat: TFrmHueSat
     Left = 216
     Top = 136
     Bitmap = {
-      494C010101000800540010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010008005C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
