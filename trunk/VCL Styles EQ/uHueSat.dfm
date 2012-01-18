@@ -4,7 +4,7 @@ object FrmHueSat: TFrmHueSat
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
-  ClientHeight = 582
+  ClientHeight = 572
   ClientWidth = 382
   Color = clBtnFace
   TransparentColorValue = clFuchsia
@@ -1880,9 +1880,22 @@ object FrmHueSat: TFrmHueSat
     Height = 13
     Caption = 'Preview'
   end
+  object LabelDrop: TLabel
+    Left = 51
+    Top = 144
+    Width = 251
+    Height = 23
+    Caption = 'Drop a VCL Style File Here'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -19
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
   object BtnApply: TButton
-    Left = 8
-    Top = 539
+    Left = 11
+    Top = 519
     Width = 225
     Height = 25
     Caption = 'Apply changes to the current style'
@@ -1890,8 +1903,8 @@ object FrmHueSat: TFrmHueSat
     OnClick = BtnApplyClick
   end
   object BtnSave: TButton
-    Left = 239
-    Top = 539
+    Left = 242
+    Top = 519
     Width = 96
     Height = 25
     Caption = 'Save'
@@ -1916,24 +1929,16 @@ object FrmHueSat: TFrmHueSat
     Caption = 'Apply Style'
     TabOrder = 3
   end
-  object CheckBoxSepia: TCheckBox
-    Left = 8
-    Top = 516
-    Width = 73
-    Height = 17
-    Caption = 'Sepia'
-    TabOrder = 4
-    OnClick = CheckBoxSepiaClick
-  end
   object PageControl1: TPageControl
     Left = 8
     Top = 291
     Width = 361
-    Height = 219
+    Height = 222
     ActivePage = TabSheet1
-    TabOrder = 5
+    TabOrder = 4
     object TabSheet1: TTabSheet
       Caption = 'HSL'
+      ExplicitHeight = 201
       object Label1: TLabel
         Left = 11
         Top = 14
@@ -2110,14 +2115,20 @@ object FrmHueSat: TFrmHueSat
         TabOrder = 11
         OnClick = ButtonLightnessClick
       end
+      object CheckBoxSepia: TCheckBox
+        Left = 11
+        Top = 173
+        Width = 73
+        Height = 17
+        Caption = 'Sepia'
+        TabOrder = 12
+        OnClick = CheckBoxSepiaClick
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitHeight = 191
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -2264,7 +2275,7 @@ object FrmHueSat: TFrmHueSat
       end
       object EditBlue: TEdit
         Left = 258
-        Top = 139
+        Top = 137
         Width = 32
         Height = 21
         NumbersOnly = True
@@ -2274,7 +2285,7 @@ object FrmHueSat: TFrmHueSat
       end
       object UpDownBlue: TUpDown
         Left = 290
-        Top = 139
+        Top = 137
         Width = 16
         Height = 21
         Associate = EditBlue
@@ -2284,7 +2295,7 @@ object FrmHueSat: TFrmHueSat
       end
       object Button4: TButton
         Left = 312
-        Top = 143
+        Top = 137
         Width = 26
         Height = 25
         BiDiMode = bdRightToLeftNoAlign
@@ -2299,10 +2310,7 @@ object FrmHueSat: TFrmHueSat
     object TabSheet3: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitHeight = 191
       object Label8: TLabel
         Left = 3
         Top = 52
@@ -2364,7 +2372,7 @@ object FrmHueSat: TFrmHueSat
     Height = 17
     Caption = 'HSL'
     Checked = True
-    TabOrder = 6
+    TabOrder = 5
     TabStop = True
     OnClick = RadioButtonHSLClick
   end
@@ -2375,7 +2383,7 @@ object FrmHueSat: TFrmHueSat
     Width = 58
     Height = 17
     Caption = 'RGB'
-    TabOrder = 7
+    TabOrder = 6
     OnClick = RadioButtonHSLClick
   end
   object RadioButtonBlend: TRadioButton
@@ -2385,15 +2393,26 @@ object FrmHueSat: TFrmHueSat
     Width = 55
     Height = 17
     Caption = 'Blend'
-    TabOrder = 8
+    TabOrder = 7
     OnClick = RadioButtonHSLClick
+  end
+  object LinkLabel1: TLinkLabel
+    Left = 8
+    Top = 550
+    Width = 73
+    Height = 17
+    Caption = 
+      '<a href="http://code.google.com/p/vcl-styles-utils"> vcl styles ' +
+      'utils</a>'
+    TabOrder = 8
+    OnLinkClick = LinkLabel1LinkClick
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 216
     Top = 136
     Bitmap = {
-      494C0101010008005C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800680010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

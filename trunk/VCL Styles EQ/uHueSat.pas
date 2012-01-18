@@ -39,7 +39,6 @@ type
     Button1: TButton;
     ActionManager1: TActionManager;
     ActionApplyStyle: TAction;
-    CheckBoxSepia: TCheckBox;
     SaveDialog1: TSaveDialog;
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
@@ -92,6 +91,9 @@ type
     Label9: TLabel;
     ColorDialog1: TColorDialog;
     Label10: TLabel;
+    LabelDrop: TLabel;
+    CheckBoxSepia: TCheckBox;
+    LinkLabel1: TLinkLabel;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -121,6 +123,8 @@ type
     procedure Button6Click(Sender: TObject);
     procedure ComboBoxBlendChange(Sender: TObject);
     procedure ColorBoxblendGetColors(Sender: TCustomColorBox; Items: TStrings);
+    procedure LinkLabel1LinkClick(Sender: TObject; const Link: string;
+      LinkType: TSysLinkType);
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
@@ -130,7 +134,7 @@ type
     procedure LoadStyle;
     procedure SetPageActive(Index:integer);
     function GetFilters  : TObjectList<TBitmap32Filter>;
-    procedure AcceptFiles(var msg : TMessage); message WM_DROPFILES;
+    procedure DropFiles(var msg : TMessage); message WM_DROPFILES;
     procedure FillListStyles;
     procedure BuildPreview;
   end;
@@ -143,10 +147,12 @@ implementation
 {$R *.dfm}
 
 uses
-  Rtti,
-  ShellAPI,
-  IOUtils,
-  StrUtils,
+  Vcl.Imaging.pngimage,
+  PngFunctions,
+  System.Rtti,
+  WinAPi.ShellAPI,
+  System.IOUtils,
+  System.StrUtils,
   Vcl.GraphUtil,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
@@ -155,7 +161,7 @@ uses
   uVCLStylesInfo;
 
 
-procedure TFrmHueSat.AcceptFiles(var msg: TMessage);
+procedure TFrmHueSat.DropFiles(var msg: TMessage);
 const
   cb = 255;
 var
@@ -163,9 +169,9 @@ var
   nCount     : integer;
   FileName   : array [0..cb] of Char;
   StyleInfo  : TStyleInfo;
-  StyleName  : string;
+  LStyleName : string;
 begin
-  StyleName :='';
+  LStyleName :='';
   nCount := DragQueryFile( msg.WParam, $FFFFFFFF, FileName, cb);
   for FileIndex := 0 to nCount-1 do
   begin
@@ -174,14 +180,15 @@ begin
     if not MatchText(StyleInfo.Name, TStyleManager.StyleNames) then
     begin
       TStyleManager.LoadFromFile(FileName);
-      StyleName:=StyleInfo.Name;
+      LStyleName:=StyleInfo.Name;
     end;
   end;
 
-  FillListStyles;
-  if StyleName<>'' then
+
+  if LStyleName<>'' then
   begin
-   ComboBoxVclStyles.ItemIndex:=ComboBoxVclStyles.Items.IndexOf(StyleName);
+   FillListStyles;
+   ComboBoxVclStyles.ItemIndex:=ComboBoxVclStyles.Items.IndexOf(LStyleName);
    LoadStyle;
   end;
 
@@ -283,6 +290,7 @@ Var
   Frm      : TFrmVCLStyleInfoDialog;
   NewName  : string;
   LBitmap  : TBitmap;
+  LPng     : TPngImage;
 begin
    if StyleName='' then exit;
    VclUtils:=TVclStylesUtils.Create(StyleName, True);
@@ -290,7 +298,12 @@ begin
 
      NewName := VclUtils.StyleExt.StyleInfo.Name;
      if RadioButtonHSL.Checked then
-      NewName :=Format('%s H%d.S%d.L%d',[NewName,TrackBarHue.Position,TrackBarSaturation.Position, TrackBarLightness.Position])
+     begin
+      if CheckBoxSepia.Checked then
+      NewName :=NewName +' Sepia';
+      if (TrackBarHue.Position<>0) or (TrackBarSaturation.Position<>0)  or (TrackBarLightness.Position<>0) then
+        NewName :=Format('%s H%d.S%d.L%d',[NewName,TrackBarHue.Position,TrackBarSaturation.Position, TrackBarLightness.Position]);
+     end
      else
      if RadioButtonRGB.Checked then
       NewName :=Format('%s R%d.G%d.B%d',[NewName,TrackBarRed.Position,TrackBarGreen.Position, TrackBarBlue.Position])
@@ -323,14 +336,19 @@ begin
                LBitmap.PixelFormat:=pf32bit;
                LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
                LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
-               DrawSampleWindow(VclUtils.StyleExt, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName, Icon.Handle);
-               LBitmap.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.bmp'));
+               DrawSampleWindow(VclUtils.StyleExt, LBitmap.Canvas, ImageVCLStyle.ClientRect, NewName, Icon.Handle);
+               //LBitmap.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.bmp'));
+               ConvertToPNG(LBitmap, LPng);
+               try
+                 LPng.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.png'));
+               finally
+                 LPng.Free;
+               end;
             finally
               LBitmap.Free;
             end;
 
-
-            MessageDlg('Vcl Style Saved', mtInformation, [mbOK], 0);
+            //MessageDlg('Vcl Style Saved', mtInformation, [mbOK], 0);
           finally
             LFilters.Free;
           end;
@@ -429,6 +447,7 @@ begin
    ImageVCLStyle.Picture:=nil;
    if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
    begin
+    LabelDrop.Caption:='';
     LBitmap:=TBitmap.Create;
     try
        LBitmap.PixelFormat:=pf32bit;
@@ -447,6 +466,8 @@ begin
       LBitmap.Free;
     end;
    end;
+
+
 end;
 
 procedure TFrmHueSat.EditHueExit(Sender: TObject);
@@ -526,8 +547,8 @@ begin
 
   With ComboBoxBlend.Items do
   begin
-   AddObject('Burn', TypeInfo(TBitmap32BlendBurn));
    AddObject('Multiply', TypeInfo(TBitmap32BlendMultiply));
+   AddObject('Burn', TypeInfo(TBitmap32BlendBurn));
    AddObject('Additive', TypeInfo(TBitmap32BlendAdditive));
    AddObject('Dodge', TypeInfo(TBitmap32BlendDodge));
    AddObject('Overlay', TypeInfo(TBitmap32BlendOverlay));
@@ -601,6 +622,12 @@ begin
    PageControl1.Pages[i].TabVisible:=i=Index;
 end;
 
+
+procedure TFrmHueSat.LinkLabel1LinkClick(Sender: TObject; const Link: string;
+  LinkType: TSysLinkType);
+begin
+  ShellExecute(0, 'Open', PChar(Link), nil , nil, SW_SHOWNORMAL);
+end;
 
 procedure TFrmHueSat.LoadStyle;
 begin
