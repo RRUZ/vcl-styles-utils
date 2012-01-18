@@ -93,6 +93,8 @@
 				<Form>FrmVCLStyleInfoDialog</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
+			<DCCReference Include="..\Extras\PngFunctions.pas"/>
+			<DCCReference Include="..\Extras\PngImageList.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
