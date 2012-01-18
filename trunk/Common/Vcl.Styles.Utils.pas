@@ -60,6 +60,7 @@ uses
 
 constructor TVclStylesUtils.Create(const  StyleName : string;Clone:Boolean=False);
 begin
+  TStyleManager.StyleNames;//call DiscoverStyleResources
   FClone   :=Clone;
   FStyleExt:=nil;
   FStream  :=nil;

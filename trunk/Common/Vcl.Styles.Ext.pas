@@ -54,7 +54,7 @@ type
    class function GetStyles: TList<TCustomStyleServices>;
    class function _GetStyles: TList<TCustomStyleServices>; static;
   public
-   class function GetRegisteredStyles: TDictionary<string, TSourceInfo>;
+   class function RegisteredStyles: TDictionary<string, TSourceInfo>;
    {$REGION 'Documentation'}
    ///	<summary>Get the TSourceInfo for a Style
    ///	</summary>
@@ -74,7 +74,12 @@ type
    ///	<summary>Force to reload a modified vcl style
    ///	</summary>
    {$ENDREGION}
-   class procedure ReloadStyle(const Name: string);overload;
+   class procedure ReloadStyle(const Name: string);
+   {$REGION 'Documentation'}
+   ///	<summary>remove a vcl style
+   ///	</summary>
+   {$ENDREGION}
+   class procedure RemoveStyle(const Name: string);
    end;
 
 
@@ -100,13 +105,13 @@ type
     ///	<summary>Create a  TCustomStyleExt using a vcl style stored in a file
     ///	</summary>
     {$ENDREGION}
-    constructor Create(const FileName :string);overload;
+    constructor Create(const FileName :string);reintroduce; overload;
     {$REGION 'Documentation'}
     ///	<summary>Create a  TCustomStyleExt using a vcl style stored in a stream
     ///	</summary>
     {$ENDREGION}
-    constructor Create(const Stream:TStream);overload;
-    constructor Create(const Style:TCustomStyle);overload;
+    constructor Create(const Stream:TStream);reintroduce; overload;
+    constructor Create(const Style:TCustomStyle);reintroduce; overload;
     destructor Destroy;override;
     {$REGION 'Documentation'}
     ///	<summary>Replace a internal bitmap of the Style
@@ -184,7 +189,7 @@ end;
 
 
 
-class function TStyleManagerHelper.GetRegisteredStyles: TDictionary<string, TSourceInfo>;
+class function TStyleManagerHelper.RegisteredStyles: TDictionary<string, TSourceInfo>;
 var
   t            : TPair<string, TStyleManager.TSourceInfo>;
   SourceInfo   : TSourceInfo;
@@ -208,7 +213,7 @@ class function TStyleManagerHelper.GetStyleSourceInfo(const StyleName: string): 
 Var
  LRegisteredStyles : TDictionary<string, TSourceInfo>;
 begin
-  LRegisteredStyles:=TStyleManager.GetRegisteredStyles;
+  LRegisteredStyles:=TStyleManager.RegisteredStyles;
   try
     if LRegisteredStyles.ContainsKey(StyleName) then
       Result:=LRegisteredStyles[StyleName];
@@ -246,6 +251,27 @@ begin
   end;
 
  SetStyle(Name);
+end;
+
+class procedure TStyleManagerHelper.RemoveStyle(const Name: string);
+var
+  LStyle: TCustomStyleServices;
+  t     : TPair<string, TStyleManager.TSourceInfo>;
+begin
+ if SameText(Name, ActiveStyle.Name, loUserLocale) then
+   SetStyle(SystemStyle);
+
+ for LStyle in Styles do
+  if SameText(Name, LStyle.Name, loUserLocale) then
+  begin
+    LStyle.Free;
+    Styles.Remove(LStyle);
+  end;
+
+  for t in Self.FRegisteredStyles do
+    if SameText(Name, t.Key, loUserLocale) then
+     Self.FRegisteredStyles.Remove(t.Key);
+
 end;
 
 class function TStyleManagerHelper._GetStyles: TList<TCustomStyleServices>;
