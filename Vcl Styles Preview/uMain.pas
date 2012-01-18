@@ -159,8 +159,6 @@ begin
    end;
 
    Loading:=False;
-
-
 end;
 
 
