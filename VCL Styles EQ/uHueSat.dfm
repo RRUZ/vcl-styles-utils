@@ -4,7 +4,7 @@ object FrmHueSat: TFrmHueSat
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
-  ClientHeight = 599
+  ClientHeight = 622
   ClientWidth = 381
   Color = clBtnFace
   TransparentColorValue = clFuchsia
@@ -2388,8 +2388,6 @@ object FrmHueSat: TFrmHueSat
     TabOrder = 9
     object TabSheet4: TTabSheet
       Caption = 'Preview'
-      ExplicitWidth = 281
-      ExplicitHeight = 165
       object ImageVCLStyle: TImage
         Left = 3
         Top = 3
@@ -2413,60 +2411,129 @@ object FrmHueSat: TFrmHueSat
     object TabSheet5: TTabSheet
       Caption = 'Style Colors'
       ImageIndex = 1
-      ExplicitWidth = 281
-      ExplicitHeight = 165
-      object ListBoxStyleColors: TListBox
+      object ListViewStyleColors: TListView
         Left = 0
-        Top = 0
+        Top = 24
         Width = 353
-        Height = 197
-        Style = lbOwnerDrawFixed
-        Align = alClient
+        Height = 173
+        Align = alCustom
+        Columns = <
+          item
+            Caption = 'Name'
+            Width = 150
+          end
+          item
+            Caption = 'Color'
+            Width = 80
+          end>
+        ReadOnly = True
+        RowSelect = True
+        SmallImages = ImageListStyleColors
         TabOrder = 0
-        OnDrawItem = ListBoxStyleColorsDrawItem
+        ViewStyle = vsReport
+      end
+      object CheckBoxStyleColors: TCheckBox
+        Left = 3
+        Top = 3
+        Width = 97
+        Height = 17
+        Caption = 'Modify'
+        Checked = True
+        State = cbChecked
+        TabOrder = 1
+        OnClick = CheckBoxStyleColorsClick
       end
     end
     object TabSheet6: TTabSheet
       Caption = 'Style Font Colors'
       ImageIndex = 2
-      object ListBoxStyleFontsColors: TListBox
+      object ListViewStyleFontColors: TListView
         Left = 0
-        Top = 0
+        Top = 24
         Width = 353
-        Height = 197
-        Style = lbOwnerDrawFixed
-        Align = alClient
+        Height = 173
+        Align = alCustom
+        Columns = <
+          item
+            Caption = 'Name'
+            Width = 150
+          end
+          item
+            Caption = 'Color'
+            Width = 80
+          end>
+        ReadOnly = True
+        RowSelect = True
+        SmallImages = ImageListStyleFontColors
         TabOrder = 0
-        OnDrawItem = ListBoxStyleColorsDrawItem
-        ExplicitLeft = -1
-        ExplicitTop = 3
+        ViewStyle = vsReport
+      end
+      object CheckBoxStyleFontColors: TCheckBox
+        Left = 3
+        Top = 3
+        Width = 97
+        Height = 17
+        Caption = 'Modify'
+        Checked = True
+        State = cbChecked
+        TabOrder = 1
+        OnClick = CheckBoxStyleColorsClick
       end
     end
     object TabSheet7: TTabSheet
       Caption = 'System Colors'
       ImageIndex = 3
-      ExplicitLeft = 3
-      ExplicitTop = 28
-      object ListBoxStyleSystemColors: TListBox
+      object ListViewSystemColors: TListView
         Left = 0
-        Top = 0
+        Top = 24
         Width = 353
-        Height = 197
-        Style = lbOwnerDrawFixed
-        Align = alClient
+        Height = 173
+        Align = alCustom
+        Columns = <
+          item
+            Caption = 'Name'
+            Width = 150
+          end
+          item
+            Caption = 'Color'
+            Width = 80
+          end>
+        ReadOnly = True
+        RowSelect = True
+        SmallImages = ImageListSystemColors
         TabOrder = 0
-        OnDrawItem = ListBoxStyleColorsDrawItem
-        ExplicitLeft = -1
-        ExplicitTop = 3
+        ViewStyle = vsReport
+      end
+      object CheckBoxSystemColors: TCheckBox
+        Left = 3
+        Top = 3
+        Width = 97
+        Height = 17
+        Caption = 'Modify'
+        Checked = True
+        State = cbChecked
+        TabOrder = 1
+        OnClick = CheckBoxStyleColorsClick
       end
     end
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Top = 603
+    Width = 381
+    Height = 19
+    Panels = <>
+    SimplePanel = True
+    ExplicitLeft = 120
+    ExplicitTop = 600
+    ExplicitWidth = 0
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 288
     Top = 312
     Bitmap = {
-      494C010101000800700010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010008007C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2625,5 +2692,20 @@ object FrmHueSat: TFrmHueSat
     Options = [cdFullOpen, cdShowHelp, cdSolidColor, cdAnyColor]
     Left = 224
     Top = 352
+  end
+  object ImageListStyleColors: TImageList
+    ColorDepth = cd32Bit
+    Left = 152
+    Top = 136
+  end
+  object ImageListStyleFontColors: TImageList
+    ColorDepth = cd32Bit
+    Left = 184
+    Top = 136
+  end
+  object ImageListSystemColors: TImageList
+    ColorDepth = cd32Bit
+    Left = 224
+    Top = 136
   end
 end

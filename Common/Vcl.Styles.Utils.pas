@@ -31,11 +31,15 @@ uses
   Generics.Collections;
 
 type
+  TVCLStylesElement  = (vseBitmaps, vseSysColors, vseStyleColors, vseStyleFontColors);
+  TVCLStylesElements = set of TVCLStylesElement;
+
   TVclStylesUtils = class
   private
      FClone     : Boolean;
      FStream    : TStream;
      FStyleExt  : TCustomStyleExt;
+    FElements: TVCLStylesElements;
      //FSourceInfo: TSourceInfo;
   public
      procedure SetFilters(Filters : TObjectList<TBitmapFilter>);
@@ -43,6 +47,7 @@ type
      procedure SaveToFile(const FileName: string);
      //property  SourceInfo: TSourceInfo read FSourceInfo;
      property  StyleExt  :  TCustomStyleExt read FStyleExt;
+     property  Elements  : TVCLStylesElements read FElements write FElements;
      constructor Create(const  StyleName : string;Clone:Boolean=False);
      destructor Destroy;override;
   end;
@@ -54,8 +59,6 @@ uses
   System.IOUtils,
   System.SysUtils,
   Vcl.Graphics;
-
-
 { TVclStylesUtils }
 
 constructor TVclStylesUtils.Create(const  StyleName : string;Clone:Boolean=False);
@@ -63,18 +66,19 @@ var
   FSourceInfo: TSourceInfo;
 begin
   TStyleManager.StyleNames;//call DiscoverStyleResources
+  FElements :=[vseBitmaps];
   FClone   :=Clone;
   FStyleExt:=nil;
   FStream  :=nil;
   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
   begin
-   //FSourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
    if FClone then
    begin
      FStream:=TMemoryStream.Create;
      FSourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
      TStream(FSourceInfo.Data).Position:=0;
      FStream.CopyFrom(TStream(FSourceInfo.Data),TStream(FSourceInfo.Data).Size);
+     //restore original index
      TStream(FSourceInfo.Data).Position:=0;
      FStream.Position:=0;
    end
@@ -125,35 +129,63 @@ var
   BitmapList: TObjectList<TBitmap>;
   Index     : Integer;
   Filter    : TBitmapFilter;
+  Element   : TIdentMapEntry;
+  LColor    : TColor;
+  StyleColor: TStyleColor;
+  StyleFont : TStyleFont;
 begin
-   BitmapList:=StyleExt.BitmapList;
-   try
-     Index:=0;
-     for LBitmap in BitmapList do
-     begin
-       for Filter in Filters do
-         Filter.Apply(LBitmap);
-        StyleExt.ReplaceBitmap(Index, LBitmap);
-        Inc(Index);
+   if vseBitmaps in FElements then
+   begin
+     BitmapList:=StyleExt.BitmapList;
+     try
+       Index:=0;
+       for LBitmap in BitmapList do
+       begin
+         for Filter in Filters do
+           Filter.ProcessBitmap(LBitmap);
+          StyleExt.ReplaceBitmap(Index, LBitmap);
+          Inc(Index);
+       end;
+     finally
+       BitmapList.Free;
      end;
-   finally
-     BitmapList.Free;
+   end;
+
+   if vseSysColors in FElements then
+   begin
+     for Element in VclStyles_SysColors do
+     begin
+       LColor:=StyleExt.GetSystemColor(Element.Value);
+        for Filter in Filters do
+         LColor:=Filter.ProcessColor(LColor);
+
+       StyleExt.SetSystemColor(Element.Value,LColor);
+     end;
+   end;
+
+   if vseStyleColors in FElements then
+   begin
+     for StyleColor  := Low(TStyleColor) to High(TStyleColor) do
+     begin
+       LColor:=StyleExt.GetStyleColor(StyleColor);
+        for Filter in Filters do
+         LColor:=Filter.ProcessColor(LColor);
+
+       StyleExt.SetStyleColor(StyleColor, LColor);
+     end;
+   end;
+
+   if vseStyleFontColors in FElements then
+   begin
+     for StyleFont  := Low(TStyleFont) to High(TStyleFont) do
+     begin
+       LColor:=StyleExt.GetStyleFontColor(StyleFont);
+        for Filter in Filters do
+         LColor:=Filter.ProcessColor(LColor);
+
+       StyleExt.SetStyleFontColor(StyleFont, LColor);
+     end;
    end;
 end;
-              {
-procedure TVclStylesUtils.SetStyleColor(Color: TStyleColor; NewColor: TColor);
-begin
 
-end;
-
-procedure TVclStylesUtils.SetStyleFontColor(Font: TStyleFont; NewColor: TColor);
-begin
-
-end;
-
-procedure TVclStylesUtils.SetSystemColor(Color, NewColor: TColor);
-begin
-
-end;
-           }
 end.

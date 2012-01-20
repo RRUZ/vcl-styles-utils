@@ -96,11 +96,18 @@ type
     PageControl2: TPageControl;
     TabSheet4: TTabSheet;
     TabSheet5: TTabSheet;
-    ListBoxStyleColors: TListBox;
     TabSheet6: TTabSheet;
-    ListBoxStyleFontsColors: TListBox;
     TabSheet7: TTabSheet;
-    ListBoxStyleSystemColors: TListBox;
+    ListViewStyleColors: TListView;
+    ImageListStyleColors: TImageList;
+    ListViewStyleFontColors: TListView;
+    ImageListStyleFontColors: TImageList;
+    ListViewSystemColors: TListView;
+    ImageListSystemColors: TImageList;
+    CheckBoxStyleColors: TCheckBox;
+    CheckBoxStyleFontColors: TCheckBox;
+    CheckBoxSystemColors: TCheckBox;
+    StatusBar1: TStatusBar;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -132,8 +139,7 @@ type
     procedure ColorBoxblendGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure LinkLabel1LinkClick(Sender: TObject; const Link: string;
       LinkType: TSysLinkType);
-    procedure ListBoxStyleColorsDrawItem(Control: TWinControl; Index: Integer;
-      Rect: TRect; State: TOwnerDrawState);
+    procedure CheckBoxStyleColorsClick(Sender: TObject);
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
@@ -160,8 +166,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Vcl.Imaging.pngimage,
   PngFunctions,
+  System.Diagnostics,
   System.TypInfo,
   System.Rtti,
   WinAPi.ShellAPI,
@@ -172,7 +178,30 @@ uses
   Vcl.Styles.Utils,
   Vcl.Themes,
   Vcl.Styles,
+  Vcl.Imaging.pngimage,
   uVCLStylesInfo;
+
+procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
+Var
+ i : integer;
+ w : integer;
+begin
+  bmp.PixelFormat:=pf32bit;
+  bmp.Width:=Width;
+  bmp.Height:=Height;
+  bmp.Canvas.Brush.Color := clBlack;
+  bmp.Canvas.FillRect(Rect(0,0, Width, Height));
+
+
+  w :=(Width-2) div (High(Colors)+1);
+  for i:=0 to High(Colors) do
+  begin
+   bmp.Canvas.Brush.Color := Colors[i];
+   //bmp.Canvas.FillRect(Rect((w*i),0, w*(i+1), Height));
+   bmp.Canvas.FillRect(Rect((w*i)+1,1, w*(i+1)+1, Height-1))
+  end;
+end;
+
 
 
 procedure TFrmHueSat.DropFiles(var msg: TMessage);
@@ -277,13 +306,23 @@ procedure TFrmHueSat.BtnApplyClick(Sender: TObject);
 Var
   LFilters : TObjectList<TBitmapFilter>;
   VclUtils : TVclStylesUtils;
+  sw: TStopWatch;
 begin
   if StyleName='' then exit;
   try
     LFilters:=GetFilters;
-
+    sw := TStopWatch.StartNew;
     VclUtils:=TVclStylesUtils.Create(StyleName);
     try
+     if CheckBoxSystemColors.Checked then
+       VclUtils.Elements:=VclUtils.Elements + [vseSysColors];
+
+     if CheckBoxStyleColors.Checked then
+       VclUtils.Elements:=VclUtils.Elements + [vseStyleColors];
+
+     if CheckBoxStyleFontColors.Checked then
+       VclUtils.Elements:=VclUtils.Elements + [vseStyleFontColors];
+
       VclUtils.SetFilters(LFilters);
       VclUtils.ApplyChanges;
     finally
@@ -291,6 +330,7 @@ begin
       VclUtils.Free;
     end;
 
+    StatusBar1.SimpleText:=(Format('ellapsed  %d ms', [sw.ElapsedMilliseconds]));
     TStyleManager.ReloadStyle(StyleName);
     LoadStyle;
   except
@@ -308,6 +348,7 @@ Var
   LBitmap  : TBitmap;
   LPng     : TPngImage;
   ColorName: string;
+  sw       : TStopWatch;
 begin
    if StyleName='' then exit;
    VclUtils:=TVclStylesUtils.Create(StyleName, True);
@@ -354,6 +395,16 @@ begin
              Frm.Free;
             end;
 
+            if CheckBoxSystemColors.Checked then
+              VclUtils.Elements:=VclUtils.Elements + [vseSysColors];
+
+            if CheckBoxStyleColors.Checked then
+              VclUtils.Elements:=VclUtils.Elements + [vseStyleColors];
+
+            if CheckBoxStyleFontColors.Checked then
+              VclUtils.Elements:=VclUtils.Elements + [vseStyleFontColors];
+
+            sw := TStopWatch.StartNew;
             VclUtils.SetFilters(LFilters);
             VclUtils.SaveToFile(SaveDialog1.FileName);
 
@@ -375,6 +426,7 @@ begin
             end;
 
             //MessageDlg('Vcl Style Saved', mtInformation, [mbOK], 0);
+            StatusBar1.SimpleText:=(Format('ellapsed  %d ms', [sw.ElapsedMilliseconds]));
           finally
             LFilters.Free;
           end;
@@ -440,6 +492,11 @@ begin
 end;
 
 procedure TFrmHueSat.CheckBoxSepiaClick(Sender: TObject);
+begin
+  BuildPreview;
+end;
+
+procedure TFrmHueSat.CheckBoxStyleColorsClick(Sender: TObject);
 begin
   BuildPreview;
 end;
@@ -605,37 +662,100 @@ var
   //VclUtils : TVclStylesUtils;
   LBitmap  : TBitmap;
   Filter   : TBitmapFilter;
+  Index    : Integer;
+  LColor   : TColor;
 begin
   if StyleName='' then exit;
   LFilters:=GetFilters;
-  //VclUtils:=TVclStylesUtils.Create(StyleName, True);
-  LBitmap:=TBitmap.Create;
   try
-    LBitmap.Assign(OriginalBitMap);
-    for Filter in LFilters do
-     Filter.Apply(LBitmap);
+    //VclUtils:=TVclStylesUtils.Create(StyleName, True);
+    LBitmap:=TBitmap.Create;
+    try
+      LBitmap.Assign(OriginalBitMap);
+      for Filter in LFilters do
+       Filter.ProcessBitmap(LBitmap);
 
-    ImageVCLStyle.Picture.Assign(LBitmap);
-    {
-    VclUtils.SetFilters(LFilters);
-    VclUtils.ApplyChanges;
-      LBitmap:=TBitmap.Create;
-      try
-         ImageVCLStyle.Picture:=nil;
-         LBitmap.PixelFormat:=pf32bit;
-         LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
-         LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
-         DrawSampleWindow(VclUtils.StyleExt, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName, Icon.Handle);
-         ImageVCLStyle.Picture.Assign(LBitmap);
-      finally
-        LBitmap.Free;
+      ImageVCLStyle.Picture.Assign(LBitmap);
+      {
+      VclUtils.SetFilters(LFilters);
+      VclUtils.ApplyChanges;
+        LBitmap:=TBitmap.Create;
+        try
+           ImageVCLStyle.Picture:=nil;
+           LBitmap.PixelFormat:=pf32bit;
+           LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
+           LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
+           DrawSampleWindow(VclUtils.StyleExt, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName, Icon.Handle);
+           ImageVCLStyle.Picture.Assign(LBitmap);
+        finally
+          LBitmap.Free;
+        end;
+       }
+
+    finally
+      LBitmap.Free;
+      //VclUtils.Free;
+    end;
+
+
+      ImageListStyleColors.Clear;
+      for Index:=0 to ListViewStyleColors.Items.Count-1 do
+      begin
+        LBitmap:=TBitmap.Create;
+        try
+          LColor:=TColor(ListViewStyleColors.Items.Item[Index].Data);
+          CreateArrayBitmap(16,16,[LColor], LBitmap);
+          if CheckBoxStyleColors.Checked then
+            for Filter in LFilters do
+              Filter.ProcessBitmap(LBitmap);
+          ImageListStyleColors.Add(LBitmap, nil);
+          ListViewStyleColors.Items.Item[Index].ImageIndex:=ImageListStyleColors.Count-1;
+        finally
+          LBitmap.Free;
+        end;
       end;
-     }
+
+      ImageListStyleFontColors.Clear;
+      for Index:=0 to ListViewStyleFontColors.Items.Count-1 do
+      begin
+        LBitmap:=TBitmap.Create;
+        try
+          LColor:=TColor(ListViewStyleFontColors.Items.Item[Index].Data);
+          CreateArrayBitmap(16,16,[LColor], LBitmap);
+          if CheckBoxStyleFontColors.Checked then
+            for Filter in LFilters do
+              Filter.ProcessBitmap(LBitmap);
+          ImageListStyleFontColors.Add(LBitmap, nil);
+          ListViewStyleFontColors.Items.Item[Index].ImageIndex:=ImageListStyleFontColors.Count-1;
+        finally
+          LBitmap.Free;
+        end;
+      end;
+
+      ImageListSystemColors.Clear;
+      for Index:=0 to ListViewSystemColors.Items.Count-1 do
+      begin
+        LBitmap:=TBitmap.Create;
+        try
+          LColor:=TColor(ListViewSystemColors.Items.Item[Index].Data);
+          CreateArrayBitmap(16,16,[LColor], LBitmap);
+          if CheckBoxSystemColors.Checked then
+            for Filter in LFilters do
+              Filter.ProcessBitmap(LBitmap);
+          ImageListSystemColors.Add(LBitmap, nil);
+          ListViewSystemColors.Items.Item[Index].ImageIndex:=ImageListSystemColors.Count-1;
+        finally
+          LBitmap.Free;
+        end;
+      end;
+
   finally
-    LFilters.Free;
-    LBitmap.Free;
-    //VclUtils.Free;
+   LFilters.Free;
   end;
+
+
+
+
 end;
 
 
@@ -655,44 +775,6 @@ begin
   ShellExecute(0, 'Open', PChar(Link), nil , nil, SW_SHOWNORMAL);
 end;
 
-procedure TFrmHueSat.ListBoxStyleColorsDrawItem(Control: TWinControl;
-  Index: Integer; Rect: TRect; State: TOwnerDrawState);
-var
-  Bitmap: TBitmap;
-  R: TRect;
-begin
-  with (Control as TListBox).Canvas do
-  begin
-    Bitmap:=TBitmap.Create;
-    try
-     Bitmap.PixelFormat:=pf24bit;
-     Bitmap.Width :=(Control as TListBox).ItemHeight;
-     Bitmap.Height:=(Control as TListBox).ItemHeight;
-
-     //border
-     Bitmap.Canvas.Brush.Color := clBlack;
-     Bitmap.Canvas.FillRect(System.Classes.Rect(0,0,(Control as TListBox).ItemHeight-1, (Control as TListBox).ItemHeight-1));
-     //color
-     Bitmap.Canvas.Brush.Color := TColor(TListBox(Control).Items.Objects[Index]);
-     Bitmap.Canvas.FillRect(System.Classes.Rect(1,1,(Control as TListBox).ItemHeight-2, (Control as TListBox).ItemHeight-2));
-
-      FillRect(Rect);
-      if Bitmap<>nil then
-      begin
-        R:=Bounds(
-          Rect.Left+2,
-          Rect.Top+2,
-          Rect.Bottom-Rect.Top-2,
-          Rect.Bottom-Rect.top-2);
-        StretchDraw(R,Bitmap);
-      end;
-      TextOut(Rect.Left+20,Rect.Top,TListBox(Control).Items[Index]);
-    finally
-      Bitmap.Free;
-    end;
-
-  end;
-end;
 
 procedure TFrmHueSat.LoadStyle;
 begin
@@ -724,75 +806,108 @@ begin
   TrackBarBlue.Position     := 0;
 end;
 
+
 procedure TFrmHueSat.LoadStyleColors;
 var
  StyleColor : TStyleColor;
-begin                                    if StyleName='' then exit;
-  ListBoxStyleColors.Items.Clear;
-  ListBoxStyleColors.Items.BeginUpdate;
-  for StyleColor  := Low(TStyleColor) to High(TStyleColor) do
-  begin
-    ListBoxStyleColors.Items.AddObject(
-    GetEnumName(TypeInfo(TStyleColor),Integer(StyleColor)),
-    TObject(TStyleManager.Style[StyleName].GetStyleColor(StyleColor))
-    );
+ Item       : TListItem;
+ LColor     : TColor;
+ LBitmap    : TBitmap;
+begin
+  if StyleName='' then exit;
+  ListViewStyleColors.Items.BeginUpdate;
+  try
+    ListViewStyleColors.Items.Clear;
+    ImageListStyleColors.Clear;
+    for StyleColor  := Low(TStyleColor) to High(TStyleColor) do
+    begin
+      LColor:=TStyleManager.Style[StyleName].GetStyleColor(StyleColor);
+      Item:=ListViewStyleColors.Items.Add;
+      Item.Data:=Pointer(LColor);
+      Item.Caption:=GetEnumName(TypeInfo(TStyleColor),Integer(StyleColor));
+      Item.SubItems.Add(ColorToString(LColor));
+      LBitmap:=TBitmap.Create;
+      try
+        CreateArrayBitmap(16,16,[LColor], LBitmap);
+        ImageListStyleColors.Add(LBitmap, nil);
+        Item.ImageIndex:=ImageListStyleColors.Count-1;
+      finally
+        LBitmap.Free;
+      end;
+    end;
+  finally
+    ListViewStyleColors.Items.EndUpdate;
   end;
-  ListBoxStyleColors.Items.EndUpdate;
 end;
 
 procedure TFrmHueSat.LoadStyleFontsColors;
 var
  StyleFont : TStyleFont;
+ Item       : TListItem;
+ LColor     : TColor;
+ LBitmap    : TBitmap;
 begin
   if StyleName='' then exit;
-  ListBoxStyleFontsColors.Items.Clear;
-  ListBoxStyleFontsColors.Items.BeginUpdate;
-  for StyleFont  := Low(TStyleFont) to High(TStyleFont) do
-  begin
-    ListBoxStyleFontsColors.Items.AddObject(
-    GetEnumName(TypeInfo(TStyleFont),Integer(StyleFont)),
-    TObject(TStyleManager.Style[StyleName].GetStyleFontColor(StyleFont))
-    );
+  ListViewStyleFontColors.Items.BeginUpdate;
+  try
+    ListViewStyleFontColors.Items.Clear;
+    ImageListStyleFontColors.Clear;
+    for StyleFont  := Low(TStyleFont) to High(TStyleFont) do
+    begin
+      LColor:=TStyleManager.Style[StyleName].GetStyleFontColor(StyleFont);
+      Item:=ListViewStyleFontColors.Items.Add;
+      Item.Data:=Pointer(LColor);
+      Item.Caption:=GetEnumName(TypeInfo(TStyleFont),Integer(StyleFont));
+      Item.SubItems.Add(ColorToString(LColor));
+      LBitmap:=TBitmap.Create;
+      try
+        CreateArrayBitmap(16,16,[LColor], LBitmap);
+        ImageListStyleFontColors.Add(LBitmap, nil);
+        Item.ImageIndex:=ImageListStyleFontColors.Count-1;
+      finally
+        LBitmap.Free;
+      end;
+    end;
+  finally
+    ListViewStyleFontColors.Items.EndUpdate;
   end;
-
-
-
-
-  ListBoxStyleFontsColors.Items.EndUpdate;
 end;
 
 
 procedure TFrmHueSat.LoadStyleSystemColors;
-const
-  MaxSysColor = 23;
-  SysColors: array[0..MaxSysColor - 1] of TIdentMapEntry = (
-    (Value: Vcl.Graphics.clActiveBorder; Name: 'clActiveBorder'),
-    (Value: Vcl.Graphics.clActiveCaption; Name: 'clActiveCaption'),
-    (Value: Vcl.Graphics.clBtnFace; Name: 'clBtnFace'),
-    (Value: Vcl.Graphics.clBtnHighlight; Name: 'clBtnHighlight'),
-    (Value: Vcl.Graphics.clBtnShadow; Name: 'clBtnShadow'),
-    (Value: Vcl.Graphics.clBtnText; Name: 'clBtnText'),
-    (Value: Vcl.Graphics.clCaptionText; Name: 'clCaptionText'),
-    (Value: Vcl.Graphics.clGrayText; Name: 'clGrayText'),
-    (Value: Vcl.Graphics.clHighlight; Name: 'clHighlight'),
-    (Value: Vcl.Graphics.clHighlightText; Name: 'clHighlightText'),
-    (Value: Vcl.Graphics.clInactiveBorder; Name: 'clInactiveBorder'),
-    (Value: Vcl.Graphics.clInactiveCaption; Name: 'clInactiveCaption'),
-    (Value: Vcl.Graphics.clInactiveCaptionText; Name: 'clInactiveCaptionText'),
-    (Value: Vcl.Graphics.clInfoBk; Name: 'clInfoBk'),
-    (Value: Vcl.Graphics.clInfoText; Name: 'clInfoText'),
-    (Value: Vcl.Graphics.clMenu; Name: 'clMenu'),
-    (Value: Vcl.Graphics.clMenuText; Name: 'clMenuText'),
-    (Value: Vcl.Graphics.clScrollBar; Name: 'clScrollBar'),
-    (Value: Vcl.Graphics.cl3DDkShadow; Name: 'cl3DDkShadow'),
-    (Value: Vcl.Graphics.cl3DLight; Name: 'cl3DLight'),
-    (Value: Vcl.Graphics.clWindow; Name: 'clWindow'),
-    (Value: Vcl.Graphics.clWindowFrame; Name: 'clWindowFrame'),
-    (Value: Vcl.Graphics.clWindowText; Name: 'clWindowText'));
 Var
-  Element : TIdentMapEntry;
+  Element    : TIdentMapEntry;
+  Item       : TListItem;
+  LColor     : TColor;
+  LBitmap    : TBitmap;
 begin
   if StyleName='' then exit;
+
+  ListViewSystemColors.Items.BeginUpdate;
+  try
+    ListViewSystemColors.Items.Clear;
+    ImageListSystemColors.Clear;
+    for Element in VclStyles_SysColors do
+    begin
+      LColor:=TStyleManager.Style[StyleName].GetSystemColor(Element.Value);
+      Item:=ListViewSystemColors.Items.Add;
+      Item.Data:=Pointer(LColor);
+      Item.Caption:=Element.Name;
+      Item.SubItems.Add(ColorToString(LColor));
+      LBitmap:=TBitmap.Create;
+      try
+        CreateArrayBitmap(16,16,[LColor], LBitmap);
+        ImageListSystemColors.Add(LBitmap, nil);
+        Item.ImageIndex:=ImageListSystemColors.Count-1;
+      finally
+        LBitmap.Free;
+      end;
+    end;
+  finally
+    ListViewSystemColors.Items.EndUpdate;
+  end;
+
+  {
   ListBoxStyleSystemColors.Items.Clear;
   ListBoxStyleSystemColors.Items.BeginUpdate;
   for Element in SysColors do
@@ -800,6 +915,7 @@ begin
   TObject(TStyleManager.Style[StyleName].GetSystemColor(Element.Value))
   );
   ListBoxStyleSystemColors.Items.EndUpdate;
+  }
 end;
 
 procedure TFrmHueSat.RadioButtonHSLClick(Sender: TObject);
