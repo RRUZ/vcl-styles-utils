@@ -16,8 +16,8 @@ object FrmMain: TFrmMain
   PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
-    Left = 8
-    Top = 184
+    Left = 96
+    Top = 181
     Width = 75
     Height = 25
     Caption = 'Close'
@@ -71,5 +71,14 @@ object FrmMain: TFrmMain
       Caption = 'TabSheet2'
       ImageIndex = 1
     end
+  end
+  object Button3: TButton
+    Left = 8
+    Top = 181
+    Width = 75
+    Height = 25
+    Caption = 'Press Me'
+    TabOrder = 4
+    OnClick = Button3Click
   end
 end
