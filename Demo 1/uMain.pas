@@ -16,9 +16,11 @@ type
     TabSheet2: TTabSheet;
     Edit1: TEdit;
     Button2: TButton;
+    Button3: TButton;
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -57,12 +59,11 @@ begin
  TStyleManager.RefreshCurrentTheme;
 end;
 
-procedure TFrmMain.FormCreate(Sender: TObject);
+procedure TFrmMain.Button3Click(Sender: TObject);
 var
   VclStylesUtils : TVclStylesUtils;
   Filters        : TObjectList<TBitmapFilter>;
 begin
-  ReportMemoryLeaksOnShutdown:=True;
   //create the instance to the  TVclStylesUtils using the carbon vcl style
   VclStylesUtils:=TVclStylesUtils.Create('Carbon');
   //create the filter list to apply
@@ -82,6 +83,13 @@ begin
     VclStylesUtils.Free;
     Filters.Free;
   end;
+  TButton(Sender).Enabled:=False;
+end;
+
+procedure TFrmMain.FormCreate(Sender: TObject);
+begin
+  ReportMemoryLeaksOnShutdown:=True;
+  TStyleManager.ReloadStyle('Carbon');
 end;
 
 

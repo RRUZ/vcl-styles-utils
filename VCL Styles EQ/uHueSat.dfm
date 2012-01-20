@@ -2438,8 +2438,6 @@ object FrmHueSat: TFrmHueSat
         Width = 97
         Height = 17
         Caption = 'Modify'
-        Checked = True
-        State = cbChecked
         TabOrder = 1
         OnClick = CheckBoxStyleColorsClick
       end
@@ -2474,8 +2472,6 @@ object FrmHueSat: TFrmHueSat
         Width = 97
         Height = 17
         Caption = 'Modify'
-        Checked = True
-        State = cbChecked
         TabOrder = 1
         OnClick = CheckBoxStyleColorsClick
       end
@@ -2510,8 +2506,6 @@ object FrmHueSat: TFrmHueSat
         Width = 97
         Height = 17
         Caption = 'Modify'
-        Checked = True
-        State = cbChecked
         TabOrder = 1
         OnClick = CheckBoxStyleColorsClick
       end
@@ -2524,16 +2518,13 @@ object FrmHueSat: TFrmHueSat
     Height = 19
     Panels = <>
     SimplePanel = True
-    ExplicitLeft = 120
-    ExplicitTop = 600
-    ExplicitWidth = 0
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 288
     Top = 312
     Bitmap = {
-      494C0101010008007C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800800010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
