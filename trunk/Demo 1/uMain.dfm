@@ -57,18 +57,19 @@ object FrmMain: TFrmMain
         TabOrder = 0
         Text = 'Edit1'
       end
+      object Button2: TButton
+        Left = 130
+        Top = 12
+        Width = 75
+        Height = 25
+        Caption = 'Make me red'
+        TabOrder = 1
+        OnClick = Button2Click
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'TabSheet2'
       ImageIndex = 1
     end
-  end
-  object Button2: TButton
-    Left = 218
-    Top = 181
-    Width = 75
-    Height = 25
-    Caption = 'Button2'
-    TabOrder = 4
   end
 end

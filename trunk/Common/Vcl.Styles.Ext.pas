@@ -82,6 +82,32 @@ type
    class procedure RemoveStyle(const Name: string);
    end;
 
+const
+  VclStyles_MaxSysColor = 23;
+  VclStyles_SysColors: array[0..VclStyles_MaxSysColor - 1] of TIdentMapEntry = (
+    (Value: Vcl.Graphics.clActiveBorder; Name: 'clActiveBorder'),
+    (Value: Vcl.Graphics.clActiveCaption; Name: 'clActiveCaption'),
+    (Value: Vcl.Graphics.clBtnFace; Name: 'clBtnFace'),
+    (Value: Vcl.Graphics.clBtnHighlight; Name: 'clBtnHighlight'),
+    (Value: Vcl.Graphics.clBtnShadow; Name: 'clBtnShadow'),
+    (Value: Vcl.Graphics.clBtnText; Name: 'clBtnText'),
+    (Value: Vcl.Graphics.clCaptionText; Name: 'clCaptionText'),
+    (Value: Vcl.Graphics.clGrayText; Name: 'clGrayText'),
+    (Value: Vcl.Graphics.clHighlight; Name: 'clHighlight'),
+    (Value: Vcl.Graphics.clHighlightText; Name: 'clHighlightText'),
+    (Value: Vcl.Graphics.clInactiveBorder; Name: 'clInactiveBorder'),
+    (Value: Vcl.Graphics.clInactiveCaption; Name: 'clInactiveCaption'),
+    (Value: Vcl.Graphics.clInactiveCaptionText; Name: 'clInactiveCaptionText'),
+    (Value: Vcl.Graphics.clInfoBk; Name: 'clInfoBk'),
+    (Value: Vcl.Graphics.clInfoText; Name: 'clInfoText'),
+    (Value: Vcl.Graphics.clMenu; Name: 'clMenu'),
+    (Value: Vcl.Graphics.clMenuText; Name: 'clMenuText'),
+    (Value: Vcl.Graphics.clScrollBar; Name: 'clScrollBar'),
+    (Value: Vcl.Graphics.cl3DDkShadow; Name: 'cl3DDkShadow'),
+    (Value: Vcl.Graphics.cl3DLight; Name: 'cl3DLight'),
+    (Value: Vcl.Graphics.clWindow; Name: 'clWindow'),
+    (Value: Vcl.Graphics.clWindowFrame; Name: 'clWindowFrame'),
+    (Value: Vcl.Graphics.clWindowText; Name: 'clWindowText'));
 
 procedure ApplyEmptyVCLStyleHook(ControlClass :TClass);
 procedure RemoveEmptyVCLStyleHook(ControlClass :TClass);
@@ -163,6 +189,7 @@ uses
  Vcl.Imaging.pngimage,
  Winapi.Messages,
 {$ENDIF}
+ Vcl.Dialogs,
  Vcl.Controls,
  System.Sysutils;
 
@@ -244,6 +271,7 @@ end;
 class procedure TStyleManagerHelper.ReloadStyle(const Name: string);
 var
   LStyle: TCustomStyleServices;
+  t     : TPair<string, TStyleManager.TSourceInfo>;
 begin
 
  if SameText(Name, ActiveStyle.Name, loUserLocale) then
@@ -255,6 +283,14 @@ begin
     LStyle.Free;
     Styles.Remove(LStyle);
   end;
+
+  for t in Self.FRegisteredStyles do
+    if SameText(Name, t.Key, loUserLocale) then
+     if (t.Value.Data<>nil) then
+     begin
+       TStream(t.Value.Data).Position:=0;
+       break;
+     end;
 
  SetStyle(Name);
 end;
@@ -339,18 +375,24 @@ begin
   Stream.Size:=0;
   Stream.Position:=0;
 
-
    TseStyle(Source).FCleanCopy.Name        :=  TseStyle(Source).StyleSource.Name;
    TseStyle(Source).FCleanCopy.Author      :=  TseStyle(Source).StyleSource.Author;
    TseStyle(Source).FCleanCopy.AuthorEMail :=  TseStyle(Source).StyleSource.AuthorEMail;
    TseStyle(Source).FCleanCopy.AuthorURL   :=  TseStyle(Source).StyleSource.AuthorURL;
    TseStyle(Source).FCleanCopy.Version     :=  TseStyle(Source).StyleSource.Version;
 
-
-  //Replace the updated bitmaps
+  //Replace the modified bitmaps
   for i := 0 to TseStyle(Source).FCleanCopy.Bitmaps.Count-1  do
    TseStyle(Source).FCleanCopy.Bitmaps[i].Assign(TseStyle(Source).StyleSource.Bitmaps[i]);
 
+  //TseStyle(Source).StyleSource.SysColors.Assign(TseStyle(Source).SysColors);
+
+  //Replace the modified colors
+  TseStyle(Source).FCleanCopy.SysColors.Assign(TseStyle(Source).SysColors);
+  TseStyle(Source).FCleanCopy.Colors.Assign(TseStyle(Source).Colors);
+  TseStyle(Source).FCleanCopy.Fonts.Assign(TseStyle(Source).Fonts);
+
+  //ShowMessage(ColorToString(TseStyle(Source).SysColors[clWindow]));
   TseStyle(Source).SaveToStream(Stream);
   {
   TseStyle(Source).StyleSource.Fonts.Assign(TseStyle(Source).Fonts);
@@ -466,38 +508,37 @@ end;
 
 procedure TCustomStyleHelper.SetStyleColor(Color: TStyleColor; NewColor: TColor);
 begin
-//  TseStyle(Self.FSource).SysColors[Color]:=NewColor;
   case Color of
-    scBorder: TSeStyle(Self.FSource).Colors[ktcBorder]:=NewColor;
-    scButtonDisabled: TSeStyle(Self.FSource).Colors[ktcButtonDisabled]:=NewColor;
-    scButtonFocused: TSeStyle(Self.FSource).Colors[ktcButtonFocused]:=NewColor;
-    scButtonHot: TSeStyle(Self.FSource).Colors[ktcButtonHot]:=NewColor;
-    scButtonNormal: TSeStyle(Self.FSource).Colors[ktcButton]:=NewColor;
-    scButtonPressed: TSeStyle(Self.FSource).Colors[ktcButtonPressed]:=NewColor;
-    scCategoryButtons: TSeStyle(Self.FSource).Colors[ktcCategoryButtons]:=NewColor;
-    scCategoryButtonsGradientBase: TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientBase]:=NewColor;
-    scCategoryButtonsGradientEnd: TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientEnd]:=NewColor;
-    scCategoryPanelGroup: TSeStyle(Self.FSource).Colors[ktcCategoryPanelGroup]:=NewColor;
-    scComboBox: TSeStyle(Self.FSource).Colors[ktcComboBox]:=NewColor;
-    scComboBoxDisabled: TSeStyle(Self.FSource).Colors[ktcComboBoxDisabled]:=NewColor;
-    scEdit: TSeStyle(Self.FSource).Colors[ktcEdit]:=NewColor;
-    scEditDisabled: TSeStyle(Self.FSource).Colors[ktcEditDisabled]:=NewColor;
-    scGrid: TSeStyle(Self.FSource).Colors[ktcGrid]:=NewColor;
-    scGenericBackground: TSeStyle(Self.FSource).Colors[ktcGenericBackground]:=NewColor;
-    scGenericGradientEnd: TSeStyle(Self.FSource).Colors[ktcGenericGradientEnd]:=NewColor;
-    scGenericGradientBase: TSeStyle(Self.FSource).Colors[ktcGenericGradientBase]:=NewColor;
-    scHintGradientBase: TSeStyle(Self.FSource).Colors[ktcHintGradientBase]:=NewColor;
-    scHintGradientEnd: TSeStyle(Self.FSource).Colors[ktcHintGradientEnd]:=NewColor;
-    scListBox: TSeStyle(Self.FSource).Colors[ktcListBox]:=NewColor;
-    scListBoxDisabled: TSeStyle(Self.FSource).Colors[ktcListBoxDisabled]:=NewColor;
-    scListView: TSeStyle(Self.FSource).Colors[ktcListView]:=NewColor;
-    scPanel: TSeStyle(Self.FSource).Colors[ktcPanel]:=NewColor;
-    scPanelDisabled: TSeStyle(Self.FSource).Colors[ktcPanelDisabled]:=NewColor;
-    scSplitter: TSeStyle(Self.FSource).Colors[ktcSplitter]:=NewColor;
-    scToolBarGradientBase: TSeStyle(Self.FSource).Colors[ktcToolBarGradientBase]:=NewColor;
-    scToolBarGradientEnd: TSeStyle(Self.FSource).Colors[ktcToolBarGradientEnd]:=NewColor;
-    scTreeView: TSeStyle(Self.FSource).Colors[ktcTreeView]:=NewColor;
-    scWindow: TSeStyle(Self.FSource).Colors[ktcWindow]:=NewColor;
+    scBorder: if TSeStyle(Self.FSource).Colors[ktcBorder]<>NewColor then TSeStyle(Self.FSource).Colors[ktcBorder]:=NewColor;
+    scButtonDisabled:  if TSeStyle(Self.FSource).Colors[ktcButtonDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonDisabled]:=NewColor;
+    scButtonFocused:  if TSeStyle(Self.FSource).Colors[ktcButtonFocused]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonFocused]:=NewColor;
+    scButtonHot:  if TSeStyle(Self.FSource).Colors[ktcButtonHot]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonHot]:=NewColor;
+    scButtonNormal:  if TSeStyle(Self.FSource).Colors[ktcButton]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButton]:=NewColor;
+    scButtonPressed:  if TSeStyle(Self.FSource).Colors[ktcButtonPressed]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonPressed]:=NewColor;
+    scCategoryButtons:  if TSeStyle(Self.FSource).Colors[ktcCategoryButtons]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryButtons]:=NewColor;
+    scCategoryButtonsGradientBase:  if TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientBase]:=NewColor;
+    scCategoryButtonsGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientEnd]:=NewColor;
+    scCategoryPanelGroup:  if TSeStyle(Self.FSource).Colors[ktcCategoryPanelGroup]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryPanelGroup]:=NewColor;
+    scComboBox:  if TSeStyle(Self.FSource).Colors[ktcComboBox]<>NewColor then TSeStyle(Self.FSource).Colors[ktcComboBox]:=NewColor;
+    scComboBoxDisabled:  if TSeStyle(Self.FSource).Colors[ktcComboBoxDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcComboBoxDisabled]:=NewColor;
+    scEdit:  if TSeStyle(Self.FSource).Colors[ktcEdit]<>NewColor then TSeStyle(Self.FSource).Colors[ktcEdit]:=NewColor;
+    scEditDisabled:  if TSeStyle(Self.FSource).Colors[ktcEditDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcEditDisabled]:=NewColor;
+    scGrid:  if TSeStyle(Self.FSource).Colors[ktcGrid]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGrid]:=NewColor;
+    scGenericBackground:  if TSeStyle(Self.FSource).Colors[ktcGenericBackground]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGenericBackground]:=NewColor;
+    scGenericGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcGenericGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGenericGradientEnd]:=NewColor;
+    scGenericGradientBase:  if TSeStyle(Self.FSource).Colors[ktcGenericGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGenericGradientBase]:=NewColor;
+    scHintGradientBase:  if TSeStyle(Self.FSource).Colors[ktcHintGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcHintGradientBase]:=NewColor;
+    scHintGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcHintGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcHintGradientEnd]:=NewColor;
+    scListBox:  if TSeStyle(Self.FSource).Colors[ktcListBox]<>NewColor then TSeStyle(Self.FSource).Colors[ktcListBox]:=NewColor;
+    scListBoxDisabled:  if TSeStyle(Self.FSource).Colors[ktcListBoxDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcListBoxDisabled]:=NewColor;
+    scListView:  if TSeStyle(Self.FSource).Colors[ktcListView]<>NewColor then TSeStyle(Self.FSource).Colors[ktcListView]:=NewColor;
+    scPanel:  if TSeStyle(Self.FSource).Colors[ktcPanel]<>NewColor then TSeStyle(Self.FSource).Colors[ktcPanel]:=NewColor;
+    scPanelDisabled:  if TSeStyle(Self.FSource).Colors[ktcPanelDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcPanelDisabled]:=NewColor;
+    scSplitter:  if TSeStyle(Self.FSource).Colors[ktcSplitter]<>NewColor then TSeStyle(Self.FSource).Colors[ktcSplitter]:=NewColor;
+    scToolBarGradientBase:  if TSeStyle(Self.FSource).Colors[ktcToolBarGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcToolBarGradientBase]:=NewColor;
+    scToolBarGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcToolBarGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcToolBarGradientEnd]:=NewColor;
+    scTreeView:  if TSeStyle(Self.FSource).Colors[ktcTreeView]<>NewColor then TSeStyle(Self.FSource).Colors[ktcTreeView]:=NewColor;
+    scWindow: if TSeStyle(Self.FSource).Colors[ktcWindow]<>NewColor then TSeStyle(Self.FSource).Colors[ktcWindow]:=NewColor;
   end;
 end;
 
@@ -594,7 +635,8 @@ end;
 
 procedure TCustomStyleHelper.SetSystemColor(Color, NewColor: TColor);
 begin
-  TseStyle(Self.FSource).SysColors[Color]:=NewColor;
+  if TseStyle(Self.FSource).SysColors[Color]<>NewColor then
+    TseStyle(Self.FSource).SysColors[Color]:=NewColor;
 end;
 
 {$ENDIF}
