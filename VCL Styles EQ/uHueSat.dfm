@@ -4,8 +4,8 @@ object FrmHueSat: TFrmHueSat
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
-  ClientHeight = 572
-  ClientWidth = 382
+  ClientHeight = 599
+  ClientWidth = 381
   Color = clBtnFace
   TransparentColorValue = clFuchsia
   DoubleBuffered = True
@@ -1860,12 +1860,6 @@ object FrmHueSat: TFrmHueSat
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object ImageVCLStyle: TImage
-    Left = 8
-    Top = 72
-    Width = 357
-    Height = 190
-  end
   object Label4: TLabel
     Left = 8
     Top = 8
@@ -1873,29 +1867,9 @@ object FrmHueSat: TFrmHueSat
     Height = 13
     Caption = 'VCL Styles'
   end
-  object Label10: TLabel
-    Left = 8
-    Top = 54
-    Width = 38
-    Height = 13
-    Caption = 'Preview'
-  end
-  object LabelDrop: TLabel
-    Left = 51
-    Top = 144
-    Width = 251
-    Height = 23
-    Caption = 'Drop a VCL Style File Here'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
-    Font.Height = -19
-    Font.Name = 'Tahoma'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
   object BtnApply: TButton
-    Left = 11
-    Top = 519
+    Left = 8
+    Top = 543
     Width = 225
     Height = 25
     Caption = 'Apply changes to the current style'
@@ -1904,7 +1878,7 @@ object FrmHueSat: TFrmHueSat
   end
   object BtnSave: TButton
     Left = 242
-    Top = 519
+    Top = 543
     Width = 96
     Height = 25
     Caption = 'Save'
@@ -1931,14 +1905,13 @@ object FrmHueSat: TFrmHueSat
   end
   object PageControl1: TPageControl
     Left = 8
-    Top = 291
+    Top = 315
     Width = 361
     Height = 222
     ActivePage = TabSheet1
     TabOrder = 4
     object TabSheet1: TTabSheet
       Caption = 'HSL'
-      ExplicitHeight = 201
       object Label1: TLabel
         Left = 11
         Top = 14
@@ -2128,7 +2101,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
-      ExplicitHeight = 191
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -2310,7 +2282,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheet3: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
-      ExplicitHeight = 191
       object Label8: TLabel
         Left = 3
         Top = 52
@@ -2367,7 +2338,7 @@ object FrmHueSat: TFrmHueSat
   end
   object RadioButtonHSL: TRadioButton
     Left = 8
-    Top = 268
+    Top = 292
     Width = 50
     Height = 17
     Caption = 'HSL'
@@ -2379,7 +2350,7 @@ object FrmHueSat: TFrmHueSat
   object RadioButtonRGB: TRadioButton
     Tag = 1
     Left = 74
-    Top = 268
+    Top = 292
     Width = 58
     Height = 17
     Caption = 'RGB'
@@ -2389,7 +2360,7 @@ object FrmHueSat: TFrmHueSat
   object RadioButtonBlend: TRadioButton
     Tag = 2
     Left = 138
-    Top = 268
+    Top = 292
     Width = 55
     Height = 17
     Caption = 'Blend'
@@ -2398,21 +2369,104 @@ object FrmHueSat: TFrmHueSat
   end
   object LinkLabel1: TLinkLabel
     Left = 8
-    Top = 550
-    Width = 73
-    Height = 17
+    Top = 574
+    Width = 76
+    Height = 19
     Caption = 
-      '<a href="http://code.google.com/p/vcl-styles-utils"> vcl styles ' +
-      'utils</a>'
+      '<a href="http://code.google.com/p/vcl-styles-utils">vcl styles u' +
+      'tils</a>'
     TabOrder = 8
+    UseVisualStyle = True
     OnLinkClick = LinkLabel1LinkClick
+  end
+  object PageControl2: TPageControl
+    Left = 8
+    Top = 61
+    Width = 361
+    Height = 225
+    ActivePage = TabSheet4
+    TabOrder = 9
+    object TabSheet4: TTabSheet
+      Caption = 'Preview'
+      ExplicitWidth = 281
+      ExplicitHeight = 165
+      object ImageVCLStyle: TImage
+        Left = 3
+        Top = 3
+        Width = 346
+        Height = 190
+      end
+      object LabelDrop: TLabel
+        Left = 43
+        Top = 75
+        Width = 251
+        Height = 23
+        Caption = 'Drop a VCL Style File Here'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -19
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+    end
+    object TabSheet5: TTabSheet
+      Caption = 'Style Colors'
+      ImageIndex = 1
+      ExplicitWidth = 281
+      ExplicitHeight = 165
+      object ListBoxStyleColors: TListBox
+        Left = 0
+        Top = 0
+        Width = 353
+        Height = 197
+        Style = lbOwnerDrawFixed
+        Align = alClient
+        TabOrder = 0
+        OnDrawItem = ListBoxStyleColorsDrawItem
+      end
+    end
+    object TabSheet6: TTabSheet
+      Caption = 'Style Font Colors'
+      ImageIndex = 2
+      object ListBoxStyleFontsColors: TListBox
+        Left = 0
+        Top = 0
+        Width = 353
+        Height = 197
+        Style = lbOwnerDrawFixed
+        Align = alClient
+        TabOrder = 0
+        OnDrawItem = ListBoxStyleColorsDrawItem
+        ExplicitLeft = -1
+        ExplicitTop = 3
+      end
+    end
+    object TabSheet7: TTabSheet
+      Caption = 'System Colors'
+      ImageIndex = 3
+      ExplicitLeft = 3
+      ExplicitTop = 28
+      object ListBoxStyleSystemColors: TListBox
+        Left = 0
+        Top = 0
+        Width = 353
+        Height = 197
+        Style = lbOwnerDrawFixed
+        Align = alClient
+        TabOrder = 0
+        OnDrawItem = ListBoxStyleColorsDrawItem
+        ExplicitLeft = -1
+        ExplicitTop = 3
+      end
+    end
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 216
-    Top = 136
+    Left = 288
+    Top = 312
     Bitmap = {
-      494C010101000800680010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800700010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2552,8 +2606,8 @@ object FrmHueSat: TFrmHueSat
       000000000000}
   end
   object ActionManager1: TActionManager
-    Left = 168
-    Top = 144
+    Left = 240
+    Top = 312
     StyleName = 'Platform Default'
     object ActionApplyStyle: TAction
       Caption = 'ActionApplyStyle'
@@ -2564,12 +2618,12 @@ object FrmHueSat: TFrmHueSat
   object SaveDialog1: TSaveDialog
     DefaultExt = '*.vsf'
     Filter = 'Visual Style Files|*.vsf'
-    Left = 112
-    Top = 152
+    Left = 200
+    Top = 312
   end
   object ColorDialog1: TColorDialog
     Options = [cdFullOpen, cdShowHelp, cdSolidColor, cdAnyColor]
     Left = 224
-    Top = 328
+    Top = 352
   end
 end

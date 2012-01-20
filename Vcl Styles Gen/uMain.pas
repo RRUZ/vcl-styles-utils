@@ -49,7 +49,7 @@ procedure TFrmMain.Button1Click(Sender: TObject);
 const
  HueDelta=10;
 Var
-  LFilters : TObjectList<TBitmap32Filter>;
+  LFilters : TObjectList<TBitmapFilter>;
   VclUtils : TVclStylesUtils;
   Hue      : Integer;
   FileName : String;
@@ -63,7 +63,7 @@ begin
     ProgressBar1.Max:=360 div HueDelta;
     while Hue<=180 do
     begin
-      LFilters:=TObjectList<TBitmap32Filter>.Create;
+      LFilters:=TObjectList<TBitmapFilter>.Create;
       if CheckBoxSepia.Checked then
       LFilters.Add(TBitmap32SepiaFilter.Create(20));
 

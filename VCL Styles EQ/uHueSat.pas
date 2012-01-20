@@ -90,10 +90,17 @@ type
     Label8: TLabel;
     Label9: TLabel;
     ColorDialog1: TColorDialog;
-    Label10: TLabel;
     LabelDrop: TLabel;
     CheckBoxSepia: TCheckBox;
     LinkLabel1: TLinkLabel;
+    PageControl2: TPageControl;
+    TabSheet4: TTabSheet;
+    TabSheet5: TTabSheet;
+    ListBoxStyleColors: TListBox;
+    TabSheet6: TTabSheet;
+    ListBoxStyleFontsColors: TListBox;
+    TabSheet7: TTabSheet;
+    ListBoxStyleSystemColors: TListBox;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -125,6 +132,8 @@ type
     procedure ColorBoxblendGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure LinkLabel1LinkClick(Sender: TObject; const Link: string;
       LinkType: TSysLinkType);
+    procedure ListBoxStyleColorsDrawItem(Control: TWinControl; Index: Integer;
+      Rect: TRect; State: TOwnerDrawState);
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
@@ -132,8 +141,12 @@ type
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
     procedure LoadStyle;
+    procedure LoadStyleColors;
+    procedure LoadStyleFontsColors;
+    procedure LoadStyleSystemColors;
+
     procedure SetPageActive(Index:integer);
-    function GetFilters  : TObjectList<TBitmap32Filter>;
+    function GetFilters  : TObjectList<TBitmapFilter>;
     procedure DropFiles(var msg : TMessage); message WM_DROPFILES;
     procedure FillListStyles;
     procedure BuildPreview;
@@ -149,6 +162,7 @@ implementation
 uses
   Vcl.Imaging.pngimage,
   PngFunctions,
+  System.TypInfo,
   System.Rtti,
   WinAPi.ShellAPI,
   System.IOUtils,
@@ -193,6 +207,8 @@ begin
   end;
 
   DragFinish( msg.WParam );
+
+  //TStyleManager.Style[''].GetStyleColor();
 end;
 
 procedure TFrmHueSat.ActionApplyStyleExecute(Sender: TObject);
@@ -206,13 +222,13 @@ begin
 end;
 
 
-function TFrmHueSat.GetFilters: TObjectList<TBitmap32Filter>;
+function TFrmHueSat.GetFilters: TObjectList<TBitmapFilter>;
 var
   LFilter : TValue;
   ctx     : TRttiContext;
   RttiInstanceType : TRttiInstanceType;
 begin
-  Result:=TObjectList<TBitmap32Filter>.Create;
+  Result:=TObjectList<TBitmapFilter>.Create;
 
     if RadioButtonHSL.Checked then
     begin
@@ -251,7 +267,7 @@ begin
       ctx := TRttiContext.Create;
       RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
       LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
-      Result.Add(TBitmap32Filter(LFilter.AsObject));
+      Result.Add(TBitmapFilter(LFilter.AsObject));
       ctx.Free;
     end;
 end;
@@ -259,7 +275,7 @@ end;
 
 procedure TFrmHueSat.BtnApplyClick(Sender: TObject);
 Var
-  LFilters : TObjectList<TBitmap32Filter>;
+  LFilters : TObjectList<TBitmapFilter>;
   VclUtils : TVclStylesUtils;
 begin
   if StyleName='' then exit;
@@ -285,12 +301,13 @@ end;
 
 procedure TFrmHueSat.BtnSaveClick(Sender: TObject);
 Var
-  LFilters : TObjectList<TBitmap32Filter>;
+  LFilters : TObjectList<TBitmapFilter>;
   VclUtils : TVclStylesUtils;
   Frm      : TFrmVCLStyleInfoDialog;
   NewName  : string;
   LBitmap  : TBitmap;
   LPng     : TPngImage;
+  ColorName: string;
 begin
    if StyleName='' then exit;
    VclUtils:=TVclStylesUtils.Create(StyleName, True);
@@ -309,7 +326,16 @@ begin
       NewName :=Format('%s R%d.G%d.B%d',[NewName,TrackBarRed.Position,TrackBarGreen.Position, TrackBarBlue.Position])
      else
      if RadioButtonBlend.Checked then
-      NewName :=Format('%s Blend %s %s',[NewName,ComboBoxBlend.Text,ColorToString(ColorBoxblend.Selected)]);
+     begin
+      ColorName:=ColorBoxblend.Items[ColorBoxblend.ItemIndex];
+      if StartsText('Custom',ColorName) then
+       ColorName:=ColorToString(ColorBoxblend.Selected)
+      else
+      if StartsText('clWeb',ColorName) then
+       ColorName:=StringReplace(ColorName,'clWeb','',[rfReplaceAll]);
+
+      NewName :=Format('%s Blend %s %s',[NewName,ComboBoxBlend.Text,ColorName]);
+     end;
 
      SaveDialog1.FileName:=NewName+'.vsf';
 
@@ -560,6 +586,7 @@ begin
 
   ComboBoxBlend.ItemIndex:=0;
   SetPageActive(0);
+
 end;
 
 procedure TFrmHueSat.FormDestroy(Sender: TObject);
@@ -574,10 +601,10 @@ end;
 
 procedure TFrmHueSat.BuildPreview;
 var
-  LFilters : TObjectList<TBitmap32Filter>;
+  LFilters : TObjectList<TBitmapFilter>;
   //VclUtils : TVclStylesUtils;
   LBitmap  : TBitmap;
-  Filter   : TBitmap32Filter;
+  Filter   : TBitmapFilter;
 begin
   if StyleName='' then exit;
   LFilters:=GetFilters;
@@ -589,7 +616,6 @@ begin
      Filter.Apply(LBitmap);
 
     ImageVCLStyle.Picture.Assign(LBitmap);
-
     {
     VclUtils.SetFilters(LFilters);
     VclUtils.ApplyChanges;
@@ -629,10 +655,53 @@ begin
   ShellExecute(0, 'Open', PChar(Link), nil , nil, SW_SHOWNORMAL);
 end;
 
+procedure TFrmHueSat.ListBoxStyleColorsDrawItem(Control: TWinControl;
+  Index: Integer; Rect: TRect; State: TOwnerDrawState);
+var
+  Bitmap: TBitmap;
+  R: TRect;
+begin
+  with (Control as TListBox).Canvas do
+  begin
+    Bitmap:=TBitmap.Create;
+    try
+     Bitmap.PixelFormat:=pf24bit;
+     Bitmap.Width :=(Control as TListBox).ItemHeight;
+     Bitmap.Height:=(Control as TListBox).ItemHeight;
+
+     //border
+     Bitmap.Canvas.Brush.Color := clBlack;
+     Bitmap.Canvas.FillRect(System.Classes.Rect(0,0,(Control as TListBox).ItemHeight-1, (Control as TListBox).ItemHeight-1));
+     //color
+     Bitmap.Canvas.Brush.Color := TColor(TListBox(Control).Items.Objects[Index]);
+     Bitmap.Canvas.FillRect(System.Classes.Rect(1,1,(Control as TListBox).ItemHeight-2, (Control as TListBox).ItemHeight-2));
+
+      FillRect(Rect);
+      if Bitmap<>nil then
+      begin
+        R:=Bounds(
+          Rect.Left+2,
+          Rect.Top+2,
+          Rect.Bottom-Rect.Top-2,
+          Rect.Bottom-Rect.top-2);
+        StretchDraw(R,Bitmap);
+      end;
+      TextOut(Rect.Left+20,Rect.Top,TListBox(Control).Items[Index]);
+    finally
+      Bitmap.Free;
+    end;
+
+  end;
+end;
+
 procedure TFrmHueSat.LoadStyle;
 begin
   CheckBoxSepia.Checked:=False;
   DrawSeletedVCLStyle;
+  LoadStyleColors;
+  LoadStyleFontsColors;
+  LoadStyleSystemColors;
+
 
   OriginalBitMap.Assign(ImageVCLStyle.Picture.Bitmap);
 
@@ -653,6 +722,84 @@ begin
 
   UpDownBlue.Position       := 0;
   TrackBarBlue.Position     := 0;
+end;
+
+procedure TFrmHueSat.LoadStyleColors;
+var
+ StyleColor : TStyleColor;
+begin                                    if StyleName='' then exit;
+  ListBoxStyleColors.Items.Clear;
+  ListBoxStyleColors.Items.BeginUpdate;
+  for StyleColor  := Low(TStyleColor) to High(TStyleColor) do
+  begin
+    ListBoxStyleColors.Items.AddObject(
+    GetEnumName(TypeInfo(TStyleColor),Integer(StyleColor)),
+    TObject(TStyleManager.Style[StyleName].GetStyleColor(StyleColor))
+    );
+  end;
+  ListBoxStyleColors.Items.EndUpdate;
+end;
+
+procedure TFrmHueSat.LoadStyleFontsColors;
+var
+ StyleFont : TStyleFont;
+begin
+  if StyleName='' then exit;
+  ListBoxStyleFontsColors.Items.Clear;
+  ListBoxStyleFontsColors.Items.BeginUpdate;
+  for StyleFont  := Low(TStyleFont) to High(TStyleFont) do
+  begin
+    ListBoxStyleFontsColors.Items.AddObject(
+    GetEnumName(TypeInfo(TStyleFont),Integer(StyleFont)),
+    TObject(TStyleManager.Style[StyleName].GetStyleFontColor(StyleFont))
+    );
+  end;
+
+
+
+
+  ListBoxStyleFontsColors.Items.EndUpdate;
+end;
+
+
+procedure TFrmHueSat.LoadStyleSystemColors;
+const
+  MaxSysColor = 23;
+  SysColors: array[0..MaxSysColor - 1] of TIdentMapEntry = (
+    (Value: Vcl.Graphics.clActiveBorder; Name: 'clActiveBorder'),
+    (Value: Vcl.Graphics.clActiveCaption; Name: 'clActiveCaption'),
+    (Value: Vcl.Graphics.clBtnFace; Name: 'clBtnFace'),
+    (Value: Vcl.Graphics.clBtnHighlight; Name: 'clBtnHighlight'),
+    (Value: Vcl.Graphics.clBtnShadow; Name: 'clBtnShadow'),
+    (Value: Vcl.Graphics.clBtnText; Name: 'clBtnText'),
+    (Value: Vcl.Graphics.clCaptionText; Name: 'clCaptionText'),
+    (Value: Vcl.Graphics.clGrayText; Name: 'clGrayText'),
+    (Value: Vcl.Graphics.clHighlight; Name: 'clHighlight'),
+    (Value: Vcl.Graphics.clHighlightText; Name: 'clHighlightText'),
+    (Value: Vcl.Graphics.clInactiveBorder; Name: 'clInactiveBorder'),
+    (Value: Vcl.Graphics.clInactiveCaption; Name: 'clInactiveCaption'),
+    (Value: Vcl.Graphics.clInactiveCaptionText; Name: 'clInactiveCaptionText'),
+    (Value: Vcl.Graphics.clInfoBk; Name: 'clInfoBk'),
+    (Value: Vcl.Graphics.clInfoText; Name: 'clInfoText'),
+    (Value: Vcl.Graphics.clMenu; Name: 'clMenu'),
+    (Value: Vcl.Graphics.clMenuText; Name: 'clMenuText'),
+    (Value: Vcl.Graphics.clScrollBar; Name: 'clScrollBar'),
+    (Value: Vcl.Graphics.cl3DDkShadow; Name: 'cl3DDkShadow'),
+    (Value: Vcl.Graphics.cl3DLight; Name: 'cl3DLight'),
+    (Value: Vcl.Graphics.clWindow; Name: 'clWindow'),
+    (Value: Vcl.Graphics.clWindowFrame; Name: 'clWindowFrame'),
+    (Value: Vcl.Graphics.clWindowText; Name: 'clWindowText'));
+Var
+  Element : TIdentMapEntry;
+begin
+  if StyleName='' then exit;
+  ListBoxStyleSystemColors.Items.Clear;
+  ListBoxStyleSystemColors.Items.BeginUpdate;
+  for Element in SysColors do
+  ListBoxStyleSystemColors.Items.AddObject(Element.Name,
+  TObject(TStyleManager.Style[StyleName].GetSystemColor(Element.Value))
+  );
+  ListBoxStyleSystemColors.Items.EndUpdate;
 end;
 
 procedure TFrmHueSat.RadioButtonHSLClick(Sender: TObject);
