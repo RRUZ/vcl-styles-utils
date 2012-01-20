@@ -70,7 +70,7 @@ procedure _BlendDarken32(const ABitMap: TBitmap;Value: Integer);
 procedure _BlendScreen32(const ABitMap: TBitmap;Value: Integer);
 
 Type
-  TBitmap32Filter=class
+  TBitmapFilter=class
   private
    FValue : Integer;
   public
@@ -79,83 +79,83 @@ Type
    property Value : Integer read FValue Write FValue;
   end;
 
-  TBitmap32HueFilter=class(TBitmap32Filter)
+  TBitmap32HueFilter=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32SaturationFilter=class(TBitmap32Filter)
+  TBitmap32SaturationFilter=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32LightnessFilter=class(TBitmap32Filter)
+  TBitmap32LightnessFilter=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32SepiaFilter=class(TBitmap32Filter)
+  TBitmap32SepiaFilter=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32RedFilter=class(TBitmap32Filter)
+  TBitmap32RedFilter=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32GreenFilter=class(TBitmap32Filter)
+  TBitmap32GreenFilter=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlueFilter=class(TBitmap32Filter)
+  TBitmap32BlueFilter=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendBurn=class(TBitmap32Filter)
+  TBitmap32BlendBurn=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendMultiply=class(TBitmap32Filter)
+  TBitmap32BlendMultiply=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
 
-  TBitmap32BlendAdditive=class(TBitmap32Filter)
+  TBitmap32BlendAdditive=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendDodge=class(TBitmap32Filter)
+  TBitmap32BlendDodge=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendOverlay=class(TBitmap32Filter)
+  TBitmap32BlendOverlay=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendDifference=class(TBitmap32Filter)
+  TBitmap32BlendDifference=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendLighten=class(TBitmap32Filter)
+  TBitmap32BlendLighten=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendDarken=class(TBitmap32Filter)
+  TBitmap32BlendDarken=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
 
-  TBitmap32BlendScreen=class(TBitmap32Filter)
+  TBitmap32BlendScreen=class(TBitmapFilter)
   public
    procedure Apply(ABitMap: TBitmap);override;
   end;
@@ -1029,6 +1029,7 @@ end;
 { TBitmap32HueFilter }
 procedure TBitmap32HueFilter.Apply(ABitMap: TBitmap);
 begin
+  if ABitMap.PixelFormat=pf32bit then
   _Hue32(ABitMap, Value);
 end;
 
@@ -1036,6 +1037,7 @@ end;
 
 procedure TBitmap32SaturationFilter.Apply(ABitMap: TBitmap);
 begin
+  if ABitMap.PixelFormat=pf32bit then
   _Saturation32(ABitMap, Value);
 end;
 
@@ -1043,22 +1045,26 @@ end;
 
 procedure TBitmap32LightnessFilter.Apply(ABitMap: TBitmap);
 begin
-  if Value >= 0 then
-    _Lightness32(ABitMap, Value)
-  else
-    _Darkness32(ABitMap, Abs(Value));
+  if ABitMap.PixelFormat=pf32bit then
+  begin
+    if Value >= 0 then
+      _Lightness32(ABitMap, Value)
+    else
+      _Darkness32(ABitMap, Abs(Value));
+  end;
 end;
 
 { TBitmap32SepiaFilter }
 
 procedure TBitmap32SepiaFilter.Apply(ABitMap: TBitmap);
 begin
- _Sepia32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+  _Sepia32(ABitMap, Value);
 end;
 
 { TBitmap32Filter }
 
-constructor TBitmap32Filter.Create(AValue: Integer);
+constructor TBitmapFilter.Create(AValue: Integer);
 begin
  inherited Create;
  FValue:=AValue;
@@ -1068,6 +1074,7 @@ end;
 
 procedure TBitmap32BlueFilter.Apply(ABitMap: TBitmap);
 begin
+  if ABitMap.PixelFormat=pf32bit then
  _SetRGB32(ABitMap,0,0,Value);
 end;
 
@@ -1075,6 +1082,7 @@ end;
 
 procedure TBitmap32RedFilter.Apply(ABitMap: TBitmap);
 begin
+  if ABitMap.PixelFormat=pf32bit then
  _SetRGB32(ABitMap,Value,0,0);
 end;
 
@@ -1082,6 +1090,7 @@ end;
 
 procedure TBitmap32GreenFilter.Apply(ABitMap: TBitmap);
 begin
+  if ABitMap.PixelFormat=pf32bit then
  _SetRGB32(ABitMap,0,Value,0);
 end;
 
@@ -1089,63 +1098,72 @@ end;
 
 procedure TBitmap32BlendBurn.Apply(ABitMap: TBitmap);
 begin
- _BlendBurn32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+   _BlendBurn32(ABitMap, Value);
 end;
 
 { TBitmap32BlendMultiply }
 
 procedure TBitmap32BlendMultiply.Apply(ABitMap: TBitmap);
 begin
- _BlendMultiply32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+  _BlendMultiply32(ABitMap, Value);
 end;
 
 { TBitmap32BlendAdditive }
 
 procedure TBitmap32BlendAdditive.Apply(ABitMap: TBitmap);
 begin
- _BlendAdditive32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+  _BlendAdditive32(ABitMap, Value);
 end;
 
 { TBitmap32BlendDodge }
 
 procedure TBitmap32BlendDodge.Apply(ABitMap: TBitmap);
 begin
- _BlendDodge32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+   _BlendDodge32(ABitMap, Value);
 end;
 
 { TBitmap32BlendOverlay }
 
 procedure TBitmap32BlendOverlay.Apply(ABitMap: TBitmap);
 begin
- _BlendOverlay32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+   _BlendOverlay32(ABitMap, Value);
 end;
 
 { TBitmap32BlendLighten }
 
 procedure TBitmap32BlendLighten.Apply(ABitMap: TBitmap);
 begin
- _BlendLighten32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+   _BlendLighten32(ABitMap, Value);
 end;
 
 { TBitmap32BlendDarken }
 
 procedure TBitmap32BlendDarken.Apply(ABitMap: TBitmap);
 begin
- _BlendDarken32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+   _BlendDarken32(ABitMap, Value);
 end;
 
 { TBitmap32BlendScreen }
 
 procedure TBitmap32BlendScreen.Apply(ABitMap: TBitmap);
 begin
- _BlendScreen32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+   _BlendScreen32(ABitMap, Value);
 end;
 
 { TBitmap32BlendDifference }
 
 procedure TBitmap32BlendDifference.Apply(ABitMap: TBitmap);
 begin
-  _BlendDifference32(ABitMap, Value);
+  if ABitMap.PixelFormat=pf32bit then
+   _BlendDifference32(ABitMap, Value);
 end;
 
 end.

@@ -38,7 +38,7 @@ type
      FStyleExt  : TCustomStyleExt;
      //FSourceInfo: TSourceInfo;
   public
-     procedure SetFilters(Filters : TObjectList<TBitmap32Filter>);
+     procedure SetFilters(Filters : TObjectList<TBitmapFilter>);
      procedure ApplyChanges;
      procedure SaveToFile(const FileName: string);
      //property  SourceInfo: TSourceInfo read FSourceInfo;
@@ -59,6 +59,8 @@ uses
 { TVclStylesUtils }
 
 constructor TVclStylesUtils.Create(const  StyleName : string;Clone:Boolean=False);
+var
+  FSourceInfo: TSourceInfo;
 begin
   TStyleManager.StyleNames;//call DiscoverStyleResources
   FClone   :=Clone;
@@ -70,8 +72,10 @@ begin
    if FClone then
    begin
      FStream:=TMemoryStream.Create;
-     FStream.CopyFrom(TStream(TStyleManager.StyleSourceInfo[StyleName].Data),TStream(TStyleManager.StyleSourceInfo[StyleName].Data).Size);
-     TStream(TStyleManager.StyleSourceInfo[StyleName].Data).Position:=0;
+     FSourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
+     TStream(FSourceInfo.Data).Position:=0;
+     FStream.CopyFrom(TStream(FSourceInfo.Data),TStream(FSourceInfo.Data).Size);
+     TStream(FSourceInfo.Data).Position:=0;
      FStream.Position:=0;
    end
    else
@@ -115,12 +119,12 @@ begin
    end;
 end;
 
-procedure TVclStylesUtils.SetFilters(Filters: TObjectList<TBitmap32Filter>);
+procedure TVclStylesUtils.SetFilters(Filters: TObjectList<TBitmapFilter>);
 var
   LBitmap   : TBitmap;
   BitmapList: TObjectList<TBitmap>;
   Index     : Integer;
-  Filter    : TBitmap32Filter;
+  Filter    : TBitmapFilter;
 begin
    BitmapList:=StyleExt.BitmapList;
    try
@@ -136,5 +140,20 @@ begin
      BitmapList.Free;
    end;
 end;
+              {
+procedure TVclStylesUtils.SetStyleColor(Color: TStyleColor; NewColor: TColor);
+begin
 
+end;
+
+procedure TVclStylesUtils.SetStyleFontColor(Font: TStyleFont; NewColor: TColor);
+begin
+
+end;
+
+procedure TVclStylesUtils.SetSystemColor(Color, NewColor: TColor);
+begin
+
+end;
+           }
 end.
