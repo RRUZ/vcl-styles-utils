@@ -25,6 +25,7 @@ interface
 
 {$DEFINE USE_VCL_STYLESAPI}
 
+
 Uses
   Vcl.Themes,
   Vcl.Styles,
@@ -126,6 +127,7 @@ type
   private
     function GetBitmapList: TObjectList<TBitmap>;
     procedure SetStyleInfo(const Value: TStyleInfo);
+    function GetSource: TObject;
   public
     {$REGION 'Documentation'}
     ///	<summary>Create a  TCustomStyleExt using a vcl style stored in a file
@@ -160,9 +162,14 @@ type
     ///	</summary>
     {$ENDREGION}
     procedure CopyToStream(Stream : TStream);
+
+    property Source: TObject read GetSource;
+    procedure SetStyleColor(Color: TStyleColor; NewColor: TColor);
+    procedure SetStyleFontColor(Font: TStyleFont; NewColor: TColor);
+    procedure SetSystemColor(Color: TColor; NewColor: TColor);
   end;
 
-
+        {
   TCustomStyleHelper = Class Helper for TCustomStyle
   private
     function GetSource: TObject;
@@ -172,6 +179,7 @@ type
     procedure SetStyleFontColor(Font: TStyleFont; NewColor: TColor);
     procedure SetSystemColor(Color: TColor; NewColor: TColor);
   End;
+      }
 
 {$ENDIF}
 
@@ -189,6 +197,7 @@ uses
  Vcl.Imaging.pngimage,
  Winapi.Messages,
 {$ENDIF}
+ Rtti,
  Vcl.Dialogs,
  Vcl.Controls,
  System.Sysutils;
@@ -213,15 +222,8 @@ begin
   Result:= Self.FRegisteredStyleHooks;
 end;
 
-function TCustomStyleHelper.GetSource: TObject;
-begin
-  Result:=Self.FSource;
-end;
 
 { TStyleManagerHelper }
-
-
-
 class function TStyleManagerHelper.RegisteredStyles: TDictionary<string, TSourceInfo>;
 var
   t            : TPair<string, TStyleManager.TSourceInfo>;
@@ -484,6 +486,146 @@ begin
   end;
 end;
 
+procedure TCustomStyleExt.SetStyleColor(Color: TStyleColor; NewColor: TColor);
+begin
+  case Color of
+    scBorder: if TSeStyle(Source).Colors[ktcBorder]<>NewColor then TSeStyle(Source).Colors[ktcBorder]:=NewColor;
+    scButtonDisabled:  if TSeStyle(Source).Colors[ktcButtonDisabled]<>NewColor then TSeStyle(Source).Colors[ktcButtonDisabled]:=NewColor;
+    scButtonFocused:  if TSeStyle(Source).Colors[ktcButtonFocused]<>NewColor then TSeStyle(Source).Colors[ktcButtonFocused]:=NewColor;
+    scButtonHot:  if TSeStyle(Source).Colors[ktcButtonHot]<>NewColor then TSeStyle(Source).Colors[ktcButtonHot]:=NewColor;
+    scButtonNormal:  if TSeStyle(Source).Colors[ktcButton]<>NewColor then TSeStyle(Source).Colors[ktcButton]:=NewColor;
+    scButtonPressed:  if TSeStyle(Source).Colors[ktcButtonPressed]<>NewColor then TSeStyle(Source).Colors[ktcButtonPressed]:=NewColor;
+    scCategoryButtons:  if TSeStyle(Source).Colors[ktcCategoryButtons]<>NewColor then TSeStyle(Source).Colors[ktcCategoryButtons]:=NewColor;
+    scCategoryButtonsGradientBase:  if TSeStyle(Source).Colors[ktcCategoryButtonsGradientBase]<>NewColor then TSeStyle(Source).Colors[ktcCategoryButtonsGradientBase]:=NewColor;
+    scCategoryButtonsGradientEnd:  if TSeStyle(Source).Colors[ktcCategoryButtonsGradientEnd]<>NewColor then TSeStyle(Source).Colors[ktcCategoryButtonsGradientEnd]:=NewColor;
+    scCategoryPanelGroup:  if TSeStyle(Source).Colors[ktcCategoryPanelGroup]<>NewColor then TSeStyle(Source).Colors[ktcCategoryPanelGroup]:=NewColor;
+    scComboBox:  if TSeStyle(Source).Colors[ktcComboBox]<>NewColor then TSeStyle(Source).Colors[ktcComboBox]:=NewColor;
+    scComboBoxDisabled:  if TSeStyle(Source).Colors[ktcComboBoxDisabled]<>NewColor then TSeStyle(Source).Colors[ktcComboBoxDisabled]:=NewColor;
+    scEdit:  if TSeStyle(Source).Colors[ktcEdit]<>NewColor then TSeStyle(Source).Colors[ktcEdit]:=NewColor;
+    scEditDisabled:  if TSeStyle(Source).Colors[ktcEditDisabled]<>NewColor then TSeStyle(Source).Colors[ktcEditDisabled]:=NewColor;
+    scGrid:  if TSeStyle(Source).Colors[ktcGrid]<>NewColor then TSeStyle(Source).Colors[ktcGrid]:=NewColor;
+    scGenericBackground:  if TSeStyle(Source).Colors[ktcGenericBackground]<>NewColor then TSeStyle(Source).Colors[ktcGenericBackground]:=NewColor;
+    scGenericGradientEnd:  if TSeStyle(Source).Colors[ktcGenericGradientEnd]<>NewColor then TSeStyle(Source).Colors[ktcGenericGradientEnd]:=NewColor;
+    scGenericGradientBase:  if TSeStyle(Source).Colors[ktcGenericGradientBase]<>NewColor then TSeStyle(Source).Colors[ktcGenericGradientBase]:=NewColor;
+    scHintGradientBase:  if TSeStyle(Source).Colors[ktcHintGradientBase]<>NewColor then TSeStyle(Source).Colors[ktcHintGradientBase]:=NewColor;
+    scHintGradientEnd:  if TSeStyle(Source).Colors[ktcHintGradientEnd]<>NewColor then TSeStyle(Source).Colors[ktcHintGradientEnd]:=NewColor;
+    scListBox:  if TSeStyle(Source).Colors[ktcListBox]<>NewColor then TSeStyle(Source).Colors[ktcListBox]:=NewColor;
+    scListBoxDisabled:  if TSeStyle(Source).Colors[ktcListBoxDisabled]<>NewColor then TSeStyle(Source).Colors[ktcListBoxDisabled]:=NewColor;
+    scListView:  if TSeStyle(Source).Colors[ktcListView]<>NewColor then TSeStyle(Source).Colors[ktcListView]:=NewColor;
+    scPanel:  if TSeStyle(Source).Colors[ktcPanel]<>NewColor then TSeStyle(Source).Colors[ktcPanel]:=NewColor;
+    scPanelDisabled:  if TSeStyle(Source).Colors[ktcPanelDisabled]<>NewColor then TSeStyle(Source).Colors[ktcPanelDisabled]:=NewColor;
+    scSplitter:  if TSeStyle(Source).Colors[ktcSplitter]<>NewColor then TSeStyle(Source).Colors[ktcSplitter]:=NewColor;
+    scToolBarGradientBase:  if TSeStyle(Source).Colors[ktcToolBarGradientBase]<>NewColor then TSeStyle(Source).Colors[ktcToolBarGradientBase]:=NewColor;
+    scToolBarGradientEnd:  if TSeStyle(Source).Colors[ktcToolBarGradientEnd]<>NewColor then TSeStyle(Source).Colors[ktcToolBarGradientEnd]:=NewColor;
+    scTreeView:  if TSeStyle(Source).Colors[ktcTreeView]<>NewColor then TSeStyle(Source).Colors[ktcTreeView]:=NewColor;
+    scWindow: if TSeStyle(Source).Colors[ktcWindow]<>NewColor then TSeStyle(Source).Colors[ktcWindow]:=NewColor;
+  end;
+end;
+
+procedure TCustomStyleExt.SetStyleFontColor(Font: TStyleFont; NewColor: TColor);
+begin
+  case Font of
+    sfButtonTextDisabled: TSeStyle(Source).Fonts[ktfButtonTextDisabled].Color:=NewColor;
+    sfButtonTextFocused: TSeStyle(Source).Fonts[ktfButtonTextFocused].Color:=NewColor;
+    sfButtonTextHot: TSeStyle(Source).Fonts[ktfButtonTextHot].Color:=NewColor;
+    sfButtonTextNormal: TSeStyle(Source).Fonts[ktfButtonTextNormal].Color:=NewColor;
+    sfButtonTextPressed: TSeStyle(Source).Fonts[ktfButtonTextPressed].Color:=NewColor;
+    sfCaptionTextInactive: TSeStyle(Source).Fonts[ktfCaptionTextInactive].Color:=NewColor;
+    sfCaptionTextNormal: TSeStyle(Source).Fonts[ktfCaptionTextNormal].Color:=NewColor;
+    sfCategoryPanelGroupHeaderHot: TSeStyle(Source).Fonts[ktfCategoryPanelGroupHeaderHot].Color:=NewColor;
+    sfCategoryPanelGroupHeaderNormal: TSeStyle(Source).Fonts[ktfCategoryPanelGroupHeaderNormal].Color:=NewColor;
+    sfCatgeoryButtonsCategoryNormal: TSeStyle(Source).Fonts[ktfCatgeoryButtonsCategoryNormal].Color:=NewColor;
+    sfCatgeoryButtonsCategorySelected: TSeStyle(Source).Fonts[ktfCatgeoryButtonsCategorySelected].Color:=NewColor;
+    sfCatgeoryButtonsHot: TSeStyle(Source).Fonts[ktfCatgeoryButtonsHot].Color:=NewColor;
+    sfCatgeoryButtonsNormal: TSeStyle(Source).Fonts[ktfCatgeoryButtonsNormal].Color:=NewColor;
+    sfCatgeoryButtonsSelected: TSeStyle(Source).Fonts[ktfCatgeoryButtonsSelected].Color:=NewColor;
+    sfCheckBoxTextDisabled: TSeStyle(Source).Fonts[ktfCheckBoxTextDisabled].Color:=NewColor;
+    sfCheckBoxTextFocused: TSeStyle(Source).Fonts[ktfCheckBoxTextFocused].Color:=NewColor;
+    sfCheckBoxTextHot: TSeStyle(Source).Fonts[ktfCheckBoxTextHot].Color:=NewColor;
+    sfCheckBoxTextNormal: TSeStyle(Source).Fonts[ktfCheckBoxTextNormal].Color:=NewColor;
+    sfCheckBoxTextPressed: TSeStyle(Source).Fonts[ktfCheckBoxTextPressed].Color:=NewColor;
+    sfComboBoxItemDisabled: TSeStyle(Source).Fonts[ktfComboBoxItemDisabled].Color:=NewColor;
+    sfComboBoxItemFocused: TSeStyle(Source).Fonts[ktfComboBoxItemFocused].Color:=NewColor;
+    sfComboBoxItemHot: TSeStyle(Source).Fonts[ktfComboBoxItemHot].Color:=NewColor;
+    sfComboBoxItemNormal: TSeStyle(Source).Fonts[ktfComboBoxItemNormal].Color:=NewColor;
+    sfComboBoxItemSelected: TSeStyle(Source).Fonts[ktfComboBoxItemSelected].Color:=NewColor;
+    sfEditBoxTextDisabled: TSeStyle(Source).Fonts[ktfEditBoxTextDisabled].Color:=NewColor;
+    sfEditBoxTextFocused: TSeStyle(Source).Fonts[ktfEditBoxTextFocused].Color:=NewColor;
+    sfEditBoxTextHot: TSeStyle(Source).Fonts[ktfEditBoxTextHot].Color:=NewColor;
+    sfEditBoxTextNormal: TSeStyle(Source).Fonts[ktfEditBoxTextNormal].Color:=NewColor;
+    sfEditBoxTextSelected: TSeStyle(Source).Fonts[ktfEditBoxTextSelected].Color:=NewColor;
+    sfGridItemFixedHot: TSeStyle(Source).Fonts[ktfGridItemFixedHot].Color:=NewColor;
+    sfGridItemFixedNormal: TSeStyle(Source).Fonts[ktfGridItemFixedNormal].Color:=NewColor;
+    sfGridItemFixedPressed: TSeStyle(Source).Fonts[ktfGridItemFixedPressed].Color:=NewColor;
+    sfGridItemNormal: TSeStyle(Source).Fonts[ktfGridItemNormal].Color:=NewColor;
+    sfGridItemSelected: TSeStyle(Source).Fonts[ktfGridItemSelected].Color:=NewColor;
+    sfGroupBoxTextDisabled: TSeStyle(Source).Fonts[ktfGroupBoxTextDisabled].Color:=NewColor;
+    sfGroupBoxTextNormal: TSeStyle(Source).Fonts[ktfGroupBoxTextNormal].Color:=NewColor;
+    sfHeaderSectionTextDisabled: TSeStyle(Source).Fonts[ktfHeaderSectionTextDisabled].Color:=NewColor;
+    sfHeaderSectionTextHot: TSeStyle(Source).Fonts[ktfHeaderSectionTextHot].Color:=NewColor;
+    sfHeaderSectionTextNormal: TSeStyle(Source).Fonts[ktfHeaderSectionTextNormal].Color:=NewColor;
+    sfHeaderSectionTextPressed: TSeStyle(Source).Fonts[ktfHeaderSectionTextPressed].Color:=NewColor;
+    sfListItemTextDisabled: TSeStyle(Source).Fonts[ktfListItemTextDisabled].Color:=NewColor;
+    sfListItemTextFocused: TSeStyle(Source).Fonts[ktfListItemTextFocused].Color:=NewColor;
+    sfListItemTextHot: TSeStyle(Source).Fonts[ktfListItemTextHot].Color:=NewColor;
+    sfListItemTextNormal: TSeStyle(Source).Fonts[ktfListItemTextNormal].Color:=NewColor;
+    sfListItemTextSelected: TSeStyle(Source).Fonts[ktfListItemTextSelected].Color:=NewColor;
+    sfMenuItemTextDisabled: TSeStyle(Source).Fonts[ktfMenuItemTextDisabled].Color:=NewColor;
+    sfMenuItemTextHot: TSeStyle(Source).Fonts[ktfMenuItemTextHot].Color:=NewColor;
+    sfMenuItemTextNormal: TSeStyle(Source).Fonts[ktfMenuItemTextNormal].Color:=NewColor;
+    sfMenuItemTextSelected: TSeStyle(Source).Fonts[ktfMenuItemTextSelected].Color:=NewColor;
+    sfPanelTextDisabled: TSeStyle(Source).Fonts[ktfPanelTextDisabled].Color:=NewColor;
+    sfPanelTextNormal: TSeStyle(Source).Fonts[ktfPanelTextNormal].Color:=NewColor;
+    sfPopupMenuItemTextDisabled: TSeStyle(Source).Fonts[ktfPopupMenuItemTextDisabled].Color:=NewColor;
+    sfPopupMenuItemTextHot: TSeStyle(Source).Fonts[ktfPopupMenuItemTextHot].Color:=NewColor;
+    sfPopupMenuItemTextNormal: TSeStyle(Source).Fonts[ktfPopupMenuItemTextNormal].Color:=NewColor;
+    sfPopupMenuItemTextSelected: TSeStyle(Source).Fonts[ktfPopupMenuItemTextSelected].Color:=NewColor;
+    sfRadioButtonTextDisabled: TSeStyle(Source).Fonts[ktfRadioButtonTextDisabled].Color:=NewColor;
+    sfRadioButtonTextFocused: TSeStyle(Source).Fonts[ktfRadioButtonTextFocused].Color:=NewColor;
+    sfRadioButtonTextHot: TSeStyle(Source).Fonts[ktfRadioButtonTextHot].Color:=NewColor;
+    sfRadioButtonTextNormal: TSeStyle(Source).Fonts[ktfRadioButtonTextNormal].Color:=NewColor;
+    sfRadioButtonTextPressed: TSeStyle(Source).Fonts[ktfRadioButtonTextPressed].Color:=NewColor;
+    sfSmCaptionTextInactive: TSeStyle(Source).Fonts[ktfSmCaptionTextInactive].Color:=NewColor;
+    sfSmCaptionTextNormal: TSeStyle(Source).Fonts[ktfSmCaptionTextNormal].Color:=NewColor;
+    sfStatusPanelTextDisabled: TSeStyle(Source).Fonts[ktfStatusPanelTextDisabled].Color:=NewColor;
+    sfStatusPanelTextNormal: TSeStyle(Source).Fonts[ktfStatusPanelTextNormal].Color:=NewColor;
+    sfTabTextActiveDisabled: TSeStyle(Source).Fonts[ktfTabTextActiveDisabled].Color:=NewColor;
+    sfTabTextActiveHot: TSeStyle(Source).Fonts[ktfTabTextActiveHot].Color:=NewColor;
+    sfTabTextActiveNormal: TSeStyle(Source).Fonts[ktfTabTextActiveNormal].Color:=NewColor;
+    sfTabTextInactiveDisabled: TSeStyle(Source).Fonts[ktfTabTextInactiveDisabled].Color:=NewColor;
+    sfTabTextInactiveHot: TSeStyle(Source).Fonts[ktfTabTextInactiveHot].Color:=NewColor;
+    sfTabTextInactiveNormal: TSeStyle(Source).Fonts[ktfTabTextInactiveNormal].Color:=NewColor;
+    sfTextLabelDisabled: TSeStyle(Source).Fonts[ktfStaticTextDisabled].Color:=NewColor;
+    sfTextLabelFocused: TSeStyle(Source).Fonts[ktfStaticTextFocused].Color:=NewColor;
+    sfTextLabelHot: TSeStyle(Source).Fonts[ktfStaticTextHot].Color:=NewColor;
+    sfTextLabelNormal: TSeStyle(Source).Fonts[ktfStaticTextNormal].Color:=NewColor;
+    sfToolItemTextDisabled: TSeStyle(Source).Fonts[ktfToolItemTextDisabled].Color:=NewColor;
+    sfToolItemTextHot: TSeStyle(Source).Fonts[ktfToolItemTextHot].Color:=NewColor;
+    sfToolItemTextNormal: TSeStyle(Source).Fonts[ktfToolItemTextNormal].Color:=NewColor;
+    sfToolItemTextSelected: TSeStyle(Source).Fonts[ktfToolItemTextSelected].Color:=NewColor;
+    sfTreeItemTextDisabled: TSeStyle(Source).Fonts[ktfTreeItemTextDisabled].Color:=NewColor;
+    sfTreeItemTextFocused: TSeStyle(Source).Fonts[ktfTreeItemTextFocused].Color:=NewColor;
+    sfTreeItemTextHot: TSeStyle(Source).Fonts[ktfTreeItemTextHot].Color:=NewColor;
+    sfTreeItemTextNormal: TSeStyle(Source).Fonts[ktfTreeItemTextNormal].Color:=NewColor;
+    sfTreeItemTextSelected: TSeStyle(Source).Fonts[ktfTreeItemTextSelected].Color:=NewColor;
+    sfWindowTextDisabled: TSeStyle(Source).Fonts[ktfWindowTextDisabled].Color:=NewColor;
+    sfWindowTextNormal: TSeStyle(Source).Fonts[ktfWindowTextNormal].Color:=NewColor;
+  end;
+end;
+
+procedure TCustomStyleExt.SetSystemColor(Color, NewColor: TColor);
+begin
+  if TseStyle(Source).SysColors[Color]<>NewColor then
+    TseStyle(Source).SysColors[Color]:=NewColor;
+end;
+
+
+function TCustomStyleExt.GetSource: TObject;
+begin
+  Result:=TRttiContext.Create.GetType(Self.ClassType).GetField('FSource').GetValue(Self).AsObject;
+end;
+
+
 procedure TCustomStyleExt.SetStyleInfo(const Value: TStyleInfo);
 begin
  TseStyle(Source).StyleSource.Name:=Value.Name;
@@ -492,6 +634,10 @@ begin
  TseStyle(Source).StyleSource.AuthorURL:=Value.AuthorURL;
  TseStyle(Source).StyleSource.Version:=Value.Version;
 end;
+
+
+
+
 
 function TCustomStyleExt.GetStyleInfo: TStyleInfo;
 begin
@@ -505,140 +651,15 @@ end;
 
 
 { TCustomStyleHelper }
-
-procedure TCustomStyleHelper.SetStyleColor(Color: TStyleColor; NewColor: TColor);
-begin
-  case Color of
-    scBorder: if TSeStyle(Self.FSource).Colors[ktcBorder]<>NewColor then TSeStyle(Self.FSource).Colors[ktcBorder]:=NewColor;
-    scButtonDisabled:  if TSeStyle(Self.FSource).Colors[ktcButtonDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonDisabled]:=NewColor;
-    scButtonFocused:  if TSeStyle(Self.FSource).Colors[ktcButtonFocused]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonFocused]:=NewColor;
-    scButtonHot:  if TSeStyle(Self.FSource).Colors[ktcButtonHot]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonHot]:=NewColor;
-    scButtonNormal:  if TSeStyle(Self.FSource).Colors[ktcButton]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButton]:=NewColor;
-    scButtonPressed:  if TSeStyle(Self.FSource).Colors[ktcButtonPressed]<>NewColor then TSeStyle(Self.FSource).Colors[ktcButtonPressed]:=NewColor;
-    scCategoryButtons:  if TSeStyle(Self.FSource).Colors[ktcCategoryButtons]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryButtons]:=NewColor;
-    scCategoryButtonsGradientBase:  if TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientBase]:=NewColor;
-    scCategoryButtonsGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryButtonsGradientEnd]:=NewColor;
-    scCategoryPanelGroup:  if TSeStyle(Self.FSource).Colors[ktcCategoryPanelGroup]<>NewColor then TSeStyle(Self.FSource).Colors[ktcCategoryPanelGroup]:=NewColor;
-    scComboBox:  if TSeStyle(Self.FSource).Colors[ktcComboBox]<>NewColor then TSeStyle(Self.FSource).Colors[ktcComboBox]:=NewColor;
-    scComboBoxDisabled:  if TSeStyle(Self.FSource).Colors[ktcComboBoxDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcComboBoxDisabled]:=NewColor;
-    scEdit:  if TSeStyle(Self.FSource).Colors[ktcEdit]<>NewColor then TSeStyle(Self.FSource).Colors[ktcEdit]:=NewColor;
-    scEditDisabled:  if TSeStyle(Self.FSource).Colors[ktcEditDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcEditDisabled]:=NewColor;
-    scGrid:  if TSeStyle(Self.FSource).Colors[ktcGrid]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGrid]:=NewColor;
-    scGenericBackground:  if TSeStyle(Self.FSource).Colors[ktcGenericBackground]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGenericBackground]:=NewColor;
-    scGenericGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcGenericGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGenericGradientEnd]:=NewColor;
-    scGenericGradientBase:  if TSeStyle(Self.FSource).Colors[ktcGenericGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcGenericGradientBase]:=NewColor;
-    scHintGradientBase:  if TSeStyle(Self.FSource).Colors[ktcHintGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcHintGradientBase]:=NewColor;
-    scHintGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcHintGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcHintGradientEnd]:=NewColor;
-    scListBox:  if TSeStyle(Self.FSource).Colors[ktcListBox]<>NewColor then TSeStyle(Self.FSource).Colors[ktcListBox]:=NewColor;
-    scListBoxDisabled:  if TSeStyle(Self.FSource).Colors[ktcListBoxDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcListBoxDisabled]:=NewColor;
-    scListView:  if TSeStyle(Self.FSource).Colors[ktcListView]<>NewColor then TSeStyle(Self.FSource).Colors[ktcListView]:=NewColor;
-    scPanel:  if TSeStyle(Self.FSource).Colors[ktcPanel]<>NewColor then TSeStyle(Self.FSource).Colors[ktcPanel]:=NewColor;
-    scPanelDisabled:  if TSeStyle(Self.FSource).Colors[ktcPanelDisabled]<>NewColor then TSeStyle(Self.FSource).Colors[ktcPanelDisabled]:=NewColor;
-    scSplitter:  if TSeStyle(Self.FSource).Colors[ktcSplitter]<>NewColor then TSeStyle(Self.FSource).Colors[ktcSplitter]:=NewColor;
-    scToolBarGradientBase:  if TSeStyle(Self.FSource).Colors[ktcToolBarGradientBase]<>NewColor then TSeStyle(Self.FSource).Colors[ktcToolBarGradientBase]:=NewColor;
-    scToolBarGradientEnd:  if TSeStyle(Self.FSource).Colors[ktcToolBarGradientEnd]<>NewColor then TSeStyle(Self.FSource).Colors[ktcToolBarGradientEnd]:=NewColor;
-    scTreeView:  if TSeStyle(Self.FSource).Colors[ktcTreeView]<>NewColor then TSeStyle(Self.FSource).Colors[ktcTreeView]:=NewColor;
-    scWindow: if TSeStyle(Self.FSource).Colors[ktcWindow]<>NewColor then TSeStyle(Self.FSource).Colors[ktcWindow]:=NewColor;
-  end;
-end;
-
-procedure TCustomStyleHelper.SetStyleFontColor(Font: TStyleFont; NewColor: TColor);
-begin
-  case Font of
-    sfButtonTextDisabled: TSeStyle(Self.FSource).Fonts[ktfButtonTextDisabled].Color:=NewColor;
-    sfButtonTextFocused: TSeStyle(Self.FSource).Fonts[ktfButtonTextFocused].Color:=NewColor;
-    sfButtonTextHot: TSeStyle(Self.FSource).Fonts[ktfButtonTextHot].Color:=NewColor;
-    sfButtonTextNormal: TSeStyle(Self.FSource).Fonts[ktfButtonTextNormal].Color:=NewColor;
-    sfButtonTextPressed: TSeStyle(Self.FSource).Fonts[ktfButtonTextPressed].Color:=NewColor;
-    sfCaptionTextInactive: TSeStyle(Self.FSource).Fonts[ktfCaptionTextInactive].Color:=NewColor;
-    sfCaptionTextNormal: TSeStyle(Self.FSource).Fonts[ktfCaptionTextNormal].Color:=NewColor;
-    sfCategoryPanelGroupHeaderHot: TSeStyle(Self.FSource).Fonts[ktfCategoryPanelGroupHeaderHot].Color:=NewColor;
-    sfCategoryPanelGroupHeaderNormal: TSeStyle(Self.FSource).Fonts[ktfCategoryPanelGroupHeaderNormal].Color:=NewColor;
-    sfCatgeoryButtonsCategoryNormal: TSeStyle(Self.FSource).Fonts[ktfCatgeoryButtonsCategoryNormal].Color:=NewColor;
-    sfCatgeoryButtonsCategorySelected: TSeStyle(Self.FSource).Fonts[ktfCatgeoryButtonsCategorySelected].Color:=NewColor;
-    sfCatgeoryButtonsHot: TSeStyle(Self.FSource).Fonts[ktfCatgeoryButtonsHot].Color:=NewColor;
-    sfCatgeoryButtonsNormal: TSeStyle(Self.FSource).Fonts[ktfCatgeoryButtonsNormal].Color:=NewColor;
-    sfCatgeoryButtonsSelected: TSeStyle(Self.FSource).Fonts[ktfCatgeoryButtonsSelected].Color:=NewColor;
-    sfCheckBoxTextDisabled: TSeStyle(Self.FSource).Fonts[ktfCheckBoxTextDisabled].Color:=NewColor;
-    sfCheckBoxTextFocused: TSeStyle(Self.FSource).Fonts[ktfCheckBoxTextFocused].Color:=NewColor;
-    sfCheckBoxTextHot: TSeStyle(Self.FSource).Fonts[ktfCheckBoxTextHot].Color:=NewColor;
-    sfCheckBoxTextNormal: TSeStyle(Self.FSource).Fonts[ktfCheckBoxTextNormal].Color:=NewColor;
-    sfCheckBoxTextPressed: TSeStyle(Self.FSource).Fonts[ktfCheckBoxTextPressed].Color:=NewColor;
-    sfComboBoxItemDisabled: TSeStyle(Self.FSource).Fonts[ktfComboBoxItemDisabled].Color:=NewColor;
-    sfComboBoxItemFocused: TSeStyle(Self.FSource).Fonts[ktfComboBoxItemFocused].Color:=NewColor;
-    sfComboBoxItemHot: TSeStyle(Self.FSource).Fonts[ktfComboBoxItemHot].Color:=NewColor;
-    sfComboBoxItemNormal: TSeStyle(Self.FSource).Fonts[ktfComboBoxItemNormal].Color:=NewColor;
-    sfComboBoxItemSelected: TSeStyle(Self.FSource).Fonts[ktfComboBoxItemSelected].Color:=NewColor;
-    sfEditBoxTextDisabled: TSeStyle(Self.FSource).Fonts[ktfEditBoxTextDisabled].Color:=NewColor;
-    sfEditBoxTextFocused: TSeStyle(Self.FSource).Fonts[ktfEditBoxTextFocused].Color:=NewColor;
-    sfEditBoxTextHot: TSeStyle(Self.FSource).Fonts[ktfEditBoxTextHot].Color:=NewColor;
-    sfEditBoxTextNormal: TSeStyle(Self.FSource).Fonts[ktfEditBoxTextNormal].Color:=NewColor;
-    sfEditBoxTextSelected: TSeStyle(Self.FSource).Fonts[ktfEditBoxTextSelected].Color:=NewColor;
-    sfGridItemFixedHot: TSeStyle(Self.FSource).Fonts[ktfGridItemFixedHot].Color:=NewColor;
-    sfGridItemFixedNormal: TSeStyle(Self.FSource).Fonts[ktfGridItemFixedNormal].Color:=NewColor;
-    sfGridItemFixedPressed: TSeStyle(Self.FSource).Fonts[ktfGridItemFixedPressed].Color:=NewColor;
-    sfGridItemNormal: TSeStyle(Self.FSource).Fonts[ktfGridItemNormal].Color:=NewColor;
-    sfGridItemSelected: TSeStyle(Self.FSource).Fonts[ktfGridItemSelected].Color:=NewColor;
-    sfGroupBoxTextDisabled: TSeStyle(Self.FSource).Fonts[ktfGroupBoxTextDisabled].Color:=NewColor;
-    sfGroupBoxTextNormal: TSeStyle(Self.FSource).Fonts[ktfGroupBoxTextNormal].Color:=NewColor;
-    sfHeaderSectionTextDisabled: TSeStyle(Self.FSource).Fonts[ktfHeaderSectionTextDisabled].Color:=NewColor;
-    sfHeaderSectionTextHot: TSeStyle(Self.FSource).Fonts[ktfHeaderSectionTextHot].Color:=NewColor;
-    sfHeaderSectionTextNormal: TSeStyle(Self.FSource).Fonts[ktfHeaderSectionTextNormal].Color:=NewColor;
-    sfHeaderSectionTextPressed: TSeStyle(Self.FSource).Fonts[ktfHeaderSectionTextPressed].Color:=NewColor;
-    sfListItemTextDisabled: TSeStyle(Self.FSource).Fonts[ktfListItemTextDisabled].Color:=NewColor;
-    sfListItemTextFocused: TSeStyle(Self.FSource).Fonts[ktfListItemTextFocused].Color:=NewColor;
-    sfListItemTextHot: TSeStyle(Self.FSource).Fonts[ktfListItemTextHot].Color:=NewColor;
-    sfListItemTextNormal: TSeStyle(Self.FSource).Fonts[ktfListItemTextNormal].Color:=NewColor;
-    sfListItemTextSelected: TSeStyle(Self.FSource).Fonts[ktfListItemTextSelected].Color:=NewColor;
-    sfMenuItemTextDisabled: TSeStyle(Self.FSource).Fonts[ktfMenuItemTextDisabled].Color:=NewColor;
-    sfMenuItemTextHot: TSeStyle(Self.FSource).Fonts[ktfMenuItemTextHot].Color:=NewColor;
-    sfMenuItemTextNormal: TSeStyle(Self.FSource).Fonts[ktfMenuItemTextNormal].Color:=NewColor;
-    sfMenuItemTextSelected: TSeStyle(Self.FSource).Fonts[ktfMenuItemTextSelected].Color:=NewColor;
-    sfPanelTextDisabled: TSeStyle(Self.FSource).Fonts[ktfPanelTextDisabled].Color:=NewColor;
-    sfPanelTextNormal: TSeStyle(Self.FSource).Fonts[ktfPanelTextNormal].Color:=NewColor;
-    sfPopupMenuItemTextDisabled: TSeStyle(Self.FSource).Fonts[ktfPopupMenuItemTextDisabled].Color:=NewColor;
-    sfPopupMenuItemTextHot: TSeStyle(Self.FSource).Fonts[ktfPopupMenuItemTextHot].Color:=NewColor;
-    sfPopupMenuItemTextNormal: TSeStyle(Self.FSource).Fonts[ktfPopupMenuItemTextNormal].Color:=NewColor;
-    sfPopupMenuItemTextSelected: TSeStyle(Self.FSource).Fonts[ktfPopupMenuItemTextSelected].Color:=NewColor;
-    sfRadioButtonTextDisabled: TSeStyle(Self.FSource).Fonts[ktfRadioButtonTextDisabled].Color:=NewColor;
-    sfRadioButtonTextFocused: TSeStyle(Self.FSource).Fonts[ktfRadioButtonTextFocused].Color:=NewColor;
-    sfRadioButtonTextHot: TSeStyle(Self.FSource).Fonts[ktfRadioButtonTextHot].Color:=NewColor;
-    sfRadioButtonTextNormal: TSeStyle(Self.FSource).Fonts[ktfRadioButtonTextNormal].Color:=NewColor;
-    sfRadioButtonTextPressed: TSeStyle(Self.FSource).Fonts[ktfRadioButtonTextPressed].Color:=NewColor;
-    sfSmCaptionTextInactive: TSeStyle(Self.FSource).Fonts[ktfSmCaptionTextInactive].Color:=NewColor;
-    sfSmCaptionTextNormal: TSeStyle(Self.FSource).Fonts[ktfSmCaptionTextNormal].Color:=NewColor;
-    sfStatusPanelTextDisabled: TSeStyle(Self.FSource).Fonts[ktfStatusPanelTextDisabled].Color:=NewColor;
-    sfStatusPanelTextNormal: TSeStyle(Self.FSource).Fonts[ktfStatusPanelTextNormal].Color:=NewColor;
-    sfTabTextActiveDisabled: TSeStyle(Self.FSource).Fonts[ktfTabTextActiveDisabled].Color:=NewColor;
-    sfTabTextActiveHot: TSeStyle(Self.FSource).Fonts[ktfTabTextActiveHot].Color:=NewColor;
-    sfTabTextActiveNormal: TSeStyle(Self.FSource).Fonts[ktfTabTextActiveNormal].Color:=NewColor;
-    sfTabTextInactiveDisabled: TSeStyle(Self.FSource).Fonts[ktfTabTextInactiveDisabled].Color:=NewColor;
-    sfTabTextInactiveHot: TSeStyle(Self.FSource).Fonts[ktfTabTextInactiveHot].Color:=NewColor;
-    sfTabTextInactiveNormal: TSeStyle(Self.FSource).Fonts[ktfTabTextInactiveNormal].Color:=NewColor;
-    sfTextLabelDisabled: TSeStyle(Self.FSource).Fonts[ktfStaticTextDisabled].Color:=NewColor;
-    sfTextLabelFocused: TSeStyle(Self.FSource).Fonts[ktfStaticTextFocused].Color:=NewColor;
-    sfTextLabelHot: TSeStyle(Self.FSource).Fonts[ktfStaticTextHot].Color:=NewColor;
-    sfTextLabelNormal: TSeStyle(Self.FSource).Fonts[ktfStaticTextNormal].Color:=NewColor;
-    sfToolItemTextDisabled: TSeStyle(Self.FSource).Fonts[ktfToolItemTextDisabled].Color:=NewColor;
-    sfToolItemTextHot: TSeStyle(Self.FSource).Fonts[ktfToolItemTextHot].Color:=NewColor;
-    sfToolItemTextNormal: TSeStyle(Self.FSource).Fonts[ktfToolItemTextNormal].Color:=NewColor;
-    sfToolItemTextSelected: TSeStyle(Self.FSource).Fonts[ktfToolItemTextSelected].Color:=NewColor;
-    sfTreeItemTextDisabled: TSeStyle(Self.FSource).Fonts[ktfTreeItemTextDisabled].Color:=NewColor;
-    sfTreeItemTextFocused: TSeStyle(Self.FSource).Fonts[ktfTreeItemTextFocused].Color:=NewColor;
-    sfTreeItemTextHot: TSeStyle(Self.FSource).Fonts[ktfTreeItemTextHot].Color:=NewColor;
-    sfTreeItemTextNormal: TSeStyle(Self.FSource).Fonts[ktfTreeItemTextNormal].Color:=NewColor;
-    sfTreeItemTextSelected: TSeStyle(Self.FSource).Fonts[ktfTreeItemTextSelected].Color:=NewColor;
-    sfWindowTextDisabled: TSeStyle(Self.FSource).Fonts[ktfWindowTextDisabled].Color:=NewColor;
-    sfWindowTextNormal: TSeStyle(Self.FSource).Fonts[ktfWindowTextNormal].Color:=NewColor;
-  end;
-end;
-
-procedure TCustomStyleHelper.SetSystemColor(Color, NewColor: TColor);
-begin
-  if TseStyle(Self.FSource).SysColors[Color]<>NewColor then
-    TseStyle(Self.FSource).SysColors[Color]:=NewColor;
-end;
-
+//function TCustomStyleHelper.GetSource: TObject;
+//begin
+//  {$IFDEF USE_RTTI}
+//  Result:=TRttiContext.Create.GetType(Self.ClassType).GetField('FSource').GetValue(Self).AsObject;
+//  {$ELSE}
+//  Result:=Self.FSource;
+//  {$ENDIF}
+//end;
+//
 {$ENDIF}
 
 procedure DrawSampleWindow(Style:TCustomStyle;Canvas:TCanvas;ARect:TRect;const ACaption : string;hIcon:HICON=0);
@@ -653,6 +674,8 @@ var
   TextRect        : TRect;
   CaptionBitmap   : TBitmap;
   ThemeTextColor  : TColor;
+
+  //BlendFunction   : TBlendFunction;
 
     function GetBorderSize: TRect;
     var
@@ -752,6 +775,27 @@ begin
 
   //Draw caption
   Canvas.Draw(0, 0, CaptionBitmap);
+  {
+  BlendFunction.BlendOp := AC_SRC_OVER;
+  BlendFunction.BlendFlags := 0;
+  BlendFunction.SourceConstantAlpha := 100;
+  BlendFunction.AlphaFormat :=  AC_SRC_OVER;
+  WinAPi.Windows.AlphaBlend(
+    Canvas.Handle,
+    0,
+    0,
+    CaptionBitmap.Width,
+    CaptionBitmap.Height,
+    CaptionBitmap.Canvas.Handle,
+    0,
+    0,
+    CaptionBitmap.Width,
+    CaptionBitmap.Height,
+    BlendFunction
+  );
+    }
+
+
   CaptionBitmap.Free;
 
   //Draw left border

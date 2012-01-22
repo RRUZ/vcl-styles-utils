@@ -2284,21 +2284,21 @@ object FrmHueSat: TFrmHueSat
       ImageIndex = 2
       object Label8: TLabel
         Left = 3
-        Top = 52
+        Top = 47
         Width = 26
         Height = 13
         Caption = 'Mode'
       end
       object Label9: TLabel
         Left = 3
-        Top = 5
+        Top = 3
         Width = 25
         Height = 13
         Caption = 'Color'
       end
       object ButtonApplyBlend: TButton
         Left = 3
-        Top = 103
+        Top = 93
         Width = 75
         Height = 25
         Caption = 'Apply Blend'
@@ -2307,7 +2307,7 @@ object FrmHueSat: TFrmHueSat
       end
       object ColorBoxblend: TColorBox
         Left = 3
-        Top = 24
+        Top = 22
         Width = 145
         Height = 22
         Selected = clRed
@@ -2318,7 +2318,7 @@ object FrmHueSat: TFrmHueSat
       end
       object Button6: TButton
         Left = 154
-        Top = 24
+        Top = 22
         Width = 27
         Height = 22
         Caption = '...'
@@ -2327,7 +2327,7 @@ object FrmHueSat: TFrmHueSat
       end
       object ComboBoxBlend: TComboBox
         Left = 3
-        Top = 71
+        Top = 66
         Width = 145
         Height = 21
         Style = csDropDownList
@@ -2413,7 +2413,7 @@ object FrmHueSat: TFrmHueSat
       ImageIndex = 1
       object ListViewStyleColors: TListView
         Left = 0
-        Top = 24
+        Top = 26
         Width = 353
         Height = 173
         Align = alCustom
@@ -2521,10 +2521,10 @@ object FrmHueSat: TFrmHueSat
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 288
-    Top = 312
+    Left = 88
+    Top = 424
     Bitmap = {
-      494C010101000800800010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800880010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2664,8 +2664,8 @@ object FrmHueSat: TFrmHueSat
       000000000000}
   end
   object ActionManager1: TActionManager
-    Left = 240
-    Top = 312
+    Left = 136
+    Top = 424
     StyleName = 'Platform Default'
     object ActionApplyStyle: TAction
       Caption = 'ActionApplyStyle'
@@ -2676,13 +2676,13 @@ object FrmHueSat: TFrmHueSat
   object SaveDialog1: TSaveDialog
     DefaultExt = '*.vsf'
     Filter = 'Visual Style Files|*.vsf'
-    Left = 200
-    Top = 312
+    Left = 184
+    Top = 424
   end
   object ColorDialog1: TColorDialog
     Options = [cdFullOpen, cdShowHelp, cdSolidColor, cdAnyColor]
     Left = 224
-    Top = 352
+    Top = 424
   end
   object ImageListStyleColors: TImageList
     ColorDepth = cd32Bit
