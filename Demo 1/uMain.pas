@@ -55,7 +55,7 @@ end;
 }
 procedure TFrmMain.Button2Click(Sender: TObject);
 begin
- TCustomStyle(TStyleManager.ActiveStyle).SetStyleColor(scEdit, clRed);
+ TCustomStyleExt(TStyleManager.ActiveStyle).SetStyleColor(scEdit, clRed);
  TStyleManager.RefreshCurrentTheme;
 end;
 

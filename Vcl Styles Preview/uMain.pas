@@ -119,7 +119,6 @@ end;
 procedure TFrmMain.FillVclStylesList;
 Var
  StyleName: string;
- FileName : string;
  Item     : TListItem;
  StyleInfo:  TStyleInfo;
  SourceInfo: TSourceInfo;
