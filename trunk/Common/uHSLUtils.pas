@@ -36,7 +36,7 @@ const
   MinHue = -180;
   DefHue = 0;
 
-  MaxSat = 100;
+  MaxSat = 255;
   MinSat = 0;
   DefSat = 0;
 
@@ -71,6 +71,7 @@ procedure _Darkness(const AColor: TColor;Value: Integer; out NewColor:TColor);
 procedure _Darkness24(var ABitMap: TBitmap; Value: integer);
 procedure _Darkness32(const ABitMap: TBitmap; Value: integer);
 
+procedure _Saturation(const AColor: TColor;Value: Integer; out NewColor:TColor);
 procedure _Saturation24(var ABitMap: TBitmap; Value: integer);
 procedure _Saturation32(const ABitMap: TBitmap; Value: integer);
 
@@ -851,6 +852,7 @@ begin
   b := RoundIntToByte(Gray + (((b - Gray) * Value) div 255));
   NewColor:= RGB(r,g,b);
 end;
+
 
 procedure _Saturation24(var ABitMap: TBitmap; Value: integer);
 begin

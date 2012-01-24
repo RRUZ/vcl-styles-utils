@@ -1881,7 +1881,7 @@ object FrmHueSat: TFrmHueSat
     Top = 543
     Width = 96
     Height = 25
-    Caption = 'Save'
+    Caption = 'Save to file'
     TabOrder = 1
     OnClick = BtnSaveClick
   end
@@ -2004,6 +2004,7 @@ object FrmHueSat: TFrmHueSat
         Width = 16
         Height = 21
         Associate = EditSat
+        Max = 255
         TabOrder = 4
         OnChanging = UpDownSatChanging
       end
@@ -2047,7 +2048,7 @@ object FrmHueSat: TFrmHueSat
         Width = 249
         Height = 30
         DoubleBuffered = True
-        Max = 100
+        Max = 255
         ParentDoubleBuffered = False
         TabOrder = 8
         TickStyle = tsManual
@@ -2524,7 +2525,7 @@ object FrmHueSat: TFrmHueSat
     Left = 88
     Top = 424
     Bitmap = {
-      494C010101000800880010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101010008008C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
