@@ -273,6 +273,7 @@ begin
       end;
 
       If UpDownSat.Position<>0 then
+        //Result.Add(TBitmap32SaturationFilter.Create(UpDownSat.Position));
         Result.Add(TBitmap32SaturationFilter.Create((255 - ((UpDownSat.Position) * 255) div MaxSat)));
 
       If UpDownLight.Position<>0 then
