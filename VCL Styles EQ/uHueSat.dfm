@@ -2102,6 +2102,7 @@ object FrmHueSat: TFrmHueSat
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
+      ExplicitTop = 28
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -2151,6 +2152,7 @@ object FrmHueSat: TFrmHueSat
         Height = 30
         DoubleBuffered = True
         Max = 255
+        Min = -255
         ParentDoubleBuffered = False
         TabOrder = 0
         TickStyle = tsManual
@@ -2167,11 +2169,12 @@ object FrmHueSat: TFrmHueSat
         OnExit = EditHueExit
       end
       object UpDownRed: TUpDown
-        Left = 290
+        Left = 292
         Top = 35
         Width = 16
         Height = 21
         Associate = EditRed
+        Min = -255
         Max = 255
         TabOrder = 2
         OnChanging = UpDownHueChanging
@@ -2196,6 +2199,7 @@ object FrmHueSat: TFrmHueSat
         Height = 30
         DoubleBuffered = True
         Max = 255
+        Min = -255
         ParentDoubleBuffered = False
         TabOrder = 4
         TickStyle = tsManual
@@ -2217,6 +2221,7 @@ object FrmHueSat: TFrmHueSat
         Width = 16
         Height = 21
         Associate = EditGreen
+        Min = -255
         Max = 255
         TabOrder = 6
         OnChanging = UpDownHueChanging
@@ -2241,6 +2246,7 @@ object FrmHueSat: TFrmHueSat
         Height = 30
         DoubleBuffered = True
         Max = 255
+        Min = -255
         ParentDoubleBuffered = False
         TabOrder = 8
         TickStyle = tsManual
@@ -2262,6 +2268,7 @@ object FrmHueSat: TFrmHueSat
         Width = 16
         Height = 21
         Associate = EditBlue
+        Min = -255
         Max = 255
         TabOrder = 10
         OnChanging = UpDownHueChanging
@@ -2525,7 +2532,7 @@ object FrmHueSat: TFrmHueSat
     Left = 88
     Top = 424
     Bitmap = {
-      494C0101010008008C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800900010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2682,8 +2689,8 @@ object FrmHueSat: TFrmHueSat
   end
   object ColorDialog1: TColorDialog
     Options = [cdFullOpen, cdShowHelp, cdSolidColor, cdAnyColor]
-    Left = 224
-    Top = 424
+    Left = 192
+    Top = 472
   end
   object ImageListStyleColors: TImageList
     ColorDepth = cd32Bit

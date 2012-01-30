@@ -282,13 +282,13 @@ begin
 
     if RadioButtonRGB.Checked then
     begin
-      If UpDownRed.Position>0 then
+      If UpDownRed.Position<>0 then
         Result.Add(TBitmap32RedFilter.Create(UpDownRed.Position));
 
-      If UpDownGreen.Position>0 then
+      If UpDownGreen.Position<>0 then
         Result.Add(TBitmap32GreenFilter.Create(UpDownGreen.Position));
 
-      If UpDownBlue.Position>0 then
+      If UpDownBlue.Position<>0 then
         Result.Add(TBitmap32BlueFilter.Create(UpDownBlue.Position));
     end;
 

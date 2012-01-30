@@ -80,8 +80,8 @@ procedure _SetRComponent(const AColor: TColor;Value: Integer; out NewColor:TColo
 procedure _SetGComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
 procedure _SetBComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
 
-procedure _SetRGB24(const ABitMap: TBitmap; DR,DG,DB: Byte);
-procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Byte);
+procedure _SetRGB24(const ABitMap: TBitmap; DR,DG,DB: Integer);
+procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Integer);
 
 procedure _BlendBurn(const AColor: TColor;Value: Integer; out NewColor:TColor);
 procedure _BlendBurn24(const ABitMap: TBitmap;Value: Integer);
@@ -790,7 +790,7 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _SetRGB24(const ABitMap: TBitmap; DR,DG,DB: Byte);
+procedure _SetRGB24(const ABitMap: TBitmap; DR,DG,DB: Integer);
 var
   r, g, b : byte;
   x, y:    integer;
@@ -814,7 +814,7 @@ begin
 end;
 
 
-procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Byte);
+procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Integer);
 var
   r, g, b, a: byte;
   x, y:    integer;
