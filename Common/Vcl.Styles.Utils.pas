@@ -39,7 +39,7 @@ type
      FClone     : Boolean;
      FStream    : TStream;
      FStyleExt  : TCustomStyleExt;
-    FElements: TVCLStylesElements;
+     FElements  : TVCLStylesElements;
      //FSourceInfo: TSourceInfo;
   public
      procedure SetFilters(Filters : TObjectList<TBitmapFilter>);
@@ -50,7 +50,11 @@ type
      property  Elements  : TVCLStylesElements read FElements write FElements;
      constructor Create(const  StyleName : string;Clone:Boolean=False);
      destructor Destroy;override;
+
+     class procedure SaveSettings(const FileName:String;Filters : TObjectList<TBitmapFilter>);
+     class procedure LoadSettings(const FileName:String);
   end;
+
 
 
 implementation
@@ -98,6 +102,11 @@ begin
   inherited;
 end;
 
+class procedure TVclStylesUtils.LoadSettings(const FileName: String);
+begin
+
+end;
+
 procedure TVclStylesUtils.ApplyChanges;
 begin
   if Assigned(StyleExt) then
@@ -106,6 +115,12 @@ begin
     StyleExt.CopyToStream(FStream);
     FStream.Seek(0,soFromBeginning);
   end;
+end;
+
+class procedure TVclStylesUtils.SaveSettings(const FileName: String;
+  Filters: TObjectList<TBitmapFilter>);
+begin
+
 end;
 
 procedure TVclStylesUtils.SaveToFile(const FileName: string);
