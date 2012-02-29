@@ -4,8 +4,8 @@ object FrmHueSat: TFrmHueSat
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
-  ClientHeight = 622
-  ClientWidth = 381
+  ClientHeight = 340
+  ClientWidth = 755
   Color = clBtnFace
   TransparentColorValue = clFuchsia
   DoubleBuffered = True
@@ -1867,23 +1867,23 @@ object FrmHueSat: TFrmHueSat
     Height = 13
     Caption = 'VCL Styles'
   end
-  object BtnApply: TButton
-    Left = 8
-    Top = 543
-    Width = 225
+  object btnApply: TButton
+    Left = 384
+    Top = 288
+    Width = 100
     Height = 25
-    Caption = 'Apply changes to the current style'
-    TabOrder = 0
-    OnClick = BtnApplyClick
+    Caption = 'Apply changes'
+    TabOrder = 10
+    OnClick = btnApplyClick
   end
-  object BtnSave: TButton
-    Left = 242
-    Top = 543
-    Width = 96
+  object btnSave: TButton
+    Left = 490
+    Top = 288
+    Width = 100
     Height = 25
-    Caption = 'Save to file'
-    TabOrder = 1
-    OnClick = BtnSaveClick
+    Caption = 'Save style to file'
+    TabOrder = 11
+    OnClick = btnSaveClick
   end
   object ComboBoxVclStyles: TComboBox
     Left = 8
@@ -1891,7 +1891,7 @@ object FrmHueSat: TFrmHueSat
     Width = 249
     Height = 21
     Style = csDropDownList
-    TabOrder = 2
+    TabOrder = 5
     OnChange = ComboBoxVclStylesChange
   end
   object Button1: TButton
@@ -1901,17 +1901,18 @@ object FrmHueSat: TFrmHueSat
     Height = 25
     Action = ActionApplyStyle
     Caption = 'Apply Style'
-    TabOrder = 3
+    TabOrder = 1
   end
   object PageControl1: TPageControl
-    Left = 8
-    Top = 315
+    Left = 384
+    Top = 61
     Width = 361
-    Height = 222
+    Height = 225
     ActivePage = TabSheet1
-    TabOrder = 4
+    TabOrder = 7
     object TabSheet1: TTabSheet
       Caption = 'HSL'
+      ExplicitHeight = 194
       object Label1: TLabel
         Left = 11
         Top = 14
@@ -1973,7 +1974,7 @@ object FrmHueSat: TFrmHueSat
         Width = 32
         Height = 21
         NumbersOnly = True
-        TabOrder = 1
+        TabOrder = 9
         Text = '0'
         OnExit = EditLightExit
       end
@@ -1985,7 +1986,7 @@ object FrmHueSat: TFrmHueSat
         Associate = EditLight
         Min = -255
         Max = 255
-        TabOrder = 2
+        TabOrder = 10
         OnChanging = UpDownLightChanging
       end
       object EditSat: TEdit
@@ -1994,7 +1995,7 @@ object FrmHueSat: TFrmHueSat
         Width = 32
         Height = 21
         NumbersOnly = True
-        TabOrder = 3
+        TabOrder = 4
         Text = '0'
         OnExit = EditSatExit
       end
@@ -2005,7 +2006,7 @@ object FrmHueSat: TFrmHueSat
         Height = 21
         Associate = EditSat
         Max = 255
-        TabOrder = 4
+        TabOrder = 5
         OnChanging = UpDownSatChanging
       end
       object EditHue: TEdit
@@ -2014,7 +2015,7 @@ object FrmHueSat: TFrmHueSat
         Width = 32
         Height = 21
         NumbersOnly = True
-        TabOrder = 5
+        TabOrder = 2
         Text = '0'
         OnExit = EditHueExit
       end
@@ -2026,7 +2027,7 @@ object FrmHueSat: TFrmHueSat
         Associate = EditHue
         Min = -180
         Max = 180
-        TabOrder = 6
+        TabOrder = 3
         OnChanging = UpDownHueChanging
       end
       object ButtonHue: TButton
@@ -2039,7 +2040,7 @@ object FrmHueSat: TFrmHueSat
         ImageIndex = 0
         Images = ImageList1
         ParentBiDiMode = False
-        TabOrder = 7
+        TabOrder = 1
         OnClick = ButtonHueClick
       end
       object TrackBarSaturation: TTrackBar
@@ -2050,7 +2051,7 @@ object FrmHueSat: TFrmHueSat
         DoubleBuffered = True
         Max = 255
         ParentDoubleBuffered = False
-        TabOrder = 8
+        TabOrder = 6
         TickStyle = tsManual
         OnChange = TrackBarSaturationChange
       end
@@ -2062,7 +2063,7 @@ object FrmHueSat: TFrmHueSat
         ImageAlignment = iaCenter
         ImageIndex = 0
         Images = ImageList1
-        TabOrder = 9
+        TabOrder = 7
         OnClick = ButtonSaturationClick
       end
       object TrackBarLightness: TTrackBar
@@ -2074,7 +2075,7 @@ object FrmHueSat: TFrmHueSat
         Max = 255
         Min = -255
         ParentDoubleBuffered = False
-        TabOrder = 10
+        TabOrder = 8
         TickStyle = tsManual
         OnChange = TrackBarLightnessChange
       end
@@ -2102,7 +2103,7 @@ object FrmHueSat: TFrmHueSat
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
-      ExplicitTop = 28
+      ExplicitHeight = 194
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -2164,19 +2165,19 @@ object FrmHueSat: TFrmHueSat
         Width = 32
         Height = 21
         NumbersOnly = True
-        TabOrder = 1
+        TabOrder = 2
         Text = '0'
         OnExit = EditHueExit
       end
       object UpDownRed: TUpDown
-        Left = 292
+        Left = 290
         Top = 35
         Width = 16
         Height = 21
         Associate = EditRed
         Min = -255
         Max = 255
-        TabOrder = 2
+        TabOrder = 3
         OnChanging = UpDownHueChanging
       end
       object Button2: TButton
@@ -2189,7 +2190,7 @@ object FrmHueSat: TFrmHueSat
         ImageIndex = 0
         Images = ImageList1
         ParentBiDiMode = False
-        TabOrder = 3
+        TabOrder = 1
         OnClick = Button2Click
       end
       object TrackBarGreen: TTrackBar
@@ -2211,7 +2212,7 @@ object FrmHueSat: TFrmHueSat
         Width = 32
         Height = 21
         NumbersOnly = True
-        TabOrder = 5
+        TabOrder = 6
         Text = '0'
         OnExit = EditHueExit
       end
@@ -2223,7 +2224,7 @@ object FrmHueSat: TFrmHueSat
         Associate = EditGreen
         Min = -255
         Max = 255
-        TabOrder = 6
+        TabOrder = 7
         OnChanging = UpDownHueChanging
       end
       object Button3: TButton
@@ -2236,7 +2237,7 @@ object FrmHueSat: TFrmHueSat
         ImageIndex = 0
         Images = ImageList1
         ParentBiDiMode = False
-        TabOrder = 7
+        TabOrder = 5
         OnClick = Button3Click
       end
       object TrackBarBlue: TTrackBar
@@ -2290,6 +2291,7 @@ object FrmHueSat: TFrmHueSat
     object TabSheet3: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
+      ExplicitHeight = 194
       object Label8: TLabel
         Left = 3
         Top = 47
@@ -2310,7 +2312,7 @@ object FrmHueSat: TFrmHueSat
         Width = 75
         Height = 25
         Caption = 'Apply Blend'
-        TabOrder = 0
+        TabOrder = 3
         OnClick = ButtonApplyBlendClick
       end
       object ColorBoxblend: TColorBox
@@ -2320,7 +2322,7 @@ object FrmHueSat: TFrmHueSat
         Height = 22
         Selected = clRed
         Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
-        TabOrder = 1
+        TabOrder = 0
         OnChange = ComboBoxBlendChange
         OnGetColors = ColorBoxblendGetColors
       end
@@ -2330,7 +2332,7 @@ object FrmHueSat: TFrmHueSat
         Width = 27
         Height = 22
         Caption = '...'
-        TabOrder = 2
+        TabOrder = 1
         OnClick = Button6Click
       end
       object ComboBoxBlend: TComboBox
@@ -2339,51 +2341,51 @@ object FrmHueSat: TFrmHueSat
         Width = 145
         Height = 21
         Style = csDropDownList
-        TabOrder = 3
+        TabOrder = 2
         OnChange = ComboBoxBlendChange
       end
     end
   end
   object RadioButtonHSL: TRadioButton
-    Left = 8
-    Top = 292
+    Left = 384
+    Top = 23
     Width = 50
     Height = 17
     Caption = 'HSL'
     Checked = True
-    TabOrder = 5
+    TabOrder = 2
     TabStop = True
     OnClick = RadioButtonHSLClick
   end
   object RadioButtonRGB: TRadioButton
     Tag = 1
-    Left = 74
-    Top = 292
+    Left = 450
+    Top = 23
     Width = 58
     Height = 17
     Caption = 'RGB'
-    TabOrder = 6
+    TabOrder = 3
     OnClick = RadioButtonHSLClick
   end
   object RadioButtonBlend: TRadioButton
     Tag = 2
-    Left = 138
-    Top = 292
+    Left = 514
+    Top = 23
     Width = 55
     Height = 17
     Caption = 'Blend'
-    TabOrder = 7
+    TabOrder = 4
     OnClick = RadioButtonHSLClick
   end
   object LinkLabel1: TLinkLabel
-    Left = 8
-    Top = 574
+    Left = 665
+    Top = 8
     Width = 76
     Height = 19
     Caption = 
       '<a href="http://code.google.com/p/vcl-styles-utils">vcl styles u' +
       'tils</a>'
-    TabOrder = 8
+    TabOrder = 0
     UseVisualStyle = True
     OnLinkClick = LinkLabel1LinkClick
   end
@@ -2393,7 +2395,7 @@ object FrmHueSat: TFrmHueSat
     Width = 361
     Height = 225
     ActivePage = TabSheet4
-    TabOrder = 9
+    TabOrder = 6
     object TabSheet4: TTabSheet
       Caption = 'Preview'
       object ImageVCLStyle: TImage
@@ -2415,13 +2417,21 @@ object FrmHueSat: TFrmHueSat
         Font.Style = [fsBold]
         ParentFont = False
       end
+      object Button7: TButton
+        Left = 96
+        Top = 200
+        Width = 75
+        Height = 25
+        Caption = 'Button7'
+        TabOrder = 0
+      end
     end
     object TabSheet5: TTabSheet
       Caption = 'Style Colors'
       ImageIndex = 1
       object ListViewStyleColors: TListView
         Left = 0
-        Top = 26
+        Top = 24
         Width = 353
         Height = 173
         Align = alCustom
@@ -2431,13 +2441,22 @@ object FrmHueSat: TFrmHueSat
             Width = 150
           end
           item
-            Caption = 'Color'
+            Caption = 'clColor'
             Width = 80
+          end
+          item
+            Caption = 'Red'
+          end
+          item
+            Caption = 'Green'
+          end
+          item
+            Caption = 'Blue'
           end>
         ReadOnly = True
         RowSelect = True
         SmallImages = ImageListStyleColors
-        TabOrder = 0
+        TabOrder = 1
         ViewStyle = vsReport
       end
       object CheckBoxStyleColors: TCheckBox
@@ -2446,7 +2465,7 @@ object FrmHueSat: TFrmHueSat
         Width = 97
         Height = 17
         Caption = 'Modify'
-        TabOrder = 1
+        TabOrder = 0
         OnClick = CheckBoxStyleColorsClick
       end
     end
@@ -2465,13 +2484,22 @@ object FrmHueSat: TFrmHueSat
             Width = 150
           end
           item
-            Caption = 'Color'
+            Caption = 'clColor'
             Width = 80
+          end
+          item
+            Caption = 'Red'
+          end
+          item
+            Caption = 'Green'
+          end
+          item
+            Caption = 'Blue'
           end>
         ReadOnly = True
         RowSelect = True
         SmallImages = ImageListStyleFontColors
-        TabOrder = 0
+        TabOrder = 1
         ViewStyle = vsReport
       end
       object CheckBoxStyleFontColors: TCheckBox
@@ -2480,7 +2508,7 @@ object FrmHueSat: TFrmHueSat
         Width = 97
         Height = 17
         Caption = 'Modify'
-        TabOrder = 1
+        TabOrder = 0
         OnClick = CheckBoxStyleColorsClick
       end
     end
@@ -2499,13 +2527,22 @@ object FrmHueSat: TFrmHueSat
             Width = 150
           end
           item
-            Caption = 'Color'
+            Caption = 'clColor'
             Width = 80
+          end
+          item
+            Caption = 'Red'
+          end
+          item
+            Caption = 'Green'
+          end
+          item
+            Caption = 'Blue'
           end>
         ReadOnly = True
         RowSelect = True
         SmallImages = ImageListSystemColors
-        TabOrder = 0
+        TabOrder = 1
         ViewStyle = vsReport
       end
       object CheckBoxSystemColors: TCheckBox
@@ -2514,25 +2551,45 @@ object FrmHueSat: TFrmHueSat
         Width = 97
         Height = 17
         Caption = 'Modify'
-        TabOrder = 1
+        TabOrder = 0
         OnClick = CheckBoxStyleColorsClick
       end
     end
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 603
-    Width = 381
+    Top = 321
+    Width = 755
     Height = 19
     Panels = <>
     SimplePanel = True
+    ExplicitTop = 603
+    ExplicitWidth = 381
+  end
+  object btnSaveSettings: TButton
+    Left = 8
+    Top = 288
+    Width = 100
+    Height = 25
+    Caption = 'Save Settings'
+    TabOrder = 8
+    OnClick = btnSaveSettingsClick
+  end
+  object btnLoadSettings: TButton
+    Left = 114
+    Top = 288
+    Width = 100
+    Height = 25
+    Caption = 'Load Settings'
+    TabOrder = 9
+    OnClick = btnLoadSettingsClick
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 88
-    Top = 424
+    Left = 600
+    Top = 155
     Bitmap = {
-      494C010101000800900010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800940010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2672,8 +2729,8 @@ object FrmHueSat: TFrmHueSat
       000000000000}
   end
   object ActionManager1: TActionManager
-    Left = 136
-    Top = 424
+    Left = 512
+    Top = 155
     StyleName = 'Platform Default'
     object ActionApplyStyle: TAction
       Caption = 'ActionApplyStyle'
@@ -2682,29 +2739,31 @@ object FrmHueSat: TFrmHueSat
     end
   end
   object SaveDialog1: TSaveDialog
-    DefaultExt = '*.vsf'
-    Filter = 'Visual Style Files|*.vsf'
-    Left = 184
-    Top = 424
+    Left = 560
+    Top = 155
   end
   object ColorDialog1: TColorDialog
     Options = [cdFullOpen, cdShowHelp, cdSolidColor, cdAnyColor]
-    Left = 192
-    Top = 472
+    Left = 640
+    Top = 155
   end
   object ImageListStyleColors: TImageList
     ColorDepth = cd32Bit
-    Left = 152
-    Top = 136
+    Left = 80
+    Top = 96
   end
   object ImageListStyleFontColors: TImageList
     ColorDepth = cd32Bit
-    Left = 184
-    Top = 136
+    Left = 152
+    Top = 104
   end
   object ImageListSystemColors: TImageList
     ColorDepth = cd32Bit
-    Left = 224
+    Left = 208
+    Top = 104
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 344
     Top = 136
   end
 end

@@ -14,7 +14,7 @@
 { The Original Code is uHueSat.pas.                                                                }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2011 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012 Rodrigo Ruz V.                         }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -30,8 +30,8 @@ uses
 
 type
   TFrmHueSat = class(TForm)
-    BtnApply:    TButton;
-    BtnSave: TButton;
+    btnApply: TButton;
+    btnSave: TButton;
     ImageList1: TImageList;
     ImageVCLStyle: TImage;
     Label4: TLabel;
@@ -108,6 +108,10 @@ type
     CheckBoxStyleFontColors: TCheckBox;
     CheckBoxSystemColors: TCheckBox;
     StatusBar1: TStatusBar;
+    btnSaveSettings: TButton;
+    Button7: TButton;
+    btnLoadSettings: TButton;
+    OpenDialog1: TOpenDialog;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -116,7 +120,7 @@ type
     procedure TrackBarHueChange(Sender: TObject);
     procedure TrackBarLightnessChange(Sender: TObject);
     procedure TrackBarSaturationChange(Sender: TObject);
-    procedure BtnApplyClick(Sender: TObject);
+    procedure btnApplyClick(Sender: TObject);
     procedure EditHueExit(Sender: TObject);
     procedure UpDownHueChanging(Sender: TObject; var AllowChange: Boolean);
     procedure EditSatExit(Sender: TObject);
@@ -127,7 +131,7 @@ type
     procedure ActionApplyStyleUpdate(Sender: TObject);
     procedure ActionApplyStyleExecute(Sender: TObject);
     procedure CheckBoxSepiaClick(Sender: TObject);
-    procedure BtnSaveClick(Sender: TObject);
+    procedure btnSaveClick(Sender: TObject);
     procedure TrackBarRedChange(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
@@ -140,6 +144,8 @@ type
     procedure LinkLabel1LinkClick(Sender: TObject; const Link: string;
       LinkType: TSysLinkType);
     procedure CheckBoxStyleColorsClick(Sender: TObject);
+    procedure btnSaveSettingsClick(Sender: TObject);
+    procedure btnLoadSettingsClick(Sender: TObject);
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
@@ -156,6 +162,9 @@ type
     procedure DropFiles(var msg : TMessage); message WM_DROPFILES;
     procedure FillListStyles;
     procedure BuildPreview;
+
+    procedure SaveSettings;
+    procedure LoadSettings;
   end;
 
 var
@@ -303,7 +312,7 @@ begin
 end;
 
 
-procedure TFrmHueSat.BtnApplyClick(Sender: TObject);
+procedure TFrmHueSat.btnApplyClick(Sender: TObject);
 Var
   LFilters : TObjectList<TBitmapFilter>;
   VclUtils : TVclStylesUtils;
@@ -331,16 +340,21 @@ begin
       VclUtils.Free;
     end;
 
-    StatusBar1.SimpleText:=(Format('ellapsed  %d ms', [sw.ElapsedMilliseconds]));
+    StatusBar1.SimpleText:=(Format('ellapsed %d ms', [sw.ElapsedMilliseconds]));
     TStyleManager.ReloadStyle(StyleName);
     LoadStyle;
   except
     on E: Exception do
-      ShowMessage(Format('Error saving vcl style - Message : %s : Trace %s', [E.Message, E.StackTrace]));
+      MessageDlg(Format('Error saving vcl style - Message : %s : Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
   end;
 end;
 
-procedure TFrmHueSat.BtnSaveClick(Sender: TObject);
+procedure TFrmHueSat.btnLoadSettingsClick(Sender: TObject);
+begin
+ LoadSettings;
+end;
+
+procedure TFrmHueSat.btnSaveClick(Sender: TObject);
 Var
   LFilters : TObjectList<TBitmapFilter>;
   VclUtils : TVclStylesUtils;
@@ -354,6 +368,8 @@ begin
    if StyleName='' then exit;
    VclUtils:=TVclStylesUtils.Create(StyleName, True);
    try
+     SaveDialog1.Filter:='Visual Style Files|*.vsf';
+     SaveDialog1.DefaultExt:='*.vsf';
 
      NewName := VclUtils.StyleExt.StyleInfo.Name;
      if RadioButtonHSL.Checked then
@@ -434,8 +450,7 @@ begin
 
         except
           on E: Exception do
-            ShowMessage(Format('Error saving vcl style - Message : %s : Trace %s',
-              [E.Message, E.StackTrace]));
+           MessageDlg(Format('Error saving vcl style - Message : %s : Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
         end;
      end;
    finally
@@ -444,6 +459,11 @@ begin
 
 end;
 
+
+procedure TFrmHueSat.btnSaveSettingsClick(Sender: TObject);
+begin
+ SaveSettings;
+end;
 
 procedure TFrmHueSat.Button2Click(Sender: TObject);
 begin
@@ -753,12 +773,16 @@ begin
   finally
    LFilters.Free;
   end;
-
-
-
-
 end;
 
+
+procedure TFrmHueSat.SaveSettings;
+begin
+  SaveDialog1.Filter:='Visual Style EQ Settings|*.vseq';
+  SaveDialog1.DefaultExt:='*.vseq';
+  if SaveDialog1.Execute then
+     TVclStylesUtils.SaveSettings(SaveDialog1.FileName, nil);
+end;
 
 procedure TFrmHueSat.SetPageActive(Index: integer);
 var
@@ -776,6 +800,14 @@ begin
   ShellExecute(0, 'Open', PChar(Link), nil , nil, SW_SHOWNORMAL);
 end;
 
+
+procedure TFrmHueSat.LoadSettings;
+begin
+  OpenDialog1.Filter:='Visual Style EQ Settings|*.vseq';
+  OpenDialog1.DefaultExt:='*.vseq';
+  if OpenDialog1.Execute then
+     TVclStylesUtils.LoadSettings(OpenDialog1.FileName);
+end;
 
 procedure TFrmHueSat.LoadStyle;
 begin
@@ -827,6 +859,9 @@ begin
       Item.Data:=Pointer(LColor);
       Item.Caption:=GetEnumName(TypeInfo(TStyleColor),Integer(StyleColor));
       Item.SubItems.Add(ColorToString(LColor));
+      Item.SubItems.Add(IntToHex(GetRValue(LColor),2));
+      Item.SubItems.Add(IntToHex(GetGValue(LColor),2));
+      Item.SubItems.Add(IntToHex(GetBValue(LColor),2));
       LBitmap:=TBitmap.Create;
       try
         CreateArrayBitmap(16,16,[LColor], LBitmap);
@@ -860,6 +895,9 @@ begin
       Item.Data:=Pointer(LColor);
       Item.Caption:=GetEnumName(TypeInfo(TStyleFont),Integer(StyleFont));
       Item.SubItems.Add(ColorToString(LColor));
+      Item.SubItems.Add(IntToHex(GetRValue(LColor),2));
+      Item.SubItems.Add(IntToHex(GetGValue(LColor),2));
+      Item.SubItems.Add(IntToHex(GetBValue(LColor),2));
       LBitmap:=TBitmap.Create;
       try
         CreateArrayBitmap(16,16,[LColor], LBitmap);
@@ -895,6 +933,9 @@ begin
       Item.Data:=Pointer(LColor);
       Item.Caption:=Element.Name;
       Item.SubItems.Add(ColorToString(LColor));
+      Item.SubItems.Add(IntToHex(GetRValue(LColor),2));
+      Item.SubItems.Add(IntToHex(GetGValue(LColor),2));
+      Item.SubItems.Add(IntToHex(GetBValue(LColor),2));
       LBitmap:=TBitmap.Create;
       try
         CreateArrayBitmap(16,16,[LColor], LBitmap);
