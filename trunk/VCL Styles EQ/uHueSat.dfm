@@ -1912,7 +1912,6 @@ object FrmHueSat: TFrmHueSat
     TabOrder = 7
     object TabSheet1: TTabSheet
       Caption = 'HSL'
-      ExplicitHeight = 194
       object Label1: TLabel
         Left = 11
         Top = 14
@@ -2103,7 +2102,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheet2: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
-      ExplicitHeight = 194
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -2291,7 +2289,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheet3: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
-      ExplicitHeight = 194
       object Label8: TLabel
         Left = 3
         Top = 47
@@ -2563,8 +2560,6 @@ object FrmHueSat: TFrmHueSat
     Height = 19
     Panels = <>
     SimplePanel = True
-    ExplicitTop = 603
-    ExplicitWidth = 381
   end
   object btnSaveSettings: TButton
     Left = 8
@@ -2589,7 +2584,7 @@ object FrmHueSat: TFrmHueSat
     Left = 600
     Top = 155
     Bitmap = {
-      494C010101000800940010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800A00010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

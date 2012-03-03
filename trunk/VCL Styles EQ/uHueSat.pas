@@ -777,11 +777,39 @@ end;
 
 
 procedure TFrmHueSat.SaveSettings;
+Var
+ LVCLStylesFilter : TVCLStylesFilter;
+ LFilters         : TObjectList<TBitmapFilter>;
+ LElements        : TVCLStylesElements;
 begin
-  SaveDialog1.Filter:='Visual Style EQ Settings|*.vseq';
-  SaveDialog1.DefaultExt:='*.vseq';
-  if SaveDialog1.Execute then
-     TVclStylesUtils.SaveSettings(SaveDialog1.FileName, nil);
+  if RadioButtonHSL.Checked then
+    LVCLStylesFilter:=vsfHSL
+  else
+  if RadioButtonRGB.Checked then
+    LVCLStylesFilter:=vsfRGB
+  else
+  if RadioButtonBlend.Checked then
+    LVCLStylesFilter:=vsfBlend;
+
+  LElements:=[];
+   if CheckBoxSystemColors.Checked then
+     LElements:=LElements + [vseSysColors];
+
+   if CheckBoxStyleColors.Checked then
+     LElements:=LElements + [vseStyleColors];
+
+   if CheckBoxStyleFontColors.Checked then
+     LElements:=LElements + [vseStyleFontColors];
+
+  LFilters:=GetFilters;
+  try
+    SaveDialog1.Filter:='Visual Style EQ Settings|*.vseq';
+    SaveDialog1.DefaultExt:='*.vseq';
+    if SaveDialog1.Execute then
+       TVclStylesUtils.SaveSettings(SaveDialog1.FileName, LElements, LVCLStylesFilter, LFilters);
+  finally
+    LFilters.Free;
+  end;
 end;
 
 procedure TFrmHueSat.SetPageActive(Index: integer);
@@ -802,11 +830,62 @@ end;
 
 
 procedure TFrmHueSat.LoadSettings;
+Var
+ LFilterType  : TVCLStylesFilter;
+ LFilters     : TObjectList<TBitmapFilter>;
+ sw           : TStopWatch;
+ VclUtils     : TVclStylesUtils;
 begin
+  if StyleName='' then exit;
   OpenDialog1.Filter:='Visual Style EQ Settings|*.vseq';
   OpenDialog1.DefaultExt:='*.vseq';
   if OpenDialog1.Execute then
-     TVclStylesUtils.LoadSettings(OpenDialog1.FileName);
+  begin
+   LFilters:=TObjectList<TBitmapFilter>.Create;
+   try
+     TVclStylesUtils.LoadSettings(OpenDialog1.FileName, LFilterType, LFilters);
+     case LFilterType of
+       vsfHSL   : RadioButtonHSL.Checked:=True;
+       vsfRGB   : RadioButtonRGB.Checked:=True;
+       vsfBlend : RadioButtonBlend.Checked:=True;
+     end;
+
+
+      try
+        sw := TStopWatch.StartNew;
+        VclUtils:=TVclStylesUtils.Create(StyleName);
+        try
+         //los colores
+
+         {
+         if CheckBoxSystemColors.Checked then
+           VclUtils.Elements:=VclUtils.Elements + [vseSysColors];
+
+         if CheckBoxStyleColors.Checked then
+           VclUtils.Elements:=VclUtils.Elements + [vseStyleColors];
+
+         if CheckBoxStyleFontColors.Checked then
+           VclUtils.Elements:=VclUtils.Elements + [vseStyleFontColors];
+         }
+
+          VclUtils.SetFilters(LFilters);
+          VclUtils.ApplyChanges;
+        finally
+          VclUtils.Free;
+        end;
+
+        StatusBar1.SimpleText:=(Format('ellapsed %d ms', [sw.ElapsedMilliseconds]));
+        TStyleManager.ReloadStyle(StyleName);
+        LoadStyle;
+      except
+        on E: Exception do
+          MessageDlg(Format('Error applying settings - Message : %s : Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
+      end;
+
+   finally
+     LFilters.Free;
+   end;
+  end;
 end;
 
 procedure TFrmHueSat.LoadStyle;
