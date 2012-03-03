@@ -33,6 +33,7 @@ uses
 type
   TVCLStylesElement  = (vseBitmaps, vseSysColors, vseStyleColors, vseStyleFontColors);
   TVCLStylesElements = set of TVCLStylesElement;
+  TVCLStylesFilter   = (vsfHSL, vsfRGB, vsfBlend);
 
   TVclStylesUtils = class
   private
@@ -51,18 +52,25 @@ type
      constructor Create(const  StyleName : string;Clone:Boolean=False);
      destructor Destroy;override;
 
-     class procedure SaveSettings(const FileName:String;Filters : TObjectList<TBitmapFilter>);
-     class procedure LoadSettings(const FileName:String);
+     class procedure SaveSettings(const FileName:String;Elements :TVCLStylesElements; FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
+     class procedure LoadSettings(const FileName:String; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
   end;
 
-
+const
+  VCLStylesFilterNames : Array[TVCLStylesFilter] of string = ('HSL','RGB','Blend');
 
 implementation
 
 uses
+  Rtti,
+  XMLDoc,
+  XMLIntf,
+  Dialogs,
   System.IOUtils,
   System.SysUtils,
   Vcl.Graphics;
+
+
 { TVclStylesUtils }
 
 constructor TVclStylesUtils.Create(const  StyleName : string;Clone:Boolean=False);
@@ -92,7 +100,6 @@ begin
   end;
 end;
 
-
 destructor TVclStylesUtils.Destroy;
 begin
   if Assigned(StyleExt) then
@@ -100,11 +107,6 @@ begin
   if FClone and Assigned(FStream) then
     FStream.Free;
   inherited;
-end;
-
-class procedure TVclStylesUtils.LoadSettings(const FileName: String);
-begin
-
 end;
 
 procedure TVclStylesUtils.ApplyChanges;
@@ -117,10 +119,67 @@ begin
   end;
 end;
 
-class procedure TVclStylesUtils.SaveSettings(const FileName: String;
-  Filters: TObjectList<TBitmapFilter>);
+class procedure TVclStylesUtils.SaveSettings(const FileName:String;Elements :TVCLStylesElements; FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
+var
+  Doc       : TXMLDocument;
+  RootNode, ChildNode, oNode : IXMLNode;
+  LFilter   : TBitmapFilter;
 begin
+  Doc   :=TXMLDocument.Create(nil);
+  try
+    Doc.Active  := True;
+    Doc.Version :='1.0';
+    Doc.Encoding:='utf-8';
+    Doc.Options := [doNodeAutoIndent];
+    RootNode    := Doc.AddChild('VCLStylesEQ');
+    RootNode.Attributes['created'] := FormatDateTime('YYYY-MM-DD HH:NN:SS',Now);
+    ChildNode := RootNode.AddChild('FilterType');
+    ChildNode.Attributes['Name'] := VCLStylesFilterNames[FilterType];
+    for LFilter in Filters do
+    begin
+     oNode  := ChildNode.AddChild(LFilter.ClassName);
+     oNode.Text:=IntToStr(LFilter.Value);
+    end;
+    Doc.SaveToFile(FileName);
+  finally
+   Doc:=nil;
+  end;
+end;
 
+class procedure TVclStylesUtils.LoadSettings(const FileName:String; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
+var
+  Doc       : IXMLDocument;
+  RootNode, ChildNode, oNode : IXMLNode;
+  s : string;
+  LFilterType  :TVCLStylesFilter;
+  i : Integer;
+  LClassName : string;
+  Ctx : TRttiContext;
+  RttiInstanceType : TRttiInstanceType;
+  Value : TValue;
+begin
+  Doc   :=LoadXMLDocument(FileName);
+  try
+    RootNode :=Doc.DocumentElement;
+    ChildNode:=RootNode.ChildNodes[0];
+    for LFilterType:=Low(TVCLStylesFilter) to High(TVCLStylesFilter) do
+     if SameText(VCLStylesFilterNames[LFilterType], ChildNode.Attributes['Name']) then
+     begin
+       FilterType:=LFilterType;
+       break;
+     end;
+
+     for i:=0 to ChildNode.ChildNodes.Count-1 do
+     begin
+      oNode:= ChildNode.ChildNodes[i];
+      LClassName:='uHSLUtils.'+oNode.NodeName;
+      RttiInstanceType := (Ctx.FindType(LClassName) as TRttiInstanceType);
+      Value := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[StrToInt(oNode.Text)]);
+      Filters.Add((Value.AsObject as TBitmapFilter));
+     end;
+  finally
+   Doc:=nil;
+  end;
 end;
 
 procedure TVclStylesUtils.SaveToFile(const FileName: string);
