@@ -152,7 +152,7 @@ type
     procedure DrawSeletedVCLStyle;
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
-    procedure LoadStyle;
+    procedure LoadStyle(SetDefaultValues:Boolean=True);
     procedure LoadStyleColors;
     procedure LoadStyleFontsColors;
     procedure LoadStyleSystemColors;
@@ -304,10 +304,13 @@ begin
     if RadioButtonBlend.Checked then
     begin
       ctx := TRttiContext.Create;
-      RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
-      LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
-      Result.Add(TBitmapFilter(LFilter.AsObject));
-      ctx.Free;
+      try
+        RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
+        LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
+        Result.Add(TBitmapFilter(LFilter.AsObject));
+      finally
+        ctx.Free;
+      end;
     end;
 end;
 
@@ -835,6 +838,9 @@ Var
  LFilters     : TObjectList<TBitmapFilter>;
  sw           : TStopWatch;
  VclUtils     : TVclStylesUtils;
+ LElements    : TVCLStylesElements;
+ Filter       : TBitmapFilter;
+ i            : Integer;
 begin
   if StyleName='' then exit;
   OpenDialog1.Filter:='Visual Style EQ Settings|*.vseq';
@@ -843,31 +849,54 @@ begin
   begin
    LFilters:=TObjectList<TBitmapFilter>.Create;
    try
-     TVclStylesUtils.LoadSettings(OpenDialog1.FileName, LFilterType, LFilters);
-     case LFilterType of
-       vsfHSL   : RadioButtonHSL.Checked:=True;
-       vsfRGB   : RadioButtonRGB.Checked:=True;
-       vsfBlend : RadioButtonBlend.Checked:=True;
-     end;
+     TVclStylesUtils.LoadSettings(OpenDialog1.FileName, LElements, LFilterType, LFilters);
 
+     case LFilterType of
+       vsfHSL   : begin
+                    RadioButtonHSL.Checked:=True;
+
+                    for Filter in  LFilters do
+                     if Filter is TBitmap32HueFilter then
+                        TrackBarHue.Position:=Filter.Value
+                     else
+                     if Filter is TBitmap32SaturationFilter then
+                       TrackBarSaturation.Position:=Filter.Value
+                     else
+                     if Filter is TBitmap32LightnessFilter then
+                       TrackBarLightness.Position:=Filter.Value;
+                  end;
+
+       vsfRGB   : begin
+                    RadioButtonRGB.Checked:=True;
+                    for Filter in  LFilters do
+                     if Filter is TBitmap32RedFilter then
+                        TrackBarRed.Position:=Filter.Value
+                     else
+                     if Filter is TBitmap32GreenFilter then
+                        TrackBarGreen.Position:=Filter.Value
+                     else
+                     if Filter is TBitmap32BlueFilter then
+                        TrackBarBlue.Position:=Filter.Value;
+                  end;
+
+       vsfBlend : begin
+                    RadioButtonBlend.Checked:=True;
+                    Filter:=LFilters[0];
+                    ColorBoxblend.Selected:=Filter.Value;
+                    for i:=0 to ComboBoxBlend.Items.Count-1 do
+                     if Pointer(ComboBoxBlend.Items.Objects[i])=Filter.ClassInfo then
+                     begin
+                      ComboBoxBlend.ItemIndex:=i;
+                      Break;
+                     end;
+                  end;
+     end;
 
       try
         sw := TStopWatch.StartNew;
         VclUtils:=TVclStylesUtils.Create(StyleName);
         try
-         //los colores
-
-         {
-         if CheckBoxSystemColors.Checked then
-           VclUtils.Elements:=VclUtils.Elements + [vseSysColors];
-
-         if CheckBoxStyleColors.Checked then
-           VclUtils.Elements:=VclUtils.Elements + [vseStyleColors];
-
-         if CheckBoxStyleFontColors.Checked then
-           VclUtils.Elements:=VclUtils.Elements + [vseStyleFontColors];
-         }
-
+          VclUtils.Elements:=LElements;
           VclUtils.SetFilters(LFilters);
           VclUtils.ApplyChanges;
         finally
@@ -876,7 +905,7 @@ begin
 
         StatusBar1.SimpleText:=(Format('ellapsed %d ms', [sw.ElapsedMilliseconds]));
         TStyleManager.ReloadStyle(StyleName);
-        LoadStyle;
+        LoadStyle(False);
       except
         on E: Exception do
           MessageDlg(Format('Error applying settings - Message : %s : Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
@@ -888,7 +917,7 @@ begin
   end;
 end;
 
-procedure TFrmHueSat.LoadStyle;
+procedure TFrmHueSat.LoadStyle(SetDefaultValues:Boolean);
 begin
   CheckBoxSepia.Checked:=False;
   DrawSeletedVCLStyle;
@@ -899,23 +928,26 @@ begin
 
   OriginalBitMap.Assign(ImageVCLStyle.Picture.Bitmap);
 
-  UpDownHue.Position   := DefHue;
-  TrackBarHue.Position := DefHue;
+  if SetDefaultValues then
+  begin
+    UpDownHue.Position   := DefHue;
+    TrackBarHue.Position := DefHue;
 
-  UpDownSat.Position := DefSat;
-  TrackBarSaturation.Position := DefSat;
+    UpDownSat.Position := DefSat;
+    TrackBarSaturation.Position := DefSat;
 
-  UpDownLight.Position       := DefLig;
-  TrackBarLightness.Position := DefLig;
+    UpDownLight.Position       := DefLig;
+    TrackBarLightness.Position := DefLig;
 
-  UpDownRed.Position       := 0;
-  TrackBarRed.Position     := 0;
+    UpDownRed.Position       := 0;
+    TrackBarRed.Position     := 0;
 
-  UpDownGreen.Position       := 0;
-  TrackBarGreen.Position     := 0;
+    UpDownGreen.Position       := 0;
+    TrackBarGreen.Position     := 0;
 
-  UpDownBlue.Position       := 0;
-  TrackBarBlue.Position     := 0;
+    UpDownBlue.Position       := 0;
+    TrackBarBlue.Position     := 0;
+  end;
 end;
 
 

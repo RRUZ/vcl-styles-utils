@@ -53,7 +53,7 @@ type
      destructor Destroy;override;
 
      class procedure SaveSettings(const FileName:String;Elements :TVCLStylesElements; FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
-     class procedure LoadSettings(const FileName:String; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
+     class procedure LoadSettings(const FileName:String;var Elements :TVCLStylesElements; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
   end;
 
 const
@@ -132,9 +132,14 @@ begin
     Doc.Encoding:='utf-8';
     Doc.Options := [doNodeAutoIndent];
     RootNode    := Doc.AddChild('VCLStylesEQ');
-    RootNode.Attributes['created'] := FormatDateTime('YYYY-MM-DD HH:NN:SS',Now);
+    RootNode.Attributes['created']    := FormatDateTime('YYYY-MM-DD HH:NN:SS',Now);
+    RootNode.Attributes['vseBitmaps'] := BoolToStr({vseBitmaps in Elements}True, True);
+    RootNode.Attributes['vseSysColors'] := BoolToStr(vseSysColors in Elements, True);
+    RootNode.Attributes['vseStyleColors'] := BoolToStr(vseStyleColors in Elements, True);
+    RootNode.Attributes['vseStyleFontColors'] := BoolToStr(vseStyleFontColors in Elements, True);
     ChildNode := RootNode.AddChild('FilterType');
     ChildNode.Attributes['Name'] := VCLStylesFilterNames[FilterType];
+
     for LFilter in Filters do
     begin
      oNode  := ChildNode.AddChild(LFilter.ClassName);
@@ -146,7 +151,7 @@ begin
   end;
 end;
 
-class procedure TVclStylesUtils.LoadSettings(const FileName:String; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
+class procedure TVclStylesUtils.LoadSettings(const FileName:String;var Elements :TVCLStylesElements; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
 var
   Doc       : IXMLDocument;
   RootNode, ChildNode, oNode : IXMLNode;
@@ -161,6 +166,20 @@ begin
   Doc   :=LoadXMLDocument(FileName);
   try
     RootNode :=Doc.DocumentElement;
+
+    Elements:=[];
+    if SameText(RootNode.Attributes['vseBitmaps'],'True') then
+     Elements:=Elements+[vseBitmaps];
+
+    if SameText(RootNode.Attributes['vseSysColors'],'True') then
+     Elements:=Elements+[vseSysColors];
+
+    if SameText(RootNode.Attributes['vseStyleColors'],'True') then
+     Elements:=Elements+[vseStyleColors];
+
+    if SameText(RootNode.Attributes['vseStyleFontColors'],'True') then
+     Elements:=Elements+[vseStyleFontColors];
+
     ChildNode:=RootNode.ChildNodes[0];
     for LFilterType:=Low(TVCLStylesFilter) to High(TVCLStylesFilter) do
      if SameText(VCLStylesFilterNames[LFilterType], ChildNode.Attributes['Name']) then
