@@ -4,7 +4,7 @@ object FrmHueSat: TFrmHueSat
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
-  ClientHeight = 340
+  ClientHeight = 339
   ClientWidth = 755
   Color = clBtnFace
   TransparentColorValue = clFuchsia
@@ -1908,7 +1908,7 @@ object FrmHueSat: TFrmHueSat
     Top = 61
     Width = 361
     Height = 225
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     TabOrder = 7
     object TabSheet1: TTabSheet
       Caption = 'HSL'
@@ -2555,11 +2555,12 @@ object FrmHueSat: TFrmHueSat
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 321
+    Top = 320
     Width = 755
     Height = 19
     Panels = <>
     SimplePanel = True
+    ExplicitTop = 321
   end
   object btnSaveSettings: TButton
     Left = 8
