@@ -51,9 +51,9 @@ type
      property  Elements  : TVCLStylesElements read FElements write FElements;
      constructor Create(const  StyleName : string;Clone:Boolean=False);
      destructor Destroy;override;
-
      class procedure SaveSettings(const FileName:String;Elements :TVCLStylesElements; FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
      class procedure LoadSettings(const FileName:String;var Elements :TVCLStylesElements; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
+     //class procedure LoadAndApplySettings(const FileName:String);
   end;
 
 const
@@ -150,7 +150,19 @@ begin
    Doc:=nil;
   end;
 end;
+          {
+class procedure TVclStylesUtils.LoadAndApplySettings(const FileName: String);
+var
+LElements   :TVCLStylesElements;
+LFilterType : TVCLStylesFilter;
+LFilters    : TObjectList<TBitmapFilter>;
+begin
+  LoadSettings(FileName, LElements, LFilterType, LFilters);
 
+
+
+end;
+         }
 class procedure TVclStylesUtils.LoadSettings(const FileName:String;var Elements :TVCLStylesElements; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
 var
   Doc       : IXMLDocument;
