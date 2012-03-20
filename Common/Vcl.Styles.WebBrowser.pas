@@ -175,8 +175,7 @@ const
   DOCHOSTUIFLAG_THEME = $00040000;
   DOCHOSTUIFLAG_NOTHEME = $00080000;
 
-//   set background to windows color.
-
+//Set background to vcl styles windows color.
 procedure TVclStylesWebBrowser.TWinContainer.WMEraseBkgnd(var Msg: TWMEraseBkgnd);
 var
   Details: TThemedElementDetails;
@@ -209,7 +208,6 @@ begin
   VScrollBarContainer := TWinContainer.Create(Self);
   VScrollBarContainer.Visible := True;
   VScrollBar := TScrollBar.Create(Self);
-  //VScrollBar.Parent:=Self;
   VScrollBar.Parent   := VScrollBarContainer;
   VScrollBar.Kind     := sbVertical;
   VScrollBar.Visible  := True;
@@ -220,7 +218,6 @@ begin
   HScrollBarContainer := TWinContainer.Create(Self);
   HScrollBarContainer.Visible := False;
   HScrollBar := TScrollBar.Create(Self);
-  //HScrollBar.Parent:=Self;
   HScrollBar.Parent   := HScrollBarContainer;
   HScrollBar.Visible  := True;
   HScrollBar.Align    := alClient;
@@ -234,12 +231,7 @@ end;
 
 //check flicker issue;
 procedure TVclStylesWebBrowser.WMSIZE(var Message: TWMSIZE);
-var
- LRect : TRect;
 begin
-  LRect := BoundsRect;
-  //OutputDebugString(PChar(Format('WMSIZE Left %d Top %d Width %d Height %d',[LRect.Left, LRect.Top, LRect.Width, LRect.Height]) ));
-
   if Document <> nil then SendMessage(Handle, WM_SETREDRAW, 0, 0);
 
   inherited;
@@ -445,10 +437,10 @@ begin
   case dwType and MB_TYPEMASK of
     MB_OK:Buttons:=[mbOK];
     MB_OKCANCEL:Buttons:=[mbOK,mbCancel];
-    MB_ABORTRETRYIGNORE:Buttons:=[mbAbort] +  [mbRetry] + [mbIgnore];
-    MB_YESNOCANCEL:Buttons:=[mbYes] +  [mbNo] + [mbCancel];
-    MB_YESNO:Buttons:=[mbYes] +  [mbNo];
-    MB_RETRYCANCEL:Buttons:=[mbRetry] +  [mbCancel];
+    MB_ABORTRETRYIGNORE:Buttons:=[mbAbort,mbRetry,mbIgnore];
+    MB_YESNOCANCEL:Buttons:=[mbYes,mbNo,mbCancel];
+    MB_YESNO:Buttons:=[mbYes,mbNo];
+    MB_RETRYCANCEL:Buttons:=[mbRetry,mbCancel];
   else
     Buttons:=[mbOK];
   end;

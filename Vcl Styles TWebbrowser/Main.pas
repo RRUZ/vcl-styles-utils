@@ -2,7 +2,7 @@ unit Main;
 
 interface
 
-{.$DEFINE USE_VCLSTYLESWB}
+{$DEFINE USE_VCLSTYLESWB}
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
