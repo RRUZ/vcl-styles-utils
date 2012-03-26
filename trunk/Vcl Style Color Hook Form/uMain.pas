@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtDlgs, Vcl.ExtCtrls,
-  Vcl.Menus;
+  Vcl.Menus, Vcl.Imaging.jpeg;
 
 type
   TFrmMain = class(TForm)
@@ -28,6 +28,7 @@ type
     ComboBoxStyles: TComboBox;
     Label1: TLabel;
     CheckBoxMerge: TCheckBox;
+    Image1: TImage;
     procedure ColorBoxNCGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure ColorBoxNCChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -85,20 +86,20 @@ end;
 
 procedure TFrmMain.CheckBoxBackClick(Sender: TObject);
 begin
-  TFormStyleHookColor.BackGroundSettings.Enabled := CheckBoxBack.Checked;
+  TFormStyleHookBackround.BackGroundSettings.Enabled := CheckBoxBack.Checked;
   RefreshControls;
 end;
 
 procedure TFrmMain.CheckBoxMergeClick(Sender: TObject);
 begin
- TFormStyleHookColor.MergeImages:=CheckBoxMerge.Checked;
+ TFormStyleHookBackround.MergeImages:=CheckBoxMerge.Checked;
  SendMessage(Handle, WM_NCPAINT, 0, 0);
  RefreshControls;
 end;
 
 procedure TFrmMain.CheckBoxNCClick(Sender: TObject);
 begin
-  TFormStyleHookColor.NCSettings.Enabled := CheckBoxNC.Checked;
+  TFormStyleHookBackround.NCSettings.Enabled := CheckBoxNC.Checked;
   SendMessage(Handle, WM_NCPAINT, 0, 0);
 end;
 
@@ -132,8 +133,8 @@ var
   style: string;
 begin
   ReportMemoryLeaksOnShutdown := True;
-  ColorBoxNC.Selected := TFormStyleHookColor.NCSettings.Color;
-  ColorBoxBackground.Selected := TFormStyleHookColor.BackGroundSettings.Color;
+  ColorBoxNC.Selected := TFormStyleHookBackround.NCSettings.Color;
+  ColorBoxBackground.Selected := TFormStyleHookBackround.BackGroundSettings.Color;
 
   for style in TStyleManager.StyleNames do
     ComboBoxStyles.Items.Add(style);
@@ -148,7 +149,7 @@ begin
   EditBackImage.Enabled := not RadioButtonBackColor.Checked;
   ColorBoxBackground.Enabled := RadioButtonBackColor.Checked;
 
-  TFormStyleHookColor.BackGroundSettings.UseColor :=
+  TFormStyleHookBackround.BackGroundSettings.UseColor :=
     RadioButtonBackColor.Checked;
   RefreshControls;
 end;
@@ -158,7 +159,7 @@ begin
   BtnSetNCImage.Enabled := not RadioButtonNCColor.Checked;
   EditNCImage.Enabled := not RadioButtonNCColor.Checked;
   ColorBoxNC.Enabled := RadioButtonNCColor.Checked;
-  TFormStyleHookColor.NCSettings.UseColor := RadioButtonNCColor.Checked;
+  TFormStyleHookBackround.NCSettings.UseColor := RadioButtonNCColor.Checked;
   SendMessage(Handle, WM_NCPAINT, 0, 0);
 end;
 
@@ -173,43 +174,43 @@ begin
       TWinControl(Components[LIndex]).Perform(WM_PAINT, 0, 0);
     end;
 
-  Invalidate;
-  SendMessage(Handle, WM_PAINT, 0, 0);
+  Self.Invalidate;
+  Self.Perform(WM_PAINT, 0, 0);
 end;
 
 procedure TFrmMain.SetBackColor;
 begin
-  TFormStyleHookColor.BackGroundSettings.UseColor := True;
-  TFormStyleHookColor.BackGroundSettings.Color := ColorBoxBackground.Selected;
+  TFormStyleHookBackround.BackGroundSettings.UseColor := True;
+  TFormStyleHookBackround.BackGroundSettings.Color := ColorBoxBackground.Selected;
   RefreshControls;
 end;
 
 procedure TFrmMain.SetBackImage;
 begin
-  TFormStyleHookColor.BackGroundSettings.UseImage := True;
-  TFormStyleHookColor.BackGroundSettings.ImageLocation := EditBackImage.Text;
+  TFormStyleHookBackround.BackGroundSettings.UseImage := True;
+  TFormStyleHookBackround.BackGroundSettings.ImageLocation := EditBackImage.Text;
   RefreshControls;
 end;
 
 procedure TFrmMain.SetNCColor;
 begin
-  TFormStyleHookColor.NCSettings.UseColor := True;
-  TFormStyleHookColor.NCSettings.Color := ColorBoxNC.Selected;
+  TFormStyleHookBackround.NCSettings.UseColor := True;
+  TFormStyleHookBackround.NCSettings.Color := ColorBoxNC.Selected;
   SendMessage(Handle, WM_NCPAINT, 0, 0);
 end;
 
 procedure TFrmMain.SetNCImage;
 begin
-  TFormStyleHookColor.NCSettings.UseImage := True;
-  TFormStyleHookColor.NCSettings.ImageLocation := EditNCImage.Text;
+  TFormStyleHookBackround.NCSettings.UseImage := True;
+  TFormStyleHookBackround.NCSettings.ImageLocation := EditNCImage.Text;
   SendMessage(Handle, WM_NCPAINT, 0, 0);
 end;
 
 initialization
 
-  TStyleManager.Engine.RegisterStyleHook(TFrmMain, TFormStyleHookColor);
-  TFormStyleHookColor.NCSettings.Color := clWebDarkSlategray;
-  TFormStyleHookColor.BackGroundSettings.Color := clWebDarkOliveGreen;
-  TFormStyleHookColor.MergeImages:=True;
+  TStyleManager.Engine.RegisterStyleHook(TFrmMain, TFormStyleHookBackround);
+  TFormStyleHookBackround.NCSettings.Color := clWebDarkSlategray;
+  TFormStyleHookBackround.BackGroundSettings.Color := clWebDarkOliveGreen;
+  TFormStyleHookBackround.MergeImages:=True;
 
 end.

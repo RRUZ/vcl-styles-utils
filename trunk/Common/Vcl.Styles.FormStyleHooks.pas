@@ -31,7 +31,7 @@ uses
   Vcl.Forms;
 
 type
-  TFormStyleHookColor=class(TFormStyleHook)
+  TFormStyleHookBackround=class(TFormStyleHook)
   strict private
     type
       TSettings = class
@@ -230,9 +230,9 @@ begin
   Result := R;
 end;
 
-{ TFormStyleHookColor.TSettings }
+{ TFormStyleHookBackround.TSettings }
 
-constructor TFormStyleHookColor.TSettings.Create;
+constructor TFormStyleHookBackround.TSettings.Create;
 begin
   inherited;
   FEnabled:=False;
@@ -241,19 +241,19 @@ begin
   UseImage:=False;
 end;
 
-destructor TFormStyleHookColor.TSettings.Destroy;
+destructor TFormStyleHookBackround.TSettings.Destroy;
 begin
   FBitmap.Free;
   inherited;
 end;
 
-procedure TFormStyleHookColor.TSettings.SetColor(const Value: TColor);
+procedure TFormStyleHookBackround.TSettings.SetColor(const Value: TColor);
 begin
   if Value<>FColor then
   FColor := Value;
 end;
 
-procedure TFormStyleHookColor.TSettings.SetImageLocation(const Value: string);
+procedure TFormStyleHookBackround.TSettings.SetImageLocation(const Value: string);
 var
   Picture: TPicture;
 begin
@@ -273,53 +273,57 @@ begin
 end;
 
 
-procedure TFormStyleHookColor.TSettings.SetUseColor(const Value: Boolean);
+procedure TFormStyleHookBackround.TSettings.SetUseColor(const Value: Boolean);
 begin
   FUseColor := Value;
   FUseImage := not Value;
 end;
 
-procedure TFormStyleHookColor.TSettings.SetUseImage(const Value: Boolean);
+procedure TFormStyleHookBackround.TSettings.SetUseImage(const Value: Boolean);
 begin
   FUseImage := Value;
   FUseColor := not Value;
 end;
 
-{ TFormStyleHookColor }
+{ TFormStyleHookBackround }
 
-class constructor TFormStyleHookColor.Create;
+class constructor TFormStyleHookBackround.Create;
 begin
    FMergeImages:=False;
-   FNCSettings:=TFormStyleHookColor.TSettings.Create;
-   FBackGroundSettings:=TFormStyleHookColor.TSettings.Create;
+   FNCSettings:=TFormStyleHookBackround.TSettings.Create;
+   FBackGroundSettings:=TFormStyleHookBackround.TSettings.Create;
 end;
 
-class destructor TFormStyleHookColor.Destroy;
+class destructor TFormStyleHookBackround.Destroy;
 begin
   FreeAndNil(FNCSettings);
   FreeAndNil(FBackGroundSettings);
 end;
 
 
-procedure TFormStyleHookColor.PaintBackground(Canvas: TCanvas);
+procedure TFormStyleHookBackround.PaintBackground(Canvas: TCanvas);
 var
   LRect   : TRect;
   RBitmap : TRect;
   L,H     : Integer;
-  //Rborder : TRect;
 begin
+  //if the option is not enabled use the default inherited PaintBackground method
   if not BackGroundSettings.Enabled then
    inherited
   else
   begin
+    //get he bounds of the control (form)
     LRect := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
+    //use a custom color for the background?
     if  BackGroundSettings.UseColor then
     begin
      Canvas.Brush.Color:=BackGroundSettings.Color;
      Canvas.FillRect(LRect);
     end
     else
+    //use a bitmap
     begin
+      //check the size of the bitmap against the control bounds to detrine how the bitmap is drawn
       if (BackGroundSettings.Bitmap.Width<LRect.Width) or (BackGroundSettings.Bitmap.Height<LRect.Height) then
       begin
        Canvas.Brush.Bitmap := BackGroundSettings.BitMap;
@@ -327,6 +331,7 @@ begin
       end
       else
       begin
+       //check if the the background bitmap must be merged with non client area bitmap
        if not FMergeImages then
         Canvas.CopyRect(LRect,BackGroundSettings.Bitmap.Canvas,LRect)
        else
@@ -334,9 +339,7 @@ begin
         RBitmap:=LRect;
         H:=_GetBorderSize.Top;
         L:=_GetBorderSize.Left;
-        //Rborder:=_GetBorderSize;
         RBitmap.SetLocation(L, H);
-
         Canvas.CopyRect(LRect,BackGroundSettings.Bitmap.Canvas,RBitmap);
        end;
       end;
@@ -344,10 +347,12 @@ begin
   end;
 end;
 
-procedure TFormStyleHookColor.PaintNC(Canvas: TCanvas);
+procedure TFormStyleHookBackround.PaintNC(Canvas: TCanvas);
 var
-  Details, CaptionDetails, IconDetails: TThemedElementDetails;
-  Detail: TThemedWindow;
+  LDetail: TThemedWindow;
+  LDetails,
+  CaptionDetails,
+  IconDetails   : TThemedElementDetails;
   R, R1, DrawRect, ButtonRect, TextRect: TRect;
   CaptionBuffer: TBitmap;
   FButtonState: TThemedWindow;
@@ -355,13 +360,14 @@ var
   LText: string;
   SrcBackRect     : TRect;
 begin
+  //if the setting is not enabled use the original PaintNC method
   if not NCSettings.Enabled then
   begin
    inherited ;
    exit;
   end;
 
-
+  //check the border style of the form
   if Form.BorderStyle = bsNone then
   begin
     MainMenuBarHookPaint(Canvas);    Exit;
@@ -369,7 +375,6 @@ begin
 
 
   {init some parameters}
-
   _FCloseButtonRect := Rect(0, 0, 0, 0);
   _FMaxButtonRect := Rect(0, 0, 0, 0);
   _FMinButtonRect := Rect(0, 0, 0, 0);
@@ -387,32 +392,34 @@ begin
      (Form.BorderStyle <> bsSizeToolWin) then
   begin
     if _FFormActive then
-      Detail := twCaptionActive
+      LDetail := twCaptionActive
     else
-      Detail := twCaptionInActive
+      LDetail := twCaptionInActive
   end
   else
   begin
    if _FFormActive then
-      Detail := twSmallCaptionActive
+      LDetail := twSmallCaptionActive
     else
-      Detail := twSmallCaptionInActive
+      LDetail := twSmallCaptionInActive
   end;
   CaptionBuffer := TBitmap.Create;
   CaptionBuffer.SetSize(_FWidth, R.Top);
 
   {draw caption border}
   DrawRect := Rect(0, 0, CaptionBuffer.Width, CaptionBuffer.Height);
-  Details := StyleServices.GetElementDetails(Detail);  //used for draw text in the caption
-  //StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, DrawRect);
+  LDetails := StyleServices.GetElementDetails(LDetail);  //used for draw text in the caption
 
+  //check if a must use a custom color or a bitmap
   if FNCSettings.UseColor then
   begin
+    //use the select color to fill the background of the canvas
     CaptionBuffer.Canvas.Brush.Color:=FNCSettings.Color;
     CaptionBuffer.Canvas.FillRect(DrawRect);
   end
   else
   begin
+    //use the bitmap to fill the canvas
     SrcBackRect.Left:=0;
     SrcBackRect.Top:=0;
     SrcBackRect.Width:=DrawRect.Width;
@@ -423,7 +430,7 @@ begin
   end;
 
   TextRect := DrawRect;
-  CaptionDetails := Details;
+  CaptionDetails := LDetails;
 
   {draw icon}
   if (biSystemMenu in TCustomFormHack(Form).BorderIcons) and
@@ -473,11 +480,11 @@ begin
           FButtonState := twSmallCloseButtonDisabled;
     end;
 
-    Details := StyleServices.GetElementDetails(FButtonState);
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    LDetails := StyleServices.GetElementDetails(FButtonState);
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
 
-    StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+    StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, LDetails, ButtonRect);
 
     if ButtonRect.Left > 0 then
       TextRect.Right := ButtonRect.Left;
@@ -514,12 +521,12 @@ begin
       else
         FButtonState := twMaxButtonDisabled;
     end;
-    Details := StyleServices.GetElementDetails(FButtonState);
+    LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
     if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, LDetails, ButtonRect);
     if ButtonRect.Left > 0 then
       TextRect.Right := ButtonRect.Left;
     _FMaxButtonRect := ButtonRect;
@@ -541,12 +548,12 @@ begin
       else
         FButtonState := twMinButtonDisabled;
 
-    Details := StyleServices.GetElementDetails(FButtonState);
+    LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
     if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, LDetails, ButtonRect);
     if ButtonRect.Left > 0 then TextRect.Right := ButtonRect.Left;
     _FMinButtonRect := ButtonRect;
   end;
@@ -565,12 +572,12 @@ begin
       FButtonState := twHelpButtonNormal
     else
       FButtonState := twHelpButtonDisabled;
-    Details := StyleServices.GetElementDetails(FButtonState);
+    LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
     if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, LDetails, ButtonRect);
 
     if ButtonRect.Left > 0 then
       TextRect.Right := ButtonRect.Left;
@@ -596,11 +603,8 @@ begin
 
   {draw left border}
   DrawRect := Rect(0, R.Top, R.Left, _FHeight - R.Bottom);
-  //Details := StyleServices.GetElementDetails(Detail);
-
   if DrawRect.Bottom - DrawRect.Top > 0 then
-  begin
-    //StyleServices.DrawElement(Canvas.Handle, Details, DrawRect);
+    //use a color?
     if FNCSettings.UseColor then
     begin
       Canvas.Brush.Color:=FNCSettings.Color;
@@ -613,15 +617,12 @@ begin
       else
         Canvas.StretchDraw(DrawRect, FNCSettings.BitMap);
     end;
-  end;
 
   {draw right border}
   DrawRect := Rect(_FWidth - R.Right, R.Top, _FWidth, _FHeight - R.Bottom);
-  //Details := StyleServices.GetElementDetails(Detail);
 
   if DrawRect.Bottom - DrawRect.Top > 0 then
-  begin
-    //StyleServices.DrawElement(Canvas.Handle, Details, DrawRect);
+    //use a color?
     if FNCSettings.UseColor then
     begin
       Canvas.Brush.Color:=FNCSettings.Color;
@@ -634,15 +635,12 @@ begin
       else
         Canvas.StretchDraw(DrawRect, FNCSettings.BitMap);
     end;
-  end;
 
   {draw Bottom border}
   DrawRect := Rect(0, _FHeight - R.Bottom, _FWidth, _FHeight);
-  //Details := StyleServices.GetElementDetails(Detail);
 
   if DrawRect.Bottom - DrawRect.Top > 0 then
-  begin
-    //StyleServices.DrawElement(Canvas.Handle, Details, DrawRect);
+    //use a color?
     if FNCSettings.UseColor then
     begin
       Canvas.Brush.Color:=FNCSettings.Color;
@@ -662,9 +660,6 @@ begin
         Canvas.CopyRect(DrawRect, FNCSettings.BitMap.Canvas,SrcBackRect);
       end;
     end;
-  end;
 end;
-
-
 
 end.

@@ -22,6 +22,12 @@ object FrmMain: TFrmMain
     Height = 13
     Caption = 'Vcl Styles'
   end
+  object Image1: TImage
+    Left = 184
+    Top = 64
+    Width = 105
+    Height = 105
+  end
   object GroupBox1: TGroupBox
     Left = 8
     Top = 84
