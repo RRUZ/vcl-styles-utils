@@ -26,11 +26,15 @@ interface
 
 uses
   Winapi.Windows,
+  Vcl.Themes,
   Vcl.Controls,
   Vcl.Graphics,
   Vcl.Forms;
 
+
 type
+  /// <summary> Form Style hook to add image and/or color supoort for background and non client area
+  /// </summary>
   TFormStyleHookBackround=class(TFormStyleHook)
   strict private
     type
@@ -70,6 +74,13 @@ type
     class property BackGroundSettings : TSettings read FBackGroundSettings;
   end;
 
+  /// <summary> Form Style hook to disable vcl styles in non client area
+  /// </summary>
+  TFormStyleHookNC= class(TMouseTrackControlStyleHook)
+  public
+    procedure PaintBackground(Canvas: TCanvas); override;
+    constructor Create(AControl: TWinControl);  override;
+  end;
 
 implementation
 
@@ -79,7 +90,6 @@ Uses
   Vcl.Imaging.Jpeg,
   Vcl.Imaging.pngimage,
   Vcl.Imaging.GIFImg,
-  Vcl.Themes,
   Vcl.Styles;
 
 type
@@ -662,4 +672,25 @@ begin
     end;
 end;
 
+{ TFormStyleHookNC }
+
+constructor TFormStyleHookNC.Create(AControl: TWinControl);
+begin
+  inherited;
+  OverrideEraseBkgnd := True;
+end;
+
+procedure TFormStyleHookNC.PaintBackground(Canvas: TCanvas);
+var
+  Details: TThemedElementDetails;
+  R: TRect;
+begin
+  if StyleServices.Available then
+  begin
+    Details.Element := teWindow;
+    Details.Part := 0;
+    R := Rect(0, 0, Control.ClientWidth, Control.ClientHeight);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
+end;
 end.

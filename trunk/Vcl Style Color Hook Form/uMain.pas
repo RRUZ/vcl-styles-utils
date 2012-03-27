@@ -28,7 +28,6 @@ type
     ComboBoxStyles: TComboBox;
     Label1: TLabel;
     CheckBoxMerge: TCheckBox;
-    Image1: TImage;
     procedure ColorBoxNCGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure ColorBoxNCChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
