@@ -123,15 +123,21 @@ procedure _BlendScreen32(const ABitMap: TBitmap;Value: Integer);
 Type
   TColorFilter=class
   private
-   FValue : Integer;
+   FColorValue : Integer;
   public
-   constructor Create(AValue:Integer);
-   property Value : Integer read FValue Write FValue;
+   constructor Create(AColorValue:Integer);
+   property ColorValue : Integer read FColorValue Write FColorValue;
    function ProcessColor(AColor: TColor):TColor;virtual;abstract;
   end;
 
   TBitmapFilter=class(TColorFilter)
+  private
+   //FColorValue   : Integer;
+   UseBitmap: Boolean;
+   FSourceBitmap : TBitmap;
   public
+   constructor Create(AColorValue:Integer);
+   constructor CreateBitMap(ASourceBitmap :TBitmap);
    procedure ProcessBitmap(ABitMap: TBitmap);virtual;abstract;
   end;
 
@@ -278,18 +284,18 @@ begin
 end;
 
 
-procedure _ProcessBitmap32(const ABitMap: TBitmap;Value: Integer;_Process:TFilterCallback);
+procedure _ProcessBitmap32(const Dest: TBitmap;Value: Integer;_Process:TFilterCallback); overload;
 var
   r, g, b, a   : byte;
   x, y:    integer;
   ARGB:    TColor;
   Line, Delta: integer;
 begin
-  Line  := integer(ABitMap.ScanLine[0]);
-  Delta := integer(ABitMap.ScanLine[1]) - Line;
-  for y := 0 to ABitMap.Height - 1 do
+  Line  := integer(Dest.ScanLine[0]);
+  Delta := integer(Dest.ScanLine[1]) - Line;
+  for y := 0 to Dest.Height - 1 do
   begin
-    for x := 0 to ABitMap.Width - 1 do
+    for x := 0 to Dest.Width - 1 do
     begin
       r    := PRGBArray32(Line)[x].R;
       g    := PRGBArray32(Line)[x].G;
@@ -307,6 +313,48 @@ begin
     Inc(Line, Delta);
   end;
 end;
+
+procedure _ProcessBitmap32(const Source, Dest: TBitmap;_Process:TFilterCallback); overload;
+var
+  r, g, b, a   : byte;
+  x, y:    integer;
+  ARGB:    TColor;
+  LineDest, DeltaDest: integer;
+  LineSource, DeltaSource: integer;
+  Value : TColor;
+begin
+  LineDest  := integer(Dest.ScanLine[0]);
+  DeltaDest := integer(Dest.ScanLine[1]) - LineDest;
+
+  LineSource  := integer(Source.ScanLine[0]);
+  DeltaSource := integer(Source.ScanLine[1]) - LineSource;
+
+  for y := 0 to Dest.Height - 1 do
+  begin
+    for x := 0 to Dest.Width - 1 do
+    begin
+      r    := PRGBArray32(LineDest)[x].R;
+      g    := PRGBArray32(LineDest)[x].G;
+      b    := PRGBArray32(LineDest)[x].B;
+      a    := PRGBArray32(LineDest)[x].A;
+
+      //GetRGB(Value, PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
+      Value:=RGB(PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
+
+
+      _Process(RGB(r,g,b), Value, ARGB);
+      GetRGB(ARGB, r, g, b);
+
+      PRGBArray32(LineDest)[x].R := r;
+      PRGBArray32(LineDest)[x].G := g;
+      PRGBArray32(LineDest)[x].B := b;
+      PRGBArray32(LineDest)[x].A := a;
+    end;
+    Inc(LineDest, DeltaDest);
+    Inc(LineSource, DeltaSource);
+  end;
+end;
+
 
 
 procedure _ProcessBitmap24(const ABitMap: TBitmap;Value: Integer;_Process:TFilterCallback);
@@ -1024,15 +1072,15 @@ end;
 procedure TBitmap32HueFilter.ProcessBitmap(ABitMap: TBitmap);
 begin
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _Hue)
+   _ProcessBitmap32(ABitMap, ColorValue, _Hue)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _Hue);
+   _ProcessBitmap24(ABitMap, ColorValue, _Hue);
 end;
 
 function TBitmap32HueFilter.ProcessColor(AColor: TColor): TColor;
 begin
-  _Hue(AColor, Value, Result);
+  _Hue(AColor, ColorValue, Result);
 end;
 
 { TBitmap32SaturationFilter }
@@ -1040,15 +1088,15 @@ end;
 procedure TBitmap32SaturationFilter.ProcessBitmap(ABitMap: TBitmap);
 begin
   if ABitMap.PixelFormat=pf32bit then
-    _ProcessBitmap32(ABitMap, Value, _Saturation)
+    _ProcessBitmap32(ABitMap, ColorValue, _Saturation)
   else
   if ABitMap.PixelFormat=pf24bit then
-    _ProcessBitmap24(ABitMap, Value, _Saturation);
+    _ProcessBitmap24(ABitMap, ColorValue, _Saturation);
 end;
 
 function TBitmap32SaturationFilter.ProcessColor(AColor: TColor): TColor;
 begin
-  _Saturation(AColor, Value, Result);
+  _Saturation(AColor, ColorValue, Result);
 end;
 
 { TBitmap32LightnessFilter }
@@ -1057,27 +1105,27 @@ procedure TBitmap32LightnessFilter.ProcessBitmap(ABitMap: TBitmap);
 begin
   if ABitMap.PixelFormat=pf32bit then
   begin
-    if Value >= 0 then
-      _ProcessBitmap32(ABitMap, Value, _Lightness)
+    if ColorValue >= 0 then
+      _ProcessBitmap32(ABitMap, ColorValue, _Lightness)
     else
-      _ProcessBitmap32(ABitMap, Abs(Value), _Darkness);
+      _ProcessBitmap32(ABitMap, Abs(ColorValue), _Darkness);
   end
   else
   if ABitMap.PixelFormat=pf24bit then
   begin
-    if Value >= 0 then
-      _ProcessBitmap24(ABitMap, Value, _Lightness)
+    if ColorValue >= 0 then
+      _ProcessBitmap24(ABitMap, ColorValue, _Lightness)
     else
-      _ProcessBitmap24(ABitMap, Abs(Value), _Darkness);
+      _ProcessBitmap24(ABitMap, Abs(ColorValue), _Darkness);
   end;
 end;
 
 function TBitmap32LightnessFilter.ProcessColor(AColor: TColor): TColor;
 begin
-    if Value >= 0 then
-      _Lightness(AColor, Value, Result)
+    if ColorValue >= 0 then
+      _Lightness(AColor, ColorValue, Result)
     else
-      _Darkness(AColor, Abs(Value), Result);
+      _Darkness(AColor, Abs(ColorValue), Result);
 end;
 
 { TBitmap32SepiaFilter }
@@ -1085,23 +1133,23 @@ end;
 procedure TBitmap32SepiaFilter.ProcessBitmap(ABitMap: TBitmap);
 begin
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _Sepia)
+   _ProcessBitmap32(ABitMap, ColorValue, _Sepia)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _Sepia);
+   _ProcessBitmap24(ABitMap, ColorValue, _Sepia);
 end;
 
 function TBitmap32SepiaFilter.ProcessColor(AColor: TColor): TColor;
 begin
-   _Sepia(AColor, Value, Result);
+   _Sepia(AColor, ColorValue, Result);
 end;
 
 { TColorFilter }
 
-constructor TColorFilter.Create(AValue: Integer);
+constructor TColorFilter.Create(AColorValue: Integer);
 begin
  inherited Create;
- FValue:=AValue;
+ FColorValue:=AColorValue;
 end;
 
 
@@ -1110,15 +1158,15 @@ end;
 procedure TBitmap32BlueFilter.ProcessBitmap(ABitMap: TBitmap);
 begin
   if ABitMap.PixelFormat=pf32bit then
-    _SetRGB32(ABitMap,0,0,Value)
+    _SetRGB32(ABitMap,0,0,ColorValue)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _SetRGB24(ABitMap,0,0,Value);
+   _SetRGB24(ABitMap,0,0,ColorValue);
 end;
 
 function TBitmap32BlueFilter.ProcessColor(AColor: TColor): TColor;
 begin
-  _SetBComponent(AColor, Value, Result);
+  _SetBComponent(AColor, ColorValue, Result);
 end;
 
 { TBitmap32RedFilter }
@@ -1126,15 +1174,15 @@ end;
 procedure TBitmap32RedFilter.ProcessBitmap(ABitMap: TBitmap);
 begin
   if ABitMap.PixelFormat=pf32bit then
-    _SetRGB32(ABitMap,Value,0,0)
+    _SetRGB32(ABitMap,ColorValue,0,0)
   else
   if ABitMap.PixelFormat=pf24bit then
-    _SetRGB24(ABitMap,Value,0,0);
+    _SetRGB24(ABitMap,ColorValue,0,0);
 end;
 
 function TBitmap32RedFilter.ProcessColor(AColor: TColor): TColor;
 begin
-  _SetRComponent(AColor, Value, Result);
+  _SetRComponent(AColor, ColorValue, Result);
 end;
 
 { TBitmap32GreenFilter }
@@ -1142,159 +1190,229 @@ end;
 procedure TBitmap32GreenFilter.ProcessBitmap(ABitMap: TBitmap);
 begin
   if ABitMap.PixelFormat=pf32bit then
-    _SetRGB32(ABitMap,0,Value,0)
+    _SetRGB32(ABitMap,0,ColorValue,0)
   else
   if ABitMap.PixelFormat=pf24bit then
-    _SetRGB24(ABitMap,0,Value,0);
+    _SetRGB24(ABitMap,0,ColorValue,0);
 end;
 
 function TBitmap32GreenFilter.ProcessColor(AColor: TColor): TColor;
 begin
-  _SetGComponent(AColor, Value, Result);
+  _SetGComponent(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendBurn }
 
 procedure TBitmap32BlendBurn.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendBurn);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendBurn)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendBurn)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendBurn);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendBurn);
 end;
 
 function TBitmap32BlendBurn.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendBurn(AColor, Value, Result);
+  _BlendBurn(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendMultiply }
 
 procedure TBitmap32BlendMultiply.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendMultiply);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendMultiply)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendMultiply)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendMultiply);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendMultiply);
 end;
 
 function TBitmap32BlendMultiply.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendMultiply(AColor, Value, Result);
+  _BlendMultiply(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendAdditive }
 
 procedure TBitmap32BlendAdditive.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendAdditive);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendAdditive)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendAdditive)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendAdditive);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendAdditive);
 end;
 
 function TBitmap32BlendAdditive.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendAdditive(AColor, Value, Result);
+  _BlendAdditive(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendDodge }
 
 procedure TBitmap32BlendDodge.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDodge);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendDodge)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendDodge)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendDodge);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendDodge);
 end;
 
 function TBitmap32BlendDodge.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendDodge(AColor, Value, Result);
+  _BlendDodge(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendOverlay }
 
 procedure TBitmap32BlendOverlay.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendOverlay);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendOverlay)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendOverlay)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendOverlay);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendOverlay);
 end;
 
 function TBitmap32BlendOverlay.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendOverlay(AColor, Value, Result);
+  _BlendOverlay(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendLighten }
 
 procedure TBitmap32BlendLighten.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendLighten);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendLighten)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendLighten)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendLighten);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendLighten);
 end;
 
 function TBitmap32BlendLighten.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendLighten(AColor, Value, Result);
+  _BlendLighten(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendDarken }
 
 procedure TBitmap32BlendDarken.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDarken);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendDarken)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendDarken)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendDarken);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendDarken);
 end;
 
 function TBitmap32BlendDarken.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendDarken(AColor, Value, Result);
+  _BlendDarken(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendScreen }
 
 procedure TBitmap32BlendScreen.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendScreen);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendScreen)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendScreen)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendScreen);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendScreen);
 end;
 
 function TBitmap32BlendScreen.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendScreen(AColor, Value, Result);
+  _BlendScreen(AColor, ColorValue, Result);
 end;
 
 { TBitmap32BlendDifference }
 
 procedure TBitmap32BlendDifference.ProcessBitmap(ABitMap: TBitmap);
 begin
+  if UseBitmap then
+  begin
+    if ABitMap.PixelFormat=pf32bit then
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDifference);
+  end
+  else
   if ABitMap.PixelFormat=pf32bit then
-   _ProcessBitmap32(ABitMap, Value, _BlendDifference)
+   _ProcessBitmap32(ABitMap, ColorValue, _BlendDifference)
   else
   if ABitMap.PixelFormat=pf24bit then
-   _ProcessBitmap24(ABitMap, Value, _BlendDifference);
+   _ProcessBitmap24(ABitMap, ColorValue, _BlendDifference);
 end;
 
 function TBitmap32BlendDifference.ProcessColor(AColor: TColor): TColor;
 begin
-  _BlendDifference(AColor, Value, Result);
+  _BlendDifference(AColor, ColorValue, Result);
+end;
+
+{ TBitmapFilter }
+
+constructor TBitmapFilter.CreateBitMap(ASourceBitmap: TBitmap);
+begin
+  inherited Create (clNone);
+  FSourceBitmap:=ASourceBitmap;
+  UseBitmap:=True;
+end;
+
+constructor TBitmapFilter.Create(AColorValue: Integer);
+begin
+  inherited Create(AColorValue);
+  UseBitmap:=False;
+  FSourceBitmap:=nil;
 end;
 
 end.

@@ -2,8 +2,8 @@ object FrmMain: TFrmMain
   Left = 0
   Top = 0
   Caption = 'Vcl Styles Demo'
-  ClientHeight = 373
-  ClientWidth = 362
+  ClientHeight = 398
+  ClientWidth = 1144
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -174,8 +174,55 @@ object FrmMain: TFrmMain
     TabOrder = 3
     OnClick = CheckBoxMergeClick
   end
+  object PageControl1: TPageControl
+    Left = 416
+    Top = 72
+    Width = 289
+    Height = 193
+    ActivePage = TabSheet2
+    TabOrder = 4
+    object TabSheet1: TTabSheet
+      Caption = 'TabSheet1'
+      object Button1: TButton
+        Left = 16
+        Top = 104
+        Width = 75
+        Height = 25
+        Caption = 'Button1'
+        TabOrder = 0
+      end
+      object Button2: TButton
+        Left = 112
+        Top = 104
+        Width = 75
+        Height = 25
+        Caption = 'Button2'
+        TabOrder = 1
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = 'TabSheet2'
+      ImageIndex = 1
+      object CheckBox1: TCheckBox
+        Left = 40
+        Top = 8
+        Width = 97
+        Height = 17
+        Caption = 'CheckBox1'
+        TabOrder = 0
+      end
+      object RadioButton1: TRadioButton
+        Left = 32
+        Top = 40
+        Width = 113
+        Height = 17
+        Caption = 'RadioButton1'
+        TabOrder = 1
+      end
+    end
+  end
   object OpenPictureDialog1: TOpenPictureDialog
     Left = 288
-    Top = 166
+    Top = 246
   end
 end

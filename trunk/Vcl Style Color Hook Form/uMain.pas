@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtDlgs, Vcl.ExtCtrls,
-  Vcl.Menus, Vcl.Imaging.jpeg;
+  Vcl.Menus, Vcl.Imaging.jpeg, Vcl.ComCtrls;
 
 type
   TFrmMain = class(TForm)
@@ -28,6 +28,13 @@ type
     ComboBoxStyles: TComboBox;
     Label1: TLabel;
     CheckBoxMerge: TCheckBox;
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    TabSheet2: TTabSheet;
+    Button1: TButton;
+    Button2: TButton;
+    CheckBox1: TCheckBox;
+    RadioButton1: TRadioButton;
     procedure ColorBoxNCGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure ColorBoxNCChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -211,5 +218,12 @@ initialization
   TFormStyleHookBackround.NCSettings.Color := clWebDarkSlategray;
   TFormStyleHookBackround.BackGroundSettings.Color := clWebDarkOliveGreen;
   TFormStyleHookBackround.MergeImages:=True;
+
+  TStyleManager.Engine.RegisterStyleHook(TCustomTabControl, TTabControlStyleHookBackround);
+  TStyleManager.Engine.RegisterStyleHook(TTabControl, TTabControlStyleHookBackround);
+  TStyleManager.Engine.RegisterStyleHook(TPageControl, TTabControlStyleHookBackround);
+
+  TStyleManager.Engine.RegisterStyleHook(TTabSheet, TTabControlStyleHookBackround);
+
 
 end.
