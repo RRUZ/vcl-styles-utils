@@ -26,8 +26,10 @@ interface
 
 uses
   Winapi.Windows,
+  Winapi.Messages,
   Vcl.Themes,
   Vcl.Controls,
+  Vcl.ComCtrls,
   Vcl.Graphics,
   Vcl.Forms;
 
@@ -81,6 +83,12 @@ type
     procedure PaintBackground(Canvas: TCanvas); override;
     constructor Create(AControl: TWinControl);  override;
   end;
+
+  TTabControlStyleHookBackround = class(TTabControlStyleHook)
+  private
+    procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
+  end;
+
 
 implementation
 
@@ -693,4 +701,30 @@ begin
     StyleServices.DrawElement(Canvas.Handle, Details, R);
   end;
 end;
+
+
+{ TTabControlStyleHookBackround }
+procedure TTabControlStyleHookBackround.WMEraseBkgnd(var Message: TMessage);
+var
+  Details : TThemedElementDetails;
+  LCanvas : TCanvas;
+begin
+  if (Message.LParam = 1) and StyleServices.Available then
+  begin
+    //Details := StyleServices.GetElementDetails(ttPane);
+    //StyleServices.DrawElement(HDC(Message.WParam), Details, Control.ClientRect);
+    LCanvas:=TCanvas.Create;
+    try
+      LCanvas.Handle:=HDC(Message.WParam);
+      LCanvas.Brush.Color:=ClGreen;
+      LCanvas.FillRect(Control.ClientRect);
+    finally
+      LCanvas.Free;
+    end;
+  end;
+  Message.Result := 1;
+  Handled := True;
+end;
+
+
 end.

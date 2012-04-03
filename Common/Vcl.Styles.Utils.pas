@@ -33,7 +33,7 @@ uses
 type
   TVCLStylesElement  = (vseBitmaps, vseSysColors, vseStyleColors, vseStyleFontColors);
   TVCLStylesElements = set of TVCLStylesElement;
-  TVCLStylesFilter   = (vsfHSL, vsfRGB, vsfBlend);
+  TVCLStylesFilter   = (vsfHSL, vsfRGB, vsfBlend, vsfTextureBlend);
 
   TVclStylesUtils = class
   private
@@ -57,7 +57,7 @@ type
   end;
 
 const
-  VCLStylesFilterNames : Array[TVCLStylesFilter] of string = ('HSL','RGB','Blend');
+  VCLStylesFilterNames : Array[TVCLStylesFilter] of string = ('HSL','RGB','Blend','Texture Blend');
 
 implementation
 
@@ -143,26 +143,14 @@ begin
     for LFilter in Filters do
     begin
      oNode  := ChildNode.AddChild(LFilter.ClassName);
-     oNode.Text:=IntToStr(LFilter.Value);
+     oNode.Text:=IntToStr(LFilter.ColorValue);
     end;
     Doc.SaveToFile(FileName);
   finally
    Doc:=nil;
   end;
 end;
-          {
-class procedure TVclStylesUtils.LoadAndApplySettings(const FileName: String);
-var
-LElements   :TVCLStylesElements;
-LFilterType : TVCLStylesFilter;
-LFilters    : TObjectList<TBitmapFilter>;
-begin
-  LoadSettings(FileName, LElements, LFilterType, LFilters);
 
-
-
-end;
-         }
 class procedure TVclStylesUtils.LoadSettings(const FileName:String;var Elements :TVCLStylesElements; var FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
 var
   Doc       : IXMLDocument;

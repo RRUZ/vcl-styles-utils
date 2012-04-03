@@ -69,6 +69,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_MapFile>3</DCC_MapFile>
 			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Locale>1033</VerInfo_Locale>
@@ -84,7 +85,7 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="uHueSat.pas">
+			<DCCReference Include="uVclStylesEQU.pas">
 				<Form>FrmHueSat</Form>
 			</DCCReference>
 			<DCCReference Include="..\Common\uHSLUtils.pas"/>
@@ -644,5 +645,5 @@ Count mtException_AntiFreeze=1
 mtException_AntiFreeze0="The application seems to be frozen."
 Count mtInvalidEmailMsg=1
 mtInvalidEmailMsg0="Invalid email."
-TextsCollection=English
+TextsCollection=
 EurekaLog Last Line -->

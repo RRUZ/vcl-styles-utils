@@ -1908,7 +1908,7 @@ object FrmHueSat: TFrmHueSat
     Top = 61
     Width = 361
     Height = 225
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     TabOrder = 7
     object TabSheet1: TTabSheet
       Caption = 'HSL'
@@ -2320,7 +2320,7 @@ object FrmHueSat: TFrmHueSat
         Selected = clRed
         Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames, cbCustomColors]
         TabOrder = 0
-        OnChange = ComboBoxBlendChange
+        OnChange = CbBlendChange
         OnGetColors = ColorBoxblendGetColors
       end
       object Button6: TButton
@@ -2332,14 +2332,56 @@ object FrmHueSat: TFrmHueSat
         TabOrder = 1
         OnClick = Button6Click
       end
-      object ComboBoxBlend: TComboBox
+      object CbBlend: TComboBox
         Left = 3
         Top = 66
         Width = 145
         Height = 21
         Style = csDropDownList
         TabOrder = 2
-        OnChange = ComboBoxBlendChange
+        OnChange = CbBlendChange
+      end
+    end
+    object TabSheet8: TTabSheet
+      Caption = 'Textures'
+      ImageIndex = 3
+      object Label10: TLabel
+        Left = 3
+        Top = 7
+        Width = 55
+        Height = 13
+        Caption = 'Blend Mode'
+      end
+      object Label11: TLabel
+        Left = 163
+        Top = 7
+        Width = 43
+        Height = 13
+        Caption = 'Textures'
+      end
+      object ImageTexture: TImage
+        Left = 3
+        Top = 53
+        Width = 347
+        Height = 144
+      end
+      object CbBlendTextures: TComboBox
+        Left = 3
+        Top = 26
+        Width = 145
+        Height = 21
+        Style = csDropDownList
+        TabOrder = 0
+        OnChange = CbBlendTexturesChange
+      end
+      object CbTextures: TComboBox
+        Left = 163
+        Top = 26
+        Width = 145
+        Height = 21
+        Style = csDropDownList
+        TabOrder = 1
+        OnChange = CbBlendTexturesChange
       end
     end
   end
@@ -2579,12 +2621,22 @@ object FrmHueSat: TFrmHueSat
     TabOrder = 9
     OnClick = btnLoadSettingsClick
   end
+  object RadioButtonTextures: TRadioButton
+    Tag = 3
+    Left = 586
+    Top = 23
+    Width = 55
+    Height = 17
+    Caption = 'Textures'
+    TabOrder = 13
+    OnClick = RadioButtonHSLClick
+  end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 600
-    Top = 155
+    Left = 168
+    Top = 203
     Bitmap = {
-      494C010101000800A80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800AC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2724,8 +2776,8 @@ object FrmHueSat: TFrmHueSat
       000000000000}
   end
   object ActionManager1: TActionManager
-    Left = 512
-    Top = 155
+    Left = 48
+    Top = 203
     StyleName = 'Platform Default'
     object ActionApplyStyle: TAction
       Caption = 'ActionApplyStyle'
@@ -2734,13 +2786,13 @@ object FrmHueSat: TFrmHueSat
     end
   end
   object SaveDialog1: TSaveDialog
-    Left = 560
-    Top = 155
+    Left = 104
+    Top = 203
   end
   object ColorDialog1: TColorDialog
     Options = [cdFullOpen, cdShowHelp, cdSolidColor, cdAnyColor]
-    Left = 640
-    Top = 155
+    Left = 232
+    Top = 203
   end
   object ImageListStyleColors: TImageList
     ColorDepth = cd32Bit

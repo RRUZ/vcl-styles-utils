@@ -1,7 +1,7 @@
 {**************************************************************************************************}
 {                                                                                                  }
-{ Unit uHueSat                                                                                     }
-{ unit uHueSat  for the Delphi IDE Theme Editor                                                    }
+{ Unit uVclStylesEQU                                                                               }
+{ unit uVclStylesEQU  for the VCL Styles Utils  project                                            }
 {                                                                                                  }
 { The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
 { you may not use this file except in compliance with the License. You may obtain a copy of the    }
@@ -11,14 +11,14 @@
 { ANY KIND, either express or implied. See the License for the specific language governing rights  }
 { and limitations under the License.                                                               }
 {                                                                                                  }
-{ The Original Code is uHueSat.pas.                                                                }
+{ The Original Code is uVclStylesEQU.pas.                                                          }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2012 Rodrigo Ruz V.                         }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
-unit uHueSat;
+unit uVclStylesEQU;
 
 interface
 
@@ -86,7 +86,7 @@ type
     RadioButtonBlend: TRadioButton;
     ColorBoxblend: TColorBox;
     Button6: TButton;
-    ComboBoxBlend: TComboBox;
+    CbBlend: TComboBox;
     Label8: TLabel;
     Label9: TLabel;
     ColorDialog1: TColorDialog;
@@ -112,6 +112,13 @@ type
     Button7: TButton;
     btnLoadSettings: TButton;
     OpenDialog1: TOpenDialog;
+    TabSheet8: TTabSheet;
+    RadioButtonTextures: TRadioButton;
+    CbBlendTextures: TComboBox;
+    Label10: TLabel;
+    CbTextures: TComboBox;
+    Label11: TLabel;
+    ImageTexture: TImage;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -139,13 +146,14 @@ type
     procedure ButtonApplyBlendClick(Sender: TObject);
     procedure RadioButtonHSLClick(Sender: TObject);
     procedure Button6Click(Sender: TObject);
-    procedure ComboBoxBlendChange(Sender: TObject);
+    procedure CbBlendChange(Sender: TObject);
     procedure ColorBoxblendGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure LinkLabel1LinkClick(Sender: TObject; const Link: string;
       LinkType: TSysLinkType);
     procedure CheckBoxStyleColorsClick(Sender: TObject);
     procedure btnSaveSettingsClick(Sender: TObject);
     procedure btnLoadSettingsClick(Sender: TObject);
+    procedure CbBlendTexturesChange(Sender: TObject);
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
@@ -165,6 +173,8 @@ type
 
     procedure SaveSettings;
     procedure LoadSettings;
+
+    procedure LoadImageTexture;
   end;
 
 var
@@ -188,6 +198,7 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Imaging.pngimage,
+  Vcl.Imaging.Jpeg,
   uVCLStylesInfo;
 
 procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
@@ -201,7 +212,6 @@ begin
   bmp.Canvas.Brush.Color := clBlack;
   bmp.Canvas.FillRect(Rect(0,0, Width, Height));
 
-
   w :=(Width-2) div (High(Colors)+1);
   for i:=0 to High(Colors) do
   begin
@@ -210,8 +220,6 @@ begin
    bmp.Canvas.FillRect(Rect((w*i)+1,1, w*(i+1)+1, Height-1))
   end;
 end;
-
-
 
 procedure TFrmHueSat.DropFiles(var msg: TMessage);
 const
@@ -305,13 +313,28 @@ begin
     begin
       ctx := TRttiContext.Create;
       try
-        RttiInstanceType := (ctx.GetType(ComboBoxBlend.Items.Objects[ComboBoxBlend.ItemIndex]) as TRttiInstanceType);
+        RttiInstanceType := (ctx.GetType(CbBlend.Items.Objects[CbBlend.ItemIndex]) as TRttiInstanceType);
         LFilter := RttiInstanceType.GetMethod('Create').Invoke(RttiInstanceType.MetaclassType,[ColorBoxblend.Selected]);
         Result.Add(TBitmapFilter(LFilter.AsObject));
       finally
         ctx.Free;
       end;
     end;
+
+    if RadioButtonTextures.Checked then
+    begin
+      ctx := TRttiContext.Create;
+      try
+        RttiInstanceType := (ctx.GetType(CbBlendTextures.Items.Objects[CbBlendTextures.ItemIndex]) as TRttiInstanceType);
+        //ShowMessage(IntToStr(ImageTexture.Picture.Bitmap.Width));
+        LFilter := RttiInstanceType.GetMethod('CreateBitMap').Invoke(RttiInstanceType.MetaclassType,[ImageTexture.Picture.Bitmap]);
+
+        Result.Add(TBitmapFilter(LFilter.AsObject));
+      finally
+        ctx.Free;
+      end;
+    end;
+
 end;
 
 
@@ -395,7 +418,7 @@ begin
       if StartsText('clWeb',ColorName) then
        ColorName:=StringReplace(ColorName,'clWeb','',[rfReplaceAll]);
 
-      NewName :=Format('%s Blend %s %s',[NewName,ComboBoxBlend.Text,ColorName]);
+      NewName :=Format('%s Blend %s %s',[NewName,CbBlend.Text,ColorName]);
      end;
 
      SaveDialog1.FileName:=NewName+'.vsf';
@@ -534,8 +557,14 @@ begin
    Items.AddObject(Item.Name,TObject(Item.Value));
 end;
 
-procedure TFrmHueSat.ComboBoxBlendChange(Sender: TObject);
+procedure TFrmHueSat.CbBlendChange(Sender: TObject);
 begin
+  BuildPreview;
+end;
+
+procedure TFrmHueSat.CbBlendTexturesChange(Sender: TObject);
+begin
+  LoadImageTexture;
   BuildPreview;
 end;
 
@@ -641,6 +670,8 @@ begin
 end;
 
 procedure TFrmHueSat.FormCreate(Sender: TObject);
+var
+  s : string;
 begin
  DragAcceptFiles( Handle, True );
  ReportMemoryLeaksOnShutdown:=True;
@@ -652,7 +683,7 @@ begin
   OriginalBitMap := TBitmap.Create;
   LoadStyle;
 
-  With ComboBoxBlend.Items do
+  With CbBlend.Items do
   begin
    AddObject('Multiply', TypeInfo(TBitmap32BlendMultiply));
    AddObject('Burn', TypeInfo(TBitmap32BlendBurn));
@@ -664,10 +695,32 @@ begin
    AddObject('Darken', TypeInfo(TBitmap32BlendDarken));
    AddObject('Screen', TypeInfo(TBitmap32BlendScreen));
   end;
+  CbBlend.ItemIndex:=0;
 
-  ComboBoxBlend.ItemIndex:=0;
+  With CbBlendTextures.Items do
+  begin
+   AddObject('Multiply', TypeInfo(TBitmap32BlendMultiply));
+   AddObject('Burn', TypeInfo(TBitmap32BlendBurn));
+   AddObject('Additive', TypeInfo(TBitmap32BlendAdditive));
+   AddObject('Dodge', TypeInfo(TBitmap32BlendDodge));
+   AddObject('Overlay', TypeInfo(TBitmap32BlendOverlay));
+   AddObject('Difference', TypeInfo(TBitmap32BlendDifference));
+   AddObject('Lighten', TypeInfo(TBitmap32BlendLighten));
+   AddObject('Darken', TypeInfo(TBitmap32BlendDarken));
+   AddObject('Screen', TypeInfo(TBitmap32BlendScreen));
+  end;
+  CbBlendTextures.ItemIndex:=0;
+
+  for s in TDirectory.GetFiles(ExtractFilePath(ParamStr(0))+'Textures','*.jpg') do
+   CbTextures.Items.Add(ExtractFileName(s));
+
+  if CbTextures.Items.Count>0 then
+  begin
+   CbTextures.ItemIndex:=0;
+   LoadImageTexture;
+  end;
+
   SetPageActive(0);
-
 end;
 
 procedure TFrmHueSat.FormDestroy(Sender: TObject);
@@ -832,6 +885,25 @@ begin
 end;
 
 
+procedure TFrmHueSat.LoadImageTexture;
+var
+ JpegImage : TJPEGImage;
+begin
+  ImageTexture.Picture.LoadFromFile(ExtractFilePath(ParamStr(0))+'textures\'+CbTextures.Text);
+  if (ImageTexture.Picture.Graphic is TJPegImage) then
+  begin
+    JpegImage := TJpegImage.Create;
+    try
+     JpegImage.Assign(ImageTexture.Picture.Graphic);
+     ImageTexture.Picture.Bitmap.Assign(JpegImage);
+    finally
+     JpegImage.Free;
+    end;
+  end;
+
+  //ShowMessage(IntToStr(ImageTexture.Picture.Graphic.Width));
+end;
+
 procedure TFrmHueSat.LoadSettings;
 Var
  LFilterType  : TVCLStylesFilter;
@@ -857,36 +929,36 @@ begin
 
                     for Filter in  LFilters do
                      if Filter is TBitmap32HueFilter then
-                        TrackBarHue.Position:=Filter.Value
+                        TrackBarHue.Position:=Filter.ColorValue
                      else
                      if Filter is TBitmap32SaturationFilter then
-                       TrackBarSaturation.Position:=Filter.Value
+                       TrackBarSaturation.Position:=Filter.ColorValue
                      else
                      if Filter is TBitmap32LightnessFilter then
-                       TrackBarLightness.Position:=Filter.Value;
+                       TrackBarLightness.Position:=Filter.ColorValue;
                   end;
 
        vsfRGB   : begin
                     RadioButtonRGB.Checked:=True;
                     for Filter in  LFilters do
                      if Filter is TBitmap32RedFilter then
-                        TrackBarRed.Position:=Filter.Value
+                        TrackBarRed.Position:=Filter.ColorValue
                      else
                      if Filter is TBitmap32GreenFilter then
-                        TrackBarGreen.Position:=Filter.Value
+                        TrackBarGreen.Position:=Filter.ColorValue
                      else
                      if Filter is TBitmap32BlueFilter then
-                        TrackBarBlue.Position:=Filter.Value;
+                        TrackBarBlue.Position:=Filter.ColorValue;
                   end;
 
        vsfBlend : begin
                     RadioButtonBlend.Checked:=True;
                     Filter:=LFilters[0];
-                    ColorBoxblend.Selected:=Filter.Value;
-                    for i:=0 to ComboBoxBlend.Items.Count-1 do
-                     if Pointer(ComboBoxBlend.Items.Objects[i])=Filter.ClassInfo then
+                    ColorBoxblend.Selected:=Filter.ColorValue;
+                    for i:=0 to CbBlend.Items.Count-1 do
+                     if Pointer(CbBlend.Items.Objects[i])=Filter.ClassInfo then
                      begin
-                      ComboBoxBlend.ItemIndex:=i;
+                      CbBlend.ItemIndex:=i;
                       Break;
                      end;
                   end;
