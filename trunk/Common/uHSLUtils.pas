@@ -322,42 +322,62 @@ var
   LineDest, DeltaDest: integer;
   LineSource, DeltaSource: integer;
   Value : TColor;
+  SourceN : TBitmap;
 begin
-  LineDest  := integer(Dest.ScanLine[0]);
-  DeltaDest := integer(Dest.ScanLine[1]) - LineDest;
+  SourceN:=TBitmap.Create;
+  try
+    SourceN.SetSize(Dest.Width, Dest.Height);
+    SourceN.PixelFormat:=pf24bit;
 
-  LineSource  := integer(Source.ScanLine[0]);
-  DeltaSource := integer(Source.ScanLine[1]) - LineSource;
-
-  for y := 0 to Dest.Height - 1 do
-  begin
-    for x := 0 to Dest.Width - 1 do
+    y := 0;
+    while y < Dest.Height do
     begin
-      r    := PRGBArray32(LineDest)[x].R;
-      g    := PRGBArray32(LineDest)[x].G;
-      b    := PRGBArray32(LineDest)[x].B;
-      a    := PRGBArray32(LineDest)[x].A;
-
-      //GetRGB(Value, PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
-      Value:=RGB(PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
-
-
-      _Process(RGB(r,g,b), Value, ARGB);
-      GetRGB(ARGB, r, g, b);
-
-      PRGBArray32(LineDest)[x].R := r;
-      PRGBArray32(LineDest)[x].G := g;
-      PRGBArray32(LineDest)[x].B := b;
-      PRGBArray32(LineDest)[x].A := a;
+      x := 0;
+      while x < Dest.Width do
+      begin
+        SourceN.Canvas.Draw(x, y, Source);
+        x := x + Source.Width;
+      end;
+      y := y + Source.Height;
     end;
-    Inc(LineDest, DeltaDest);
-    Inc(LineSource, DeltaSource);
+
+    LineDest  := integer(Dest.ScanLine[0]);
+    DeltaDest := integer(Dest.ScanLine[1]) - LineDest;
+
+    LineSource  := integer(SourceN.ScanLine[0]);
+    DeltaSource := integer(SourceN.ScanLine[1]) - LineSource;
+
+    for y := 0 to Dest.Height - 1 do
+    begin
+      for x := 0 to Dest.Width - 1 do
+      begin
+        r    := PRGBArray32(LineDest)[x].R;
+        g    := PRGBArray32(LineDest)[x].G;
+        b    := PRGBArray32(LineDest)[x].B;
+        a    := PRGBArray32(LineDest)[x].A;
+
+        Value:=RGB(PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
+
+
+        _Process(RGB(r,g,b), Value, ARGB);
+        GetRGB(ARGB, r, g, b);
+
+        PRGBArray32(LineDest)[x].R := r;
+        PRGBArray32(LineDest)[x].G := g;
+        PRGBArray32(LineDest)[x].B := b;
+        PRGBArray32(LineDest)[x].A := a;
+      end;
+      Inc(LineDest, DeltaDest);
+      Inc(LineSource, DeltaSource);
+    end;
+  finally
+    SourceN.Free;
   end;
 end;
 
 
 
-procedure _ProcessBitmap24(const ABitMap: TBitmap;Value: Integer;_Process:TFilterCallback);
+procedure _ProcessBitmap24(const ABitMap: TBitmap;Value: Integer;_Process:TFilterCallback); overload;
 var
   r, g, b    : byte;
   x, y:    integer;
@@ -384,6 +404,66 @@ begin
     Inc(Line, Delta);
   end;
 end;
+
+procedure _ProcessBitmap24(const Source, Dest: TBitmap;_Process:TFilterCallback); overload;
+var
+  r, g, b   : byte;
+  x, y:    integer;
+  ARGB:    TColor;
+  LineDest, DeltaDest: integer;
+  LineSource, DeltaSource: integer;
+  Value : TColor;
+  SourceN : TBitmap;
+begin
+  SourceN:=TBitmap.Create;
+  try
+    SourceN.SetSize(Dest.Width, Dest.Height);
+    SourceN.PixelFormat:=pf24bit;
+
+    y := 0;
+    while y < Dest.Height do
+    begin
+      x := 0;
+      while x < Dest.Width do
+      begin
+        SourceN.Canvas.Draw(x, y, Source);
+        x := x + Source.Width;
+      end;
+      y := y + Source.Height;
+    end;
+
+    LineDest  := integer(Dest.ScanLine[0]);
+    DeltaDest := integer(Dest.ScanLine[1]) - LineDest;
+
+    LineSource  := integer(SourceN.ScanLine[0]);
+    DeltaSource := integer(SourceN.ScanLine[1]) - LineSource;
+
+    for y := 0 to Dest.Height - 1 do
+    begin
+      for x := 0 to Dest.Width - 1 do
+      begin
+        r    := PRGBArray24(LineDest)[x].R;
+        g    := PRGBArray24(LineDest)[x].G;
+        b    := PRGBArray24(LineDest)[x].B;
+
+        Value:=RGB(PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
+
+        _Process(RGB(r,g,b), Value, ARGB);
+        GetRGB(ARGB, r, g, b);
+
+        PRGBArray32(LineDest)[x].R := r;
+        PRGBArray32(LineDest)[x].G := g;
+        PRGBArray32(LineDest)[x].B := b;
+      end;
+      Inc(LineDest, DeltaDest);
+      Inc(LineSource, DeltaSource);
+    end;
+  finally
+    SourceN.Free;
+  end;
+end;
+
+
 
 procedure _Sepia(const AColor: TColor;Value: Integer; out NewColor:TColor);
 var
@@ -1208,7 +1288,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendBurn);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendBurn)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendBurn)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1230,7 +1313,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendMultiply);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendMultiply)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendMultiply)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1252,7 +1338,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendAdditive);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendAdditive)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendAdditive)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1274,7 +1363,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDodge);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDodge)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendDodge)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1296,7 +1388,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendOverlay);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendOverlay)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendOverlay)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1318,7 +1413,11 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendLighten);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendLighten)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendLighten)
+
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1340,7 +1439,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDarken);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDarken)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendDarken)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1362,7 +1464,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendScreen);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendScreen)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendScreen)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -1384,7 +1489,10 @@ begin
   if UseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDifference);
+     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDifference)
+    else
+    if ABitMap.PixelFormat=pf24bit then
+     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendDifference)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
