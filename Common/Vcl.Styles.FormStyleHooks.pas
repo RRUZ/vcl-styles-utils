@@ -83,12 +83,12 @@ type
     procedure PaintBackground(Canvas: TCanvas); override;
     constructor Create(AControl: TWinControl);  override;
   end;
-
+        {
   TTabControlStyleHookBackround = class(TTabControlStyleHook)
   private
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
   end;
-
+       }
 
 implementation
 
@@ -704,6 +704,7 @@ end;
 
 
 { TTabControlStyleHookBackround }
+{
 procedure TTabControlStyleHookBackround.WMEraseBkgnd(var Message: TMessage);
 var
   Details : TThemedElementDetails;
@@ -725,6 +726,6 @@ begin
   Message.Result := 1;
   Handled := True;
 end;
-
+}
 
 end.
