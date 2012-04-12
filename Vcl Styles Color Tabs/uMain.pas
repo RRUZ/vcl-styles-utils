@@ -18,7 +18,6 @@ type
     TabSheet6: TTabSheet;
     TabSheet7: TTabSheet;
     TabSheet8: TTabSheet;
-    TabSheet9: TTabSheet;
     Edit1: TEdit;
     Label1: TLabel;
     CheckBox1: TCheckBox;
@@ -43,7 +42,6 @@ type
     TabSheet15: TTabSheet;
     TabSheet16: TTabSheet;
     TabSheet17: TTabSheet;
-    TabSheet18: TTabSheet;
   private
     { Private declarations }
   public

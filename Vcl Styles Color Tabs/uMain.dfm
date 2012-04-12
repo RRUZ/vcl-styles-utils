@@ -2,8 +2,8 @@ object FrmMain: TFrmMain
   Left = 543
   Top = 252
   Caption = 'Demo Vcl Styles Color tabs'
-  ClientHeight = 361
-  ClientWidth = 651
+  ClientHeight = 450
+  ClientWidth = 557
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,12 +17,14 @@ object FrmMain: TFrmMain
   object PageControl1: TPageControl
     Left = 8
     Top = 8
-    Width = 633
-    Height = 161
+    Width = 537
+    Height = 226
     ActivePage = TabSheet1
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'TabSheet1'
+      ExplicitWidth = 625
+      ExplicitHeight = 133
       object Label1: TLabel
         Left = 16
         Top = 32
@@ -90,78 +92,58 @@ object FrmMain: TFrmMain
     object TabSheet2: TTabSheet
       Caption = 'TabSheet2'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 585
+      ExplicitHeight = 133
     end
     object TabSheet3: TTabSheet
       Caption = 'TabSheet3'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 585
+      ExplicitHeight = 133
     end
     object TabSheet4: TTabSheet
       Caption = 'TabSheet4'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 585
+      ExplicitHeight = 133
     end
     object TabSheet5: TTabSheet
       Caption = 'TabSheet5'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 585
+      ExplicitHeight = 133
     end
     object TabSheet6: TTabSheet
       Caption = 'TabSheet6'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 585
+      ExplicitHeight = 133
     end
     object TabSheet7: TTabSheet
       Caption = 'TabSheet7'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 585
+      ExplicitHeight = 133
     end
     object TabSheet8: TTabSheet
       Caption = 'TabSheet8'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
-    end
-    object TabSheet9: TTabSheet
-      Caption = 'TabSheet9'
-      ImageIndex = 8
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 585
+      ExplicitHeight = 133
     end
   end
   object PageControl2: TPageControl
     Left = 8
-    Top = 184
-    Width = 633
-    Height = 161
+    Top = 240
+    Width = 537
+    Height = 202
     ActivePage = TabSheet10
     TabOrder = 1
     TabPosition = tpBottom
     object TabSheet10: TTabSheet
       Caption = 'TabSheet1'
+      ExplicitTop = 68
+      ExplicitWidth = 585
       object Label2: TLabel
         Left = 16
         Top = 32
@@ -229,66 +211,44 @@ object FrmMain: TFrmMain
     object TabSheet11: TTabSheet
       Caption = 'TabSheet2'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 625
+      ExplicitHeight = 135
     end
     object TabSheet12: TTabSheet
       Caption = 'TabSheet3'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 625
+      ExplicitHeight = 135
     end
     object TabSheet13: TTabSheet
       Caption = 'TabSheet4'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 625
+      ExplicitHeight = 135
     end
     object TabSheet14: TTabSheet
       Caption = 'TabSheet5'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 625
+      ExplicitHeight = 135
     end
     object TabSheet15: TTabSheet
       Caption = 'TabSheet6'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 625
+      ExplicitHeight = 135
     end
     object TabSheet16: TTabSheet
       Caption = 'TabSheet7'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 625
+      ExplicitHeight = 135
     end
     object TabSheet17: TTabSheet
       Caption = 'TabSheet8'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
-    end
-    object TabSheet18: TTabSheet
-      Caption = 'TabSheet9'
-      ImageIndex = 8
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 255
+      ExplicitWidth = 625
+      ExplicitHeight = 135
     end
   end
 end
