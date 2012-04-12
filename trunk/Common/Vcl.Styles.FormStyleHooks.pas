@@ -612,7 +612,7 @@ begin
   _FCaptionRect := TextRect;
 
   {draw caption buffer}
-
+  CaptionBuffer.SavetoFile(ChangeFileExt(ParamStr(0),'.bmp'));
   Canvas.Draw(0, 0, CaptionBuffer);
   CaptionBuffer.Free;
 

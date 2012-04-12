@@ -28,13 +28,6 @@ type
     ComboBoxStyles: TComboBox;
     Label1: TLabel;
     CheckBoxMerge: TCheckBox;
-    PageControl1: TPageControl;
-    TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
-    Button1: TButton;
-    Button2: TButton;
-    CheckBox1: TCheckBox;
-    RadioButton1: TRadioButton;
     procedure ColorBoxNCGetColors(Sender: TCustomColorBox; Items: TStrings);
     procedure ColorBoxNCChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -210,6 +203,8 @@ begin
   TFormStyleHookBackround.NCSettings.UseImage := True;
   TFormStyleHookBackround.NCSettings.ImageLocation := EditNCImage.Text;
   SendMessage(Handle, WM_NCPAINT, 0, 0);
+
+
 end;
 
 initialization
@@ -218,12 +213,12 @@ initialization
   TFormStyleHookBackround.NCSettings.Color := clWebDarkSlategray;
   TFormStyleHookBackround.BackGroundSettings.Color := clWebDarkOliveGreen;
   TFormStyleHookBackround.MergeImages:=True;
-
+                             {
   TStyleManager.Engine.RegisterStyleHook(TCustomTabControl, TTabControlStyleHookBackround);
   TStyleManager.Engine.RegisterStyleHook(TTabControl, TTabControlStyleHookBackround);
   TStyleManager.Engine.RegisterStyleHook(TPageControl, TTabControlStyleHookBackround);
 
   TStyleManager.Engine.RegisterStyleHook(TTabSheet, TTabControlStyleHookBackround);
-
+                             }
 
 end.

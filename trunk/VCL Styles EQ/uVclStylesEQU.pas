@@ -25,7 +25,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, StdCtrls, Mask, ComCtrls, Generics.Defaults, uHSLUtils,
-  Generics.Collections, Vcl.ImgList, Vcl.ActnList,
+  Generics.Collections, Vcl.ImgList, Vcl.ActnList, Vcl.Styles.Ext,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan;
 
 type
@@ -33,7 +33,6 @@ type
     btnApply: TButton;
     btnSave: TButton;
     ImageList1: TImageList;
-    ImageVCLStyle: TImage;
     Label4: TLabel;
     ComboBoxVclStyles: TComboBox;
     Button1: TButton;
@@ -41,7 +40,7 @@ type
     ActionApplyStyle: TAction;
     SaveDialog1: TSaveDialog;
     PageControl1: TPageControl;
-    TabSheet1: TTabSheet;
+    TabSheetHSL: TTabSheet;
     TrackBarHue: TTrackBar;
     EditLight: TEdit;
     UpDownLight: TUpDown;
@@ -60,7 +59,7 @@ type
     Bevel2: TBevel;
     Label3: TLabel;
     Bevel3: TBevel;
-    TabSheet2: TTabSheet;
+    TabSheetRGB: TTabSheet;
     TrackBarRed: TTrackBar;
     Label5: TLabel;
     Bevel5: TBevel;
@@ -79,7 +78,7 @@ type
     UpDownBlue: TUpDown;
     Button4: TButton;
     Bevel7: TBevel;
-    TabSheet3: TTabSheet;
+    TabSheetBlend: TTabSheet;
     ButtonApplyBlend: TButton;
     RadioButtonHSL: TRadioButton;
     RadioButtonRGB: TRadioButton;
@@ -94,10 +93,10 @@ type
     CheckBoxSepia: TCheckBox;
     LinkLabel1: TLinkLabel;
     PageControl2: TPageControl;
-    TabSheet4: TTabSheet;
-    TabSheet5: TTabSheet;
-    TabSheet6: TTabSheet;
-    TabSheet7: TTabSheet;
+    TabSheetPreview: TTabSheet;
+    TabSheetStyleColors: TTabSheet;
+    TabSheetStyleFonts: TTabSheet;
+    TabSheetSystemColors: TTabSheet;
     ListViewStyleColors: TListView;
     ImageListStyleColors: TImageList;
     ListViewStyleFontColors: TListView;
@@ -112,13 +111,14 @@ type
     Button7: TButton;
     btnLoadSettings: TButton;
     OpenDialog1: TOpenDialog;
-    TabSheet8: TTabSheet;
+    TabSheetTextures: TTabSheet;
     RadioButtonTextures: TRadioButton;
     CbBlendTextures: TComboBox;
     Label10: TLabel;
     CbTextures: TComboBox;
     Label11: TLabel;
     ImageTexture: TImage;
+    ImageVCLStyle: TImage;
     procedure ButtonHueClick(Sender: TObject);
     procedure ButtonSaturationClick(Sender: TObject);
     procedure ButtonLightnessClick(Sender: TObject);
@@ -157,6 +157,7 @@ type
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
+    //FPreview       : TVclStylesPreview;
     procedure DrawSeletedVCLStyle;
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
@@ -193,7 +194,7 @@ uses
   System.IOUtils,
   System.StrUtils,
   Vcl.GraphUtil,
-  Vcl.Styles.Ext,
+
   Vcl.Styles.Utils,
   Vcl.Themes,
   Vcl.Styles,
@@ -457,6 +458,7 @@ begin
                LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
                LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
                DrawSampleWindow(VclUtils.StyleExt, LBitmap.Canvas, ImageVCLStyle.ClientRect, NewName, Icon.Handle);
+               //DrawSampleWindow(VclUtils.StyleExt, ImageVCLStyle, NewName, Icon.Handle);
                //LBitmap.SaveToFile(ChangeFileExt(SaveDialog1.FileName,'.bmp'));
                ConvertToPNG(LBitmap, LPng);
                try
@@ -581,7 +583,7 @@ var
   SourceInfo: TSourceInfo;
 begin
    ImageVCLStyle.Picture:=nil;
-   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
+   if (StyleName<>'') and (not SameText('Windows',StyleName)) then
    begin
     LabelDrop.Caption:='';
     LBitmap:=TBitmap.Create;
@@ -602,9 +604,30 @@ begin
       LBitmap.Free;
     end;
    end;
-
-
 end;
+
+{
+var
+  LStyle    : TCustomStyleExt;
+  SourceInfo: TSourceInfo;
+begin
+   ImageVCLStyle.Picture:=nil;
+   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
+   begin
+     LabelDrop.Caption:='';
+     TStyleManager.StyleNames;//call DiscoverStyleResources
+     SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
+     LStyle:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
+     try
+       FPreview.Style:=LStyle;
+       FPreview.Caption:=StyleName;
+       FPreview.Repaint;
+     finally
+       LStyle.Free;
+     end;
+   end;
+end;
+}
 
 procedure TFrmHueSat.EditHueExit(Sender: TObject);
 Var
@@ -673,6 +696,11 @@ procedure TFrmHueSat.FormCreate(Sender: TObject);
 var
   s : string;
 begin
+ {
+ FPreview:=TVclStylesPreview.Create(Self);
+ FPreview.Parent:=TabSheetPreview;
+ FPreview.BoundsRect := TabSheetPreview.ClientRect;
+ }
  DragAcceptFiles( Handle, True );
  ReportMemoryLeaksOnShutdown:=True;
 
