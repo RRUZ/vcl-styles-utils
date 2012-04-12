@@ -1,6 +1,6 @@
 object FrmHueSat: TFrmHueSat
-  Left = 809
-  Top = 234
+  Left = 415
+  Top = 229
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VCL Styles Equalizer'
@@ -1908,9 +1908,9 @@ object FrmHueSat: TFrmHueSat
     Top = 61
     Width = 361
     Height = 225
-    ActivePage = TabSheet1
+    ActivePage = TabSheetHSL
     TabOrder = 7
-    object TabSheet1: TTabSheet
+    object TabSheetHSL: TTabSheet
       Caption = 'HSL'
       object Label1: TLabel
         Left = 11
@@ -2099,7 +2099,7 @@ object FrmHueSat: TFrmHueSat
         OnClick = CheckBoxSepiaClick
       end
     end
-    object TabSheet2: TTabSheet
+    object TabSheetRGB: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
       object Label5: TLabel
@@ -2286,9 +2286,13 @@ object FrmHueSat: TFrmHueSat
         OnClick = Button4Click
       end
     end
-    object TabSheet3: TTabSheet
+    object TabSheetBlend: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label8: TLabel
         Left = 3
         Top = 47
@@ -2342,7 +2346,7 @@ object FrmHueSat: TFrmHueSat
         OnChange = CbBlendChange
       end
     end
-    object TabSheet8: TTabSheet
+    object TabSheetTextures: TTabSheet
       Caption = 'Textures'
       ImageIndex = 3
       object Label10: TLabel
@@ -2433,16 +2437,10 @@ object FrmHueSat: TFrmHueSat
     Top = 61
     Width = 361
     Height = 225
-    ActivePage = TabSheet4
+    ActivePage = TabSheetPreview
     TabOrder = 6
-    object TabSheet4: TTabSheet
+    object TabSheetPreview: TTabSheet
       Caption = 'Preview'
-      object ImageVCLStyle: TImage
-        Left = 3
-        Top = 3
-        Width = 346
-        Height = 190
-      end
       object LabelDrop: TLabel
         Left = 43
         Top = 75
@@ -2456,6 +2454,12 @@ object FrmHueSat: TFrmHueSat
         Font.Style = [fsBold]
         ParentFont = False
       end
+      object ImageVCLStyle: TImage
+        Left = 3
+        Top = 3
+        Width = 347
+        Height = 194
+      end
       object Button7: TButton
         Left = 96
         Top = 200
@@ -2465,7 +2469,7 @@ object FrmHueSat: TFrmHueSat
         TabOrder = 0
       end
     end
-    object TabSheet5: TTabSheet
+    object TabSheetStyleColors: TTabSheet
       Caption = 'Style Colors'
       ImageIndex = 1
       object ListViewStyleColors: TListView
@@ -2508,7 +2512,7 @@ object FrmHueSat: TFrmHueSat
         OnClick = CheckBoxStyleColorsClick
       end
     end
-    object TabSheet6: TTabSheet
+    object TabSheetStyleFonts: TTabSheet
       Caption = 'Style Font Colors'
       ImageIndex = 2
       object ListViewStyleFontColors: TListView
@@ -2551,7 +2555,7 @@ object FrmHueSat: TFrmHueSat
         OnClick = CheckBoxStyleColorsClick
       end
     end
-    object TabSheet7: TTabSheet
+    object TabSheetSystemColors: TTabSheet
       Caption = 'System Colors'
       ImageIndex = 3
       object ListViewSystemColors: TListView
@@ -2636,7 +2640,7 @@ object FrmHueSat: TFrmHueSat
     Left = 168
     Top = 203
     Bitmap = {
-      494C010101000800AC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800B00010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
