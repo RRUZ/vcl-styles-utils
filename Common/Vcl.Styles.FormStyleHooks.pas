@@ -37,7 +37,7 @@ uses
 type
   /// <summary> Form Style hook to add image and/or color supoort for background and non client area
   /// </summary>
-  TFormStyleHookBackround=class(TFormStyleHook)
+  TFormStyleHookBackground=class(TFormStyleHook)
   strict private
     type
       TSettings = class
@@ -62,15 +62,20 @@ type
         constructor Create;
         destructor  Destroy;override;
       end;
-    class var FNCSettings: TSettings;
-    class var FBackGroundSettings: TSettings;
-    class var FMergeImages: boolean;
+    class var FNCSettings         : TSettings;
+    class var FBackGroundSettings : TSettings;
+    class var FMergeImages        : boolean;
+    class Var FSharedBitMap       : TBitmap;
+    class var FSharedImageLocation: string;
+    class procedure SetSharedImageLocation(const Value: string); static;
   protected
     procedure PaintNC(Canvas: TCanvas); override;
     procedure PaintBackground(Canvas: TCanvas); override;
     class constructor Create;
     class destructor  Destroy;
   public
+    class property SharedImageLocation : string read FSharedImageLocation write SetSharedImageLocation;
+    class property SharedBitMap : TBitmap read FSharedBitMap write FSharedBitMap;
     class property MergeImages: boolean read FMergeImages write FMergeImages;
     class property NCSettings : TSettings read FNCSettings;
     class property BackGroundSettings : TSettings read FBackGroundSettings;
@@ -250,7 +255,7 @@ end;
 
 { TFormStyleHookBackround.TSettings }
 
-constructor TFormStyleHookBackround.TSettings.Create;
+constructor TFormStyleHookBackground.TSettings.Create;
 begin
   inherited;
   FEnabled:=False;
@@ -259,19 +264,19 @@ begin
   UseImage:=False;
 end;
 
-destructor TFormStyleHookBackround.TSettings.Destroy;
+destructor TFormStyleHookBackground.TSettings.Destroy;
 begin
   FBitmap.Free;
   inherited;
 end;
 
-procedure TFormStyleHookBackround.TSettings.SetColor(const Value: TColor);
+procedure TFormStyleHookBackground.TSettings.SetColor(const Value: TColor);
 begin
   if Value<>FColor then
   FColor := Value;
 end;
 
-procedure TFormStyleHookBackround.TSettings.SetImageLocation(const Value: string);
+procedure TFormStyleHookBackground.TSettings.SetImageLocation(const Value: string);
 var
   Picture: TPicture;
 begin
@@ -291,13 +296,13 @@ begin
 end;
 
 
-procedure TFormStyleHookBackround.TSettings.SetUseColor(const Value: Boolean);
+procedure TFormStyleHookBackground.TSettings.SetUseColor(const Value: Boolean);
 begin
   FUseColor := Value;
   FUseImage := not Value;
 end;
 
-procedure TFormStyleHookBackround.TSettings.SetUseImage(const Value: Boolean);
+procedure TFormStyleHookBackground.TSettings.SetUseImage(const Value: Boolean);
 begin
   FUseImage := Value;
   FUseColor := not Value;
@@ -305,21 +310,42 @@ end;
 
 { TFormStyleHookBackround }
 
-class constructor TFormStyleHookBackround.Create;
+class constructor TFormStyleHookBackground.Create;
 begin
    FMergeImages:=False;
-   FNCSettings:=TFormStyleHookBackround.TSettings.Create;
-   FBackGroundSettings:=TFormStyleHookBackround.TSettings.Create;
+   FSharedBitMap:=TBitmap.Create;
+   FNCSettings:=TFormStyleHookBackground.TSettings.Create;
+   FBackGroundSettings:=TFormStyleHookBackground.TSettings.Create;
 end;
 
-class destructor TFormStyleHookBackround.Destroy;
+class destructor TFormStyleHookBackground.Destroy;
 begin
+  FreeAndNil(FSharedBitMap);
   FreeAndNil(FNCSettings);
   FreeAndNil(FBackGroundSettings);
 end;
 
+class procedure TFormStyleHookBackground.SetSharedImageLocation(const Value: string);
+var
+  Picture: TPicture;
+begin
+  FSharedImageLocation := Value;
+  if FileExists(Value) then
+  begin
+    Picture := TPicture.Create;
+    try
+      Picture.LoadFromFile(Value);
+      FSharedBitMap.Width := Picture.Width;
+      FSharedBitMap.Height := Picture.Height;
+      FSharedBitMap.Canvas.Draw(0, 0, Picture.Graphic);
+    finally
+      Picture.Free;
+    end;
+  end;
+end;
 
-procedure TFormStyleHookBackround.PaintBackground(Canvas: TCanvas);
+
+procedure TFormStyleHookBackground.PaintBackground(Canvas: TCanvas);
 var
   LRect   : TRect;
   RBitmap : TRect;
@@ -342,7 +368,7 @@ begin
     //use a bitmap
     begin
       //check the size of the bitmap against the control bounds to detrine how the bitmap is drawn
-      if (BackGroundSettings.Bitmap.Width<LRect.Width) or (BackGroundSettings.Bitmap.Height<LRect.Height) then
+      if not FMergeImages and ((BackGroundSettings.Bitmap.Width<LRect.Width) or (BackGroundSettings.Bitmap.Height<LRect.Height)) then
       begin
        Canvas.Brush.Bitmap := BackGroundSettings.BitMap;
        Canvas.FillRect(LRect);
@@ -358,14 +384,15 @@ begin
         H:=_GetBorderSize.Top;
         L:=_GetBorderSize.Left;
         RBitmap.SetLocation(L, H);
-        Canvas.CopyRect(LRect,BackGroundSettings.Bitmap.Canvas,RBitmap);
+        //Canvas.CopyRect(LRect,BackGroundSettings.Bitmap.Canvas,RBitmap);
+        Canvas.CopyRect(LRect,FSharedBitMap.Canvas,RBitmap);
        end;
       end;
     end;
   end;
 end;
 
-procedure TFormStyleHookBackround.PaintNC(Canvas: TCanvas);
+procedure TFormStyleHookBackground.PaintNC(Canvas: TCanvas);
 var
   LDetail: TThemedWindow;
   LDetails,
@@ -444,7 +471,10 @@ begin
     SrcBackRect.Height:=DrawRect.Height;
     //SrcBackRect.SetLocation(FNCSettings.Bitmap.Width-DrawRect.Width, 0);
     //SrcBackRect.SetLocation(_GetBorderSize.Width, 0);
-    CaptionBuffer.Canvas.CopyRect(DrawRect, FNCSettings.Bitmap.Canvas,SrcBackRect);
+    if not FMergeImages then
+      CaptionBuffer.Canvas.CopyRect(DrawRect, FNCSettings.Bitmap.Canvas,SrcBackRect)
+    else
+      CaptionBuffer.Canvas.CopyRect(DrawRect, FSharedBitMap.Canvas,SrcBackRect)
   end;
 
   TextRect := DrawRect;
@@ -629,10 +659,17 @@ begin
     end
     else
     begin
+      if FMergeImages then
+        if (DrawRect.Height<=FSharedBitMap.Height) and (DrawRect.Width<=FSharedBitMap.Width)  then
+          Canvas.CopyRect(DrawRect,FSharedBitMap.Canvas,DrawRect)
+        else
+          Canvas.StretchDraw(DrawRect, FSharedBitMap)
+      else
       if (DrawRect.Height<=FNCSettings.BitMap.Height) and (DrawRect.Width<=FNCSettings.BitMap.Width)  then
         Canvas.CopyRect(DrawRect,FNCSettings.Bitmap.Canvas,DrawRect)
       else
         Canvas.StretchDraw(DrawRect, FNCSettings.BitMap);
+
     end;
 
   {draw right border}
@@ -647,10 +684,16 @@ begin
     end
     else
     begin
-      if (DrawRect.Height<=FNCSettings.BitMap.Height) and (Control.Width<=FNCSettings.BitMap.Width)  then
-        Canvas.CopyRect(DrawRect,FNCSettings.Bitmap.Canvas,DrawRect)
+      if FMergeImages then
+        if (DrawRect.Height<=FSharedBitMap.Height) and (Control.Width<=FSharedBitMap.Width)  then
+          Canvas.CopyRect(DrawRect,FSharedBitMap.Canvas,DrawRect)
+        else
+          Canvas.StretchDraw(DrawRect, FSharedBitMap)
       else
-        Canvas.StretchDraw(DrawRect, FNCSettings.BitMap);
+        if (DrawRect.Height<=FNCSettings.BitMap.Height) and (Control.Width<=FNCSettings.BitMap.Width)  then
+          Canvas.CopyRect(DrawRect,FNCSettings.Bitmap.Canvas,DrawRect)
+        else
+          Canvas.StretchDraw(DrawRect, FNCSettings.BitMap);
     end;
 
   {draw Bottom border}
@@ -665,19 +708,34 @@ begin
     end
     else
     begin
-      if (DrawRect.Height<=FNCSettings.BitMap.Height) and (Control.Width<=FNCSettings.BitMap.Width)  then
-        Canvas.CopyRect(DrawRect,FNCSettings.Bitmap.Canvas,DrawRect)
+      if FMergeImages then
+        if (DrawRect.Height<=FSharedBitMap.Height) and (Control.Width<=FSharedBitMap.Width)  then
+          Canvas.CopyRect(DrawRect,FSharedBitMap.Canvas,DrawRect)
+        else
+        begin
+          SrcBackRect.Left:=0;
+          SrcBackRect.Top:=0;
+          SrcBackRect.Width:=DrawRect.Width;
+          SrcBackRect.Height:=DrawRect.Height;
+          SrcBackRect.SetLocation(FSharedBitMap.Width-DrawRect.Width, 0);
+          Canvas.CopyRect(DrawRect, FSharedBitMap.Canvas,SrcBackRect);
+        end
       else
-      begin
-        SrcBackRect.Left:=0;
-        SrcBackRect.Top:=0;
-        SrcBackRect.Width:=DrawRect.Width;
-        SrcBackRect.Height:=DrawRect.Height;
-        SrcBackRect.SetLocation(FNCSettings.BitMap.Width-DrawRect.Width, 0);
-        Canvas.CopyRect(DrawRect, FNCSettings.BitMap.Canvas,SrcBackRect);
-      end;
+        if (DrawRect.Height<=FNCSettings.BitMap.Height) and (Control.Width<=FNCSettings.BitMap.Width)  then
+          Canvas.CopyRect(DrawRect,FNCSettings.Bitmap.Canvas,DrawRect)
+        else
+        begin
+          SrcBackRect.Left:=0;
+          SrcBackRect.Top:=0;
+          SrcBackRect.Width:=DrawRect.Width;
+          SrcBackRect.Height:=DrawRect.Height;
+          SrcBackRect.SetLocation(FNCSettings.BitMap.Width-DrawRect.Width, 0);
+          Canvas.CopyRect(DrawRect, FNCSettings.BitMap.Canvas,SrcBackRect);
+        end;
     end;
 end;
+
+
 
 { TFormStyleHookNC }
 

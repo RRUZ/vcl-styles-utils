@@ -2,9 +2,10 @@ object FrmMain: TFrmMain
   Left = 444
   Top = 235
   Caption = 'Vcl Styles Demo'
-  ClientHeight = 398
+  ClientHeight = 479
   ClientWidth = 359
   Color = clBtnFace
+  TransparentColorValue = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -22,9 +23,16 @@ object FrmMain: TFrmMain
     Height = 13
     Caption = 'Vcl Styles'
   end
-  object GroupBox1: TGroupBox
+  object Label2: TLabel
     Left = 8
     Top = 84
+    Width = 55
+    Height = 13
+    Caption = 'Image Path'
+  end
+  object GroupBox1: TGroupBox
+    Left = 8
+    Top = 140
     Width = 337
     Height = 121
     Caption = 'Non client area'
@@ -90,7 +98,7 @@ object FrmMain: TFrmMain
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Top = 211
+    Top = 267
     Width = 337
     Height = 154
     Caption = 'Background'
@@ -166,13 +174,30 @@ object FrmMain: TFrmMain
   object CheckBoxMerge: TCheckBox
     Left = 8
     Top = 61
-    Width = 97
+    Width = 233
     Height = 17
-    Caption = 'Merge Images'
+    Caption = 'Merge Images (use a single shared bitmap)'
     Checked = True
     State = cbChecked
     TabOrder = 3
     OnClick = CheckBoxMergeClick
+  end
+  object BtnSetSharedImg: TButton
+    Left = 276
+    Top = 101
+    Width = 75
+    Height = 25
+    Caption = 'Set  Image'
+    TabOrder = 4
+    OnClick = BtnSetSharedImgClick
+  end
+  object EditSharedImage: TEdit
+    Left = 8
+    Top = 103
+    Width = 262
+    Height = 21
+    Enabled = False
+    TabOrder = 5
   end
   object OpenPictureDialog1: TOpenPictureDialog
     Left = 288
