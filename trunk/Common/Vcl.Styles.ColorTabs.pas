@@ -119,8 +119,8 @@ var
   LSize  : Integer;
   LCanvas: TCanvas;
 begin
-  if (PageControl <> nil) and StyleServices.Enabled and
-     ((PageControl.Style = tsTabs) or TStyleManager.IsCustomStyleActive) then
+  if (PageControl <> nil) and StyleServices.Enabled and TStyleManager.IsCustomStyleActive then
+    // ((PageControl.Style = tsTabs) or TStyleManager.IsCustomStyleActive) then
   begin
     GetWindowRect(Handle, LRect);
     OffsetRect(LRect, -LRect.Left, -LRect.Top);

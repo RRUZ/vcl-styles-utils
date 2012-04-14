@@ -35,7 +35,7 @@ uses
 
 
 type
-  /// <summary> Form Style hook to add image and/or color supoort for background and non client area
+  /// <summary> Form Style hook to add image and/or color supoort for the background and non client area
   /// </summary>
   TFormStyleHookBackground=class(TFormStyleHook)
   strict private
@@ -81,7 +81,7 @@ type
     class property BackGroundSettings : TSettings read FBackGroundSettings;
   end;
 
-  /// <summary> Form Style hook to disable vcl styles in non client area
+  /// <summary> Form Style hook to disable vcl styles in the non client area
   /// </summary>
   TFormStyleHookNC= class(TMouseTrackControlStyleHook)
   public
