@@ -51,12 +51,15 @@ implementation
 uses
  System.Classes,
  System.SysUtils,
+ Generics.Collections,
  Vcl.Styles,
  Vcl.Themes,
  Vcl.Controls,
  Winapi.Windows;
 
 type
+  TStyleHookList = TList<TStyleHookClass>;
+
   TPageControlHelper = class helper for TPageControl
   public
     procedure UpdateTab2(Page: Vcl.ComCtrls.TTabSheet);
@@ -69,6 +72,19 @@ type
   public
     procedure AngleTextOut2(Canvas: TCanvas; Angle: Integer; X, Y: Integer; const Text: string);
   end;
+
+  TStyleHookDictionary = TDictionary<TClass, TStyleHookList>;
+  TCustomStyleEngineHelper = Class Helper for TCustomStyleEngine
+  public
+    class function GetRegisteredStyleHooks : TStyleHookDictionary;
+  End;
+
+
+class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
+begin
+  Result:= Self.FRegisteredStyleHooks;
+end;
+
 
 function GetBorderColorTab: TColor;
 begin
@@ -110,11 +126,16 @@ begin
 end;
 
 
-{ TPageControlHelper }
-
-procedure TPageControlHelper.UpdateTab2(Page: Vcl.ComCtrls.TTabSheet);
+function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
+var
+  List    : TStyleHookList;
 begin
-  Self.UpdateTab(Page);
+ Result:=False;
+    if TCustomStyleEngine.GetRegisteredStyleHooks.ContainsKey(ControlClass) then
+    begin
+      List := TCustomStyleEngine.GetRegisteredStyleHooks[ControlClass];
+      Result:=List.IndexOf(StyleHookClass) <> -1;
+    end;
 end;
 
 
@@ -126,8 +147,11 @@ var
   LSize  : Integer;
   LCanvas: TCanvas;
 begin
+  //check if the TTabColorControlStyleHook is registered
+  if (not IsStyleHookRegistered(TCustomTabControl, TTabColorControlStyleHook)) and (not IsStyleHookRegistered(TTabControl, TTabColorControlStyleHook)) then
+    inherited
+  else
   if (PageControl <> nil) and StyleServices.Enabled and TStyleManager.IsCustomStyleActive then
-    // ((PageControl.Style = tsTabs) or TStyleManager.IsCustomStyleActive) then
   begin
     GetWindowRect(Handle, LRect);
     OffsetRect(LRect, -LRect.Left, -LRect.Top);
@@ -145,12 +169,20 @@ begin
     end;
 
     Message.Result := 1;
-    PageControl.UpdateTab2(PageControl.ActivePage);
+    if PageControl.ActivePage<>nil then
+     PageControl.UpdateTab2(PageControl.ActivePage);
   end
   else
     inherited;
 end;
 
+
+{ TPageControlHelper }
+
+procedure TPageControlHelper.UpdateTab2(Page: Vcl.ComCtrls.TTabSheet);
+begin
+  Self.UpdateTab(Page);
+end;
 
 { TTabControlStyleHookHelper }
 
