@@ -42,6 +42,24 @@ type
     TabSheet15: TTabSheet;
     TabSheet16: TTabSheet;
     TabSheet17: TTabSheet;
+    PageControl3: TPageControl;
+    TabSheet9: TTabSheet;
+    TabSheet18: TTabSheet;
+    TabSheet19: TTabSheet;
+    TabSheet20: TTabSheet;
+    TabSheet21: TTabSheet;
+    TabSheet22: TTabSheet;
+    TabSheet23: TTabSheet;
+    PageControl4: TPageControl;
+    TabSheet24: TTabSheet;
+    TabSheet25: TTabSheet;
+    TabSheet26: TTabSheet;
+    TabSheet27: TTabSheet;
+    PageControl5: TPageControl;
+    TabSheet28: TTabSheet;
+    TabSheet29: TTabSheet;
+    TabSheet30: TTabSheet;
+    TabSheet31: TTabSheet;
   private
     { Private declarations }
   public

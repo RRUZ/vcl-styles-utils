@@ -36,11 +36,14 @@ type
 
   TTabColorControlStyleHook= class(TTabControlStyleHook)
   private
+    class var FUseBorder : Boolean;
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
   protected
+    class constructor Create;
     procedure PaintBackground(Canvas: TCanvas); override;
     procedure Paint(Canvas: TCanvas); override;
     procedure DrawTab(Canvas: TCanvas; Index: Integer); override;
+    class property  UseBorder : Boolean read FUseBorder write FUseBorder;
   end;
 
 implementation
@@ -67,6 +70,10 @@ type
     procedure AngleTextOut2(Canvas: TCanvas; Angle: Integer; X, Y: Integer; const Text: string);
   end;
 
+function GetBorderColorTab: TColor;
+begin
+ result:=clBlack;
+end;
 
 function GetColorTab(Index : Integer) : TColor;
 Const
@@ -155,6 +162,11 @@ end;
 
 
 { TTabColorControlStyleHook }
+class constructor TTabColorControlStyleHook.Create;
+begin
+  FUseBorder:=True;
+end;
+
 procedure TTabColorControlStyleHook.DrawTab(Canvas: TCanvas; Index: Integer);
 var
   LDetails    : TThemedElementDetails;
@@ -248,9 +260,110 @@ begin
   if StyleServices.Available then
   begin
     LDetails := StyleServices.GetElementDetails(LThemedTab);//necesary for  DrawControlText
-    InflateRect(R,-1,0);//adjust the size of the tab creating blanks space between the tabs
-    Canvas.Brush.Color:=GetColorTab(Index);
-    Canvas.FillRect(R);
+
+    if FUseBorder then
+    begin
+      case TabPosition of
+       tpTop :
+            begin
+              InflateRect(R,-1,0);
+              if TabIndex<>Index then
+               R.Bottom:=R.Bottom+1
+              else
+               R.Bottom:=R.Bottom-1;
+
+              Canvas.Brush.Color:=GetBorderColorTab;
+              Canvas.FillRect(R);
+
+              if TabIndex=Index then
+              begin
+               InflateRect(R,-1,-1);
+               R.Bottom:=R.Bottom+1;
+              end
+              else
+               InflateRect(R,-1,-1);
+            end;
+
+       tpBottom :
+            begin
+              InflateRect(R,-1,0);
+              if TabIndex<>Index then
+               R.Bottom:=R.Bottom+1
+              else
+               R.Top:=R.Top+3;
+
+              Canvas.Brush.Color:=GetBorderColorTab;
+              Canvas.FillRect(R);
+
+              if TabIndex=Index then
+              begin
+               InflateRect(R,-1, 0);
+               R.Bottom:=R.Bottom-1;
+              end
+              else
+               InflateRect(R,-1,-1);
+            end;
+
+       tpLeft :
+            begin
+              InflateRect(R, 0, -1);
+
+              if TabIndex<>Index then
+               R.Left:=R.Left+1
+              else
+               R.Right:=R.Right-1;
+
+              Canvas.Brush.Color:=GetBorderColorTab;
+              Canvas.FillRect(R);
+
+
+              if TabIndex=Index then
+              begin
+               InflateRect(R,-1,-1);
+               R.Right:=R.Right+1;
+              end
+              else
+               InflateRect(R,-1,-1);
+
+            end;
+
+       tpRight :
+            begin
+              InflateRect(R, 0, -1);
+
+              if TabIndex<>Index then
+               //R.Left:=R.Left+1
+              else
+               R.Left:=R.Left+3;
+
+              Canvas.Brush.Color:=GetBorderColorTab;
+              Canvas.FillRect(R);
+
+
+              if TabIndex=Index then
+              begin
+               InflateRect(R,-1,-1);
+               R.Left:=R.Left-1;
+              end
+              else
+               InflateRect(R,-1,-1);
+
+            end;
+
+
+      end;
+
+
+      Canvas.Brush.Color:=GetColorTab(Index);
+      Canvas.FillRect(R);
+    end
+    else
+    Begin
+      InflateRect(R,-1,0);//adjust the size of the tab creating blanks space between the tabs
+      Canvas.Brush.Color:=GetColorTab(Index);
+      Canvas.FillRect(R);
+    end;
+
   end;
 
   //get the index of the image (icon)
@@ -359,8 +472,20 @@ begin
 
   if StyleServices.Available then
   begin
-    Canvas.Brush.Color:=GetColorTab(TabIndex);
-    Canvas.FillRect(LRect);
+    if FUseBorder then
+    begin
+      Canvas.Brush.Color:=GetBorderColorTab;
+      Canvas.Rectangle(LRect.Left, LRect.Top, LRect.Right, LRect.Bottom);
+
+      InflateRect(LRect, -1, -1);
+      Canvas.Brush.Color:=GetColorTab(TabIndex);
+      Canvas.FillRect(LRect);
+    end
+    else
+    begin
+      Canvas.Brush.Color:=GetColorTab(TabIndex);
+      Canvas.FillRect(LRect);
+    end;
   end;
 
   // Draw active tab
@@ -377,7 +502,12 @@ var
 begin
   if StyleServices.Available then
   begin
-    LColor:=StyleServices.GetSystemColor(clWindowFrame);
+
+    if Control.Parent is TTabSheet then
+     LColor:= GetColorTab(TTabSheet(Control.Parent).PageIndex)
+    else
+     LColor:= StyleServices.GetSystemColor(clWindowFrame);
+
     Canvas.Brush.Color:=LColor;
     Canvas.FillRect(Control.ClientRect);
   end;
