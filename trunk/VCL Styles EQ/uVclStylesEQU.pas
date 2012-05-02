@@ -261,6 +261,7 @@ end;
 procedure TFrmHueSat.ActionApplyStyleExecute(Sender: TObject);
 begin
  TStyleManager.SetStyle(StyleName);
+ DragAcceptFiles( Handle, True );
 end;
 
 procedure TFrmHueSat.ActionApplyStyleUpdate(Sender: TObject);
