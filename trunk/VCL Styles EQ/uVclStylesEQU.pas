@@ -1242,6 +1242,8 @@ begin
   if DirectoryExists(StylesDir) then
     for Style in TDirectory.GetFiles(IncludeTrailingPathDelimiter(StylesDir), '*.vsf') do
       RegisterVCLStyle(Style);
+
+  TStyleManager.SystemStyle;  //prevent bug in registration of vcl style
 end;
 
 

@@ -43,7 +43,7 @@ type
 type
   TVclStylesPreview = class(TCustomControl)
   private
-    FStyle: TCustomStyle;
+    FStyle: TCustomStyleServices;//TCustomStyle;
     FIcon: HICON;
     FCaption: TCaption;
     FRegion : HRGN;
@@ -52,7 +52,7 @@ type
     procedure Paint; override;
   public
     property Icon:HICON read FIcon Write FIcon;
-    property Style:TCustomStyle read FStyle Write FStyle;
+    property Style:TCustomStyleServices read FStyle Write FStyle;
     property Caption : TCaption read FCaption write FCaption;
     property BitMap : TBitmap read FBitmap write FBitmap;
     constructor Create(AControl: TComponent); override;
