@@ -109,19 +109,6 @@ type
     procedure PaintNC(Canvas: TCanvas); override;
   end;
 
-implementation
-
-Uses
-  Winapi.UxTheme,
-  System.SysUtils,
-  System.Classes,
-  Vcl.Imaging.Jpeg,
-  Vcl.Imaging.pngimage,
-  Vcl.Imaging.GIFImg,
-  Vcl.Styles;
-
-type
-  TCustomFormClass      = class(TCustomForm);
   TFormStyleHookHelper  = class helper for TFormStyleHook
   private
     function  GetFCloseButtonRect: TRect;
@@ -170,8 +157,25 @@ type
     property _FRegion: HRGN read GetFRegion write SetFRegion;
     procedure MainMenuBarHookPaint(Canvas: TCanvas);
     function _GetIconFast: TIcon;
+    procedure _ChangeSize;
   end;
 
+  function RectVCenter(var R: TRect; Bounds: TRect): TRect;
+
+
+implementation
+
+Uses
+  Winapi.UxTheme,
+  System.SysUtils,
+  System.Classes,
+  Vcl.Imaging.Jpeg,
+  Vcl.Imaging.pngimage,
+  Vcl.Imaging.GIFImg,
+  Vcl.Styles;
+
+type
+  TCustomFormClass = class(TCustomForm);
 
 function RectVCenter(var R: TRect; Bounds: TRect): TRect;
 begin
@@ -1129,6 +1133,8 @@ begin
 end;
 
 { TFormStyleHookHelper }
+
+
 function TFormStyleHookHelper.GetFCaptionRect: TRect;
 begin
  result:=Self.FCaptionRect;
@@ -1268,6 +1274,11 @@ end;
 procedure TFormStyleHookHelper.SetFWidth(const Value: Integer);
 begin
  Self.FWidth:=Value;
+end;
+
+procedure TFormStyleHookHelper._ChangeSize;
+begin
+ Self.ChangeSize;
 end;
 
 function TFormStyleHookHelper._GetBorderSize: TRect;
