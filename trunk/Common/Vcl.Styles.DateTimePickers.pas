@@ -184,11 +184,8 @@ begin
     if not TStyleManager.ActiveStyle.IsSystemStyle and  (Winapi.uxTheme.GetWindowTheme(Control.Handle )<>0) then
       Winapi.uxTheme.SetWindowTheme(Control.Handle, '', '');//disable themes in the calendar
 
-    if TStyleManager.SystemStyle.Enabled then
-    begin
       PaintNC(LCanvas);
       Paint(LCanvas);
-    end;
 
     if DateMode = dmUpDown then
       LRect := Rect(2, 2, Control.Width - 2, Control.Height - 2)
