@@ -23,7 +23,6 @@ type
     DBMemo1: TDBMemo;
     procedure Button1Click(Sender: TObject);
   private
-  A : TWinControl;
   public
     { Public declarations }
   end;
@@ -48,26 +47,13 @@ end;
 
 
 initialization
-{
- TStyleManager.Engine.RegisterStyleHook(TCustomEdit, TEditStyleHookColor);
- TStyleManager.Engine.RegisterStyleHook(TEdit, TEditStyleHookColor);
-
- TStyleManager.Engine.RegisterStyleHook(TMemo, TMemoStyleHookColor);
- TStyleManager.Engine.RegisterStyleHook(TCustomMemo, TMemoStyleHookColor);
-
- TStyleManager.Engine.RegisterStyleHook(TCustomMaskEdit, TEditStyleHookColor);
- TStyleManager.Engine.RegisterStyleHook(TMaskEdit, TEditStyleHookColor);
-
- TStyleManager.Engine.RegisterStyleHook(TCustomLabeledEdit, TEditStyleHookColor);
- TStyleManager.Engine.RegisterStyleHook(TLabeledEdit, TEditStyleHookColor);
- }
  TStyleManager.Engine.RegisterStyleHook(TEdit, TEditStyleHookColor);
  TStyleManager.Engine.RegisterStyleHook(TButtonedEdit, TEditStyleHookColor);
+ TStyleManager.Engine.RegisterStyleHook(TMaskEdit, TEditStyleHookColor);
+ TStyleManager.Engine.RegisterStyleHook(TLabeledEdit, TEditStyleHookColor);
 
  TStyleManager.Engine.RegisterStyleHook(TMemo, TMemoStyleHookColor);
  TStyleManager.Engine.RegisterStyleHook(TDBMemo, TMemoStyleHookColor);
- TStyleManager.Engine.RegisterStyleHook(TMaskEdit, TEditStyleHookColor);
- TStyleManager.Engine.RegisterStyleHook(TLabeledEdit, TEditStyleHookColor);
 
 end.
 

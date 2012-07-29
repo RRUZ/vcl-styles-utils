@@ -29,8 +29,17 @@ uses
  Winapi.Messages;
 
 type
+  /// <summary> The TEditStyleHookColor vcl style hook allows you to use custom colors in the TCustomEdit descendent components
+  /// </summary>
+  /// <remarks>
+  /// You can use this hook on these components
+  /// TEdit, TButtonedEdit, TMaskEdit, TEditStyleHookColor
+  /// </remarks>
+  /// <code>
+  /// TStyleManager.Engine.RegisterStyleHook(TEdit, TEditStyleHookColor);
+  /// </code>
   TEditStyleHookColor = class(TEditStyleHook)
-  private
+  strict private
     procedure UpdateColors;
   protected
     procedure WndProc(var Message: TMessage); override;
@@ -38,8 +47,17 @@ type
     constructor Create(AControl: TWinControl); override;
   end;
 
+  /// <summary> The TMemoStyleHookColor vcl style hook allows you to use custom colors in the TCustomMemo descendent components
+  /// </summary>
+  /// <remarks>
+  /// You can use this hook on these components
+  /// TMemo, TMemoStyleHookColor
+  /// </remarks>
+  /// <code>
+  /// TStyleManager.Engine.RegisterStyleHook(TMemo, TMemoStyleHookColor);
+  /// </code>
   TMemoStyleHookColor = class(TMemoStyleHook)
-  private
+  strict  private
     procedure UpdateColors;
   protected
     procedure WndProc(var Message: TMessage); override;
