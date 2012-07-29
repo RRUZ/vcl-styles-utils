@@ -111,7 +111,7 @@ object FrmMain: TFrmMain
   end
   object Button1: TButton
     Left = 8
-    Top = 264
+    Top = 328
     Width = 75
     Height = 25
     Caption = 'Button1'
