@@ -41,6 +41,33 @@ type
   TStyleHookList = TList<TStyleHookClass>;
 
 type
+  /// <summary> The <c>TVclStylesPreview</c> class, is a control for display  a preview of any Vcl style loaded
+  /// </summary>
+  /// <remarks>
+  /// sample of use
+  /// <code>
+  /// var <para></para>
+  ///   StyleName : string;<para></para>
+  ///   SourceInfo: TSourceInfo;<para></para>
+  ///   LStyle    : TCustomStyleServices;<para></para>
+  ///   FPreview  : TVclStylesPreview;<para></para>
+  /// begin<para></para>
+  ///    FPreview:=TVclStylesPreview.Create(Self);<para></para>
+  ///    FPreview.Parent:=PanelPreview;<para></para>
+  ///    FPreview.BoundsRect := PanelPreview.ClientRect;<para></para>
+  ///    StyleName:='Carbon';<para></para>
+  ///    if (StyleName &lt;&gt;'') and (not SameText(StyleName, 'Windows')) then<para></para>
+  ///    begin<para></para>
+  ///      TStyleManager.StyleNames;//call DiscoverStyleResources<para></para>
+  ///      LStyle:=TStyleManager.Style[StyleName];<para></para>
+  ///      FPreview.Caption:=StyleName;<para></para>
+  ///      FPreview.Style:=LStyle;<para></para>
+  ///      TVclStylesPreviewClass(FPreview).Paint;<para></para>
+  ///    end;<para></para>
+  ///    ....<para></para>
+  /// end;<para></para>
+  /// </code>
+  /// </remarks>
   TVclStylesPreview = class(TCustomControl)
   private
     FStyle: TCustomStyleServices;//TCustomStyle;
@@ -67,7 +94,7 @@ type
   end;
 
   {$REGION 'Documentation'}
-  ///	<summary>Heper for the TStyleManager class
+  ///	<summary>Helper class for the TStyleManager
   ///	</summary>
   {$ENDREGION}
   TStyleManagerHelper = Class Helper for TStyleManager
