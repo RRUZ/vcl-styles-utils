@@ -82,6 +82,7 @@ begin
   FClone   :=Clone;
   FStyleExt:=nil;
   FStream  :=nil;
+
   if (StyleName<>'') and (CompareText('Windows',StyleName)<>0) then
   begin
    if FClone then
