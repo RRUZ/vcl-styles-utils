@@ -188,8 +188,17 @@ end;
 
 procedure TTabControlStyleHookHelper.AngleTextOut2(Canvas: TCanvas; Angle, X,
   Y: Integer; const Text: string);
+var
+  LSavedDC: Integer;
 begin
-  Self.AngleTextOut(Canvas, Angle, X, Y, Text);
+  LSavedDC := SaveDC(Canvas.Handle);
+  try
+    SetBkMode(Canvas.Handle, TRANSPARENT);
+    Canvas.Font.Orientation := Angle;
+    Canvas.TextOut(X, Y, Text);
+  finally
+    RestoreDC(Canvas.Handle, LSavedDC);
+  end;
 end;
 
 
@@ -456,7 +465,7 @@ begin
       LTextX := LayoutR.Left + (LayoutR.Right - LayoutR.Left) div 2 - Canvas.TextHeight(Tabs[Index]) div 2;
       LTextY := LayoutR.Top + (LayoutR.Bottom - LayoutR.Top) div 2 + Canvas.TextWidth(Tabs[Index]) div 2;
       Canvas.Font.Color := LTextColor;
-      AngleTextOut2(Canvas, 90, LTextX, LTextY, Tabs[Index]);
+      AngleTextOut2(Canvas, 900, LTextX, LTextY, Tabs[Index]);
     end
     else
     if TabPosition = tpRight then
@@ -464,7 +473,7 @@ begin
       LTextX := LayoutR.Left + (LayoutR.Right - LayoutR.Left) div 2 + Canvas.TextHeight(Tabs[Index]) div 2;
       LTextY := LayoutR.Top + (LayoutR.Bottom - LayoutR.Top) div 2 - Canvas.TextWidth(Tabs[Index]) div 2;
       Canvas.Font.Color := LTextColor;
-      AngleTextOut2(Canvas, -90, LTextX, LTextY, Tabs[Index]);
+      AngleTextOut2(Canvas, -900, LTextX, LTextY, Tabs[Index]);
     end
     else
      DrawControlText(Tabs[Index], LayoutR, DT_VCENTER or DT_CENTER or DT_SINGLELINE  or DT_NOCLIP);
