@@ -250,8 +250,14 @@ uses
  System.Sysutils;
 
 {$IFDEF USE_VCL_STYLESAPI}
-{$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleUtils.inc'}
-{$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleAPI.inc'}
+ {$IFDEF VER230}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleUtils.inc'}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleAPI.inc'}
+ {$ENDIF}
+ {$IFDEF VER240}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleUtils.inc'}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleAPI.inc'}
+ {$ENDIF}
 {$ENDIF}
 
 
@@ -461,6 +467,8 @@ begin
 end;
 
 constructor TCustomStyleExt.Create(const Stream: TStream);
+var
+  LSource: TObject;
 begin
   inherited Create;
   FStream:=TMemoryStream.Create;
@@ -468,10 +476,9 @@ begin
   Stream.Seek(0, soBeginning); //index 0 to load
   FStream.CopyFrom(Stream, Stream.Size);
   Stream.Seek(0, soBeginning); //restore index 0 after
-
-
+  LSource:=Source;
   FStream.Seek(0, soBeginning);//index 0 to load
-  TseStyle(Source).LoadFromStream(FStream);
+  TseStyle(LSource).LoadFromStream(FStream);
 end;
 
 
@@ -485,35 +492,56 @@ end;
 
 function TCustomStyleExt.GetBitmapList: TObjectList<TBitmap>;
 var
-  I: Integer;
+  LSource: TObject;
+  I{,Lindex}: Integer;
+  LseBitmap : TseBitmap;
+
 begin
+  LSource:=Source;
   Result:=TObjectList<TBitmap>.Create;
-  for I:=0 to TseStyle(Source).StyleSource.Bitmaps.Count-1 do
+           {
+  Lindex:=0;
+  for I:=0 to Length(TseStyle(LSource).FObjects)-1 do
+  if (TseStyle(LSource).FObjects[i]<>nil) and (TSeStyleObject(TseStyle(LSource).FObjects[i]).Bitmaps<>nil) then
+  begin
+    Result.Add(TBitmap.Create);
+    Result[Lindex].PixelFormat:=pf32bit;
+    LseBitmap:=TSeStyleObject(TseStyle(LSource).FObjects[i]).Bitmaps[0];
+    Result[Lindex].Width := LseBitmap.Width;
+    Result[Lindex].Height:= LseBitmap.Height;
+    LseBitmap.Draw(Result[Lindex].Canvas,0,0);
+    //Result[Lindex].SaveToFile(Format('C:\Users\Dexter\Desktop\Brazil\%d.bmp',[LIndex]));
+    inc(Lindex);
+    break;
+  end;
+         }
+
+  for I:=0 to TseStyle(LSource).StyleSource.Bitmaps.Count-1 do
   begin
     Result.Add(TBitmap.Create);
     Result[I].PixelFormat:=pf32bit;
-    Result[I].Width := TseStyle(Source).StyleSource.Bitmaps[I].Width;
-    Result[I].Height:= TseStyle(Source).StyleSource.Bitmaps[I].Height;
-    TseStyle(Source).StyleSource.Bitmaps[I].Draw(Result[I].Canvas,0,0);
+    LseBitmap:=TseStyle(LSource).StyleSource.Bitmaps[I];
+    Result[I].Width := LseBitmap.Width;
+    Result[I].Height:= LseBitmap.Height;
+    LseBitmap.Draw(Result[I].Canvas,0,0);
   end;
-
-//  TseStyle(Source).StyleSource.Colors
 end;
 
 procedure TCustomStyleExt.ReplaceBitmap(DestIndex: Integer; Src: TBitmap);
 var
   BF          : TBlendFunction;
   Canvas      : TCanvas;
-  BitMap      : TseBitmap;
+  LBitMap      : TseBitmap;
   DstRect, SrcRect: TRect;
 begin
-  BitMap:=TseStyle(Source).StyleSource.Bitmaps[DestIndex];
+  LBitMap:=TseStyle(Source).StyleSource.Bitmaps[DestIndex];
+
   SrcRect:=Rect(0 ,0, Src.Width, Src.Height);
   DstRect:=Rect(0 ,0, Src.Width, Src.Height);
 
-  Canvas:= BitMap.Canvas;
+  Canvas:= LBitMap.Canvas;
   SetStretchBltMode(Canvas.Handle, COLORONCOLOR);
-  if BitMap.AlphaBlend then
+  if LBitMap.AlphaBlend then
   begin
     BF.BlendOp := AC_SRC_OVER;
     BF.BlendFlags := 0;
@@ -523,7 +551,7 @@ begin
       Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, BF);
   end
   else
-  if BitMap.Transparent then
+  if LBitMap.Transparent then
   begin
     Winapi.Windows.TransparentBlt(Canvas.Handle, DstRect.Left, DstRect.Top, DstRect.Right - DstRect.Left, DstRect.Bottom - DstRect.Top,
       Src.Canvas.Handle, SrcRect.Left, SrcRect.Top, SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, seTransparent);

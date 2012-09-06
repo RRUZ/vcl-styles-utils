@@ -1,7 +1,6 @@
 program VisualStylesEQU;
 
 uses
-  ExceptionLog,
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,
