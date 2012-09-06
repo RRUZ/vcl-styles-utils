@@ -156,7 +156,6 @@ class procedure TVclStylesUtils.LoadSettings(const FileName:String;var Elements 
 var
   Doc       : IXMLDocument;
   RootNode, ChildNode, oNode : IXMLNode;
-  s : string;
   LFilterType  :TVCLStylesFilter;
   i : Integer;
   LClassName : string;
