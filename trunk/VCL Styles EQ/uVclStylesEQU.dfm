@@ -2293,6 +2293,10 @@ object FrmHueSat: TFrmHueSat
     object TabSheetBlend: TTabSheet
       Caption = 'Blend'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label8: TLabel
         Left = 3
         Top = 47
@@ -2349,6 +2353,10 @@ object FrmHueSat: TFrmHueSat
     object TabSheetTextures: TTabSheet
       Caption = 'Textures'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label10: TLabel
         Left = 3
         Top = 7
@@ -2652,7 +2660,7 @@ object FrmHueSat: TFrmHueSat
     Left = 168
     Top = 203
     Bitmap = {
-      494C010101000800B80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800BC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
