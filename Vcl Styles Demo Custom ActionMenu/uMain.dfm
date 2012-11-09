@@ -11,6 +11,7 @@ object Form4: TForm4
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  PopupMenu = PopupActionBar1
   Position = poScreenCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -462,5 +463,9 @@ object Form4: TForm4
       DialogCaption = 'BrowseForFolder1'
       BrowseOptions = []
     end
+  end
+  object PopupActionBar1: TPopupActionBar
+    Left = 184
+    Top = 96
   end
 end
