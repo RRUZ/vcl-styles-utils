@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.ActnList, Vcl.ActnMan, Vcl.ToolWin, Vcl.ActnCtrls,
   Vcl.ActnMenus, Vcl.StdActns, Vcl.ExtActns, Vcl.XPStyleActnCtrls,
-  Vcl.StdStyleActnCtrls, Vcl.StdCtrls;
+  Vcl.StdStyleActnCtrls, Vcl.StdCtrls, Vcl.Menus, Vcl.ActnPopup;
 
 type
   TForm4 = class(TForm)
@@ -46,6 +46,7 @@ type
     FileExit1: TFileExit;
     BrowseForFolder1: TBrowseForFolder;
     Button1: TButton;
+    PopupActionBar1: TPopupActionBar;
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   private
@@ -70,10 +71,39 @@ begin
 end;
 
 procedure TForm4.FormCreate(Sender: TObject);
+var
+  MenuItem: TMenuItem;
 begin
- Screen.MenuFont.Name := 'Impact';
- Screen.MenuFont.Size := 12;
- //Vcl.StdStyleActnCtrls->Vcl.PlatformDefaultStyleActnCtrls
+  MenuItem := TMenuItem.Create(PopupActionBar1);
+  MenuItem.Action := FileOpen1;
+  PopupActionBar1.Items.Add(MenuItem);
+
+  MenuItem := TMenuItem.Create(PopupActionBar1);
+  MenuItem.Action := FileOpenWith1;
+  PopupActionBar1.Items.Add(MenuItem);
+
+  MenuItem := TMenuItem.Create(PopupActionBar1);
+  MenuItem.Action := FileSaveAs1;
+  PopupActionBar1.Items.Add(MenuItem);
+
+  MenuItem := TMenuItem.Create(PopupActionBar1);
+  MenuItem.Action := FilePrintSetup1;
+  PopupActionBar1.Items.Add(MenuItem);
+
+  MenuItem := TMenuItem.Create(PopupActionBar1);
+  MenuItem.Action := FilePageSetup1;
+  PopupActionBar1.Items.Add(MenuItem);
+
+  MenuItem := TMenuItem.Create(PopupActionBar1);
+  MenuItem.Action := FileRun1;
+  PopupActionBar1.Items.Add(MenuItem);
+
+  MenuItem := TMenuItem.Create(PopupActionBar1);
+  MenuItem.Action := FileExit1;
+  PopupActionBar1.Items.Add(MenuItem);
+
+  Screen.MenuFont.Name := 'Impact';
+  Screen.MenuFont.Size := 12;
 end;
 
 
