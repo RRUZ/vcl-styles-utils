@@ -157,7 +157,7 @@ type
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
-    //FPreview       : TVclStylesPreview;
+    FPreview       : TVclStylesPreview;
     procedure DrawSeletedVCLStyle;
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
