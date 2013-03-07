@@ -195,7 +195,11 @@ begin
 
   LFormats := TTextFormatFlags(Flags);
   if Selected and Enabled then
-    LDetails := StyleServices.GetElementDetails(tmPopupItemHot)
+  begin
+    LDetails := StyleServices.GetElementDetails(tmPopupItemHot);
+    if TOSVersion.Check(5, 1) then
+     SetBkMode(DC, Winapi.Windows.TRANSPARENT);
+  end
   else
     LDetails := StyleServices.GetElementDetails(MenuStates[Enabled or ActionBar.DesignMode]);
 
@@ -298,8 +302,8 @@ end;
 
 initialization
   PlatformVclStylesStyle := TPlatformVclStylesStyle.Create;
-  DefaultActnBarStyle := PlatformVclStylesStyle.GetStyleName;
   RegisterActnBarStyle(PlatformVclStylesStyle);
+  DefaultActnBarStyle :=PlatformVclStylesStyle.GetStyleName;
 finalization
   UnregisterActnBarStyle(PlatformVclStylesStyle);
   PlatformVclStylesStyle.Free;
