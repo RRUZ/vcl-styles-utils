@@ -25,7 +25,9 @@ unit Vcl.Styles.Fixes;
 interface
 
 uses
+ Vcl.ComCtrls,
  Vcl.StdCtrls,
+ Winapi.Windows,
  Vcl.Graphics;
 
 type
@@ -42,11 +44,23 @@ type
     procedure Paint(Canvas: TCanvas); override;
   end;
 
+  /// <summary> The <c>TListViewStyleHookFix</c> vcl style hook fix these QC #108678, #108875 for Delphi XE2
+  /// </summary>
+  /// <remarks>
+  /// Use this hook in this way
+  /// <code>
+  /// TStyleManager.Engine.RegisterStyleHook(TListView, TListViewStyleHookFix);
+  /// </code>
+  /// </remarks>
+ TListViewStyleHookFix=class(TListViewStyleHook)
+    procedure DrawHeaderSection(Canvas: TCanvas; R: TRect; Index: Integer;
+      const Text: string; IsPressed, IsBackground: Boolean); override;
+ end;
+
 
 implementation
 
 uses
-  Winapi.Windows,
   Winapi.CommCtrl,
   Vcl.Themes,
   System.Types;
@@ -61,6 +75,9 @@ type
    function DropDown: Boolean;
   end;
 
+ TListViewStyleHookHelper = class helper for TListViewStyleHook
+ function  HeaderHandle: HWnd;
+ end;
 
 procedure TButtonStyleHookFix.Paint(Canvas: TCanvas);
 const
@@ -84,7 +101,7 @@ var
   BCaption          : String;
   LImageIndex       : Integer;
 begin
-  LImageIndex:=PBS_NORMAL;
+  //LImageIndex:=PBS_NORMAL;
 
   if StyleServices.Available then
   begin
@@ -276,5 +293,51 @@ function TButtonStyleHookHelper.Pressed: Boolean;
 begin
   Result:=Self.FPressed;
 end;
+
+{ TListViewStyleHookHelper }
+
+function TListViewStyleHookHelper.HeaderHandle: HWnd;
+begin
+  Result:=Self.FHeaderHandle;
+end;
+
+{ TListViewStyleHookFix }
+
+procedure TListViewStyleHookFix.DrawHeaderSection(Canvas: TCanvas; R: TRect;
+  Index: Integer; const Text: string; IsPressed, IsBackground: Boolean);
+var
+  Item: THDItem;
+  ImageList: HIMAGELIST;
+  DrawState: TThemedHeader;
+  IconWidth, IconHeight: Integer;
+  Details: TThemedElementDetails;
+begin
+  FillChar(Item, SizeOf(Item), 0);
+  Item.Mask := HDI_FORMAT;
+  Header_GetItem(Handle, Index, Item);
+  if IsBackground then
+    DrawState := thHeaderItemNormal
+  else if IsPressed then
+    DrawState := thHeaderItemPressed
+  else
+    DrawState := thHeaderItemNormal;
+
+  Details := StyleServices.GetElementDetails(DrawState);
+  StyleServices.DrawElement(Canvas.Handle, Details, R);
+
+  ImageList := SendMessage(HeaderHandle, HDM_GETIMAGELIST, 0, 0);
+  Item.Mask := HDI_FORMAT or HDI_IMAGE;
+  InflateRect(R, -2, -2);
+  if (ImageList <> 0) and Header_GetItem(HeaderHandle, Index, Item) then
+  begin
+    if Item.fmt and HDF_IMAGE = HDF_IMAGE then
+      ImageList_Draw(ImageList, Item.iImage, Canvas.Handle, R.Left, R.Top, ILD_TRANSPARENT);
+    ImageList_GetIconSize(ImageList, IconWidth, IconHeight);
+    Inc(R.Left, IconWidth + 5);
+  end;
+
+  DrawControlText(Canvas, Details, Text, R, DT_VCENTER or DT_LEFT or  DT_SINGLELINE or DT_END_ELLIPSIS);
+end;
+
 
 end.
