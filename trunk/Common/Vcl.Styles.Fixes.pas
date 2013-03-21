@@ -44,7 +44,7 @@ type
     procedure Paint(Canvas: TCanvas); override;
   end;
 
-  /// <summary> The <c>TListViewStyleHookFix</c> vcl style hook fix these QC #108678, #108875 for Delphi XE2
+  /// <summary> The <c>TListViewStyleHookFix</c> vcl style hook fix these QC #108678, #108875 for Delphi XE2 and Delphi XE3
   /// </summary>
   /// <remarks>
   /// Use this hook in this way

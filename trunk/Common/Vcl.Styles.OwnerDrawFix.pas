@@ -24,14 +24,6 @@ unit Vcl.Styles.OwnerDrawFix;
 interface
 
 uses
- System.Classes;
-
-procedure ApplyVclStylesOwnerDrawFix(Parent: TComponent;Active:Boolean);
-
-
-implementation
-
-uses
  Winapi.Windows,
  Winapi.CommCtrl,
  Vcl.ComCtrls,
@@ -39,11 +31,12 @@ uses
  Vcl.StdCtrls,
  Vcl.Controls,
  Vcl.Styles,
- Vcl.Themes;
+ Vcl.Themes,
+ System.Classes;
 
 type
   TVclStylesOwnerDrawFix=class
-  private
+  public
     procedure ComboBoxDrawItem(Control: TWinControl; Index: Integer;  Rect: TRect; State: TOwnerDrawState);
     procedure ListBoxDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure ListViewDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
@@ -53,11 +46,23 @@ type
 
 var
   VclStylesOwnerDrawFix : TVclStylesOwnerDrawFix;
+       {
+procedure ApplyVclStylesOwnerDrawFix(Parent: TComponent;Active:Boolean);
+       }
 
+implementation
+
+
+
+Type
+  TCustomListViewClass=class(TCustomListView);
+
+  {
 procedure ApplyVclStylesOwnerDrawFix(Parent: TComponent;Active:Boolean);
 var
  i : Integer;
-begin
+begin                 //fails en mutilples cambios
+
   for i:=0 to Parent.ComponentCount-1 do
     if (Parent.Components[i] is TComboBox) and Active and (TComboBox(Parent.Components[i]).Style<>csOwnerDrawFixed) then
     begin
@@ -99,7 +104,7 @@ begin
     else
      ApplyVclStylesOwnerDrawFix(Parent.Components[i], Active);
 end;
-
+     }
 { TVclStylesOwnerDrawFix }
 
 procedure TVclStylesOwnerDrawFix.ComboBoxDrawItem(Control: TWinControl;
@@ -164,8 +169,10 @@ var
   BoxSize   : TSize;
   Spacing   : Integer;
   LColor    : TColor;
+  ImageSize : Integer;
 begin
   Spacing:=4;
+  ImageSize:=0;
   LStyles:=StyleServices;
   if not LStyles.GetElementColor(LStyles.GetElementDetails(ttItemNormal), ecTextColor, LColor) or  (LColor = clNone) then
   LColor := LStyles.GetSystemColor(clWindowText);
@@ -212,6 +219,13 @@ begin
 
     if TListView(Sender).RowSelect then
       Sender.Canvas.Brush.Color := LStyles.GetSystemColor(clHighlight);
+
+    if (TCustomListViewClass(Sender).SmallImages<>nil) and (TCustomListViewClass(Sender).SmallImages.Handle<>0) and (Item.ImageIndex>=0) then
+    begin
+      ImageList_Draw(TCustomListViewClass(Sender).SmallImages.Handle, Item.ImageIndex, Sender.Canvas.Handle, R.Left - 2, R.Top, ILD_NORMAL);
+      ImageSize:=TCustomListViewClass(Sender).SmallImages.Width;
+      r.Left:=r.Left+ImageSize;
+    end;
 
     LDetails := StyleServices.GetElementDetails(tlListItemNormal);
     Sender.Canvas.Brush.Style := bsClear;

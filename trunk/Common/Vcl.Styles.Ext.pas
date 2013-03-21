@@ -229,6 +229,7 @@ type
     procedure SetSystemColor(Color: TColor; NewColor: TColor);
   End;
       }
+//function DoHasElementFixedPosition(Details: TThemedElementDetails): Boolean;
 
 {$ENDIF}
 
@@ -270,9 +271,68 @@ type
   public
     class function GetRegisteredStyleHooks : TStyleHookDictionary;
   End;
+{
+const
+  THEME_WP_CAPTION = 77;
+  THEME_WP_SMALLCAPTION = 78;
+  THEME_WP_MINCAPTION = 79;
+  THEME_WP_SMALLMINCAPTION = 80;
+  THEME_WP_MAXCAPTION = 81;
+  THEME_WP_SMALLMAXCAPTION = 82;
+  THEME_WP_FRAMELEFT = 83;
+  THEME_WP_FRAMERIGHT = 84;
+  THEME_WP_FRAMEBOTTOM = 85;
+  THEME_WP_SMALLFRAMELEFT = 86;
+  THEME_WP_SMALLFRAMERIGHT = 87;
+  THEME_WP_SMALLFRAMEBOTTOM = 88;
 
+  THEME_WP_SYSBUTTON = 89;
+  THEME_WP_MDISYSBUTTON = 90;
+  THEME_WP_MINBUTTON = 91;
+  THEME_WP_MDIMINBUTTON = 92;
+  THEME_WP_MAXBUTTON = 93;
+  THEME_WP_CLOSEBUTTON = 94;
+  THEME_WP_SMALLCLOSEBUTTON = 95;
+  THEME_WP_MDICLOSEBUTTON = 96;
+  THEME_WP_RESTOREBUTTON = 97;
+  THEME_WP_MDIRESTOREBUTTON = 98;
+  THEME_WP_HELPBUTTON = 99;
+  THEME_WP_MDIHELPBUTTON = 100;
+  THEME_WP_HORZSCROLL = 101;
+  THEME_WP_HORZTHUMB = 102;
+  THEME_WP_VERTSCROLL = 103;
+  THEME_WP_VERTTHUMB = 104;
+  THEME_WP_DIALOG = 105;
+  THEME_WP_CAPTIONSIZINGTEMPLATE = 106;
+  THEME_WP_SMALLCAPTIONSIZINGTEMPLATE = 107;
+  THEME_WP_FRAMELEFTSIZINGTEMPLATE = 108;
+  THEME_WP_SMALLFRAMELEFTSIZINGTEMPLATE = 109;
+  THEME_WP_FRAMERIGHTSIZINGTEMPLATE = 110;
+  THEME_WP_SMALLFRAMERIGHTSIZINGTEMPLATE = 111;
+  THEME_WP_FRAMEBOTTOMSIZINGTEMPLATE = 112;
+  THEME_WP_SMALLFRAMEBOTTOMSIZINGTEMPLATE = 113;
+  THEME_WP_FRAME = 114;
 
-
+function DoHasElementFixedPosition(Details: TThemedElementDetails): Boolean;
+begin
+  Result := False;
+  if Details.Element <> teWindow then Exit;
+  case Details.Part of
+    THEME_WP_SMALLCLOSEBUTTON, THEME_WP_SMALLCAPTION:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscToolWindow, kwbClose);
+    THEME_WP_CLOSEBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbClose);
+    THEME_WP_HELPBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbHelp);
+    THEME_WP_MAXBUTTON, THEME_WP_RESTOREBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbMax);
+    THEME_WP_MINBUTTON:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbMin);
+    THEME_WP_SYSBUTTON, THEME_WP_CAPTION:
+      Result := TseStyle(FSource).WindowGetFixPosition(kwscStandard, kwbSysMenu);
+  end;
+end;
+}
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
 begin
   Result:= Self.FRegisteredStyleHooks;
