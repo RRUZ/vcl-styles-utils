@@ -737,6 +737,61 @@ var
   LBitmapPos: TPoint;
   LBitmapSize: TSize;
   LExStyle  : DWORD;
+  TextTopOffset: Integer;
+
+  function GetTopOffset: Integer;
+  var
+    P: TPoint;
+  begin
+    P.X := Form.Left + Form.Width div 2;
+    P.Y := Form.Top + Form.Height div 2;
+    Result := Screen.MonitorFromPoint(P).WorkareaRect.Top;
+    if Form.Top < Result then Result := Result - Form.Top else Result := 0;
+  end;
+
+
+  procedure CorrectLeftButtonRect(var AButtonRect: TRect);
+  var
+    TopOffset, LeftOffset: Integer;
+    BS: TRect;
+  begin
+    if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0) then
+    begin
+      BS := _GetBorderSize;
+      TopOffset := GetTopOffset;
+      LeftOffset := BS.Left;
+      if ButtonRect.Top < TopOffset then
+      begin
+        TopOffset := TopOffset - ButtonRect.Top;
+        OffsetRect(ButtonRect, LeftOffset, TopOffset);
+        TopOffset := ButtonRect.Bottom - BS.Top;
+        if TopOffset > 0 then
+          OffsetRect(ButtonRect, 0, -TopOffset);
+      end;
+    end;
+  end;
+
+  procedure CorrectRightButtonRect(var AButtonRect: TRect);
+  var
+    TopOffset, RightOffset: Integer;
+    BS: TRect;
+  begin
+    if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0) then
+    begin
+      BS := _GetBorderSize;
+      TopOffset := GetTopOffset;
+      RightOffset := -BS.Right;
+      if ButtonRect.Top < TopOffset then
+      begin
+        TopOffset := TopOffset - ButtonRect.Top;
+        OffsetRect(ButtonRect, RightOffset, TopOffset);
+        TopOffset := ButtonRect.Bottom - BS.Top;
+        if TopOffset > 0 then
+          OffsetRect(ButtonRect, 0, -TopOffset);
+      end;
+    end;
+  end;
+
 begin
   //if the setting is not enabled use the original PaintNC method
   if not NCSettings.Enabled then
@@ -790,6 +845,7 @@ begin
   {draw caption border}
   DrawRect := Rect(0, 0, LBitmap.Width, LBitmap.Height);
   LDetails := StyleServices.GetElementDetails(LDetail);  //used for draw text in the caption
+  TextTopOffset := 3;
 
   //check if a must use a custom color or a bitmap
   if FNCSettings.UseColor then
@@ -847,6 +903,19 @@ begin
     IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
     if not StyleServices.GetElementContentRect(0, IconDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
+
+    R1 := ButtonRect;
+    {$IF CompilerVersion > 23.0}
+    if not StyleServices.HasElementFixedPosition(LDetails) then
+    begin
+      CorrectLeftButtonRect(ButtonRect);
+      TextTopOffset := Abs(R1.Top - ButtonRect.Top);
+      if TextTopOffset > R.Top then TextTopOffset := 3;
+    end
+    else
+      TextTopOffset := 0;
+    {$IFEND}
+
     R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R1, ButtonRect);
     if ButtonRect.Width > 0 then
@@ -890,6 +959,11 @@ begin
     if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
 
+    {$IF CompilerVersion > 23.0}
+    if not StyleServices.HasElementFixedPosition(LDetails) then
+      CorrectRightButtonRect(ButtonRect);
+    {$IFEND}
+
     StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, ButtonRect);
 
     if ButtonRect.Left > 0 then
@@ -931,6 +1005,12 @@ begin
 
     if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
+
+    {$IF CompilerVersion > 23.0}
+    if not StyleServices.HasElementFixedPosition(LDetails) then
+     CorrectRightButtonRect(ButtonRect);
+    {$IFEND}
+
     if ButtonRect.Width > 0 then
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, ButtonRect);
     if ButtonRect.Left > 0 then
@@ -958,6 +1038,12 @@ begin
 
     if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
+
+    {$IF CompilerVersion > 23.0}
+    if not StyleServices.HasElementFixedPosition(LDetails) then
+      CorrectRightButtonRect(ButtonRect);
+    {$IFEND}
+
     if ButtonRect.Width > 0 then
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, ButtonRect);
     if ButtonRect.Left > 0 then TextRect.Right := ButtonRect.Left;
@@ -982,6 +1068,12 @@ begin
 
     if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
+
+    {$IF CompilerVersion > 23.0}
+    if not StyleServices.HasElementFixedPosition(LDetails) then
+      CorrectRightButtonRect(ButtonRect);
+    {$IFEND}
+
     if ButtonRect.Width > 0 then
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, ButtonRect);
 
@@ -996,6 +1088,18 @@ begin
     Include(TextFormat, tfRtlReading);
 
   LText := Text;
+
+  {$IF CompilerVersion > 23.0}
+  if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and
+     (TextTopOffset <> 0) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) then
+  begin
+    Inc(TextRect.Left, R.Left);
+    MoveWindowOrg(LBitmap.Canvas.Handle, 0, TextTopOffset);
+    StyleServices.DrawText(LBitmap.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+    MoveWindowOrg(LBitmap.Canvas.Handle, 0, -TextTopOffset);
+  end
+  else
+  {$IFEND}
   StyleServices.DrawText(LBitmap.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
   _FCaptionRect := TextRect;
 
