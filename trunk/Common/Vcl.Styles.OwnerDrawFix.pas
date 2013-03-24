@@ -15,7 +15,7 @@
 { The Original Code is Vcl.Styles.OwnerDrawFix.pas.                                                }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -122,7 +122,10 @@ begin
     Canvas.Font.Color  := LStyles.GetStyleFontColor(FontColorStates[Control.Enabled]);
 
     if odSelected in State then
+    begin
      Canvas.Brush.Color := LStyles.GetSystemColor(clHighlight);
+     Canvas.Font.Color  := LStyles.GetSystemColor(clHighlightText);
+    end;
 
     Canvas.FillRect(Rect) ;
     Canvas.TextOut(Rect.Left+2, Rect.Top, Items[Index]);
@@ -227,7 +230,11 @@ begin
       r.Left:=r.Left+ImageSize;
     end;
 
-    LDetails := StyleServices.GetElementDetails(tlListItemNormal);
+    if ([odSelected, odHotLight] * State <> []) then
+      LDetails := StyleServices.GetElementDetails(tlListItemSelected)
+    else
+      LDetails := StyleServices.GetElementDetails(tlListItemNormal);
+
     Sender.Canvas.Brush.Style := bsClear;
     LStyles.DrawText(Sender.Canvas.Handle, LDetails, s, r, [tfLeft, tfSingleLine, tfVerticalCenter, tfEndEllipsis]);
 
