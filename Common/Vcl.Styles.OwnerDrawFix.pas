@@ -48,6 +48,9 @@ var
 
 implementation
 
+uses
+  System.SysUtils;
+
 type
   TCustomListViewClass=class(TCustomListView);
 
@@ -108,6 +111,8 @@ end;
 
 procedure TVclStylesOwnerDrawFix.ListViewDrawItem(Sender: TCustomListView;
   Item: TListItem; Rect: TRect; State: TOwnerDrawState);
+const
+  Spacing =4;
 var
   Dx        : Integer;
   r         : TRect;
@@ -117,11 +122,9 @@ var
   LDetails  : TThemedElementDetails;
   LStyles   : TCustomStyleServices;
   BoxSize   : TSize;
-  Spacing   : Integer;
   LColor    : TColor;
   ImageSize : Integer;
 begin
-  Spacing:=4;
   ImageSize:=0;
   LStyles:=StyleServices;
   if not LStyles.GetElementColor(LStyles.GetElementDetails(ttItemNormal), ecTextColor, LColor) or  (LColor = clNone) then
@@ -217,10 +220,23 @@ end;
 
 procedure TVclStylesOwnerDrawFix.ListViewMouseDown(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+const
+  Spacing =4;
+var
+  LDetails  : TThemedElementDetails;
+  Size      : TSize;
 begin
- if TListView(Sender).OwnerDraw then
-  if X<=13 then
-   TListView(Sender).Selected.Checked:=not TListView(Sender).Selected.Checked;
+ if TListView(Sender).OwnerDraw and (TListView(Sender).Checkboxes) then
+  begin
+   LDetails := StyleServices.GetElementDetails(tbCheckBoxCheckedNormal);
+   Size.cx:=0;
+   Size.cy:=0;
+
+   if StyleServices.GetElementSize(TListView(Sender).Canvas.Handle, LDetails, esMinimum, Size) and (X>Spacing) and (X<=Size.Width) then
+    TListView(Sender).Selected.Checked:=not TListView(Sender).Selected.Checked;
+
+   //OutputDebugString(PChar(Format('X %d Size.Width %d',[X, Size.Width])));
+  end;
 end;
 
 initialization
