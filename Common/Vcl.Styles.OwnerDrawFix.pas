@@ -199,9 +199,9 @@ begin
       rc.Right  := rc.Left + BoxSize.cx;
 
       if Item.Checked then
-       LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal)
+       LDetails := StyleServices.GetElementDetails(tbCheckBoxCheckedNormal)
       else
-       LDetails := StyleServices.GetElementDetails(tbCheckBoxcheckedNormal);
+       LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
 
       LStyles.DrawElement(Sender.Canvas.Handle, LDetails, Rc);
     end;
