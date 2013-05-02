@@ -15,7 +15,7 @@
 { The Original Code is Vcl.Styles.Ext.pas.                                                         }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -259,6 +259,10 @@ uses
  {$IFDEF VER240}
    {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleUtils.inc'}
    {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleAPI.inc'}
+ {$ENDIF}
+ {$IFDEF VER250}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\11.0\source\vcl\StyleUtils.inc'}
+   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\11.0\source\vcl\StyleAPI.inc'}
  {$ENDIF}
 {$ENDIF}
 
