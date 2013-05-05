@@ -141,7 +141,7 @@ begin
     Dx:=0;
     r.Right := r.Left + Sender.Column[ColIdx].Width;
 
-    if ColIdx > 0 then
+    if (ColIdx > 0) and (Item.SubItems.Count>=ColIdx) then
       s := Item.SubItems[ColIdx - 1]
     else
     begin
