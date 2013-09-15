@@ -1867,14 +1867,6 @@ object FrmMain: TFrmMain
     Height = 13
     Caption = 'VCL Styles'
   end
-  object Image1: TImage
-    Left = 495
-    Top = 27
-    Width = 422
-    Height = 400
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    AutoSize = True
-  end
   object ListView1: TListView
     Left = 8
     Top = 27
@@ -1920,6 +1912,13 @@ object FrmMain: TFrmMain
     Anchors = [akLeft, akBottom]
     Caption = 'Apply Style'
     TabOrder = 1
+  end
+  object Panel1: TPanel
+    Left = 495
+    Top = 27
+    Width = 425
+    Height = 400
+    TabOrder = 2
   end
   object ActionManager1: TActionManager
     Left = 296
