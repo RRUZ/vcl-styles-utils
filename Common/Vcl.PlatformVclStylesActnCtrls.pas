@@ -26,6 +26,7 @@ interface
 
 uses
    Vcl.ActnMan,
+   Vcl.Buttons,
    Vcl.PlatformDefaultStyleActnCtrls;
 
 type
@@ -69,8 +70,8 @@ type
   private
     procedure NativeDrawText(const Text: string; var Rect: TRect; Flags: Longint);
   protected
-    procedure DrawText(var ARect: TRect; var Flags: Cardinal;
-      Text: string); override;
+    procedure DrawBackground(var PaintRect: TRect); override;
+    procedure DrawText(var ARect: TRect; var Flags: Cardinal; Text: string); override;
   end;
 
   TThemedMenuItemHelper = class Helper for TThemedMenuItem
@@ -78,6 +79,17 @@ type
    function GetPaintRect: TRect;
    property PaintRect: TRect read GetPaintRect;
   end;
+
+  TThemedButtonControlEx = class(TThemedButtonControl)
+  protected
+    procedure DrawBackground(var PaintRect: TRect); override;
+  end;
+
+  TThemedDropDownButtonEx= class(TThemedDropDownButton)
+  protected
+    procedure DrawBackground(var PaintRect: TRect); override;
+  end;
+
 
 { TThemedMenuItemHelper }
 function TThemedMenuItemHelper.GetPaintRect: TRect;
@@ -116,7 +128,7 @@ begin
         csStandard: Result := TStandardDropDownButton;
         csXPStyle: Result := TXPStyleDropDownBtn;
       else
-        Result := TThemedDropDownButton;
+        Result := TThemedDropDownButtonEx;
       end
     else
     if (AnItem.Action is TStaticListAction) or (AnItem.Action is TVirtualListAction) then
@@ -126,7 +138,7 @@ begin
       csStandard: Result := TStandardButtonControl;
       csXPStyle: Result := TXPStyleButton;
     else
-      Result := TThemedButtonControl;
+      Result := TThemedButtonControlEx;
     end
   end
   else
@@ -284,6 +296,15 @@ begin
   LNativeStyle.DrawText(Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
 end;
 
+procedure TThemedMenuButtonEx.DrawBackground(var PaintRect: TRect);
+const
+  MenuStates: array[Boolean, Boolean] of TThemedMenu =
+    ((tmMenuBarItemNormal, tmMenuBarItemPushed), (tmMenuBarItemHot, tmMenuBarItemPushed));
+begin
+  Canvas.Brush.Color := ActionBar.ColorMap.Color;
+  StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(MenuStates[MouseInControl, Selected]), PaintRect);
+end;
+
 procedure TThemedMenuButtonEx.DrawText(var ARect: TRect; var Flags: Cardinal;
   Text: string);
 var
@@ -292,12 +313,77 @@ begin
   if Parent is TCustomActionMainMenuBar then
     if not TCustomActionMainMenuBar(Parent).PersistentHotkeys then
       Text := StripHotkey(Text);
-
+     VER barra memnu Paint
   LRect := ARect;
   Inc(LRect.Left);
   Canvas.Font := Screen.MenuFont;
+  //LRect.Top:=-10;
   NativeDrawText(Text, LRect, Flags or DT_CALCRECT or DT_NOCLIP);
   NativeDrawText(Text, LRect, Flags);
+end;
+
+{ TThemedButtonControlEx }
+
+procedure TThemedButtonControlEx.DrawBackground(var PaintRect: TRect);
+const
+  DisabledState: array[Boolean] of TThemedToolBar = (ttbButtonDisabled, ttbButtonPressed);
+  CheckedState: array[Boolean] of TThemedToolBar = (ttbButtonHot, ttbButtonCheckedHot);
+var
+  SaveIndex: Integer;
+begin
+  if not StyleServices.IsSystemStyle and ActionClient.Separator then Exit;
+
+  SaveIndex := SaveDC(Canvas.Handle);
+  try
+    if Enabled and not (ActionBar.DesignMode) then
+    begin
+      if (MouseInControl or IsChecked) and
+         Assigned(ActionClient) {and not ActionClient.Separator)} then
+      begin
+        StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(CheckedState[IsChecked or (FState = bsDown)]), PaintRect);
+
+        if not MouseInControl then
+          ;//StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(ttbButtonPressed), PaintRect);
+      end
+      else
+        ;//StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(ttbButtonNormal), PaintRect);
+    end
+    else
+      StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(DisabledState[IsChecked]), PaintRect);
+
+  finally
+    RestoreDC(Canvas.Handle, SaveIndex);
+  end;
+end;
+
+{ TThemedDropDownButtonEx }
+
+procedure TThemedDropDownButtonEx.DrawBackground(var PaintRect: TRect);
+const
+  CheckedState: array[Boolean] of TThemedToolBar = (ttbButtonHot, ttbButtonCheckedHot);
+var
+  LIndex : Integer;
+begin
+  LIndex := SaveDC(Canvas.Handle);
+  try
+    if Enabled and not (ActionBar.DesignMode) then
+    begin
+      if (MouseInControl or IsChecked or DroppedDown) and
+         (Assigned(ActionClient) and not ActionClient.Separator) then
+      begin
+        StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(CheckedState[IsChecked or (FState = bsDown)]), PaintRect);
+
+       if IsChecked and not MouseInControl then
+          StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(ttbButtonPressed), PaintRect);
+      end
+      else
+        ;//StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(ttbButtonNormal), PaintRect);
+    end
+    else
+      ;//StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(DisabledState[IsChecked]), PaintRect);
+  finally
+    RestoreDC(Canvas.Handle, LIndex);
+  end;
 end;
 
 initialization

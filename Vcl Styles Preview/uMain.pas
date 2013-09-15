@@ -4,17 +4,17 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.Styles.Ext,
+  Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, Vcl.ToolWin;
 
 type
   TFrmMain = class(TForm)
     ListView1: TListView;
     Label1: TLabel;
-    Image1: TImage;
     Button1: TButton;
     ActionManager1: TActionManager;
     ActionApplyStyle: TAction;
+    Panel1: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -24,8 +24,8 @@ type
       Selected: Boolean);
   private
     Loading : Boolean;
-    FBitmap : TBitmap;
     FStylesPath : string;
+    FPreview:TVclStylesPreview;
     procedure FillVclStylesList;
     procedure ClearVclStylesList;
   public
@@ -40,8 +40,10 @@ implementation
 uses
   IOUtils,
   Vcl.Themes,
-  Vcl.Styles,
-  Vcl.Styles.Ext;
+  Vcl.Styles;
+
+type
+ TVclStylesPreviewClass = class(TVclStylesPreview);
 
 {$R *.dfm}
 
@@ -50,24 +52,22 @@ begin
    Loading:=False;
    FStylesPath:= IncludeTrailingPathDelimiter(ExpandFileName(ExtractFilePath(ParamStr(0))  + '\..\Styles'));
    ReportMemoryLeaksOnShutdown:=True;
-   FBitmap:=TBitmap.Create;
-   FBitmap.PixelFormat:=pf32bit;
-   FBitmap.Width :=Image1.ClientRect.Width;
-   FBitmap.Height:=Image1.ClientRect.Height;
+   FPreview:=TVclStylesPreview.Create(Self);
+   FPreview.Parent:=Panel1;
+   FPreview.BoundsRect := Panel1.ClientRect;
    FillVclStylesList;
 end;
 
 procedure TFrmMain.FormDestroy(Sender: TObject);
 begin
   ClearVclStylesList;
-  FBitmap.Free;
+  FPreview.Free;
 end;
 
 procedure TFrmMain.FormShow(Sender: TObject);
 begin
    if ListView1.Items.Count>0 then
     ListView1.Selected:=ListView1.Items.Item[0];
-
 end;
 
 procedure TFrmMain.ListView1SelectItem(Sender: TObject; Item: TListItem;
@@ -89,8 +89,9 @@ begin
 
    if Assigned(LStyle) and not Loading  then
    begin
-     DrawSampleWindow(LStyle, FBitmap.Canvas, Image1.ClientRect, Item.SubItems[1]);
-     Image1.Picture.Assign(FBitmap);
+     FPreview.Caption:=Item.SubItems[1];
+     FPreview.Style:=LStyle;
+     TVclStylesPreviewClass(FPreview).Paint;
    end;
   end;
 end;

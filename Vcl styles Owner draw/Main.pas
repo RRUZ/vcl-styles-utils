@@ -40,7 +40,7 @@ uses
 
 procedure TFrmMain.CheckBox1Click(Sender: TObject);
 begin
-  SetOwnerDraw(CheckBox1.Checked);
+  //SetOwnerDraw(CheckBox1.Checked);
 end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
@@ -85,7 +85,15 @@ end;
 
 procedure TFrmMain.SetOwnerDraw(Value: Boolean);
 begin
-  ApplyVclStylesOwnerDrawFix(Self, Value);
+  ComboBox1.Style:=csOwnerDrawFixed;
+  ComboBox1.OnDrawItem:=VclStylesOwnerDrawFix.ComboBoxDrawItem;
+
+  ListBox1.Style:=lbOwnerDrawFixed;
+  ListBox1.OnDrawItem:=VclStylesOwnerDrawFix.ListBoxDrawItem;
+
+  ListView1.OwnerDraw:=True;
+  ListView1.OnDrawItem:=VclStylesOwnerDrawFix.ListViewDrawItem;
+  ListView1.OnMouseDown:=VclStylesOwnerDrawFix.ListViewMouseDown;
 end;
 
 end.

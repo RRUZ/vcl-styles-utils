@@ -41,7 +41,7 @@ object Form4: TForm4
     Top = 192
     Width = 75
     Height = 25
-    Caption = 'Test'
+    Caption = 'Press Me'
     TabOrder = 1
     OnClick = Button1Click
   end
