@@ -18,6 +18,10 @@
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
+{ Contributors                                                                                     }
+{                                                                                                  }
+{ Leonardo Cechet                                                                                  }
+{                                                                                                  }
 {**************************************************************************************************}
 
 unit Vcl.Styles.Fixes;
@@ -159,8 +163,24 @@ begin
     else
     if Focused then
     begin
-      LDetails := StyleServices.GetElementDetails(tbPushButtonDefaulted) ;
-      LImageIndex := PBS_DEFAULTED;
+      if not Control.Enabled then
+      begin
+        LDetails := StyleServices.GetElementDetails(tbPushButtonDisabled) ;
+        LImageIndex := PBS_DISABLED;
+      end
+      else
+      begin
+        if MouseInControl then
+        begin
+          LDetails := StyleServices.GetElementDetails(tbPushButtonDefaulted) ;
+          LImageIndex := PBS_DEFAULTED;
+        end
+        else
+        begin
+          LDetails := StyleServices.GetElementDetails(tbPushButtonNormal);
+          LImageIndex := PBS_NORMAL;
+        end;
+      end;
     end
     else
     if Control.Enabled then
