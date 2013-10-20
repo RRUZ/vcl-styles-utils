@@ -15,7 +15,7 @@
 { The Original Code is Vcl.Styles.Utils.pas.                                                       }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2013 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
