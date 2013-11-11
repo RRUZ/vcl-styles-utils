@@ -1,0 +1,66 @@
+========================================================================================
+                    ThemedSysControls : The Version History
+========================================================================================
+
+v1.6 (11/11/2013)
+  +The code is refactored .
+  +The InsertMenuItem function is redirected to the original function in finalization .
+  +The License is modified .
+  
+v1.5 (07/11/2013)
+ New unit uTooltipsWnd:
+  +The Tooltip Control is themed. 
+  
+  +HeaderSection of ListView is themed as hot when mouse is on it . 
+  +BugFix : Clicking on CloseButton does not close the Window . 
+ 
+v1.4 (31/10/2013)
+  + The Header of SysListView32 control is themed .
+  + BugFix : when clicking on Column , background color change .
+  + BugFix: The white bakground color that apear when combobox has an edit control .
+
+v1.3 (26/10/2013):
+  New unit uScrollBarWnd 
+  New unit uNativeScrollBar 
+   +ScrollBar is themed.
+ 
+v1.2 (20/10/2013):
+ 
+ New unit uSysListView32Wnd :
+  +SysListView32 control is themed .
+  
+ New unit uToolbarWindow32Wnd :
+  +ToolbarWindow32 control is themed.
+ 
+ PopupMenu:
+  +Add support to Menu item icon (icons are painted if you use a Vcl Menu control (TMenu)).
+  +BugFix : If Menu is a Vcl control (TMenu) then , in some situation the item text will not painted correctly.
+  +BugFix : ItemDiasabled in some situation is draw as normal item .
+  +BugFix : If PopupMenu is droped from MainMenu , the first item is highlighted.
+  +BugFix : if item was selected using mouse then reselected using keyboard , the item does not appears hot.
+
+v1.1 (16/10/2013):
+ 
+ New Unit(uStaticWnd):
+  +Static Control is themed when its disabled .
+  
+ Button (uButtonWnd Unit):
+  +BugFix : When button is down ,the button style/state does not change .
+  +BugFix : Button painted as RadioButton .
+  +Added support for SplitButton : Split Button is themed .
+  +Added focus effect to CheckBox & RadioButton
+  +Added BSFocused state to Button : button is correctly themed when its got focus .
+
+ Dialog (uThemedDialog Unit):
+  +BugFix:Window size is smaller than the original size .
+  +Main Icon is painted .
+  
+ uControlWnd Unit:
+  +Added Enabled property .
+  +Added Focused property .
+  +Added Visible property .
+  
+v1 (20/09/2013)
+
+  Initial release. 
+	 
