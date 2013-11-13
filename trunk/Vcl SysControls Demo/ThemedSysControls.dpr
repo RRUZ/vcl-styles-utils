@@ -25,7 +25,7 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  TStyleManager.TrySetStyle('Amethyst Kamri');
+  TStyleManager.TrySetStyle('Auric');
   Application.CreateForm(TMain, Main);
   Application.Run;
 end.

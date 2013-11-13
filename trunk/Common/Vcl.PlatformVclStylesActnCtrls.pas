@@ -43,6 +43,7 @@ implementation
 
 uses
   Vcl.Menus,
+  Winapi.UxTheme,
   Winapi.Windows,
   System.SysUtils,
   Vcl.ActnMenus,
@@ -89,6 +90,38 @@ type
   protected
     procedure DrawBackground(var PaintRect: TRect); override;
   end;
+
+function DoDrawText(DC: HDC; Details: TThemedElementDetails;
+  const S: string; var R: TRect; Flags: TTextFormat; Options: TStyleTextOptions): Boolean;
+var
+  LFlags: Cardinal;
+  LColorRef: TColorRef;
+begin
+    LFlags := TTextFormatFlags(Flags);
+    LColorRef := SetTextColor(DC, Vcl.Graphics.ColorToRGB(Options.TextColor));
+    try
+      Winapi.Windows.DrawText(DC, PChar(S), Length(S), R, LFlags);
+    finally
+      SetTextColor(DC, LColorRef);
+    end;
+    Result := True;
+end;
+
+function InternalDrawText(DC: HDC; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: TTextFormat; Color: TColor = clNone): Boolean;
+var
+  LColor: TColor;
+  LOptions: TStyleTextOptions;
+begin
+  if Color <> clNone then
+  begin
+    LOptions.Flags := [stfTextColor];
+    LOptions.TextColor := Color;
+  end
+  else
+    LOptions.Flags := [];
+  Result := DoDrawText(DC, Details, S, R, Flags, LOptions);
+end;
+
 
 
 { TThemedMenuItemHelper }
@@ -201,9 +234,9 @@ var
   LFormats: TTextFormat;
   LColor: TColor;
   LDetails: TThemedElementDetails;
-  LNativeStyle : TCustomStyleServices;
+  //LNativeStyle : TCustomStyleServices;
 begin
-  LNativeStyle:=TStyleManager.SystemStyle;
+  //LNativeStyle:=TStyleManager.SystemStyle;
 
   LFormats := TTextFormatFlags(Flags);
   if Selected and Enabled then
@@ -222,7 +255,11 @@ begin
   if (tfCalcRect in LFormats) and ( (LCaption = '') or (LCaption[1] = cHotkeyPrefix) and (LCaption[2] = #0) ) then
     LCaption := LCaption + ' ';
 
-  LNativeStyle.DrawText(DC, LDetails, LCaption, Rect, LFormats, LColor);
+
+
+  //LNativeStyle.DrawText(DC, LDetails, LCaption, Rect, LFormats, LColor);   //doesn't work when the windows classic theme is applied in the OS
+  //StyleServices.DrawText(DC, LDetails, LCaption, Rect, LFormats, LColor); //doesn't work with custom fonts sizes and types
+  InternalDrawText(DC, LDetails, LCaption, Rect, LFormats, LColor);
 end;
 
 procedure TThemedMenuItemEx.DrawText(var Rect: TRect; var Flags: Cardinal;
@@ -313,7 +350,7 @@ begin
   if Parent is TCustomActionMainMenuBar then
     if not TCustomActionMainMenuBar(Parent).PersistentHotkeys then
       Text := StripHotkey(Text);
-     VER barra memnu Paint
+   //  VER barra memnu Paint
   LRect := ARect;
   Inc(LRect.Left);
   Canvas.Font := Screen.MenuFont;
