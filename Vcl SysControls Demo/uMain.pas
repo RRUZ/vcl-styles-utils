@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.Buttons, Vcl.StdCtrls, Vcl.Styles, Vcl.Themes,
-  Vcl.Menus, Vcl.Samples.Spin, Vcl.ImgList;
+  Vcl.Menus, Vcl.Samples.Spin, Vcl.ImgList, Vcl.ExtDlgs;
 
 type
   TMain = class(TForm)
@@ -77,6 +77,7 @@ type
     PrintDialog1: TPrintDialog;
     OpenDialog2: TOpenDialog;
     ImageList1: TImageList;
+    OpenPictureDialog1: TOpenPictureDialog;
     procedure FormCreate(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure ListBox1Click(Sender: TObject);
