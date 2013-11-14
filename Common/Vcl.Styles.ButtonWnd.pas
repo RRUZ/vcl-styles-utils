@@ -62,6 +62,7 @@ implementation
 
 uses
   System.Classes,
+  System.SysUtils,
   Vcl.Graphics,
   Vcl.Themes;
 
@@ -377,6 +378,7 @@ var
 begin
   CurrentBtn := Handle;
   uMsg := Message.Msg;
+  //Addlog('TButtonWnd '+IntToStr(uMsg));
   case uMsg of
 
     WM_ERASEBKGND:
@@ -426,40 +428,46 @@ begin
           end;
 
         BeginPaint(Handle, PS);
-        DC := GetDC(Handle);
+        try
+            DC := GetDC(Handle);
+            try
+              if IsButtonRadioBox(Handle) then
+                begin
+                  if FDown then
+                    DrawRadioButton(DC, ClientRect, BSPressed)
+                  else if FMouseEnter then
+                    DrawRadioButton(DC, ClientRect, BSHot)
+                  else
+                    DrawRadioButton(DC, ClientRect, BSNormal);
+                end
+              else if IsButtonCheckBox(Handle) then
+                begin
+                  if FDown then
+                    DrawCheckBox(DC, ClientRect, BSPressed)
+                  else if FMouseEnter then
+                    DrawCheckBox(DC, ClientRect, BSHot)
+                  else
+                    DrawCheckBox(DC, ClientRect, BSNormal);
+                end
+              else if IsButton(Handle) then
+                begin
+                  if FDown then
+                    DrawButton(DC, ClientRect, BSPressed)
+                  else if FMouseEnter then
+                    DrawButton(DC, ClientRect, BSHot)
+                  else if Focused then
+                    DrawButton(DC, ClientRect, BSFocused)
+                  else
+                    DrawButton(DC, ClientRect, BSNormal);
+                end;
 
-        if IsButtonRadioBox(Handle) then
-          begin
-            if FDown then
-              DrawRadioButton(DC, ClientRect, BSPressed)
-            else if FMouseEnter then
-              DrawRadioButton(DC, ClientRect, BSHot)
-            else
-              DrawRadioButton(DC, ClientRect, BSNormal);
-          end
-        else if IsButtonCheckBox(Handle) then
-          begin
-            if FDown then
-              DrawCheckBox(DC, ClientRect, BSPressed)
-            else if FMouseEnter then
-              DrawCheckBox(DC, ClientRect, BSHot)
-            else
-              DrawCheckBox(DC, ClientRect, BSNormal);
-          end
-        else if IsButton(Handle) then
-          begin
-            if FDown then
-              DrawButton(DC, ClientRect, BSPressed)
-            else if FMouseEnter then
-              DrawButton(DC, ClientRect, BSHot)
-            else if Focused then
-              DrawButton(DC, ClientRect, BSFocused)
-            else
-              DrawButton(DC, ClientRect, BSNormal);
-          end;
+            finally
+              ReleaseDC(Handle, DC);
+            end;
+        finally
+          EndPaint(Handle, PS);
+        end;
 
-        ReleaseDC(Handle, DC);
-        EndPaint(Handle, PS);
       end;
 
     WM_LBUTTONDOWN:
