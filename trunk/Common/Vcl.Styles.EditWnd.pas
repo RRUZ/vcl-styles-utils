@@ -105,16 +105,20 @@ begin
           if GetWindowClassName(GetParent(Handle)) <> 'ComboBox' then
             begin
               DC := GetWindowDC(Handle);
-              R := ClientRect;
-              if IsWindowEnabled(Handle) then
-                LDetails := StyleServices.GetElementDetails
-                  (TThemedEdit.teEditTextNormal)
-              else
-                LDetails := StyleServices.GetElementDetails
-                  (TThemedEdit.teEditTextDisabled);
-              R := Rect(0, 0, ClientRect.Width + 4, ClientRect.Height + 4);
-              StyleServices.DrawElement(DC, LDetails, R);
-              ReleaseDC(Handle, DC);
+              try
+                R := ClientRect;
+                if IsWindowEnabled(Handle) then
+                  LDetails := StyleServices.GetElementDetails
+                    (TThemedEdit.teEditTextNormal)
+                else
+                  LDetails := StyleServices.GetElementDetails
+                    (TThemedEdit.teEditTextDisabled);
+                R := Rect(0, 0, ClientRect.Width + 4, ClientRect.Height + 4);
+                StyleServices.DrawElement(DC, LDetails, R);
+              finally
+               ReleaseDC(Handle, DC);
+              end;
+
               InvalidateRect(Handle, nil, False);
             end
           else { VCL Edit Control }
