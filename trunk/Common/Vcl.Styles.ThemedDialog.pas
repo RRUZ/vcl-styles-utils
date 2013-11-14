@@ -311,6 +311,7 @@ begin
   StyleServices.GetElementRegion(Details, R, Result);
 end;
 
+
 procedure TDialogWnd.WndProc(var Message: TMessage);
 var
   uMsg: UINT;
@@ -326,6 +327,7 @@ var
   CStaticHWND: HWND;
   R: TRect;
   DFBW: Integer;
+
   procedure Close;
   begin
     SendMessage(Handle, WM_SYSCOMMAND, SC_CLOSE, 0);
@@ -335,6 +337,7 @@ begin
   uMsg := Message.Msg;
   wParam := Message.wParam;
   lParam := Message.lParam;
+
   case uMsg of
 
     WM_CREATE:

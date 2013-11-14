@@ -138,6 +138,8 @@ begin
     Result := InsertMenuItemOrg(p1, p2, p3, p4);
 end;
 
+
+
 { TThemedSysControls }
 
 constructor TThemedSysControls.Create;
@@ -235,7 +237,7 @@ begin
       if Code = HCBT_DESTROYWND then
       begin
         sClassName := GetWindowClassName(wParam);
-          if sClassName = '#32768' then
+          if (sClassName = '#32768') then
           {PopupMenu}
           begin
             if PopupWndList.ContainsKey(wParam) then
@@ -243,7 +245,7 @@ begin
             //OutputDebugString(PChar('remove PopupWndList count '+IntToStr(PopupWndList.Count)));
           end
           else
-          if sClassName = '#32770' then
+          if (sClassName = '#32770') then
           {Dialog}
           begin
             if DialogWndList.ContainsKey(wParam) then
@@ -251,7 +253,7 @@ begin
             //OutputDebugString(PChar('remove DialogWndList count '+IntToStr(DialogWndList.Count)));
           end
           else
-          if sClassName = 'Button' then
+          if (sClassName = 'Button') then
           {Button}
           begin
             if BtnWndArrayList.ContainsKey(wParam) then
@@ -265,37 +267,37 @@ begin
               UnknownControlList.Remove(wParam);
           end
           else
-          if sClassName = 'SysListView32' then
+          if (sClassName = 'SysListView32') then
           begin
             if SysListView32WndList.ContainsKey(wParam) then
               SysListView32WndList.Remove(wParam);
           end
           else
-          if sClassName = 'ToolbarWindow32' then
+          if (sClassName = 'ToolbarWindow32') then
           begin
             if ToolbarWindow32WndList.ContainsKey(wParam) then
               ToolbarWindow32WndList.Remove(wParam);
           end
           else
-          if sClassName = 'Edit' then
+          if (sClassName = 'Edit') then
           begin
             if EditWndList.ContainsKey(wParam) then
               EditWndList.Remove(wParam);
           end
           else
-          if sClassName = 'Static' then
+          if (sClassName = 'Static') then
           begin
             if StaticWndList.ContainsKey(wParam) then
               StaticWndList.Remove(wParam);
           end
           else
-          if sClassName = 'ComboBox' then
+          if (sClassName = 'ComboBox') then
           begin
             if ComboBoxWndList.ContainsKey(wParam) then
               ComboBoxWndList.Remove(wParam);
           end
           else
-          if sClassName = 'tooltips_class32' then
+          if (sClassName = 'tooltips_class32') then
           begin
             if TooltipsWndList.ContainsKey(wParam) then
               TooltipsWndList.Remove(wParam);
@@ -306,19 +308,26 @@ begin
         begin
           CBTSturct := PCBTCreateWnd(lParam)^;
           sClassName := GetWindowClassName(wParam);
+          Addlog(sClassName);
           //PopupMenu
           if Integer(CBTSturct.lpcs.lpszClass) = 32768 then
               PopupWndList.Add(wParam, TPopupWnd.Create(wParam))
           else
           //Dialog
-          if Integer(CBTSturct.lpcs.lpszClass) = 32770 then
+          if (Integer(CBTSturct.lpcs.lpszClass) = 32770) then
             begin
               if (CBTSturct.lpcs.cx <> 0) and (CBTSturct.lpcs.cy <> 0) then
-                DialogWndList.Add(wParam, TDialogWnd.Create(wParam))
+              begin
+                DialogWndList.Add(wParam, TDialogWnd.Create(wParam));
+                Addlog('Done');
+              end;
             end
           else
-          if sClassName = 'Button' then
-              BtnWndArrayList.Add(wParam, TButtonWnd.Create(wParam))
+          if (sClassName = 'Button')  then
+          begin
+              BtnWndArrayList.Add(wParam, TButtonWnd.Create(wParam));
+              Addlog('Done');
+          end
           else
           if (sClassName = 'ScrollBar') or (sClassName = 'ReBarWindow32') {or (sClassName = 'ToolbarWindow32')} then
               UnknownControlList.Add(wParam, TUnknownControlWnd.Create(wParam))
@@ -332,10 +341,10 @@ begin
                 ToolbarWindow32WndList.Add(wParam, TToolbarWindow32Wnd.Create(wParam));
             end
           else
-          if sClassName = 'Edit' then
+          if (sClassName = 'Edit')  then
               EditWndList.Add(wParam, TEditWnd.Create(wParam))
           else
-          if sClassName = 'Static' then
+          if (sClassName = 'Static') then
             begin
               { This condition can solve the Edit animated cursor : see ColorDialog !! }
               if (CBTSturct.lpcs.Style and SS_ICON <> SS_ICON) and
@@ -345,10 +354,10 @@ begin
                   StaticWndList.Add(wParam, TStaticWnd.Create(wParam));
             end
           else
-          if sClassName = 'ComboBox' then
+          if (sClassName = 'ComboBox') then
             ComboBoxWndList.Add(wParam, TComboBoxWnd.Create(wParam))
           else
-          if sClassName = 'tooltips_class32' then
+          if (sClassName = 'tooltips_class32') then
             TooltipsWndList.Add(wParam, TooltipsWnd.Create(wParam))
         end
     end;
