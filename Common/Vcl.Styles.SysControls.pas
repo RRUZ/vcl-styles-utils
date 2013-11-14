@@ -308,7 +308,7 @@ begin
         begin
           CBTSturct := PCBTCreateWnd(lParam)^;
           sClassName := GetWindowClassName(wParam);
-          Addlog(sClassName);
+          //Addlog(sClassName);
           //PopupMenu
           if Integer(CBTSturct.lpcs.lpszClass) = 32768 then
               PopupWndList.Add(wParam, TPopupWnd.Create(wParam))
@@ -319,15 +319,12 @@ begin
               if (CBTSturct.lpcs.cx <> 0) and (CBTSturct.lpcs.cy <> 0) then
               begin
                 DialogWndList.Add(wParam, TDialogWnd.Create(wParam));
-                Addlog('Done');
+                //Addlog('Done');
               end;
             end
           else
           if (sClassName = 'Button')  then
-          begin
-              BtnWndArrayList.Add(wParam, TButtonWnd.Create(wParam));
-              Addlog('Done');
-          end
+              BtnWndArrayList.Add(wParam, TButtonWnd.Create(wParam))
           else
           if (sClassName = 'ScrollBar') or (sClassName = 'ReBarWindow32') {or (sClassName = 'ToolbarWindow32')} then
               UnknownControlList.Add(wParam, TUnknownControlWnd.Create(wParam))
