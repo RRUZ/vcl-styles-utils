@@ -152,7 +152,9 @@ type
   function GetIconSize(h_Icon: HICON): TIconSize;
   function GetWindowIcon(hWin: HWND): HICON;
 
+
 implementation
+
 
 const
 {$EXTERNALSYM BS_SPLITBUTTON}
@@ -166,7 +168,7 @@ const
 
 {$WARN ZERO_NIL_COMPAT OFF}
 
-{$REGION 'Useful Functions'}
+
 
 function GetWindowText(Window: HWND): String;
 var
@@ -661,9 +663,6 @@ begin
     DstPoint.Y + SrcRect.Height), SrcRect, AlphaBlend, Transparent, Opacity,TransparentColor);
 end;
 
-
-
-
 { TControlWnd }
 
 function TControlWnd.CallOrgWndProc(Message: TMessage): LRESULT;
@@ -747,7 +746,6 @@ function TControlWnd.GetClientRect: TRect;
 begin
   SetRectEmpty(Result);
   Winapi.Windows.GetClientRect(Handle, Result);
-
 end;
 
 function TControlWnd.GetHeight: integer;
