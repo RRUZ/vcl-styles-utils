@@ -37,6 +37,7 @@ uses
   Vcl.Dialogs,
   Vcl.Styles,
   Vcl.Themes,
+  Vcl.Styles.FormWnd,
   Vcl.Styles.PopupWnd,
   Vcl.Styles.EditWnd,
   Vcl.Styles.StaticWnd,
@@ -48,6 +49,7 @@ uses
   Vcl.Styles.ControlWnd,
   Vcl.Styles.ComboBoxWnd,
   Vcl.Styles.PanelWnd,
+  Vcl.Styles.ProgressBarWnd,
   Vcl.Styles.ToolTipsWnd;
 
 type
@@ -92,9 +94,13 @@ var
   SysListView32WndList : TObjectDictionary<HWND, TSysListView32Wnd>;
   BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
   PanelWndArrayList : TObjectDictionary<HWND, TPanelWnd>;
-  ThemedSysControls: TThemedSysControls;
+  FormWndArrayList : TObjectDictionary<HWND, TFormWnd>;
+  ProgressBarWndArrayList : TObjectDictionary<HWND, TProgressBarWnd>;
+
 
   ClassesList : TDictionary<HWND, string>;
+  ThemedSysControls: TThemedSysControls;
+
 
 { the Original InsertMenuItem function }
 function InsertMenuItemOrg(p1: HMENU; p2: UINT; p3: BOOL;
@@ -176,6 +182,8 @@ begin
   SysListView32WndList := TObjectDictionary<HWND, TSysListView32Wnd>.Create([doOwnsValues]);
   BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
   PanelWndArrayList := TObjectDictionary<HWND, TPanelWnd>.Create([doOwnsValues]);
+  FormWndArrayList := TObjectDictionary<HWND, TFormWnd>.Create([doOwnsValues]);
+  ProgressBarWndArrayList  := TObjectDictionary<HWND, TProgressBarWnd>.Create([doOwnsValues]);
   ClassesList := TDictionary<HWND, string>.Create;
 end;
 
@@ -194,6 +202,8 @@ begin
   SysListView32WndList.Free;
   BtnWndArrayList.Free;
   PanelWndArrayList.Free;
+  ProgressBarWndArrayList.Free;
+  FormWndArrayList.Free;
 
   FBalloonHint.Free;
   ClassesList.Free;
@@ -724,7 +734,6 @@ class function TThemedSysControls.HookActionCallBackWndProc(nCode: Integer;
   wParam: wParam; lParam: lParam): LRESULT;
 var
   C: array [0 .. 256] of Char;
-  CBTSturct: TCBTCreateWnd;
   sClassName : string;
 begin
     Result := CallNextHookEx(FHook_WH_CALLWNDPROC, nCode, wParam, lParam);
@@ -743,20 +752,20 @@ begin
       if ClassesList.ContainsKey(PCWPStruct(lParam)^.hwnd) then
       begin
         sClassName:=ClassesList[PCWPStruct(lParam)^.hwnd];
-        if (SameText(sClassName,'TPanel')) then
-        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message));
 
+        {if (SameText(sClassName,'TPanel')) then
+        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message));
+        }
         if SameText(sClassName,'TNewButton') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (BtnWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                BtnWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TButtonWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end
-        {
+        end {
         else
         if SameText(sClassName,'TWizardForm')  then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (DialogWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               DialogWndList.Add(PCWPStruct(lParam)^.hwnd, TDialogWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (FormWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               FormWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TFormWnd.Create(PCWPStruct(lParam)^.hwnd));
         end   }
         else
         if SameText(sClassName,'TEdit') then
@@ -769,7 +778,14 @@ begin
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                StaticWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end {
+        end
+        else
+        if (SameText(sClassName,'TNewProgressBar')) then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ProgressBarWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               ProgressBarWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TProgressBarWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        {
         else
         if (SameText(sClassName,'TPanel')) then
         begin
