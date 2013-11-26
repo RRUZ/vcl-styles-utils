@@ -73,7 +73,6 @@ begin
     FOrientation:=pbVertical
   else
     FOrientation:=pbHorizontal;
-
 end;
 
 function TProgressBarWnd.GetBarRect: TRect;
@@ -123,33 +122,30 @@ end;
    }
 procedure TProgressBarWnd.WndProc(var Message: TMessage);
 var
-  uMsg: UINT;
   DC: HDC;
-  R: TRect;
   LDetails: TThemedElementDetails;
-  W, Pos : Integer;
-  FillR  : TRect;
-  Canvas: TCanvas;
-  PS: TPaintStruct;
+  W, LPos : Integer;
+  LRect, FillR  : TRect;
+  LCanvas: TCanvas;
+  lpPaint: TPaintStruct;
 begin
 
-  uMsg := Message.Msg;
 
-  case uMsg of
+  case Message.Msg of
 
     WM_PAINT:
       begin
         DC := HDC(Message.WParam);
-        Canvas := TCanvas.Create;
+        LCanvas := TCanvas.Create;
         try
           if DC <> 0 then
-            Canvas.Handle := DC
+            LCanvas.Handle := DC
           else
-            Canvas.Handle := BeginPaint(Handle, PS);
+            LCanvas.Handle := BeginPaint(Handle, lpPaint);
 
 
           //Frame
-          R := BarRect;
+          LRect := BarRect;
           if Orientation = pbHorizontal then
             LDetails := StyleServices.GetElementDetails(tpBar)
           else
@@ -157,42 +153,42 @@ begin
 
           //Addlog(Format('Frame R  Width %d Height %d',[R.Width, R.Height]));
 
-          StyleServices.DrawElement(Canvas.Handle, LDetails, R);
+          StyleServices.DrawElement(LCanvas.Handle, LDetails, LRect);
 
           //Bar
-          InflateRect(R, -1, -1);
+          InflateRect(LRect, -1, -1);
           if Orientation = pbHorizontal then
-            W := R.Width
+            W := LRect.Width
           else
-            W := R.Height;
+            W := LRect.Height;
 
           //Addlog(Format('GetPosition %d',[GetPosition]));
           //Addlog(Format('GetPercent %n',[GetPercent]));
 
-          Pos := Round(W * GetPercent);
+          LPos := Round(W * GetPercent);
 
           //Addlog(Format('Pos %d',[Pos]));
 
-          FillR := R;
+          FillR := LRect;
           if Orientation = pbHorizontal then
           begin
-            FillR.Right := FillR.Left + Pos;
+            FillR.Right := FillR.Left + LPos;
             LDetails := StyleServices.GetElementDetails(tpChunk);
           end
           else
           begin
-            FillR.Top := FillR.Bottom - Pos;
+            FillR.Top := FillR.Bottom - LPos;
             LDetails := StyleServices.GetElementDetails(tpChunkVert);
           end;
 
-          StyleServices.DrawElement(Canvas.Handle, LDetails, FillR);
+          StyleServices.DrawElement(LCanvas.Handle, LDetails, FillR);
 
 
           if DC = 0 then
-            EndPaint(Handle, PS);
+            EndPaint(Handle, lpPaint);
         finally
-          Canvas.Handle := 0;
-          Canvas.Free;
+          LCanvas.Handle := 0;
+          LCanvas.Free;
         end;
       end;
 

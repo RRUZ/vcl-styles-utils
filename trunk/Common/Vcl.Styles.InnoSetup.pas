@@ -25,6 +25,8 @@ unit Vcl.Styles.InnoSetup;
 
 interface
 
+Procedure  Done;
+
 implementation
 
 uses
@@ -41,6 +43,7 @@ uses
   Vcl.Styles.PopupWnd,
   Vcl.Styles.EditWnd,
   Vcl.Styles.StaticWnd,
+  Vcl.Styles.StaticTextWnd,
   Vcl.Styles.ThemedDialog,
   Vcl.Styles.ToolbarWindow32Wnd,
   Vcl.Styles.SysListView32Wnd,
@@ -86,6 +89,7 @@ var
   TooltipsWndList: TObjectDictionary<HWND, TooltipsWnd>;
   PopupWndList: TObjectDictionary<HWND, TPopupWnd>;
   StaticWndList: TObjectDictionary<HWND, TStaticWnd>;
+  StaticTextWndList : TObjectDictionary<HWND, TStaticTextWnd>;
   DialogWndList: TObjectDictionary<HWND, TDialogWnd>;
   EditWndList: TObjectDictionary<HWND, TEditWnd>;
   ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
@@ -174,6 +178,8 @@ begin
   PopupWndList:= TObjectDictionary<HWND, TPopupWnd>.Create([doOwnsValues]);
   TooltipsWndList:= TObjectDictionary<HWND, TooltipsWnd>.Create([doOwnsValues]);
   StaticWndList:= TObjectDictionary<HWND, TStaticWnd>.Create([doOwnsValues]);
+  StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
+
   DialogWndList:= TObjectDictionary<HWND,TDialogWnd>.Create([doOwnsValues]);
   EditWndList:= TObjectDictionary<HWND, TEditWnd>.Create([doOwnsValues]);
   ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
@@ -194,6 +200,7 @@ begin
   PopupWndList.Free;
   TooltipsWndList.Free;
   StaticWndList.Free;
+  StaticTextWndList.Free;
   DialogWndList.Free;
   EditWndList.Free;
   ComboBoxWndList.Free;
@@ -776,8 +783,8 @@ begin
         else
         if SameText(sClassName,'TNewStaticText') then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               StaticWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               StaticTextWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if (SameText(sClassName,'TNewProgressBar')) then
@@ -813,6 +820,17 @@ begin
     UnhookWindowsHookEx(FHook);
 end;
 
+
+Procedure  Done;
+begin
+if Assigned(ThemedSysControls) then
+  begin
+    ThemedSysControls.Free;
+    ThemedSysControls:=nil;
+    RedirectProcedure(@Winapi.Windows.InsertMenuItem, InsertMenuItemOrgPointer);
+  end;
+end;
+
 initialization
 
   ThemedSysControls:=nil;
@@ -824,11 +842,6 @@ initialization
   end;
 
 finalization
-
-if Assigned(ThemedSysControls) then
-  begin
-    ThemedSysControls.Free;
-    RedirectProcedure(@Winapi.Windows.InsertMenuItem, InsertMenuItemOrgPointer);
-  end;
+   Done;
 
 end.

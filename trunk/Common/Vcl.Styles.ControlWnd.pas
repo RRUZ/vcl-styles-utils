@@ -63,6 +63,7 @@ type
     FParentHandle: THandle;
     EditBrush: HBRUSH;
     StaticBrush: HBRUSH;
+    FFont : TFont;
     function GetClientRect: TRect;
     function GetText: String;
     function GetParentClassName: String;
@@ -82,6 +83,7 @@ type
     function GetLeft: integer;
     function GetTop: integer;
     function GetClassName: String;
+    function GetFont: TFont;
 
   protected
     function CallOrgWndProc(Message: TMessage): LRESULT;
@@ -95,7 +97,9 @@ type
     function GetParentHandle: HWND;
     function DrawTextCentered(DC: HDC; Details: TThemedElementDetails;
       const R: TRect; S: String): integer;
-    property Handle: THandle read FHandle write FHandle;
+    procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
+     const S: string; var R: TRect; Flags: Cardinal);
+     property Handle: THandle read FHandle write FHandle;
     property OldWndProc: Pointer read FOldProc;
     property ParentHandle: THandle read FParentHandle write FParentHandle;
     property ClassNameNative: String read GetClassName;
@@ -112,6 +116,7 @@ type
     property Enabled: Boolean read GetEnabled;
     property Focused: Boolean read GetFocused;
     property Visible: Boolean read GetVisible;
+    property Font : TFont read GetFont;
     property FontColor: TColor read GetFontColor;
     property MouseInControl: Boolean read IsMouseInControl;
     property HasClientEdge: Boolean read GetClientEdge;
@@ -682,6 +687,7 @@ begin
   SetWindowLongPtr(FHandle, GWL_WNDPROC, LONG_PTR(FProcInstance));
   EditBrush := 0;
   StaticBrush := 0;
+  FFont := nil;
 end;
 
 destructor TControlWnd.Destroy;
@@ -691,6 +697,7 @@ begin
   SetWindowLongPtr(Handle, GWL_WNDPROC, LONG_PTR(FOldProc));
   DeleteObject(StaticBrush);
   DeleteObject(EditBrush);
+  FFont.Free;
   inherited;
 end;
 
@@ -799,10 +806,62 @@ begin
   Result := GetFocus = Handle;
 end;
 
+function TControlWnd.GetFont: TFont;
+var
+  LogFont: TLogFont;
+  hFont  : HGDIOBJ;
+begin
+  if FFont<>nil then
+   Exit(FFont);
+
+  hFont := SendMessage(Handle, WM_GETFONT, 0, 0);
+  Result := TFont.Create;
+  FillChar(LogFont, SizeOf(LogFont), 0);
+  GetObject(hFont, SizeOf(logfont), @LogFont);
+  Result.Name   := StrPas(LogFont.lffaceName);
+  Result.Height := LogFont.lfHeight;
+  if LogFont.lfWeight >= FW_MEDIUM then
+    Result.Style := Result.Style + [fsBold];
+  if LogFont.lfItalic <> 0 then
+    Result.Style := Result.Style + [fsItalic];
+  if LogFont.lfUnderline <> 0 then
+    Result.Style := Result.Style + [fsUnderline];
+  if LogFont.lfStrikeout <> 0 then
+    Result.Style := Result.Style + [fsStrikeout];
+  case (LogFont.lfPitchAndFamily and 3) of
+    VARIABLE_PITCH: Result.Pitch := fpVariable;
+    FIXED_PITCH: Result.Pitch    := fpFixed;
+  end;
+
+  FFont:=Result;
+end;
+
+
 function TControlWnd.GetFontColor: TColor;
 begin
   Result := StyleServices.GetSystemColor(clWindowText);
 end;
+
+procedure TControlWnd.DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
+  const S: string; var R: TRect; Flags: Cardinal);
+var
+  ThemeTextColor: TColor;
+  TextFormat: TTextFormatFlags;
+begin
+  Canvas.Font := Self.Font;
+  TextFormat := TTextFormatFlags(Flags);
+  if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
+  begin
+    Canvas.Font.Color := ThemeTextColor;
+    StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
+  end
+  else
+  begin
+    Canvas.Refresh;
+    StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
+  end;
+end;
+
 
 function TControlWnd.DrawTextCentered(DC: HDC; Details: TThemedElementDetails;
   const R: TRect; S: String): integer;
