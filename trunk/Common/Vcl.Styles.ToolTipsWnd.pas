@@ -48,7 +48,6 @@ uses
   Winapi.CommCtrl,
   Winapi.Windows,
   Vcl.Graphics,
-  Vcl.Styles,
   Vcl.Forms,
   Vcl.Themes;
 

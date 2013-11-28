@@ -1,6 +1,6 @@
 {**************************************************************************************************}
 {                                                                                                  }
-{ Unit Vcl.Styles.ProgressBarWnd                                                                   }
+{ Unit Vcl.Styles.ComCtrls                                                                         }
 { unit for the VCL Styles Utils                                                                    }
 { http://code.google.com/p/vcl-styles-utils/                                                       }
 {                                                                                                  }
@@ -12,7 +12,7 @@
 { ANY KIND, either express or implied. See the License for the specific language governing rights  }
 { and limitations under the License.                                                               }
 {                                                                                                  }
-{ The Original Code is Vcl.Styles.ProgressBarWnd.pas.                                              }
+{ The Original Code is Vcl.Styles.ComCtrls.pas.                                                    }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
 {                                                                                                  }
@@ -21,7 +21,7 @@
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
-unit Vcl.Styles.ProgressBarWnd;
+unit Vcl.Styles.ComCtrls;
 
 interface
 

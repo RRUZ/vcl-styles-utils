@@ -32,7 +32,6 @@ uses
   System.Classes,
   Vcl.Controls,
   Vcl.Graphics,
-  Vcl.Styles,
   Vcl.Themes,
   System.Types,
   System.SysUtils,

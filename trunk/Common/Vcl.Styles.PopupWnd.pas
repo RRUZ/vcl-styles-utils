@@ -41,7 +41,6 @@ uses
   Vcl.Graphics,
   Vcl.Forms,
   Vcl.Menus,
-  Vcl.Styles,
   Vcl.Themes,
   System.Types,
   System.SysUtils,

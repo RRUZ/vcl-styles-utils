@@ -1,6 +1,6 @@
 {**************************************************************************************************}
 {                                                                                                  }
-{ Unit Vcl.Styles.StaticTextWnd                                                                    }
+{ Unit Vcl.Styles.StdCtrls                                                                         }
 { unit for the VCL Styles Utils                                                                    }
 { http://code.google.com/p/vcl-styles-utils/                                                       }
 {                                                                                                  }
@@ -12,16 +12,15 @@
 { ANY KIND, either express or implied. See the License for the specific language governing rights  }
 { and limitations under the License.                                                               }
 {                                                                                                  }
-{ The Original Code is Vcl.Styles.StaticTextWnd.pas.                                               }
+{ The Original Code is Vcl.Styles.StdCtrls.pas.                                                    }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
 {                                                                                                  }
-{ Portions created by SMP3 are Copyright (C) 2013 SMP3.                                            }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2013 Rodrigo Ruz V.                         }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
-unit Vcl.Styles.StaticTextWnd;
+unit Vcl.Styles.StdCtrls;
 
 interface
 
@@ -84,8 +83,6 @@ begin
   end;
   Inc(Rect.Bottom); Inc(Rect.Right);
 end;
-
-
 
 constructor TStaticTextWnd.Create(AHandle: THandle);
 begin
