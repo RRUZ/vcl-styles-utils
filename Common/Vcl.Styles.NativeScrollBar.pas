@@ -35,7 +35,6 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   Vcl.Graphics,
-  Vcl.Styles,
   Vcl.Themes,
   System.Types,
   System.SysUtils,

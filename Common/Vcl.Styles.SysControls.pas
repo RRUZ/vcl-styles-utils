@@ -33,7 +33,6 @@ uses
   System.SysUtils,
   Vcl.Controls,
   Vcl.Dialogs,
-  Vcl.Styles,
   Vcl.Themes,
   Vcl.Styles.PopupWnd,
   Vcl.Styles.EditWnd,

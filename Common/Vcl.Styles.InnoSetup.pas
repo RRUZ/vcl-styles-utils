@@ -29,45 +29,42 @@ Procedure  Done;
 
 implementation
 
+{
+  TNewEdit = class(TEdit)
+  TNewMemo = class(TMemo)
+  TNewComboBox = class(TComboBox)    ok
+  TNewListBox = class(TListBox)
+  TNewButton = class(TButton)        ok
+  TNewCheckBox = class(TCheckBox)
+  TNewRadioButton = class(TRadioButton)
+}
+
 uses
   Winapi.Windows,
   Winapi.Messages,
   System.Generics.Collections,
   System.SysUtils,
-  System.IOUtils,
+  {$IFDEF DEBUG}System.IOUtils,{$ENDIF}
   Vcl.Controls,
   Vcl.Dialogs,
-  Vcl.Styles,
   Vcl.Themes,
-  Vcl.Styles.FormWnd,
-  Vcl.Styles.PopupWnd,
+  Vcl.Styles.Form,
+  Vcl.Styles.StdCtrls,
+  Vcl.Styles.ExtCtrls,
+  Vcl.Styles.ComCtrls,
+
   Vcl.Styles.EditWnd,
   Vcl.Styles.StaticWnd,
-  Vcl.Styles.StaticTextWnd,
-  Vcl.Styles.ThemedDialog,
-  Vcl.Styles.ToolbarWindow32Wnd,
-  Vcl.Styles.SysListView32Wnd,
-  Vcl.Styles.ButtonWnd,
-  Vcl.Styles.UnknownControlWnd,
-  Vcl.Styles.ControlWnd,
   Vcl.Styles.ComboBoxWnd,
-  Vcl.Styles.PanelWnd,
-  Vcl.Styles.ProgressBarWnd,
-  Vcl.Styles.ToolTipsWnd;
+  Vcl.Styles.ButtonWnd;
 
 type
-  TThemedSysControls = class
+  TThemedInnoControls = class
   private
   class var
-    FBalloonHint: TBalloonHint;
-    FPreviousSysBtn: Integer;
-    FPreviousHandle: THandle;
-    FHook: HHook;
     FHook_WH_CALLWNDPROC: HHook;
   protected
     class function HookActionCallBackWndProc(nCode: Integer; wParam: wParam;
-      lParam: lParam): LRESULT; stdcall; static;
-    class function HookActionCallBack(Code: Integer; wParam: wParam;
       lParam: lParam): LRESULT; stdcall; static;
     procedure InstallHook;
     procedure RemoveHook;
@@ -76,116 +73,35 @@ type
     destructor Destroy; override;
   end;
 
-  PInstruction = ^TInstruction;
-
-  TInstruction = packed record
-    Opcode: Byte;
-    Offset: Integer;
-  end;
-
 var
-  InsertMenuItemOrgPointer: Pointer = nil;
-  MenuItemInfoArray: array of TMenuItemInfo;
-  TooltipsWndList: TObjectDictionary<HWND, TooltipsWnd>;
-  PopupWndList: TObjectDictionary<HWND, TPopupWnd>;
-  StaticWndList: TObjectDictionary<HWND, TStaticWnd>;
   StaticTextWndList : TObjectDictionary<HWND, TStaticTextWnd>;
-  DialogWndList: TObjectDictionary<HWND, TDialogWnd>;
   EditWndList: TObjectDictionary<HWND, TEditWnd>;
   ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
-  UnknownControlList: TObjectDictionary<HWND, TUnknownControlWnd>;
-  ToolbarWindow32WndList : TObjectDictionary<HWND, TToolbarWindow32Wnd>;
-  SysListView32WndList : TObjectDictionary<HWND, TSysListView32Wnd>;
   BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
   PanelWndArrayList : TObjectDictionary<HWND, TPanelWnd>;
   FormWndArrayList : TObjectDictionary<HWND, TFormWnd>;
   ProgressBarWndArrayList : TObjectDictionary<HWND, TProgressBarWnd>;
-
-
   ClassesList : TDictionary<HWND, string>;
-  ThemedSysControls: TThemedSysControls;
+  ThemedInnoControls: TThemedInnoControls;
 
-
-{ the Original InsertMenuItem function }
-function InsertMenuItemOrg(p1: HMENU; p2: UINT; p3: BOOL;
-  const p4: TMenuItemInfo): BOOL; stdcall;
-  external user32 name 'InsertMenuItemW';
-
+{$IFDEF DEBUG}
 procedure Addlog(const msg : string);
 begin
    TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',msg+sLineBreak);
 end;
-
-procedure PatchCode(Address: Pointer; const NewCode; Size: Integer);
-var
-  OldProtect: DWORD;
-begin
-  if VirtualProtect(Address, Size, PAGE_EXECUTE_READWRITE, OldProtect) then
-    begin
-      Move(NewCode, Address^, Size);
-      FlushInstructionCache(GetCurrentProcess, Address, Size);
-      VirtualProtect(Address, Size, OldProtect, @OldProtect);
-    end;
-end;
-
-procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
-var
-  NewCode: TInstruction;
-begin
-  NewCode.Opcode := $E9; // jump relative
-  NewCode.Offset := NativeInt(NewAddress) - NativeInt(OldAddress) -
-    SizeOf(NewCode);
-  PatchCode(OldAddress, NewCode, SizeOf(NewCode));
-end;
-
-function InsertMenuItemHook(p1: HMENU; p2: UINT; p3: BOOL;
-  const p4: TMenuItemInfo): BOOL; stdcall;
-var
-  L: Integer;
-begin
-  { If Menu is Owner Draw , the dwTypeData will be destroyed
-    So the GetHMenuItemText function will fails  .
-    We need to copy the Text String to a Pointer that hold the Text (dwItemData).
-  }
-  if p4.fType and MFT_OWNERDRAW = MFT_OWNERDRAW then
-    begin
-      L := Length(MenuItemInfoArray) + 1;
-      SetLength(MenuItemInfoArray, L);
-      MenuItemInfoArray[L - 1] := p4;
-      MenuItemInfoArray[L - 1].dwItemData :=
-        NativeInt(MenuItemInfoArray[L - 1].dwTypeData);
-      Result := InsertMenuItemOrg(p1, p2, p3, MenuItemInfoArray[L - 1]);
-    end
-  else
-    { Call the Original InsertMenuItem function }
-    Result := InsertMenuItemOrg(p1, p2, p3, p4);
-end;
-
-
+{$ENDIF}
 
 { TThemedSysControls }
 
-constructor TThemedSysControls.Create;
+constructor TThemedInnoControls.Create;
 begin
   inherited;
-  FBalloonHint := TBalloonHint.Create(nil);
-  FBalloonHint.Style := bhsStandard;
-  FBalloonHint.Delay := 1500;
-  FBalloonHint.HideAfter := 3000;
-  FPreviousHandle := 0;
   FHook_WH_CALLWNDPROC := 0;
   InstallHook;
-  PopupWndList:= TObjectDictionary<HWND, TPopupWnd>.Create([doOwnsValues]);
-  TooltipsWndList:= TObjectDictionary<HWND, TooltipsWnd>.Create([doOwnsValues]);
-  StaticWndList:= TObjectDictionary<HWND, TStaticWnd>.Create([doOwnsValues]);
-  StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
 
-  DialogWndList:= TObjectDictionary<HWND,TDialogWnd>.Create([doOwnsValues]);
+  StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
   EditWndList:= TObjectDictionary<HWND, TEditWnd>.Create([doOwnsValues]);
   ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
-  UnknownControlList:= TObjectDictionary<HWND, TUnknownControlWnd>.Create([doOwnsValues]);
-  ToolbarWindow32WndList:= TObjectDictionary<HWND, TToolbarWindow32Wnd>.Create([doOwnsValues]);
-  SysListView32WndList := TObjectDictionary<HWND, TSysListView32Wnd>.Create([doOwnsValues]);
   BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
   PanelWndArrayList := TObjectDictionary<HWND, TPanelWnd>.Create([doOwnsValues]);
   FormWndArrayList := TObjectDictionary<HWND, TFormWnd>.Create([doOwnsValues]);
@@ -193,30 +109,22 @@ begin
   ClassesList := TDictionary<HWND, string>.Create;
 end;
 
-destructor TThemedSysControls.Destroy;
+destructor TThemedInnoControls.Destroy;
 begin
   RemoveHook;
 
-  PopupWndList.Free;
-  TooltipsWndList.Free;
-  StaticWndList.Free;
   StaticTextWndList.Free;
-  DialogWndList.Free;
   EditWndList.Free;
   ComboBoxWndList.Free;
-  UnknownControlList.Free;
-  ToolbarWindow32WndList.Free;
-  SysListView32WndList.Free;
   BtnWndArrayList.Free;
   PanelWndArrayList.Free;
   ProgressBarWndArrayList.Free;
   FormWndArrayList.Free;
-
-  FBalloonHint.Free;
   ClassesList.Free;
   inherited;
 end;
 
+{$IFDEF DEBUG}
 function WM_To_String(WM_Message: Integer): string;
 begin
   case WM_Message of
@@ -553,191 +461,9 @@ begin
     Result := 'Unknown(' + IntToStr(WM_Message) + ')';
   end; {Case}
 end;
+{$ENDIF}
 
-
-class function TThemedSysControls.HookActionCallBack(Code: Integer;
-  wParam: wParam; lParam: lParam): LRESULT;
-var
-  Msg: TMOUSEHOOKSTRUCT;
-  C: array [0 .. 256] of Char;
-
-  { Note :  there is only one window that desplay
-    Max,Min,Help,Close hint in the System Windows .
-    => the handle of this window is fixed !!
-    Yes it's fixed .. that's means : there is only one
-    Handle : the handle value is :  [65550,65600] in windows (98,XP,Win7).
-    Not sure about Win8...
-  }
-  procedure HideSysToolTip;
-  var
-    hSysToolTip: THandle;
-  begin
-    For hSysToolTip := 65550 To 65600 do
-      begin
-        If IsWindowVisible(hSysToolTip) then
-          begin
-            GetClassName(hSysToolTip, C, 256);
-            ShowWindow(hSysToolTip, SW_HIDE);
-          end;
-      end;
-  end;
-
-  procedure ShowToolTip(HintTitle: String);
-  begin
-    HideSysToolTip;
-    if FPreviousSysBtn <> Integer(Msg.wHitTestCode) then
-      begin
-        FBalloonHint.HideHint;
-        FBalloonHint.Title := HintTitle;
-        FPreviousSysBtn := Msg.wHitTestCode;
-        FBalloonHint.ShowHint(Msg.pt);
-      end;
-  end;
-
-var
-  CBTSturct: TCBTCreateWnd;
-  sClassName : string;
-begin
-    if (StyleServices.Enabled) and not (StyleServices.IsSystemStyle) then
-    begin
-      if Code = HCBT_SYSCOMMAND then
-        begin
-          FBalloonHint.HideHint;
-          FPreviousSysBtn := 0;
-        end
-      else
-      if Code = HCBT_DESTROYWND then
-      begin
-        sClassName := GetWindowClassName(wParam);
-          if (sClassName = '#32768') then
-          {PopupMenu}
-          begin
-            if PopupWndList.ContainsKey(wParam) then
-              PopupWndList.Remove(wParam);
-            //OutputDebugString(PChar('remove PopupWndList count '+IntToStr(PopupWndList.Count)));
-          end
-          else
-          if (sClassName = '#32770') then
-          {Dialog}
-          begin
-            if DialogWndList.ContainsKey(wParam) then
-              DialogWndList.Remove(wParam);
-            //OutputDebugString(PChar('remove DialogWndList count '+IntToStr(DialogWndList.Count)));
-          end
-          else
-          if (sClassName = 'Button') then
-          {Button}
-          begin
-            if BtnWndArrayList.ContainsKey(wParam) then
-              BtnWndArrayList.Remove(wParam);
-            //OutputDebugString(PChar('remove BtnWndArrayList count '+IntToStr(BtnWndArrayList.Count)));
-          end
-          else
-          if (sClassName = 'ScrollBar') or (sClassName = 'ReBarWindow32') {or (sClassName = 'ToolbarWindow32')} then
-          begin
-            if UnknownControlList.ContainsKey(wParam) then
-              UnknownControlList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'SysListView32') then
-          begin
-            if SysListView32WndList.ContainsKey(wParam) then
-              SysListView32WndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'ToolbarWindow32') then
-          begin
-            if ToolbarWindow32WndList.ContainsKey(wParam) then
-              ToolbarWindow32WndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'Edit') then
-          begin
-            if EditWndList.ContainsKey(wParam) then
-              EditWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'Static') then
-          begin
-            if StaticWndList.ContainsKey(wParam) then
-              StaticWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'ComboBox') then
-          begin
-            if ComboBoxWndList.ContainsKey(wParam) then
-              ComboBoxWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'tooltips_class32') then
-          begin
-            if TooltipsWndList.ContainsKey(wParam) then
-              TooltipsWndList.Remove(wParam);
-          end
-      end
-      else
-      if Code = HCBT_CREATEWND then
-        begin
-          CBTSturct := PCBTCreateWnd(lParam)^;
-          sClassName := GetWindowClassName(wParam);
-          //Addlog(sClassName);
-          //PopupMenu
-          if Integer(CBTSturct.lpcs.lpszClass) = 32768 then
-              PopupWndList.Add(wParam, TPopupWnd.Create(wParam))
-          else
-          //Dialog
-          if (Integer(CBTSturct.lpcs.lpszClass) = 32770) then
-            begin
-              if (CBTSturct.lpcs.cx <> 0) and (CBTSturct.lpcs.cy <> 0) then
-              begin
-                DialogWndList.Add(wParam, TDialogWnd.Create(wParam));
-                //Addlog('Done');
-              end;
-            end
-          else
-          if (sClassName = 'Button')  then
-          begin
-              BtnWndArrayList.Add(wParam, TButtonWnd.Create(wParam));
-              //Addlog('Done');
-          end
-          else
-          if (sClassName = 'ScrollBar') or (sClassName = 'ReBarWindow32') {or (sClassName = 'ToolbarWindow32')} then
-              UnknownControlList.Add(wParam, TUnknownControlWnd.Create(wParam))
-          else
-          if sClassName = 'SysListView32' then
-              SysListView32WndList.Add(wParam, TSysListView32Wnd.Create(wParam))
-          else
-          if sClassName = 'ToolbarWindow32' then
-            begin
-              if not UseLatestCommonDialogs then
-                ToolbarWindow32WndList.Add(wParam, TToolbarWindow32Wnd.Create(wParam));
-            end
-          else
-          if (sClassName = 'Edit')  then
-              EditWndList.Add(wParam, TEditWnd.Create(wParam))
-          else
-          if (sClassName = 'Static') then
-            begin
-              { This condition can solve the Edit animated cursor : see ColorDialog !! }
-              if (CBTSturct.lpcs.Style and SS_ICON <> SS_ICON) and
-                (CBTSturct.lpcs.Style and SS_BITMAP <> SS_BITMAP) and
-                (CBTSturct.lpcs.Style and SS_GRAYRECT <> SS_GRAYRECT) and
-                (CBTSturct.lpcs.Style and SS_GRAYFRAME <> SS_GRAYFRAME) then
-                  StaticWndList.Add(wParam, TStaticWnd.Create(wParam));
-            end
-          else
-          if (sClassName = 'ComboBox') then
-            ComboBoxWndList.Add(wParam, TComboBoxWnd.Create(wParam))
-          else
-          if (sClassName = 'tooltips_class32') then
-            TooltipsWndList.Add(wParam, TooltipsWnd.Create(wParam))
-        end
-    end;
-  Result := CallNextHookEx(FHook, Code, wParam, lParam);
-end;
-
-
-class function TThemedSysControls.HookActionCallBackWndProc(nCode: Integer;
+class function TThemedInnoControls.HookActionCallBackWndProc(nCode: Integer;
   wParam: wParam; lParam: lParam): LRESULT;
 var
   C: array [0 .. 256] of Char;
@@ -759,22 +485,29 @@ begin
       if ClassesList.ContainsKey(PCWPStruct(lParam)^.hwnd) then
       begin
         sClassName:=ClassesList[PCWPStruct(lParam)^.hwnd];
-
-        {if (SameText(sClassName,'TPanel')) then
+                              {
+        if (SameText(sClassName,'TWizardForm')) then
         Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message));
-        }
+                               }
         if SameText(sClassName,'TNewButton') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (BtnWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                BtnWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TButtonWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end {
+        end
         else
-        if SameText(sClassName,'TWizardForm')  then
+        if SameText(sClassName,'TWizardForm') or SameText(sClassName,'TSetupForm')   then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (FormWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                FormWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TFormWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end   }
+        end
         else
+        if SameText(sClassName,'TNewComboBox') then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ComboBoxWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               ComboBoxWndList.Add(PCWPStruct(lParam)^.hwnd, TComboBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
+             {
         if SameText(sClassName,'TEdit') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (EditWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
@@ -786,7 +519,7 @@ begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                StaticTextWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
-        else
+        else                      }
         if (SameText(sClassName,'TNewProgressBar')) then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ProgressBarWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
@@ -805,41 +538,32 @@ begin
     end;
 end;
 
-procedure TThemedSysControls.InstallHook;
+procedure TThemedInnoControls.InstallHook;
 begin
-  FHook_WH_CALLWNDPROC := SetWindowsHookEx(WH_CALLWNDPROC, @TThemedSysControls.HookActionCallBackWndProc, 0, GetCurrentThreadId);
-  FHook := SetWindowsHookEx(WH_CBT, @TThemedSysControls.HookActionCallBack, 0, GetCurrentThreadId);
+  FHook_WH_CALLWNDPROC := SetWindowsHookEx(WH_CALLWNDPROC, @TThemedInnoControls.HookActionCallBackWndProc, 0, GetCurrentThreadId);
 end;
 
-procedure TThemedSysControls.RemoveHook;
+procedure TThemedInnoControls.RemoveHook;
 begin
   if FHook_WH_CALLWNDPROC <> 0 then
     UnhookWindowsHookEx(FHook_WH_CALLWNDPROC);
-
-  if FHook <> 0 then
-    UnhookWindowsHookEx(FHook);
 end;
 
 
 Procedure  Done;
 begin
-if Assigned(ThemedSysControls) then
+if Assigned(ThemedInnoControls) then
   begin
-    ThemedSysControls.Free;
-    ThemedSysControls:=nil;
-    RedirectProcedure(@Winapi.Windows.InsertMenuItem, InsertMenuItemOrgPointer);
+    ThemedInnoControls.Free;
+    ThemedInnoControls:=nil;
   end;
 end;
 
 initialization
 
-  ThemedSysControls:=nil;
+  ThemedInnoControls:=nil;
   if StyleServices.Available then
-  begin
-    ThemedSysControls := TThemedSysControls.Create;
-    InsertMenuItemOrgPointer := @Winapi.Windows.InsertMenuItem;
-    RedirectProcedure(@Winapi.Windows.InsertMenuItem, @InsertMenuItemHook);
-  end;
+    ThemedInnoControls := TThemedInnoControls.Create;
 
 finalization
    Done;

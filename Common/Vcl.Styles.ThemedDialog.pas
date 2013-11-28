@@ -364,7 +364,7 @@ begin
       begin
         P.X := GET_X_LPARAM(lParam);
         P.Y := GET_Y_LPARAM(lParam);
-        P := NormalizePoint(Handle, P);
+        P := Vcl.Styles.ControlWnd.NormalizePoint(Handle, P);
         Message.Result := CallOrgWndProc(Message);
         if Message.Result = HTCLOSE then
           begin

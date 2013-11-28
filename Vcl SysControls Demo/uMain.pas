@@ -78,6 +78,7 @@ type
     OpenDialog2: TOpenDialog;
     ImageList1: TImageList;
     OpenPictureDialog1: TOpenPictureDialog;
+    Kopi235ren1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure ListBox1Click(Sender: TObject);
@@ -138,7 +139,9 @@ begin
   TaskDialog1.Caption := 'Caption Text';
   TaskDialog1.ExpandedText := 'ExpandedText ..';
   TaskDialog1.FooterText := 'FooterText..';
-  TaskDialog1.Execute;
+  TaskDialog1.Execute;  44
+
+  issue 8
 end;
 
 procedure TMain.SpeedButton11Click(Sender: TObject);

@@ -160,6 +160,9 @@ type
 
 implementation
 
+uses
+  System.Types;
+
 
 const
 {$EXTERNALSYM BS_SPLITBUTTON}
