@@ -77,8 +77,11 @@ var
   StaticTextWndList : TObjectDictionary<HWND, TStaticTextWnd>;
   EditWndList: TObjectDictionary<HWND, TEditWnd>;
   ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
+  CheckBoxWndList: TObjectDictionary<HWND, TCheckBoxTextWnd>;
   BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
-  PanelWndArrayList : TObjectDictionary<HWND, TPanelWnd>;
+  PanelWndList : TObjectDictionary<HWND, TPanelWnd>;
+  NotebookPageWndList : TObjectDictionary<HWND, TNotebookPagelWnd>;
+  NotebookWndList : TObjectDictionary<HWND, TNotebookWnd>;
   FormWndArrayList : TObjectDictionary<HWND, TFormWnd>;
   ProgressBarWndArrayList : TObjectDictionary<HWND, TProgressBarWnd>;
   ClassesList : TDictionary<HWND, string>;
@@ -87,7 +90,7 @@ var
 {$IFDEF DEBUG}
 procedure Addlog(const msg : string);
 begin
-   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',msg+sLineBreak);
+   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
 end;
 {$ENDIF}
 
@@ -102,8 +105,11 @@ begin
   StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
   EditWndList:= TObjectDictionary<HWND, TEditWnd>.Create([doOwnsValues]);
   ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
+  CheckBoxWndList:= TObjectDictionary<HWND, TCheckBoxTextWnd>.Create([doOwnsValues]);
   BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
-  PanelWndArrayList := TObjectDictionary<HWND, TPanelWnd>.Create([doOwnsValues]);
+  PanelWndList := TObjectDictionary<HWND, TPanelWnd>.Create([doOwnsValues]);
+  NotebookPageWndList := TObjectDictionary<HWND, TNotebookPagelWnd>.Create([doOwnsValues]);
+  NotebookWndList := TObjectDictionary<HWND, TNotebookWnd>.Create([doOwnsValues]);
   FormWndArrayList := TObjectDictionary<HWND, TFormWnd>.Create([doOwnsValues]);
   ProgressBarWndArrayList  := TObjectDictionary<HWND, TProgressBarWnd>.Create([doOwnsValues]);
   ClassesList := TDictionary<HWND, string>.Create;
@@ -116,11 +122,14 @@ begin
   StaticTextWndList.Free;
   EditWndList.Free;
   ComboBoxWndList.Free;
+  CheckBoxWndList.Free;
   BtnWndArrayList.Free;
-  PanelWndArrayList.Free;
+  PanelWndList.Free;
   ProgressBarWndArrayList.Free;
   FormWndArrayList.Free;
   ClassesList.Free;
+  NotebookPageWndList.Free;
+  NotebookWndList.Free;
   inherited;
 end;
 
@@ -485,10 +494,14 @@ begin
       if ClassesList.ContainsKey(PCWPStruct(lParam)^.hwnd) then
       begin
         sClassName:=ClassesList[PCWPStruct(lParam)^.hwnd];
-                              {
-        if (SameText(sClassName,'TWizardForm')) then
-        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message));
-                               }
+
+        {$IFDEF DEBUG}
+        if (SameText(sClassName,'TNewNotebook')) then
+        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
+        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
+        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) );
+        {$ENDIF}
+
         if SameText(sClassName,'TNewButton') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (BtnWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
@@ -507,32 +520,50 @@ begin
                ComboBoxWndList.Add(PCWPStruct(lParam)^.hwnd, TComboBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
+        if SameText(sClassName,'TNewCheckBox') then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (CheckBoxWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               CheckBoxWndList.Add(PCWPStruct(lParam)^.hwnd, TCheckBoxTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
+
              {
         if SameText(sClassName,'TEdit') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (EditWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                EditWndList.Add(PCWPStruct(lParam)^.hwnd, TEditWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
-        else
+        else    }
         if SameText(sClassName,'TNewStaticText') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                StaticTextWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
-        else                      }
+        else
         if (SameText(sClassName,'TNewProgressBar')) then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ProgressBarWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                ProgressBarWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TProgressBarWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
-        {
+        else
+        if (SameText(sClassName,'TNewNotebook')) then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               NotebookWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
+        if (SameText(sClassName,'TNewNotebookPage')) then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookPageWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               NotebookPageWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookPagelWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
         else
         if (SameText(sClassName,'TPanel')) then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (PanelWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               PanelWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TPanelWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (PanelWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               PanelWndList.Add(PCWPStruct(lParam)^.hwnd, TPanelWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
-          }
+
         ;
       end;
     end;

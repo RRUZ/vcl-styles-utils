@@ -12,6 +12,7 @@ DefaultDirName={pf}\The Road To Delphi
 DefaultGroupName=The Road To Delphi
 Compression=lzma
 SolidCompression=true
+WizardImageFile=compiler:WizModernImage-IS.bmp
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.bmp
 OutputDir=.\Output
 OutputBaseFilename=Setup
@@ -22,7 +23,8 @@ VersionInfoTextVersion=1, 0, 0, 0
 ;#define VCLStylesPath "{localappdata}\VCLStylesPath"
 
 [Files]
-Source: Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+;Source: Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+Source: Win32\Debug\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 Source: ..\Styles\LavenderClassico.vsf; DestDir: {app}
 Source: ..\Styles\LightGreen.vsf; DestDir: {app}
 Source: ..\Styles\lilac.vsf; DestDir: {app}

@@ -92,6 +92,7 @@ type
     constructor Create(AHandle: THandle); virtual;
     Destructor Destroy; override;
     procedure Refresh;
+    procedure Invalidate;
     procedure InvalidateNC;
     procedure SetRedraw(Value: Boolean);
     function GetParentHandle: HWND;
@@ -902,6 +903,12 @@ end;
 procedure TControlWnd.Refresh;
 begin
   SendMessage(Handle, WM_PAINT, 0, 0);
+end;
+
+procedure TControlWnd.Invalidate;
+begin
+  InvalidateNC;
+  InvalidateRect(Handle, nil, False);
 end;
 
 procedure TControlWnd.InvalidateNC;

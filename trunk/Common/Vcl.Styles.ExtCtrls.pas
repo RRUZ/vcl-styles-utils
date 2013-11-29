@@ -41,6 +41,20 @@ type
     constructor Create(AHandle: THandle); override;
   end;
 
+  TNotebookWnd = class(TControlWnd)
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+  end;
+
+  TNotebookPagelWnd = class(TControlWnd)
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+  end;
+
 implementation
 
 uses
@@ -58,110 +72,174 @@ procedure TPanelWnd.WndProc(var Message: TMessage);
 var
   uMsg: UINT;
   DC: HDC;
-  R: TRect;
   LDetails: TThemedElementDetails;
-  CSP: PNCCalcSizeParams;
+  lpPaint: TPaintStruct;
   Rect: TRect;
   LColor: TColor;
   LStyle: TCustomStyleServices;
-  TopColor, BottomColor: TColor;
-  BaseColor, BaseTopColor, BaseBottomColor: TColor;
+  BaseColor{, BaseTopColor, BaseBottomColor}: TColor;
   LCanvas:TCanvas;
-  Flags: Longint;
+//  Flags: Longint;
+//  LCaption : string;
 begin
 
   uMsg := Message.Msg;
 
   case uMsg of
 
-    WM_DESTROY:
+    WM_PAINT:
       begin
-        if FStaticBrush<>0 then
-         DeleteObject(FStaticBrush);
-        Message.Result := CallOrgWndProc(Message);
+        DC := HDC(Message.WParam);
+        LCanvas := TCanvas.Create;
+        try
+          if DC <> 0 then
+            LCanvas.Handle := DC
+          else
+            LCanvas.Handle := BeginPaint(Handle, lpPaint);
+
+          Rect := Self.ClientRect;
+
+          BaseColor :=  StyleServices.GetSystemColor(clBtnFace);
+          {
+          BaseTopColor := StyleServices.GetSystemColor(clBtnHighlight);
+          BaseBottomColor := StyleServices.GetSystemColor(clBtnShadow);
+          }
+          LStyle := StyleServices;
+
+          LDetails := LStyle.GetElementDetails(tpPanelBackground);
+          if LStyle.GetElementColor(LDetails, ecFillColor, LColor) and (LColor <> clNone) then
+            BaseColor := LColor;
+          LDetails := LStyle.GetElementDetails(tpPanelBevel);
+          {
+          if LStyle.GetElementColor(LDetails, ecEdgeHighLightColor, LColor) and (LColor <> clNone) then
+            BaseTopColor := LColor;
+          if LStyle.GetElementColor(LDetails, ecEdgeShadowColor, LColor) and (LColor <> clNone) then
+            BaseBottomColor := LColor;
+
+                   {
+          if BevelOuter <> bvNone then
+          begin
+            AdjustColors(BevelOuter);
+            Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+          end;
+          if not (LStyle.Enabled and (csParentBackground in ControlStyle)) then
+            Frame3D(Canvas, Rect, BaseColor, BaseColor, BorderWidth)
+          else
+            InflateRect(Rect, -Integer(BorderWidth), -Integer(BorderWidth));
+          if BevelInner <> bvNone then
+          begin
+            AdjustColors(BevelInner);
+            Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+          end;   }
+
+
+          with LCanvas do
+          begin
+            //if not LStyle.Enabled or not ParentBackground then
+            //begin
+              Brush.Color := BaseColor;
+              FillRect(Rect);
+            //end;
+
+//            LCaption:=Self.Text;
+//            if {FShowCaption and} (LCaption <> '') then
+//            begin
+//              Brush.Style := bsClear;
+//              Font := Self.Font;
+//              Flags := DT_EXPANDTABS or DT_SINGLELINE{ or
+//                VerticalAlignments[FVerticalAlignment] or Alignments[FAlignment]};
+//              //Flags := DrawTextBiDiModeFlags(Flags);
+//              if LStyle.Enabled then
+//              begin
+//                LDetails := LStyle.GetElementDetails(tpPanelBackground);
+//                if not LStyle.GetElementColor(LDetails, ecTextColor, LColor) or (LColor = clNone) then
+//                  LColor := Font.Color;
+//                LStyle.DrawText(Handle, LDetails, LCaption, Rect, TTextFormatFlags(Flags), LColor)
+//              end
+//              else
+//                DrawText(Handle, LCaption, -1, Rect, Flags);
+//            end;
+
+          end;
+
+          if DC = 0 then
+            EndPaint(Handle, lpPaint);
+        finally
+          LCanvas.Handle := 0;
+          LCanvas.Free;
+        end;
       end;
-
-
-    WM_CTLCOLORSTATIC :
-     begin
-        LDetails := LStyle.GetElementDetails(tpPanelBackground);
-        {
-        if LStyle.GetElementColor(LDetails, ecFillColor, LColor) and (LColor <> clNone) then
-          BaseColor := LColor;
-        }
-        BaseColor:=clRed;
-        SetBkColor(Message.WParam, BaseColor);
-
-        if FStaticBrush = 0 then
-          FStaticBrush := CreateSolidBrush(BaseColor);
-
-        Message.Result := FStaticBrush;
-//
-//        if FStaticBrush = 0 then
-//          FStaticBrush := CreateSolidBrush(sColor);
-//
-//        if IsWindowEnabled(LPARAM) then
-//          LDetails := StyleServices.GetElementDetails
-//            (TThemedTextLabel.ttlTextLabelNormal)
-//        else
-//          LDetails := StyleServices.GetElementDetails
-//            (TThemedTextLabel.ttlTextLabelDisabled);
-//
-//        StyleServices.GetElementColor(LDetails, ecTextColor, sColor);
-//
-//        { Change Static Control Text Color }
-//        SetTextColor(WPARAM, sColor);
-//        { Transparent Static BackGound }
-//        Message.Result := FStaticBrush;
-
-     end;
-//    WM_PAINT:
-//      begin
-//          LDetails := LStyle.GetElementDetails(tpPanelBackground);
-//          if LStyle.GetElementColor(LDetails, ecFillColor, LColor) and (LColor <> clNone) then
-//            BaseColor := LColor;
-//          LDetails := LStyle.GetElementDetails(tpPanelBevel);
-//          if LStyle.GetElementColor(LDetails, ecEdgeHighLightColor, LColor) and (LColor <> clNone) then
-//            BaseTopColor := LColor;
-//          if LStyle.GetElementColor(LDetails, ecEdgeShadowColor, LColor) and (LColor <> clNone) then
-//            BaseBottomColor := LColor;
-//
-//          DC := GetWindowDC(Handle);
-//          try
-//                                {
-//            if BevelOuter <> bvNone then
-//            begin
-//              AdjustColors(BevelOuter);
-//              Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
-//            end;
-//            if not (LStyle.Enabled and (csParentBackground in ControlStyle)) then
-//              Frame3D(Canvas, Rect, BaseColor, BaseColor, BorderWidth)
-//            else
-//              InflateRect(Rect, -Integer(BorderWidth), -Integer(BorderWidth));
-//            if BevelInner <> bvNone then
-//            begin
-//              AdjustColors(BevelInner);
-//              Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
-//            end;
-//                                     }
-//            LCanvas:=TCanvas.Create;
-//            try
-//              LCanvas.Handle:=DC;
-//              LCanvas.Brush.Style := bsSolid;
-//              LCanvas.Brush.Color := clred;//BaseColor;
-//              LCanvas.FillRect(ClientRect);
-//            finally
-//              LCanvas.Free;
-//            end;
-//          finally
-//             ReleaseDC(Handle, DC);
-//          end;
-//
-//      end;
 
   else
     Message.Result := CallOrgWndProc(Message);
   end;
 end;
 
+{ TNotebookPagelWnd }
+
+constructor TNotebookPagelWnd.Create(AHandle: THandle);
+var
+  brush :HBRUSH;
+begin
+  inherited;
+         brush := CreateSolidBrush(RGB(0, 0, 255));
+         SetClassLongPtr(Handle, -10, LONG(brush));
+
+end;
+
+
+procedure TNotebookPagelWnd.WndProc(var Message: TMessage);
+
+      procedure PaintBkgnd(DC: HDC; R: TRect);
+      var
+        LDetails: TThemedElementDetails;
+        ThemeElement: TThemedElement;
+      begin
+        ThemeElement := TThemedElement.teWindow;
+        LDetails := TThemedElementDetails.Create(ThemeElement, 0, 1);
+
+        StyleServices.DrawElement(DC, LDetails, R);
+      end;
+
+var
+  uMsg: UINT;
+begin
+
+  uMsg := Message.Msg;
+
+  case uMsg of
+
+    WM_ERASEBKGND:
+      begin
+        PaintBkgnd(Message.WParam, ClientRect);
+        Message.Result := 1;
+      end;
+
+  else
+    Message.Result := CallOrgWndProc(Message);
+  end;
+end;
+
+{ TNotebooklWnd }
+
+constructor TNotebookWnd.Create(AHandle: THandle);
+begin
+  inherited;
+
+end;
+
+procedure TNotebookWnd.WndProc(var Message: TMessage);
+var
+  uMsg: UINT;
+begin
+  uMsg := Message.Msg;
+  case uMsg of
+    WM_ERASEBKGND:
+      begin
+         CallOrgWndProc(Message);
+      end;
+  else
+    Message.Result := CallOrgWndProc(Message);
+  end;
+end;
 end.
