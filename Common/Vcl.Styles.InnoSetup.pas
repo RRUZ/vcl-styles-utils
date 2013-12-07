@@ -569,9 +569,7 @@ begin
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (PanelWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                PanelWndList.Add(PCWPStruct(lParam)^.hwnd, TPanelWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end
-
-        ;
+        end;
       end;
     end;
 end;
