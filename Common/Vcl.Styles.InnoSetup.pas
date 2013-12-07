@@ -605,7 +605,7 @@ begin
 //   Addlog(IntToHex(Result, 8));
 //  end
 //  else
-   Result:= StyleServices.GetSystemColor(nIndex or $FF000000);
+   Result:= StyleServices.GetSystemColor(nIndex or Integer($FF000000));
 end;
 
 Procedure  Done;
@@ -619,9 +619,6 @@ if Assigned(ThemedInnoControls) then
   InterceptRemove(@TrampolineGetSysColor,@GetSysColorHook);
   //RedirectProcedure(@GetSysColorHook, @Winapi.Windows.GetSysColor);
 end;
-
-var
-  ThemeLibrary: THandle;
 
 initialization
 
