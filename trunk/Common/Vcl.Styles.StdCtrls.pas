@@ -68,6 +68,7 @@ type
 implementation
 
 uses
+  System.UITypes,
   System.Classes;
 
 { TEditWnd }

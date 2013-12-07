@@ -757,8 +757,6 @@ const
 
 implementation
 
-//uses _uAsmProfiler;
-
 
 { TCopyInstructionProc functions used for copying instructions: }
 
@@ -983,7 +981,6 @@ end;
 function NewIntercepts:TIntercepts;
 begin
   Result := TIntercepts.Create;
-  //New(Result,Create);
   Result.FProcess := GetCurrentProcess;
 end;
 
@@ -993,7 +990,8 @@ begin
   GetMem(Result,TrampolineSize);
   TargetProc := GetFinalCode(TargetProc);
   InterceptProc := GetFinalCode(InterceptProc);
-  if not InsertIntercept(TargetProc,Result,InterceptProc) then begin
+  if not InsertIntercept(TargetProc,Result,InterceptProc) then
+  begin
     FreeMem(Result);
     Result := nil;
   end;
@@ -1043,7 +1041,8 @@ begin
   Result := False;
   P := TargetProc;
   BytesToCopy := 0;
-  while BytesToCopy < SizeOfJmp do begin
+  while BytesToCopy < SizeOfJmp do
+  begin
     { Calculate the size of the assembly instructions to be copied to the
       trampoline by dummy-copying assembly instructions until at least 5 bytes
       (SizeOfJmp) have been processed }
@@ -1210,30 +1209,23 @@ var
 begin
   if Assigned(TargetProc) and Assigned(InterceptProc) then
   begin
-    { Intercepts only work on NT based operating systems (Windows NT, 2000, XP) }
-    //if Winver >= wvNT  {= VER_PLATFORM_WIN32_NT} then begin
-      Intercepts := NewIntercepts;
-      try
-        Result := Intercepts.CreateIntercept(TargetProc,InterceptProc);
-      finally
-        Intercepts.Free;
-      end;
-    //end
-    //else
-    //  Result := nil;
+    Intercepts := NewIntercepts;
+    try
+      Result := Intercepts.CreateIntercept(TargetProc,InterceptProc);
+    finally
+      Intercepts.Free;
+    end;
   end
   else
     Result := nil;
-
-  //if Result = nil then
-  //  Raise Exception.Create('Could not intercept function!');
 end;
 
 function InterceptRemove(var Trampoline: Pointer; const InterceptProc: Pointer): Boolean;
 var
   Intercepts: TIntercepts;
 begin
-  if Assigned(Trampoline) and Assigned(InterceptProc) then begin
+  if Assigned(Trampoline) and Assigned(InterceptProc) then
+  begin
     Intercepts := NewIntercepts;
     try
       Result := Intercepts.RemoveIntercept(Trampoline,InterceptProc);
@@ -1242,7 +1234,8 @@ begin
     finally
       Intercepts.Free;
     end;
-  end else
+  end
+  else
     Result := False;
 end;
 
