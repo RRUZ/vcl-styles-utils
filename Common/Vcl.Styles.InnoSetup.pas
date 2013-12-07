@@ -40,14 +40,19 @@ implementation
 }
 
 uses
+  KOLDetours,
   Winapi.Windows,
+  Winapi.UxTheme,
   Winapi.Messages,
   System.Generics.Collections,
   System.SysUtils,
-  {$IFDEF DEBUG}System.IOUtils,{$ENDIF}
+  {$IFDEF DEBUG}
+  System.IOUtils,
+  {$ENDIF}
   Vcl.Controls,
   Vcl.Dialogs,
   Vcl.Themes,
+  Vcl.Graphics,
   Vcl.Styles.Form,
   Vcl.Styles.StdCtrls,
   Vcl.Styles.ExtCtrls,
@@ -73,9 +78,10 @@ type
     destructor Destroy; override;
   end;
 
+
 var
   StaticTextWndList : TObjectDictionary<HWND, TStaticTextWnd>;
-  EditWndList: TObjectDictionary<HWND, TEditWnd>;
+  EditWndList: TObjectDictionary<HWND, TEditTextWnd>;
   ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
   CheckBoxWndList: TObjectDictionary<HWND, TCheckBoxTextWnd>;
   BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
@@ -85,7 +91,10 @@ var
   FormWndArrayList : TObjectDictionary<HWND, TFormWnd>;
   ProgressBarWndArrayList : TObjectDictionary<HWND, TProgressBarWnd>;
   ClassesList : TDictionary<HWND, string>;
+
   ThemedInnoControls: TThemedInnoControls;
+  GetSysColorOrgPointer: Pointer = nil;
+  var TrampolineGetSysColor : function (nIndex: Integer): DWORD; stdcall;
 
 {$IFDEF DEBUG}
 procedure Addlog(const msg : string);
@@ -103,7 +112,7 @@ begin
   InstallHook;
 
   StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
-  EditWndList:= TObjectDictionary<HWND, TEditWnd>.Create([doOwnsValues]);
+  EditWndList:= TObjectDictionary<HWND, TEditTextWnd>.Create([doOwnsValues]);
   ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
   CheckBoxWndList:= TObjectDictionary<HWND, TCheckBoxTextWnd>.Create([doOwnsValues]);
   BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
@@ -496,10 +505,10 @@ begin
         sClassName:=ClassesList[PCWPStruct(lParam)^.hwnd];
 
         {$IFDEF DEBUG}
-        if (SameText(sClassName,'TNewNotebook')) then
-        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
-        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
-        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) );
+//        if (SameText(sClassName,'TEdit')) then
+//        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
+//        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
+//        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) );
         {$ENDIF}
 
         if SameText(sClassName,'TNewButton') then
@@ -526,14 +535,12 @@ begin
                CheckBoxWndList.Add(PCWPStruct(lParam)^.hwnd, TCheckBoxTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
-
-             {
         if SameText(sClassName,'TEdit') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (EditWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               EditWndList.Add(PCWPStruct(lParam)^.hwnd, TEditWnd.Create(PCWPStruct(lParam)^.hwnd));
+               EditWndList.Add(PCWPStruct(lParam)^.hwnd, TEditTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
-        else    }
+        else
         if SameText(sClassName,'TNewStaticText') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
@@ -580,6 +587,26 @@ begin
     UnhookWindowsHookEx(FHook_WH_CALLWNDPROC);
 end;
 
+{
+
+function ColorToRGB(Color: TColor): Longint;
+begin
+  if Color < 0 then
+    Result := GetSysColor(Color and $000000FF) else
+    Result := Color;
+end;
+}
+
+function GetSysColorHook(nIndex: Integer): DWORD; stdcall;
+begin
+//  if nIndex = COLOR_BTNFACE then
+//  begin
+//   Result:= StyleServices.GetSystemColor(clBtnFace);
+//   Addlog(IntToHex(Result, 8));
+//  end
+//  else
+   Result:= StyleServices.GetSystemColor(nIndex or $FF000000);
+end;
 
 Procedure  Done;
 begin
@@ -588,15 +615,25 @@ if Assigned(ThemedInnoControls) then
     ThemedInnoControls.Free;
     ThemedInnoControls:=nil;
   end;
+
+  InterceptRemove(@TrampolineGetSysColor,@GetSysColorHook);
+  //RedirectProcedure(@GetSysColorHook, @Winapi.Windows.GetSysColor);
 end;
+
+var
+  ThemeLibrary: THandle;
 
 initialization
 
   ThemedInnoControls:=nil;
   if StyleServices.Available then
-    ThemedInnoControls := TThemedInnoControls.Create;
+  begin
+   ThemedInnoControls := TThemedInnoControls.Create;
+   GetSysColorOrgPointer  := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
+   @TrampolineGetSysColor := InterceptCreate(GetSysColorOrgPointer, @GetSysColorHook);
+   //RedirectProcedure(GetSysColorOrgPointer, @GetSysColorHook);
+  end;
 
 finalization
    Done;
-
 end.

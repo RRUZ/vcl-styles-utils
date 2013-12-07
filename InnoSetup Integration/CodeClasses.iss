@@ -5,22 +5,25 @@ CreateAppDir=no
 DisableProgramGroupPage=yes
 DefaultGroupName=My Program
 UninstallDisplayIcon={app}\MyProg.exe
-OutputDir=userdocs:Inno Setup Examples Output
-
+OutputDir=.\Output
 [Files]
 Source: compiler:WizModernSmallImage.bmp; Flags: dontcopy
 Source: Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
-Source: ..\Styles\SapphireKamri.vsf; DestDir: {app}
+;Source: Win32\Debug\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+Source: ..\Styles\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
+Source: Win32\Debug\Styles\Office2007.cjstyles; DestDir: {app}
 [Code]
-// Importing the LoadVCLStyle function from VclStylesInno.DLL
+//Import the LoadVCLStyle function from VclStylesInno.DLL
 procedure LoadVCLStyle(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall';
 // Import the UnLoadVCLStyles function from VclStylesInno.DLL
 procedure UnLoadVCLStyles; external 'UnLoadVCLStyles@files:VclStylesInno.dll stdcall';
 
+
+
 function InitializeSetup(): Boolean;
 begin
-	ExtractTemporaryFile('SapphireKamri.vsf');
-	LoadVCLStyle(ExpandConstant('{tmp}\SapphireKamri.vsf'));
+	ExtractTemporaryFile('Amakrits.vsf');
+	LoadVCLStyle(ExpandConstant('{tmp}\Amakrits.vsf'));
 	Result := True;
 end;
 
