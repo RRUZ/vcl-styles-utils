@@ -33,7 +33,7 @@ uses
 
 var
   TrampolineGetSysColor:  function (nIndex: Integer): DWORD; stdcall;
-  GetSysColorOrgPointer : Pointer;
+  GetSysColorOrgPointer : Pointer = nil;
 
 function InterceptGetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
