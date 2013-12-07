@@ -1,14 +1,9 @@
 unit KOLDetours;
-//
-//       Unit: KOL detours
 //    purpose: Interception of methods, procedures and functions
 //     Author: KOL version Thaddy de Koning
-//             Original author? published first in Delphi Magazine 101.
-//  Copyright: This version ©2004, Thaddy de Koning
-//    Remarks: Freeware, use as you like.
-//             I did very little to the code, tnx to the original author.
-//             Only works for NT and higher.
-//
+//             Original author is Erik van Bilsen.
+//             Published first in Delphi Magazine 101.
+
 interface
 
 uses Windows, Sysutils;
