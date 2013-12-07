@@ -29,6 +29,8 @@ uses
   Winapi.Messages,
   Vcl.Themes,
   System.Types,
+  Vcl.Graphics,
+  Vcl.Controls,
   Vcl.Styles.ControlWnd;
 
 type
@@ -52,12 +54,21 @@ type
     constructor Create(AHandle: THandle); override;
   end;
 
+  TEditTextWnd = class(TControlWnd)
+  private
+    FBrush: TBrush;
+    FFontColor : TColor;
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
 
 implementation
 
 uses
-  System.Classes,
-  Vcl.Graphics;
+  System.Classes;
 
 { TEditWnd }
 type
@@ -347,6 +358,98 @@ begin
           LCanvas.Free;
         end;
       end;
+
+  else
+    Message.Result := CallOrgWndProc(Message);
+  end;
+end;
+
+{ TEditTextWnd }
+
+constructor TEditTextWnd.Create(AHandle: THandle);
+begin
+  inherited;
+  FBrush.Color := StyleServices.GetStyleColor(scWindow);
+  FFontColor := StyleServices.GetSystemColor(clWindowText);
+end;
+
+destructor TEditTextWnd.Destroy;
+begin
+  FBrush.Free;
+  inherited;
+end;
+
+procedure TEditTextWnd.WndProc(var Message: TMessage);
+const
+  ColorStates: array[Boolean] of TStyleColor = (scEditDisabled, scEdit);
+  FontColorStates: array[Boolean] of TStyleFont = (sfEditBoxTextDisabled, sfEditBoxTextNormal);
+
+var
+  Msg: UINT;
+  LCalcSize_Params: PNCCalcSizeParams;
+  DC: HDC;
+  LDetails: TThemedElementDetails;
+  LCanvas : TCanvas;
+  LRect: TRect;
+  lpPaint : TPaintStruct;
+begin
+  Msg := Message.Msg;
+  case Msg of
+    WM_NCCALCSIZE:
+      begin
+        LCalcSize_Params := TWMNCCalcSize(Message).CalcSize_Params;
+        Inc(LCalcSize_Params^.rgrc[0].Left, 2);
+        Inc(LCalcSize_Params^.rgrc[0].Top, 2);
+        Dec(LCalcSize_Params^.rgrc[0].Right, 2);
+        Dec(LCalcSize_Params^.rgrc[0].Bottom, 2);
+      end;
+
+    WM_NCPAINT:
+      begin
+        DC := HDC(Message.WParam);
+        LCanvas := TCanvas.Create;
+        try
+          if DC <> 0 then
+            LCanvas.Handle := DC
+          else
+            LCanvas.Handle := BeginPaint(Handle, lpPaint);
+
+          LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
+          LRect := Rect(0, 0, Width, Height);
+          InflateRect(LRect, -2, -2);
+          ExcludeClipRect(LCanvas.Handle, LRect.Left, LRect.Top, LRect.Right, LRect.Bottom);
+          StyleServices.DrawElement(LCanvas.Handle, LDetails, Rect(0, 0, Width, Height));
+
+          if DC = 0 then
+            EndPaint(Handle, lpPaint);
+        finally
+          LCanvas.Handle := 0;
+          LCanvas.Free;
+        end;
+      end;
+           {
+    WM_CTLCOLORSTATIC :
+      begin
+        FBrush.Color := StyleServices.GetStyleColor(ColorStates[Enabled]);
+        FFontColor := StyleServices.GetStyleFontColor(FontColorStates[Enabled]);
+
+        SetTextColor(Message.WParam, ColorToRGB(FFontColor));
+        SetBkColor(Message.WParam, ColorToRGB(FBrush.Color));
+        Message.Result := LRESULT(FBrush.Handle);
+      end
+      }
+
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+      begin
+        SetTextColor(Message.WParam, ColorToRGB(FontColor));
+        SetBkColor(Message.WParam, ColorToRGB(FBrush.Color));
+        Message.Result := LRESULT(FBrush.Handle);
+      end;
+    CM_ENABLEDCHANGED:
+      begin
+        FBrush.Color := StyleServices.GetStyleColor(ColorStates[Enabled]);
+        FFontColor := StyleServices.GetStyleFontColor(FontColorStates[Enabled]);
+      end
 
   else
     Message.Result := CallOrgWndProc(Message);

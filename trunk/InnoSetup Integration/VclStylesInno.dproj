@@ -46,6 +46,14 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<VerInfo_Build>12</VerInfo_Build>
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.1.1.12;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<Manifest_File>None</Manifest_File>
+			<VerInfo_Release>1</VerInfo_Release>
+			<VerInfo_MajorVer>0</VerInfo_MajorVer>
+			<VerInfo_MinorVer>1</VerInfo_MinorVer>
 			<DCC_UsePackage>bindcompfmx;fmx;rtl;dbrtl;IndySystem;DbxClientDriver;bindcomp;inetdb;DBXInterBaseDriver;DataSnapClient;DataSnapCommon;DataSnapServer;DataSnapProviderClient;xmlrtl;DbxCommonDriver;IndyProtocols;DBXMySQLDriver;dbxcds;soaprtl;bindengine;DBXOracleDriver;CustomIPTransport;dsnap;DBXInformixDriver;fmxase;IndyCore;DBXFirebirdDriver;inet;fmxobj;inetdbxpress;DBXSybaseASADriver;fmxdae;IPIndyImpl;dbexpress;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<GenDll>true</GenDll>
@@ -75,6 +83,11 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<Manifest_File>None</Manifest_File>
 			<DCC_MapFile>3</DCC_MapFile>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
@@ -85,6 +98,11 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+			<VerInfo_Build>3</VerInfo_Build>
+			<VerInfo_MinorVer>1</VerInfo_MinorVer>
+			<VerInfo_MajorVer>0</VerInfo_MajorVer>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.1.2.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Release>2</VerInfo_Release>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>1033</VerInfo_Locale>
@@ -93,6 +111,7 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="..\Common\Vcl.Styles.InnoSetup.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ButtonWnd.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ComboBoxWnd.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ControlWnd.pas"/>
@@ -101,7 +120,6 @@
 			<DCCReference Include="..\Common\Vcl.Styles.PopupWnd.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ScrollBarWnd.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.StaticWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.InnoSetup.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ExtCtrls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.StdCtrls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ComCtrls.pas"/>
@@ -114,6 +132,7 @@
 				<Form>/Vcl.Styles.SysControls in &apos;..\Common\Vcl.Styles.SysControls.pas&apos;;</Form>
 			</DCCReference>
 			<DCCReference Include="..\Common\Vcl.Styles.SysControls.pas"/>
+			<DCCReference Include="..\Common\KOLDetours.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -186,11 +205,6 @@
 [Exception Log]
 EurekaLog Version=7001
 Activate=0
-DeleteMapAfterCompile=0
+DeleteMapAfterCompile=1
 Encrypt Password=""
-idEurekaLog=1
-idEurekaLogDetailed=1
-idMSClassic=1
-idStepsToReproduce=1
-ProjectID="{55E0AFBB-FBF6-4A74-BBF5-37F435302299}"
 EurekaLog Last Line -->

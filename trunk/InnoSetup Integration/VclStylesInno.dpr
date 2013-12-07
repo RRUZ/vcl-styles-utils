@@ -7,9 +7,10 @@ library VclStylesInno;
 
 uses
   System.SysUtils,
-  Vcl.Dialogs,
   Vcl.Themes,
   Vcl.Styles,
+  Vcl.Dialogs,
+  Vcl.Styles.InnoSetup in '..\Common\Vcl.Styles.InnoSetup.pas',
   Vcl.Styles.ButtonWnd in '..\Common\Vcl.Styles.ButtonWnd.pas',
   Vcl.Styles.ComboBoxWnd in '..\Common\Vcl.Styles.ComboBoxWnd.pas',
   Vcl.Styles.ControlWnd in '..\Common\Vcl.Styles.ControlWnd.pas',
@@ -18,7 +19,6 @@ uses
   Vcl.Styles.PopupWnd in '..\Common\Vcl.Styles.PopupWnd.pas',
   Vcl.Styles.ScrollBarWnd in '..\Common\Vcl.Styles.ScrollBarWnd.pas',
   Vcl.Styles.StaticWnd in '..\Common\Vcl.Styles.StaticWnd.pas',
-  Vcl.Styles.InnoSetup in '..\Common\Vcl.Styles.InnoSetup.pas',
   Vcl.Styles.ExtCtrls in '..\Common\Vcl.Styles.ExtCtrls.pas',
   Vcl.Styles.StdCtrls in '..\Common\Vcl.Styles.StdCtrls.pas',
   Vcl.Styles.ComCtrls in '..\Common\Vcl.Styles.ComCtrls.pas',
@@ -27,8 +27,9 @@ uses
   Vcl.Styles.ThemedDialog in '..\Common\Vcl.Styles.ThemedDialog.pas',
   Vcl.Styles.ToolbarWindow32Wnd in '..\Common\Vcl.Styles.ToolbarWindow32Wnd.pas',
   Vcl.Styles.ToolTipsWnd in '..\Common\Vcl.Styles.ToolTipsWnd.pas',
-  Vcl.Styles.UnknownControlWnd in '..\Common\Vcl.Styles.UnknownControlWnd.pas',
-  Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas';
+  Vcl.Styles.UnknownControlWnd in '..\Common\Vcl.Styles.UnknownControlWnd.pas' {/Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas';},
+  Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas',
+  KOLDetours in '..\Common\KOLDetours.pas';
 
 {$R *.res}
 
