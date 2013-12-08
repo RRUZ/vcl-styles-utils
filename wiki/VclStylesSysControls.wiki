@@ -1,0 +1,12 @@
+#summary Vcl.Styles.SysControls
+
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.SysControls.pas">Vcl.Styles.SysControls</a>  unit add support for the VCL Styles to the Standard Windows dialogs and Menus.
+
+
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/dialog_full.png
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/10.png
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/11.png
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/12.png
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/13.png
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/14.png
