@@ -1,0 +1,6 @@
+#summary Vcl.Styles.Preview.
+
+The TVclStylesPreview Component included in the Vcl.Styles.Ext unit allow you preview a VCL Style. 
+
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/VCLStyles_Previewer.png
