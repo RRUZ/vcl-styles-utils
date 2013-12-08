@@ -1,0 +1,10 @@
+#summary Vcl.Styles.FormStyleHooks.
+
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.FormStyleHooks.pas</a> unit introduces a set of new style hook to customize the background and non client area of a form, more info can be found in this article http://theroadtodelphi.wordpress.com/2012/03/26/vcl-styles-adding-background-images-and-colors-to-delphi-forms/
+
+=Screenshots=
+
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/backimage1.png
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/backimage2.png
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/ncbackimage2.png
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/ncimage1.png
