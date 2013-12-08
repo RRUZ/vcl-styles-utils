@@ -41,3 +41,10 @@ end;
 And this is the result after of apply the above code 
 
 http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/CarbonSimple_After.png
+
+=Additional Screenshots=
+
+
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerBlend.png
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerHSL.png
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerRGB.png
