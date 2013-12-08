@@ -1,0 +1,5 @@
+#summary Vcl.Styles.Fixes.
+
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Fixes.pas">Vcl.Styles.Fixes</a> unit includes a set of fixes for QC reports #103708, #107764, #108678, #108875.
+
+
