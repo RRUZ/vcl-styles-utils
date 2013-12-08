@@ -1,6 +1,6 @@
 #summary Vcl.Styles.Hook.
 
-The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit, patch some WinApi functions to fix the background and highlight color of some VCL components.
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit, patch some !WinApi functions to fix the background and highlight color of some VCL components.
 
 = Screenshots =
 
