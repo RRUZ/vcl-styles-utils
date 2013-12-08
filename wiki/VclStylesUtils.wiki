@@ -1,13 +1,43 @@
 #summary Vcl.Styles.Utils.
 
-= Introduction =
+The _Vcl.Styles.Utils_ unit contain classes to modify existing styles using color operations like Blend, HSL and RGB.
 
-Add your content here.
+Check this form with the _Carbon_ style applied.
 
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/CarbonSimple.png
 
-= Details =
+{{{
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+//This code shows how you can add a Overlay blend effect to an existing vcl style
+//and then apply the changes in run-time.
+procedure TFrmMain.FormCreate(Sender: TObject);
+var
+  VclStylesUtils : TVclStylesUtils;
+  Filters        : TObjectList<TBitmapFilter>;
+begin
+  //create the instance to the  TVclStylesUtils using the carbon vcl style
+  VclStylesUtils:=TVclStylesUtils.Create('Carbon');
+  //create the filter list to apply
+  Filters:=TObjectList<TBitmapFilter>.Create;
+  try
+    //create a TBitmap32BlendOverlay filter and add to the list
+    Filters.Add(TBitmap32BlendOverlay.Create(clYellow));
+    //set the elements to be affected
+    VclStylesUtils.Elements:=VclStylesUtils.Elements+ [vseBitmaps ,vseSysColors, vseStyleColors];
+    //set the filters
+    VclStylesUtils.SetFilters(Filters);
+    //Apply the changes to the style
+    VclStylesUtils.ApplyChanges;
+    //reload the modified style
+    TStyleManager.ReloadStyle('Carbon');
+  finally
+    VclStylesUtils.Free;
+    Filters.Free;
+  end;
+end;
+
+}}}
+
+And this is the result after of apply the above code 
+
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/CarbonSimple_After.png
