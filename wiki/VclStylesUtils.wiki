@@ -48,3 +48,8 @@ http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/CarbonSimple_After.png
 http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerBlend.png
 http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerHSL.png
 http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerRGB.png
+
+=Videos=
+
+<wiki:video url="http://www.youtube.com/watch?v=MxT1LR-JtvY"/>
+<wiki:video url="http://www.youtube.com/watch?v=zmQuC74zaKk"/>
