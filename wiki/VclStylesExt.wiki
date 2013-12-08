@@ -1,4 +1,4 @@
-#Vcl.Styles.Ext.
+#summary Vcl.Styles.Ext.
 
 
   The _Vcl.Styles.Ext_ unit which extend the [http://docwiki.embarcadero.com/VCL/en/Themes.TStyleManager TStyleManager] Delphi class adding new properties and methods to list, remove and reload the vcl styles. The extension of the TStyleManager class was made using class helpers, because that only you must add the _Vcl.Styles.Ext_ unit to your project to start to use it.
