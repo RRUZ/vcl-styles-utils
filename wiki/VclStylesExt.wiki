@@ -1,0 +1,24 @@
+#Vcl.Styles.Ext.
+
+
+  The _Vcl.Styles.Ext_ unit which extend the [http://docwiki.embarcadero.com/VCL/en/Themes.TStyleManager TStyleManager] Delphi class adding new properties and methods to list, remove and reload the vcl styles. The extension of the TStyleManager class was made using class helpers, because that only you must add the _Vcl.Styles.Ext_ unit to your project to start to use it.
+
+
+Example to remove a vcl style
+
+{{{
+ TStyleManager.RemoveStyle('Carbon');
+}}}
+
+
+
+This unit also a define a new class called _TCustomStyleExt_ that descends of the [http://docwiki.embarcadero.com/VCL/en/Vcl.Styles.TCustomStyle TCustomStyle] and allow you to access to the RAW data of the vcl styles like bitmaps, fonts and colors.
+
+For example you can modify the vcl styles colors in this way
+
+{{{  
+  TCustomStyleExt(TStyleManager.ActiveStyle).SetStyleColor(scEdit, clRed);
+  TCustomStyleExt(TStyleManager.Style[StyleName]).SetSystemColor(clBtnFace,clLime);
+  TCustomStyleExt(TStyleManager.Style[StyleName]).SetStyleColor(scBorder, clBlue);
+  TCustomStyleExt(TStyleManager.Style[StyleName]).SetStyleFontColor(sfButtonTextNormal, clYellow);
+}}}
