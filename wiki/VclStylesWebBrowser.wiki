@@ -1,6 +1,6 @@
 #summary Vcl.Styles.WebBrowser.
 
-The Vcl.Styles.WebBrowser unit includes a VCL Style hook to enable the VCL Styles in the TWebBrowser component, more info can be found in this article http://theroadtodelphi.wordpress.com/2012/03/20/delphi-vcl-styles-and-twebbrowser-source-code-released/
+The Vcl.Styles.!WebBrowser unit includes a VCL Style hook to enable the VCL Styles in the TWebBrowser component, more info can be found in this article http://theroadtodelphi.wordpress.com/2012/03/20/delphi-vcl-styles-and-twebbrowser-source-code-released/
 
 
 http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/twbscrollbars.png
