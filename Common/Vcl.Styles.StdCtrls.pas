@@ -31,6 +31,7 @@ uses
   System.Types,
   Vcl.Graphics,
   Vcl.Controls,
+  Vcl.Styles.ScrollBarWnd,
   Vcl.Styles.ControlWnd;
 
 type
@@ -65,9 +66,35 @@ type
     destructor Destroy; override;
   end;
 
+  TMemoWnd = class(TScrollBarWnd)
+  private
+    FBrush: TBrush;
+    FFontColor : TColor;
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
+
+  TListBoxWnd = class(TScrollBarWnd)
+  private
+    FBrush: TBrush;
+    FFontColor : TColor;
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
+
 implementation
 
 uses
+  {$IFDEF DEBUG}
+  System.IOUtils,
+  System.SysUtils,
+  {$ENDIF}
   System.UITypes,
   System.Classes;
 
@@ -113,6 +140,8 @@ begin
   inherited Create(AHandle);
   FStaticBrush := 0;
 end;
+
+
 
 procedure TStaticTextWnd.WndProc(var Message: TMessage);
 const
@@ -217,7 +246,7 @@ end;
 
 constructor TCheckBoxTextWnd.Create(AHandle: THandle);
 begin
-  inherited;
+  inherited Create(AHandle);
   FPressed:=False;
 end;
 
@@ -365,11 +394,13 @@ begin
   end;
 end;
 
+
 { TEditTextWnd }
 
 constructor TEditTextWnd.Create(AHandle: THandle);
 begin
-  inherited;
+  inherited Create(AHandle);
+  FBrush:=TBrush.Create;
   FBrush.Color := StyleServices.GetStyleColor(scWindow);
   FFontColor := StyleServices.GetSystemColor(clWindowText);
 end;
@@ -396,6 +427,13 @@ var
 begin
   Msg := Message.Msg;
   case Msg of
+    WM_CREATE:
+      begin
+        Message.Result := CallOrgWndProc(Message);
+        FBrush.Color := StyleServices.GetStyleColor(ColorStates[Self.Enabled]);
+        FFontColor := StyleServices.GetStyleFontColor(FontColorStates[Enabled]);
+      end;
+
     WM_NCCALCSIZE:
       begin
         LCalcSize_Params := TWMNCCalcSize(Message).CalcSize_Params;
@@ -407,38 +445,161 @@ begin
 
     WM_NCPAINT:
       begin
-        DC := HDC(Message.WParam);
         LCanvas := TCanvas.Create;
         try
-          if DC <> 0 then
-            LCanvas.Handle := DC
-          else
-            LCanvas.Handle := BeginPaint(Handle, lpPaint);
-
+          LCanvas.Handle := GetWindowDC(Handle);
           LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
           LRect := Rect(0, 0, Width, Height);
           InflateRect(LRect, -2, -2);
           ExcludeClipRect(LCanvas.Handle, LRect.Left, LRect.Top, LRect.Right, LRect.Bottom);
           StyleServices.DrawElement(LCanvas.Handle, LDetails, Rect(0, 0, Width, Height));
-
-          if DC = 0 then
-            EndPaint(Handle, lpPaint);
         finally
+          ReleaseDC(Handle, LCanvas.Handle);
           LCanvas.Handle := 0;
           LCanvas.Free;
         end;
-      end;
-           {
-    WM_CTLCOLORSTATIC :
-      begin
-        FBrush.Color := StyleServices.GetStyleColor(ColorStates[Enabled]);
-        FFontColor := StyleServices.GetStyleFontColor(FontColorStates[Enabled]);
 
+      end;
+
+    WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC:
+      with Message do
+        Result := SendMessage(LParam, CN_BASE + Msg, WParam, LParam);
+
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+      begin
         SetTextColor(Message.WParam, ColorToRGB(FFontColor));
         SetBkColor(Message.WParam, ColorToRGB(FBrush.Color));
         Message.Result := LRESULT(FBrush.Handle);
-      end
-      }
+      end;
+
+  else
+    Message.Result := CallOrgWndProc(Message);
+  end;
+end;
+
+{ TMemoWnd }
+
+constructor TMemoWnd.Create(AHandle: THandle);
+begin
+  inherited ;
+  FBrush:=TBrush.Create;
+  FBrush.Color := StyleServices.GetStyleColor(scWindow);
+  FFontColor := StyleServices.GetSystemColor(clWindowText);
+end;
+
+destructor TMemoWnd.Destroy;
+begin
+  FBrush.Free;
+  inherited;
+end;
+
+procedure TMemoWnd.WndProc(var Message: TMessage);
+const
+  ColorStates: array[Boolean] of TStyleColor = (scEditDisabled, scEdit);
+  FontColorStates: array[Boolean] of TStyleFont = (sfEditBoxTextDisabled, sfEditBoxTextNormal);
+
+var
+  Msg: UINT;
+  LCalcSize_Params: PNCCalcSizeParams;
+  DC: HDC;
+  LDetails: TThemedElementDetails;
+  LCanvas : TCanvas;
+  LRect: TRect;
+  lpPaint : TPaintStruct;
+begin
+  Msg := Message.Msg;
+  case Msg of
+    WM_CREATE:
+      begin
+        Message.Result := CallOrgWndProc(Message);
+        FBrush.Color := StyleServices.GetStyleColor(ColorStates[Self.Enabled]);
+        FFontColor := StyleServices.GetStyleFontColor(FontColorStates[Enabled]);
+      end;
+
+    WM_NCCALCSIZE:
+      begin
+        LCalcSize_Params := TWMNCCalcSize(Message).CalcSize_Params;
+        Inc(LCalcSize_Params^.rgrc[0].Left, 2);
+        Inc(LCalcSize_Params^.rgrc[0].Top, 2);
+        Dec(LCalcSize_Params^.rgrc[0].Right, 2);
+        Dec(LCalcSize_Params^.rgrc[0].Bottom, 2);
+      end;
+
+    WM_NCPAINT:
+      begin
+        LCanvas := TCanvas.Create;
+        try
+          LCanvas.Handle := GetWindowDC(Handle);
+          LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
+          LRect := Rect(0, 0, Width, Height);
+          InflateRect(LRect, -2, -2);
+          ExcludeClipRect(LCanvas.Handle, LRect.Left, LRect.Top, LRect.Right, LRect.Bottom);
+          StyleServices.DrawElement(LCanvas.Handle, LDetails, Rect(0, 0, Width, Height));
+        finally
+          ReleaseDC(Handle, LCanvas.Handle);
+          LCanvas.Handle := 0;
+          LCanvas.Free;
+        end;
+
+      end;
+
+    WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC:
+      with Message do
+        Result := SendMessage(LParam, CN_BASE + Msg, WParam, LParam);
+
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
+      begin
+        SetTextColor(Message.WParam, ColorToRGB(FFontColor));
+        SetBkColor(Message.WParam, ColorToRGB(FBrush.Color));
+        Message.Result := LRESULT(FBrush.Handle);
+      end;
+
+  else
+      Inherited;
+      //Message.Result := CallOrgWndProc(Message);
+  end;
+end;
+
+{ TListBoxWnd }
+
+{$IFDEF DEBUG}
+procedure Addlog(const msg : string);
+begin
+   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+end;
+{$ENDIF}
+
+
+constructor TListBoxWnd.Create(AHandle: THandle);
+begin
+  inherited ;
+  FBrush:=TBrush.Create;
+  FBrush.Color := StyleServices.GetStyleColor(scListBox);
+  FFontColor := StyleServices.GetStyleFontColor(sfListItemTextNormal);
+  Addlog('TListBoxWnd Create');
+end;
+
+destructor TListBoxWnd.Destroy;
+begin
+  FBrush.Free;
+  inherited;
+end;
+
+procedure TListBoxWnd.WndProc(var Message: TMessage);
+const
+  ColorStates: array[Boolean] of TStyleColor = (scListBoxDisabled, scListBox);
+  FontColorStates: array[Boolean] of TStyleFont = (sfListItemTextDisabled, sfListItemTextNormal);
+var
+  Msg: UINT;
+begin
+  Addlog('TListBoxWnd WndProc');
+  Msg := Message.Msg;
+  case Msg of
+
+    WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC:
+      with Message do
+        Result := SendMessage(LParam, CN_BASE + Msg, WParam, LParam);
+
 
     CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
       begin
@@ -446,14 +607,28 @@ begin
         SetBkColor(Message.WParam, ColorToRGB(FBrush.Color));
         Message.Result := LRESULT(FBrush.Handle);
       end;
+
     CM_ENABLEDCHANGED:
       begin
-        FBrush.Color := StyleServices.GetStyleColor(ColorStates[Enabled]);
-        FFontColor := StyleServices.GetStyleFontColor(FontColorStates[Enabled]);
+        FBrush.Color := StyleServices.GetStyleColor(ColorStates[Self.Enabled]);
+        FFontColor := StyleServices.GetStyleFontColor(FontColorStates[Self.Enabled]);
+      end;
+
+    WM_SETFOCUS,
+    WM_KILLFOCUS:
+      begin
+        CallOrgWndProc(Message);
+        RedrawWindow(Handle, nil, 0, RDW_INVALIDATE or RDW_UPDATENOW);
+      end;
+
+    WM_ERASEBKGND :
+      begin
+          Message.Result:=1;
       end
 
   else
-    Message.Result := CallOrgWndProc(Message);
+      Inherited WndProc(Message);
+      //Message.Result := CallOrgWndProc(Message);
   end;
 end;
 

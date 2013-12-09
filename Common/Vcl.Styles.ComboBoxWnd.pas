@@ -39,7 +39,7 @@ uses
   Vcl.Styles.ControlWnd;
 
 type
-  TListBoxWnd = class(TControlWnd)
+  TComboListBoxWnd = class(TControlWnd)
   protected
     procedure WndProc(var Message: TMessage); override;
   end;
@@ -52,7 +52,7 @@ type
     FStaticBrush: HBRUSH;
     FEditBrush: HBRUSH;
     FListBoxHandle: THandle;
-    FListBoxWnd: TListBoxWnd;
+    FListBoxWnd: TComboListBoxWnd;
     FMouseOnButton: Boolean;
     FListHandle: HWND;
     FEditHandle: HWND;
@@ -559,7 +559,7 @@ end;
 
 { TListBoxWnd }
 
-procedure TListBoxWnd.WndProc(var Message: TMessage);
+procedure TComboListBoxWnd.WndProc(var Message: TMessage);
 var
   uMsg: UINT;
 begin
