@@ -30,12 +30,15 @@ Procedure  Done;
 implementation
 
 {
-  TNewEdit = class(TEdit)
+  TNewEdit = class(TEdit)            ok
+  TEdit                              ok
+  TPasswordEdit                      ok
   TNewMemo = class(TMemo)
   TNewComboBox = class(TComboBox)    ok
   TNewListBox = class(TListBox)
+  TListBox
   TNewButton = class(TButton)        ok
-  TNewCheckBox = class(TCheckBox)
+  TNewCheckBox = class(TCheckBox)    ok
   TNewRadioButton = class(TRadioButton)
 }
 
@@ -57,9 +60,6 @@ uses
   Vcl.Styles.StdCtrls,
   Vcl.Styles.ExtCtrls,
   Vcl.Styles.ComCtrls,
-
-  Vcl.Styles.EditWnd,
-  Vcl.Styles.StaticWnd,
   Vcl.Styles.ComboBoxWnd,
   Vcl.Styles.ButtonWnd;
 
@@ -82,6 +82,8 @@ type
 var
   StaticTextWndList : TObjectDictionary<HWND, TStaticTextWnd>;
   EditWndList: TObjectDictionary<HWND, TEditTextWnd>;
+  MemoWndList: TObjectDictionary<HWND, TMemoWnd>;
+  ListBoxWndList: TObjectDictionary<HWND, Vcl.Styles.StdCtrls.TListBoxWnd>;
   ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
   CheckBoxWndList: TObjectDictionary<HWND, TCheckBoxTextWnd>;
   BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
@@ -113,6 +115,8 @@ begin
 
   StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
   EditWndList:= TObjectDictionary<HWND, TEditTextWnd>.Create([doOwnsValues]);
+  MemoWndList:= TObjectDictionary<HWND, TMemoWnd>.Create([doOwnsValues]);
+  ListBoxWndList:= TObjectDictionary<HWND, Vcl.Styles.StdCtrls.TListBoxWnd>.Create([doOwnsValues]);
   ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
   CheckBoxWndList:= TObjectDictionary<HWND, TCheckBoxTextWnd>.Create([doOwnsValues]);
   BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
@@ -130,6 +134,8 @@ begin
 
   StaticTextWndList.Free;
   EditWndList.Free;
+  MemoWndList.Free;
+  ListBoxWndList.Free;
   ComboBoxWndList.Free;
   CheckBoxWndList.Free;
   BtnWndArrayList.Free;
@@ -497,6 +503,7 @@ begin
       if not ClassesList.ContainsKey(PCWPStruct(lParam)^.hwnd) then
       begin
         GetClassName(PCWPStruct(lParam)^.hwnd, C, 256);
+        //Addlog('GetClassName ' + C);
         ClassesList.Add(PCWPStruct(lParam)^.hwnd, C);
       end;
 
@@ -508,7 +515,10 @@ begin
 //        if (SameText(sClassName,'TEdit')) then
 //        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
 //        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
-//        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) );
+//        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
+//        ' hwnd : '+ IntToHex(PCWPStruct(lParam)^.hwnd, 8) +
+//        ' WNDPROC : ' + IntToHex(GetWindowLongPtr(PCWPStruct(lParam)^.hwnd, GWL_WNDPROC), 8 )
+//        );
         {$ENDIF}
 
         if SameText(sClassName,'TNewButton') then
@@ -535,10 +545,22 @@ begin
                CheckBoxWndList.Add(PCWPStruct(lParam)^.hwnd, TCheckBoxTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
-        if SameText(sClassName,'TEdit') then
+        if SameText(sClassName,'TEdit') or SameText(sClassName,'TNewEdit')  or SameText(sClassName,'TPasswordEdit')  then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (EditWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                EditWndList.Add(PCWPStruct(lParam)^.hwnd, TEditTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
+        if SameText(sClassName,'TNewMemo') or SameText(sClassName,'TMemo')  then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (MemoWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               MemoWndList.Add(PCWPStruct(lParam)^.hwnd, TMemoWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
+        if SameText(sClassName,'TNewListBox') or SameText(sClassName,'TListBox') then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ListBoxWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               ListBoxWndList.Add(PCWPStruct(lParam)^.hwnd, Vcl.Styles.StdCtrls.TListBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewStaticText') then

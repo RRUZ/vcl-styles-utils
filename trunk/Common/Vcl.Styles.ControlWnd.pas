@@ -64,6 +64,8 @@ type
     EditBrush: HBRUSH;
     StaticBrush: HBRUSH;
     FFont : TFont;
+    FClassName: String;
+
     function GetClientRect: TRect;
     function GetText: String;
     function GetParentClassName: String;
@@ -162,6 +164,9 @@ type
 implementation
 
 uses
+  {$IFDEF DEBUG}
+  System.IOUtils,
+  {$ENDIF}
   System.Types;
 
 
@@ -680,15 +685,27 @@ begin
     Message.lParam);
 end;
 
+{$IFDEF DEBUG}
+//procedure Addlog(const msg : string);
+//begin
+//   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+//end;
+{$ENDIF}
+
 constructor TControlWnd.Create(AHandle: THandle);
 begin
+  FClassName:='';
   { Save the original WndProc }
-  FOldProc := Pointer(GetWindowLongPtr(AHandle, GWL_WNDPROC));
-  FProcInstance := MakeObjectInstance(WndProc);
   FHandle := AHandle;
+  //Addlog(Format('Handle %x', [ FHandle]));
+  FOldProc := Pointer(GetWindowLongPtr(AHandle, GWL_WNDPROC));
+  //Addlog(Format('%s OldProc %s', [ClassNameNative, InttoHex( Integer(FOldProc),8)]));
+  FProcInstance := MakeObjectInstance(WndProc);
+  //Addlog(Format('%s FProcInstance %s', [ClassNameNative, InttoHex( Integer(FProcInstance),8)]));
   FParentHandle := GetParent(FHandle);
   { Changing Window WndProc }
   SetWindowLongPtr(FHandle, GWL_WNDPROC, LONG_PTR(FProcInstance));
+  //Addlog(Format('%s GetWindowLongPtr %s', [ClassNameNative, IntToHex(GetWindowLongPtr(AHandle, GWL_WNDPROC), 8 )]));
   EditBrush := 0;
   StaticBrush := 0;
   FFont := nil;
@@ -777,7 +794,10 @@ end;
 
 function TControlWnd.GetClassName: String;
 begin
-  Result := GetWindowClassName(Handle);
+ if FClassName='' then
+  FClassName := GetWindowClassName(Handle);
+
+  Result:=FClassName;
 end;
 
 function TControlWnd.GetParentClassName: String;

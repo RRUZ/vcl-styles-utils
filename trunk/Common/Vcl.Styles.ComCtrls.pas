@@ -29,7 +29,9 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   Vcl.Themes,
+  Vcl.Graphics,
   System.Types,
+  Vcl.Styles.ScrollBarWnd,
   Vcl.Styles.ControlWnd;
 
 type
@@ -56,12 +58,22 @@ type
     constructor Create(AHandle: THandle); override;
   end;
 
+  TTreeViewWnd = class(TScrollBarWnd)
+  private
+    FBrush: TBrush;
+    FFontColor : TColor;
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
+
+
 implementation
 
 uses
-  Vcl.Graphics,
   System.SysUtils,
-  //System.IOUtils,
   Winapi.CommCtrl;
 
 { TEditWnd }
@@ -198,6 +210,52 @@ begin
       end;
   else
     Message.Result := CallOrgWndProc(Message);
+  end;
+end;
+
+{ TTreeViewWnd }
+
+constructor TTreeViewWnd.Create(AHandle: THandle);
+var
+  LColor: TColor;
+begin
+  inherited;
+  FBrush:=TBrush.Create;
+  if not StyleServices.GetElementColor(StyleServices.GetElementDetails(ttItemNormal), ecTextColor, LColor) or (LColor = clNone) then
+    LColor := StyleServices.GetSystemColor(clWindowText);
+  FFontColor := LColor;
+  FBrush.Color := StyleServices.GetStyleColor(scTreeView);
+end;
+
+destructor TTreeViewWnd.Destroy;
+begin
+  FBrush.Free;
+  inherited;
+end;
+
+procedure TTreeViewWnd.WndProc(var Message: TMessage);
+var
+  SF: TScrollInfo;
+  Msg: UINT;
+begin
+  Msg := Message.Msg;
+  case Msg of
+    TVM_SETBKCOLOR :
+      begin
+         Message.LParam := LPARAM(ColorToRGB(FBrush.Color));
+      end;
+    TVM_SETTEXTCOLOR :
+      begin
+        Message.LParam := LPARAM(ColorToRGB(FFontColor));
+      end;
+
+    WM_ERASEBKGND:
+      begin
+        Message.Result := 1;
+      end;
+  else
+      Inherited WndProc(Message);
+      //Message.Result := CallOrgWndProc(Message);
   end;
 end;
 
