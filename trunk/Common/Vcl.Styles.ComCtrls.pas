@@ -73,10 +73,17 @@ type
 implementation
 
 uses
-  System.SysUtils,
-  Winapi.CommCtrl;
+  System.UITypes;
 
-{ TEditWnd }
+const
+  PBS_SMOOTH              = 01;
+  PBS_VERTICAL            = 04;
+  PBM_GETRANGE            = WM_USER+7;
+  PBM_GETPOS              = WM_USER+8;
+
+  TV_FIRST                = $1100;      { TreeView messages }
+  TVM_SETBKCOLOR          = TV_FIRST + 29;
+  TVM_SETTEXTCOLOR        = TV_FIRST + 30;
 
 constructor TProgressBarWnd.Create(AHandle: THandle);
 begin
@@ -126,17 +133,11 @@ begin
   Result := SendMessage(Handle, PBM_GETPOS, 0, 0);
 end;
 
-   {
-procedure Addlog(const msg : string);
-begin
-   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',msg+sLineBreak);
-end;
-   }
 procedure TProgressBarWnd.WndProc(var Message: TMessage);
 var
   DC: HDC;
   LDetails: TThemedElementDetails;
-  W, LPos : Integer;
+  LWidth, LPos : Integer;
   LRect, FillR  : TRect;
   LCanvas: TCanvas;
   lpPaint: TPaintStruct;
@@ -163,23 +164,16 @@ begin
           else
             LDetails := StyleServices.GetElementDetails(tpBarVert);
 
-          //Addlog(Format('Frame R  Width %d Height %d',[R.Width, R.Height]));
-
           StyleServices.DrawElement(LCanvas.Handle, LDetails, LRect);
 
           //Bar
           InflateRect(LRect, -1, -1);
           if Orientation = pbHorizontal then
-            W := LRect.Width
+            LWidth := LRect.Width
           else
-            W := LRect.Height;
+            LWidth := LRect.Height;
 
-          //Addlog(Format('GetPosition %d',[GetPosition]));
-          //Addlog(Format('GetPercent %n',[GetPercent]));
-
-          LPos := Round(W * GetPercent);
-
-          //Addlog(Format('Pos %d',[Pos]));
+          LPos := Round(LWidth * GetPercent);
 
           FillR := LRect;
           if Orientation = pbHorizontal then
@@ -235,7 +229,6 @@ end;
 
 procedure TTreeViewWnd.WndProc(var Message: TMessage);
 var
-  SF: TScrollInfo;
   Msg: UINT;
 begin
   Msg := Message.Msg;
@@ -254,8 +247,8 @@ begin
         Message.Result := 1;
       end;
   else
-      Inherited WndProc(Message);
-      //Message.Result := CallOrgWndProc(Message);
+      //Inherited WndProc(Message);
+      Message.Result := CallOrgWndProc(Message);
   end;
 end;
 

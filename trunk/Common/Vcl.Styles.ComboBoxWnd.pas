@@ -76,8 +76,7 @@ var
 
 implementation
 
-uses
-   Vcl.GraphUtil;
+
 
 { TComboBoxWnd }
 function GetCBInfo(CBHandle: HWND): TComboBoxInfo;
