@@ -33,29 +33,34 @@ implementation
   TNewEdit = class(TEdit)            ok
   TEdit                              ok
   TPasswordEdit                      ok
-  TNewMemo = class(TMemo)
+  TNewMemo = class(TMemo)            ow/ scrollbar
   TNewComboBox = class(TComboBox)    ok
-  TNewListBox = class(TListBox)
-  TListBox
+  TNewListBox = class(TListBox)      ow/ scrollbar
+  TListBox                           ow/ scrollbar
   TNewButton = class(TButton)        ok
   TNewCheckBox = class(TCheckBox)    ok
   TNewRadioButton = class(TRadioButton)
+  TSelectFolderForm                  ok
+  TFolderTreeView
+  TStartMenuFolderTreeView
+  TRichEditViewer                    ow/ scrollbar
 }
 
 uses
-  KOLDetours,
+  //KOLDetours,
   Winapi.Windows,
-  Winapi.UxTheme,
+
   Winapi.Messages,
   System.Generics.Collections,
   System.SysUtils,
   {$IFDEF DEBUG}
   System.IOUtils,
   {$ENDIF}
-  Vcl.Controls,
-  Vcl.Dialogs,
+
+
   Vcl.Themes,
-  Vcl.Graphics,
+
+  Vcl.Styles.ControlWnd,
   Vcl.Styles.Form,
   Vcl.Styles.StdCtrls,
   Vcl.Styles.ExtCtrls,
@@ -83,7 +88,10 @@ var
   StaticTextWndList : TObjectDictionary<HWND, TStaticTextWnd>;
   EditWndList: TObjectDictionary<HWND, TEditTextWnd>;
   MemoWndList: TObjectDictionary<HWND, TMemoWnd>;
-  ListBoxWndList: TObjectDictionary<HWND, Vcl.Styles.StdCtrls.TListBoxWnd>;
+
+  ListBoxWndList: TObjectDictionary<HWND, TControlWnd>;
+  InnoSetupControlsList: TObjectDictionary<HWND, TControlWnd>;
+
   ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
   CheckBoxWndList: TObjectDictionary<HWND, TCheckBoxTextWnd>;
   BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
@@ -92,11 +100,12 @@ var
   NotebookWndList : TObjectDictionary<HWND, TNotebookWnd>;
   FormWndArrayList : TObjectDictionary<HWND, TFormWnd>;
   ProgressBarWndArrayList : TObjectDictionary<HWND, TProgressBarWnd>;
+  TreeViewWndArrayList : TObjectDictionary<HWND, TTreeViewWnd>;
   ClassesList : TDictionary<HWND, string>;
 
   ThemedInnoControls: TThemedInnoControls;
   GetSysColorOrgPointer: Pointer = nil;
-  var TrampolineGetSysColor : function (nIndex: Integer): DWORD; stdcall;
+  //var TrampolineGetSysColor : function (nIndex: Integer): DWORD; stdcall;
 
 {$IFDEF DEBUG}
 procedure Addlog(const msg : string);
@@ -116,7 +125,8 @@ begin
   StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
   EditWndList:= TObjectDictionary<HWND, TEditTextWnd>.Create([doOwnsValues]);
   MemoWndList:= TObjectDictionary<HWND, TMemoWnd>.Create([doOwnsValues]);
-  ListBoxWndList:= TObjectDictionary<HWND, Vcl.Styles.StdCtrls.TListBoxWnd>.Create([doOwnsValues]);
+  ListBoxWndList:= TObjectDictionary<HWND, TControlWnd>.Create([doOwnsValues]);
+  InnoSetupControlsList := TObjectDictionary<HWND, TControlWnd>.Create([doOwnsValues]);
   ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
   CheckBoxWndList:= TObjectDictionary<HWND, TCheckBoxTextWnd>.Create([doOwnsValues]);
   BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
@@ -125,6 +135,7 @@ begin
   NotebookWndList := TObjectDictionary<HWND, TNotebookWnd>.Create([doOwnsValues]);
   FormWndArrayList := TObjectDictionary<HWND, TFormWnd>.Create([doOwnsValues]);
   ProgressBarWndArrayList  := TObjectDictionary<HWND, TProgressBarWnd>.Create([doOwnsValues]);
+  TreeViewWndArrayList := TObjectDictionary<HWND, TTreeViewWnd>.Create([doOwnsValues]);
   ClassesList := TDictionary<HWND, string>.Create;
 end;
 
@@ -136,6 +147,7 @@ begin
   EditWndList.Free;
   MemoWndList.Free;
   ListBoxWndList.Free;
+  InnoSetupControlsList.Free;
   ComboBoxWndList.Free;
   CheckBoxWndList.Free;
   BtnWndArrayList.Free;
@@ -145,6 +157,7 @@ begin
   ClassesList.Free;
   NotebookPageWndList.Free;
   NotebookWndList.Free;
+  TreeViewWndArrayList.Free;
   inherited;
 end;
 
@@ -512,13 +525,13 @@ begin
         sClassName:=ClassesList[PCWPStruct(lParam)^.hwnd];
 
         {$IFDEF DEBUG}
-//        if (SameText(sClassName,'TEdit')) then
-//        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
-//        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
-//        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
-//        ' hwnd : '+ IntToHex(PCWPStruct(lParam)^.hwnd, 8) +
-//        ' WNDPROC : ' + IntToHex(GetWindowLongPtr(PCWPStruct(lParam)^.hwnd, GWL_WNDPROC), 8 )
-//        );
+        if (SameText(sClassName,'TNewListBox')) then
+        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
+        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
+        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
+        ' hwnd : '+ IntToHex(PCWPStruct(lParam)^.hwnd, 8) +
+        ' WNDPROC : ' + IntToHex(GetWindowLongPtr(PCWPStruct(lParam)^.hwnd, GWL_WNDPROC), 8 )
+        );
         {$ENDIF}
 
         if SameText(sClassName,'TNewButton') then
@@ -527,7 +540,7 @@ begin
                BtnWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TButtonWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
-        if SameText(sClassName,'TWizardForm') or SameText(sClassName,'TSetupForm')   then
+        if SameText(sClassName,'TWizardForm') or SameText(sClassName,'TSetupForm') or SameText(sClassName,'TSelectFolderForm') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (FormWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                FormWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TFormWnd.Create(PCWPStruct(lParam)^.hwnd));
@@ -563,6 +576,18 @@ begin
                ListBoxWndList.Add(PCWPStruct(lParam)^.hwnd, Vcl.Styles.StdCtrls.TListBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
+        if SameText(sClassName,'TNewCheckListBox') then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TNewCheckListBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
+        if SameText(sClassName,'TRichEditViewer') then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TRichEditViewerWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
         if SameText(sClassName,'TNewStaticText') then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
@@ -575,6 +600,12 @@ begin
                ProgressBarWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TProgressBarWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
+//        if (SameText(sClassName,'TStartMenuFolderTreeView')) or (SameText(sClassName,'TFolderTreeView'))  then
+//        begin
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (TreeViewWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               TreeViewWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TTreeViewWnd.Create(PCWPStruct(lParam)^.hwnd));
+//        end
+//        else
         if (SameText(sClassName,'TNewNotebook')) then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
@@ -636,7 +667,7 @@ if Assigned(ThemedInnoControls) then
     ThemedInnoControls:=nil;
   end;
 
-  InterceptRemove(@TrampolineGetSysColor,@GetSysColorHook);
+  //InterceptRemove(@TrampolineGetSysColor,@GetSysColorHook);
   //RedirectProcedure(@GetSysColorHook, @Winapi.Windows.GetSysColor);
 end;
 
@@ -647,7 +678,7 @@ initialization
   begin
    ThemedInnoControls := TThemedInnoControls.Create;
    GetSysColorOrgPointer  := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
-   @TrampolineGetSysColor := InterceptCreate(GetSysColorOrgPointer, @GetSysColorHook);
+   //@TrampolineGetSysColor := InterceptCreate(GetSysColorOrgPointer, @GetSysColorHook);
    //RedirectProcedure(GetSysColorOrgPointer, @GetSysColorHook);
   end;
 

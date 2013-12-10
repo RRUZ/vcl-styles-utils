@@ -29,12 +29,10 @@ interface
 uses
   Winapi.Windows,
   Winapi.Messages,
-  System.Classes,
-  Vcl.Controls,
-  Vcl.Graphics,
+
+
+
   Vcl.Themes,
-  System.Types,
-  System.SysUtils,
   Vcl.Styles.ControlWnd;
 
 type

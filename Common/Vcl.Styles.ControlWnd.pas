@@ -98,6 +98,7 @@ type
     procedure InvalidateNC;
     procedure SetRedraw(Value: Boolean);
     function GetParentHandle: HWND;
+    procedure PaintBorder(EraseLRCorner: Boolean);
     function DrawTextCentered(DC: HDC; Details: TThemedElementDetails;
       const R: TRect; S: String): integer;
     procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails;
@@ -728,6 +729,50 @@ var
 begin
   GetCursorPos(P);
   Result := WindowFromPoint(P) = Handle;
+end;
+
+procedure TControlWnd.PaintBorder(EraseLRCorner: Boolean);
+var
+  EmptyRect,
+  DrawRect: TRect;
+  DC: HDC;
+  H, W: Integer;
+  AStyle,
+  ExStyle: Integer;
+  Details: TThemedElementDetails;
+begin
+  ExStyle := GetWindowLong(Handle, GWL_EXSTYLE);
+  if (ExStyle and WS_EX_CLIENTEDGE) <> 0 then
+  begin
+    GetWindowRect(Handle, DrawRect);
+    OffsetRect(DrawRect, -DrawRect.Left, -DrawRect.Top);
+    DC := GetWindowDC(Handle);
+    try
+      EmptyRect := DrawRect;
+      if EraseLRCorner then
+      begin
+        AStyle := GetWindowLong(Handle, GWL_STYLE);
+        if ((AStyle and WS_HSCROLL) <> 0) and ((AStyle and WS_VSCROLL) <> 0) then
+        begin
+          W := GetSystemMetrics(SM_CXVSCROLL);
+          H := GetSystemMetrics(SM_CYHSCROLL);
+          InflateRect(EmptyRect, -2, -2);
+          with EmptyRect do   {
+            if UseRightToLeftScrollBar then
+              EmptyRect := Rect(Left, Bottom - H, Left + W, Bottom)
+            else     }
+              EmptyRect := Rect(Right - W, Bottom - H, Right, Bottom);
+          FillRect(DC, EmptyRect, GetSysColorBrush(COLOR_BTNFACE));
+        end;
+      end;
+      with DrawRect do
+        ExcludeClipRect(DC, Left + 2, Top + 2, Right - 2, Bottom - 2);
+      Details := StyleServices.GetElementDetails(teEditTextNormal);
+      StyleServices.DrawElement(DC, Details, DrawRect);
+    finally
+      ReleaseDC(Handle, DC);
+    end;
+  end;
 end;
 
 function TControlWnd.GetText: String;

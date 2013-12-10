@@ -37,13 +37,12 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   System.Classes,
-  Vcl.Controls,
+
   Vcl.Graphics,
   Vcl.Forms,
   Vcl.Menus,
   Vcl.Themes,
   System.Types,
-  System.SysUtils,
   Vcl.Styles.ControlWnd;
 
 type

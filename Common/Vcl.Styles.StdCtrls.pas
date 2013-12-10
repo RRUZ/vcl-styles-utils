@@ -88,6 +88,24 @@ type
     destructor Destroy; override;
   end;
 
+  TNewCheckListBoxWnd = class(TScrollBarWnd)
+  private
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
+
+  TRichEditViewerWnd = class(TScrollBarWnd)
+  private
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
+
 implementation
 
 uses
@@ -419,11 +437,9 @@ const
 var
   Msg: UINT;
   LCalcSize_Params: PNCCalcSizeParams;
-  DC: HDC;
   LDetails: TThemedElementDetails;
   LCanvas : TCanvas;
   LRect: TRect;
-  lpPaint : TPaintStruct;
 begin
   Msg := Message.Msg;
   case Msg of
@@ -501,11 +517,9 @@ const
 var
   Msg: UINT;
   LCalcSize_Params: PNCCalcSizeParams;
-  DC: HDC;
   LDetails: TThemedElementDetails;
   LCanvas : TCanvas;
   LRect: TRect;
-  lpPaint : TPaintStruct;
 begin
   Msg := Message.Msg;
   case Msg of
@@ -555,8 +569,8 @@ begin
       end;
 
   else
-      Inherited;
-      //Message.Result := CallOrgWndProc(Message);
+      //Inherited;
+      Message.Result := CallOrgWndProc(Message);
   end;
 end;
 
@@ -576,7 +590,7 @@ begin
   FBrush:=TBrush.Create;
   FBrush.Color := StyleServices.GetStyleColor(scListBox);
   FFontColor := StyleServices.GetStyleFontColor(sfListItemTextNormal);
-  Addlog('TListBoxWnd Create');
+  //Addlog('TListBoxWnd Create');
 end;
 
 destructor TListBoxWnd.Destroy;
@@ -592,7 +606,6 @@ const
 var
   Msg: UINT;
 begin
-  Addlog('TListBoxWnd WndProc');
   Msg := Message.Msg;
   case Msg of
 
@@ -624,12 +637,77 @@ begin
     WM_ERASEBKGND :
       begin
           Message.Result:=1;
-      end
+      end;
 
+    WM_NCPAINT:   //remove when scrrollbars code was actived.
+      begin
+        PaintBorder(True);
+      end;
   else
-      Inherited WndProc(Message);
-      //Message.Result := CallOrgWndProc(Message);
+      //inherited WndProc(Message);
+      Message.Result := CallOrgWndProc(Message);
   end;
 end;
 
+{ TNewCheckListBoxWnd }
+
+constructor TNewCheckListBoxWnd.Create(AHandle: THandle);
+begin
+  inherited;
+
+end;
+
+destructor TNewCheckListBoxWnd.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TNewCheckListBoxWnd.WndProc(var Message: TMessage);
+var
+  Msg: UINT;
+begin
+  Msg := Message.Msg;
+  case Msg of
+
+    WM_NCPAINT:   //remove when scrrollbars code was actived.
+      begin
+        PaintBorder(True);
+      end;
+  else
+      //inherited WndProc(Message);
+      Message.Result := CallOrgWndProc(Message);
+  end;
+end;
+
+{ TRichEditViewerWnd }
+
+constructor TRichEditViewerWnd.Create(AHandle: THandle);
+begin
+  inherited;
+
+end;
+
+destructor TRichEditViewerWnd.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TRichEditViewerWnd.WndProc(var Message: TMessage);
+var
+  Msg: UINT;
+begin
+  Msg := Message.Msg;
+  case Msg of
+
+    WM_NCPAINT:   //remove when scrrollbars code was actived.
+      begin
+        PaintBorder(True);
+      end;
+  else
+      //inherited WndProc(Message);
+      Message.Result := CallOrgWndProc(Message);
+  end;
+end;
 end.

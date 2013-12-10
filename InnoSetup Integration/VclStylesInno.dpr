@@ -29,7 +29,8 @@ uses
   Vcl.Styles.ToolTipsWnd in '..\Common\Vcl.Styles.ToolTipsWnd.pas',
   Vcl.Styles.UnknownControlWnd in '..\Common\Vcl.Styles.UnknownControlWnd.pas' {/Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas';},
   Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas',
-  KOLDetours in '..\Common\KOLDetours.pas';
+  KOLDetours in '..\Common\KOLDetours.pas',
+  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas';
 
 {$R *.res}
 

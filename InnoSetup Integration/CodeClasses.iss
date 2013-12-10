@@ -8,17 +8,17 @@ UninstallDisplayIcon={app}\MyProg.exe
 OutputDir=.\Output
 [Files]
 Source: compiler:WizModernSmallImage.bmp; Flags: dontcopy
-Source: Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
-;Source: Win32\Debug\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+;Source: Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+Source: Win32\Debug\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 Source: ..\Styles\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
-Source: Win32\Debug\Styles\Office2007.cjstyles; DestDir: {app}
 [Code]
+
 //Import the LoadVCLStyle function from VclStylesInno.DLL
 procedure LoadVCLStyle(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall';
 // Import the UnLoadVCLStyles function from VclStylesInno.DLL
 procedure UnLoadVCLStyles; external 'UnLoadVCLStyles@files:VclStylesInno.dll stdcall';
 
-
+function LoadLibrary(lpLibFileName: PAnsiChar): Integer; external 'LoadLibraryA@kernel32.dll stdcall';
 
 function InitializeSetup(): Boolean;
 begin
@@ -35,7 +35,9 @@ end;
 
 procedure ButtonOnClick(Sender: TObject);
 begin
-  MsgBox('You clicked the button!', mbInformation, mb_Ok);
+	//MsgBox(IntToStr(666), mbInformation, mb_Ok);
+  MsgBox(IntToStr(LoadLibrary('uxtheme.dll')), mbInformation, mb_Ok);
+  //MsgBox('You clicked the button!', mbInformation, mb_Ok);
 end;
 
 procedure BitmapImageOnClick(Sender: TObject);
@@ -178,6 +180,12 @@ begin
   ComboBox.Parent := Page.Surface;
   ComboBox.Style := csDropDownList;
   ComboBox.Items.Add('TComboBox');
+  ComboBox.Items.Add('TComboBox');
+  ComboBox.Items.Add('TComboBox');
+  ComboBox.Items.Add('TComboBox');
+  ComboBox.Items.Add('TComboBox');
+  ComboBox.Items.Add('TComboBox');
+  ComboBox.Items.Add('TComboBox');
   ComboBox.ItemIndex := 0;
 
   ListBox := TNewListBox.Create(Page);
@@ -185,7 +193,12 @@ begin
   ListBox.Width := Page.SurfaceWidth;
   ListBox.Height := ScaleY(97);
   ListBox.Parent := Page.Surface;
-  ListBox.Items.Add('TListBox');
+  ListBox.Items.Add('Item 1');
+  ListBox.Items.Add('Item 2');
+  ListBox.Items.Add('Item 3');
+  ListBox.Items.Add('Item 4');
+  ListBox.Items.Add('Item 5');
+  ListBox.Items.Add('Item 6');
   ListBox.ItemIndex := 0;
 
   StaticText := TNewStaticText.Create(Page);
@@ -261,7 +274,7 @@ begin
 
   FolderTreeView := TFolderTreeView.Create(Page);
   FolderTreeView.Width := Page.SurfaceWidth;
-  FolderTreeView.Height := Page.SurfaceHeight;
+  FolderTreeView.Height := Page.SurfaceHeight-10;
   FolderTreeView.Parent := Page.Surface;
   FolderTreeView.Directory := ExpandConstant('{src}');
 
