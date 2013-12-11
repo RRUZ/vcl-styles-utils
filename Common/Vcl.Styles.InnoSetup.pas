@@ -44,22 +44,21 @@ implementation
   TFolderTreeView
   TStartMenuFolderTreeView
   TRichEditViewer                    ow/ scrollbar
+  TNewStaticText                     ok
+  TNewNotebook                       ok
+  TNewNotebookPage                   ok
+  TPanel                             ok
 }
 
 uses
-  //KOLDetours,
   Winapi.Windows,
-
   Winapi.Messages,
   System.Generics.Collections,
   System.SysUtils,
   {$IFDEF DEBUG}
   System.IOUtils,
   {$ENDIF}
-
-
   Vcl.Themes,
-
   Vcl.Styles.ControlWnd,
   Vcl.Styles.Form,
   Vcl.Styles.StdCtrls,
@@ -95,9 +94,6 @@ var
   ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
   CheckBoxWndList: TObjectDictionary<HWND, TCheckBoxTextWnd>;
   BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
-  PanelWndList : TObjectDictionary<HWND, TPanelWnd>;
-  NotebookPageWndList : TObjectDictionary<HWND, TNotebookPagelWnd>;
-  NotebookWndList : TObjectDictionary<HWND, TNotebookWnd>;
   FormWndArrayList : TObjectDictionary<HWND, TFormWnd>;
   ProgressBarWndArrayList : TObjectDictionary<HWND, TProgressBarWnd>;
   TreeViewWndArrayList : TObjectDictionary<HWND, TTreeViewWnd>;
@@ -130,9 +126,6 @@ begin
   ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
   CheckBoxWndList:= TObjectDictionary<HWND, TCheckBoxTextWnd>.Create([doOwnsValues]);
   BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
-  PanelWndList := TObjectDictionary<HWND, TPanelWnd>.Create([doOwnsValues]);
-  NotebookPageWndList := TObjectDictionary<HWND, TNotebookPagelWnd>.Create([doOwnsValues]);
-  NotebookWndList := TObjectDictionary<HWND, TNotebookWnd>.Create([doOwnsValues]);
   FormWndArrayList := TObjectDictionary<HWND, TFormWnd>.Create([doOwnsValues]);
   ProgressBarWndArrayList  := TObjectDictionary<HWND, TProgressBarWnd>.Create([doOwnsValues]);
   TreeViewWndArrayList := TObjectDictionary<HWND, TTreeViewWnd>.Create([doOwnsValues]);
@@ -151,12 +144,9 @@ begin
   ComboBoxWndList.Free;
   CheckBoxWndList.Free;
   BtnWndArrayList.Free;
-  PanelWndList.Free;
   ProgressBarWndArrayList.Free;
   FormWndArrayList.Free;
   ClassesList.Free;
-  NotebookPageWndList.Free;
-  NotebookWndList.Free;
   TreeViewWndArrayList.Free;
   inherited;
 end;
@@ -588,12 +578,12 @@ begin
                InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TRichEditViewerWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
-        if SameText(sClassName,'TNewStaticText') then
-        begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               StaticTextWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end
-        else
+//        if SameText(sClassName,'TNewStaticText') then     //TNewStaticText is handled by the Getsyscolors hook
+//        begin
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               StaticTextWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+//        end
+//        else
         if (SameText(sClassName,'TNewProgressBar')) then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ProgressBarWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
@@ -606,23 +596,25 @@ begin
 //               TreeViewWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TTreeViewWnd.Create(PCWPStruct(lParam)^.hwnd));
 //        end
 //        else
-        if (SameText(sClassName,'TNewNotebook')) then
-        begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               NotebookWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end
-        else
-        if (SameText(sClassName,'TNewNotebookPage')) then
-        begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookPageWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               NotebookPageWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookPagelWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end
-        else
-        if (SameText(sClassName,'TPanel')) then
-        begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (PanelWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               PanelWndList.Add(PCWPStruct(lParam)^.hwnd, TPanelWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end;
+
+//        if (SameText(sClassName,'TNewNotebook')) then     //TNewNotebook is handled by the Getsyscolors hook
+//        begin
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               NotebookWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookWnd.Create(PCWPStruct(lParam)^.hwnd));
+//        end
+//        else
+//        if (SameText(sClassName,'TNewNotebookPage')) then   //TNewNotebookPage is handled by the Getsyscolors hook
+//        begin
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookPageWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               NotebookPageWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookPagelWnd.Create(PCWPStruct(lParam)^.hwnd));
+//        end
+//
+//        else
+//        if (SameText(sClassName,'TPanel')) then   //TPanel is handled by the Getsyscolors hook
+//        begin
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (PanelWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               PanelWndList.Add(PCWPStruct(lParam)^.hwnd, TPanelWnd.Create(PCWPStruct(lParam)^.hwnd));
+//        end;
       end;
     end;
 end;
@@ -648,16 +640,16 @@ begin
 end;
 }
 
-function GetSysColorHook(nIndex: Integer): DWORD; stdcall;
-begin
-//  if nIndex = COLOR_BTNFACE then
-//  begin
-//   Result:= StyleServices.GetSystemColor(clBtnFace);
-//   Addlog(IntToHex(Result, 8));
-//  end
-//  else
-   Result:= StyleServices.GetSystemColor(nIndex or Integer($FF000000));
-end;
+//function GetSysColorHook(nIndex: Integer): DWORD; stdcall;
+//begin
+////  if nIndex = COLOR_BTNFACE then
+////  begin
+////   Result:= StyleServices.GetSystemColor(clBtnFace);
+////   Addlog(IntToHex(Result, 8));
+////  end
+////  else
+//   Result:= StyleServices.GetSystemColor(nIndex or Integer($FF000000));
+//end;
 
 Procedure  Done;
 begin

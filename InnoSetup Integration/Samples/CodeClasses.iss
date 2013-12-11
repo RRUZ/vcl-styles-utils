@@ -6,11 +6,13 @@ DisableProgramGroupPage=yes
 DefaultGroupName=My Program
 UninstallDisplayIcon={app}\MyProg.exe
 OutputDir=.\Output
+WizardImageFile=..\images\WizModernImage-IS_Orange.bmp
+WizardSmallImageFile=..\images\WizModernSmallImage-IS_Orange.bmp
 [Files]
 Source: compiler:WizModernSmallImage.bmp; Flags: dontcopy
-;Source: Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
-Source: Win32\Debug\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
-Source: ..\Styles\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
+Source: ..\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+;Source: ..\Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+Source: ..\Styles\Auric.vsf; DestDir: {app}; Flags: dontcopy
 [Code]
 
 //Import the LoadVCLStyle function from VclStylesInno.DLL
@@ -22,8 +24,8 @@ function LoadLibrary(lpLibFileName: PAnsiChar): Integer; external 'LoadLibraryA@
 
 function InitializeSetup(): Boolean;
 begin
-	ExtractTemporaryFile('Amakrits.vsf');
-	LoadVCLStyle(ExpandConstant('{tmp}\Amakrits.vsf'));
+	ExtractTemporaryFile('Auric.vsf');
+	LoadVCLStyle(ExpandConstant('{tmp}\Auric.vsf'));
 	Result := True;
 end;
 
@@ -35,9 +37,7 @@ end;
 
 procedure ButtonOnClick(Sender: TObject);
 begin
-	//MsgBox(IntToStr(666), mbInformation, mb_Ok);
-  MsgBox(IntToStr(LoadLibrary('uxtheme.dll')), mbInformation, mb_Ok);
-  //MsgBox('You clicked the button!', mbInformation, mb_Ok);
+  MsgBox('You clicked the button!', mbInformation, mb_Ok);
 end;
 
 procedure BitmapImageOnClick(Sender: TObject);
@@ -319,7 +319,7 @@ begin
 
   RichEditViewer := TRichEditViewer.Create(Page);
   RichEditViewer.Width := Page.SurfaceWidth;
-  RichEditViewer.Height := Page.SurfaceHeight;
+  RichEditViewer.Height := Page.SurfaceHeight-10;
   RichEditViewer.Parent := Page.Surface;
   RichEditViewer.ScrollBars := ssVertical;
   RichEditViewer.UseRichEdit := True;
@@ -396,7 +396,7 @@ begin
 
   { Custom beveled label }
 
-  WizardForm.BeveledLabel.Caption := ' BeveledLabel ';
+  WizardForm.BeveledLabel.Caption := '';
 end;
 
 procedure InitializeUninstallProgressForm();

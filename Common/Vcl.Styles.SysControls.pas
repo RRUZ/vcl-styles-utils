@@ -241,7 +241,6 @@ begin
           begin
             if PopupWndList.ContainsKey(wParam) then
               PopupWndList.Remove(wParam);
-            //OutputDebugString(PChar('remove PopupWndList count '+IntToStr(PopupWndList.Count)));
           end
           else
           if (sClassName = '#32770') then
@@ -249,7 +248,6 @@ begin
           begin
             if DialogWndList.ContainsKey(wParam) then
               DialogWndList.Remove(wParam);
-            //OutputDebugString(PChar('remove DialogWndList count '+IntToStr(DialogWndList.Count)));
           end
           else
           if (sClassName = 'Button') then
@@ -257,7 +255,6 @@ begin
           begin
             if BtnWndArrayList.ContainsKey(wParam) then
               BtnWndArrayList.Remove(wParam);
-            //OutputDebugString(PChar('remove BtnWndArrayList count '+IntToStr(BtnWndArrayList.Count)));
           end
           else
           if (sClassName = 'ScrollBar') or (sClassName = 'ReBarWindow32') {or (sClassName = 'ToolbarWindow32')} then
@@ -307,7 +304,6 @@ begin
         begin
           CBTSturct := PCBTCreateWnd(lParam)^;
           sClassName := GetWindowClassName(wParam);
-          //Addlog(sClassName);
           //PopupMenu
           if Integer(CBTSturct.lpcs.lpszClass) = 32768 then
               PopupWndList.Add(wParam, TPopupWnd.Create(wParam))
@@ -318,7 +314,6 @@ begin
               if (CBTSturct.lpcs.cx <> 0) and (CBTSturct.lpcs.cy <> 0) then
               begin
                 DialogWndList.Add(wParam, TDialogWnd.Create(wParam));
-                //Addlog('Done');
               end;
             end
           else

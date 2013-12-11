@@ -67,13 +67,6 @@ begin
    Result:= StyleServices.GetSystemColor(iColorId or Integer($FF000000));
 end;
 
-{$IFDEF DEBUG}
-procedure Addlog(const msg : string);
-begin
-   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-end;
-{$ENDIF}
-
 
 initialization
  if StyleServices.Available then
@@ -83,12 +76,11 @@ initialization
    Addlog(Format('ThemeLibrary %x %d',[Integer(ThemeLibrary), Integer(ThemeLibrary)]));
    {$ENDIF}
 
-           //oroginal
+           //original
    GetSysColorOrgPointer  := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
-          // oroginal
    @TrampolineGetSysColor := InterceptCreate(GetSysColorOrgPointer, @InterceptGetSysColor);
 
-        // oroginal
+        // original
      {
    OpenThemeDataOrgPointer  := GetProcAddress(ThemeLibrary, 'OpenThemeData');
    @TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @InterceptOpenThemeData);
