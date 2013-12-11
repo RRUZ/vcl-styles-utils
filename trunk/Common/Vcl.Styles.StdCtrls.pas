@@ -226,17 +226,17 @@ begin
 
           LRect := Self.ClientRect;
 
-          if (Self.ExStyle and  WS_EX_TRANSPARENT) = WS_EX_TRANSPARENT then
-          begin
-            LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
-            StyleServices.DrawParentBackground(Handle, LCanvas.Handle, LDetails, False);
-            LCanvas.Brush.Style := bsClear;
-          end
-          else
-          begin
-            LCanvas.Brush.Color := StyleServices.GetStyleColor(scWindow);
-            LCanvas.FillRect(LRect);
-          end;
+//          if (Self.ExStyle and  WS_EX_TRANSPARENT) = WS_EX_TRANSPARENT then
+//          begin
+//            LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
+//            StyleServices.DrawParentBackground(Handle, LCanvas.Handle, LDetails, False);
+//            LCanvas.Brush.Style := bsClear;
+//          end
+//          else
+//          begin
+//            LCanvas.Brush.Color := StyleServices.GetStyleColor(scWindow);
+//            LCanvas.FillRect(LRect);
+//          end;
           LDetails := StyleServices.GetElementDetails(States[Self.Enabled]);
 
           if (Style and SS_CENTER = SS_CENTER) then
@@ -575,14 +575,6 @@ begin
 end;
 
 { TListBoxWnd }
-
-{$IFDEF DEBUG}
-procedure Addlog(const msg : string);
-begin
-   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-end;
-{$ENDIF}
-
 
 constructor TListBoxWnd.Create(AHandle: THandle);
 begin

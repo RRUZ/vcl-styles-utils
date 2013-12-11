@@ -686,12 +686,6 @@ begin
     Message.lParam);
 end;
 
-{$IFDEF DEBUG}
-//procedure Addlog(const msg : string);
-//begin
-//   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-//end;
-{$ENDIF}
 
 constructor TControlWnd.Create(AHandle: THandle);
 begin
