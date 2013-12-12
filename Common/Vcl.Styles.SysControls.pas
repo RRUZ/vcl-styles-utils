@@ -26,10 +26,14 @@ unit Vcl.Styles.SysControls;
 interface
 
 implementation
+{.$DEFINE USEGENERICS}   //Reduce the final exe/dll size
 
 uses
   Winapi.Windows,
+  {$IFDEF USEGENERICS}
   System.Generics.Collections,
+  {$ENDIF}
+  System.Classes,
   System.SysUtils,
   Vcl.Controls,
   Vcl.Dialogs,
@@ -71,17 +75,91 @@ type
     Offset: Integer;
   end;
 
+{$IFNDEF USEGENERICS}
+  TDictionary = class
+  private
+     FKeys, FValues : TList;
+  public
+    procedure Add(hwnd: HWND; Control : TObject);
+    procedure Remove(hwnd: HWND);
+    function GetIndex(hwnd: Winapi.Windows.HWND) : Integer;
+    function ContainsKey(hwnd: Winapi.Windows.HWND) : Boolean;
+    constructor Create; overload;
+    destructor Destroy; override;
+  end;
+{$ENDIF}
+
+
+
 var
   InsertMenuItemOrgPointer: Pointer = nil;
   MenuItemInfoArray: array of TMenuItemInfo;
+  {$IFDEF USEGENERICS}
   SysControlsWndList: TObjectDictionary<HWND, TControlWnd>;
   PopupWndList: TObjectDictionary<HWND, TPopupWnd>;
+  {$ELSE}
+  SysControlsWndList: TDictionary;
+  PopupWndList : TDictionary;
+  {$ENDIF}
   ThemedSysControls: TThemedSysControls;
 
 { the Original InsertMenuItem function }
 function InsertMenuItemOrg(p1: HMENU; p2: UINT; p3: BOOL;
   const p4: TMenuItemInfo): BOOL; stdcall;
   external user32 name 'InsertMenuItemW';
+
+{$IFNDEF USEGENERICS}
+
+{ TDictionary }
+
+procedure TDictionary.Add(hwnd: HWND; Control: TObject);
+begin
+ FKeys.Add(Pointer(hwnd));
+ FValues.Add(Control);
+end;
+
+function TDictionary.ContainsKey(hwnd: Winapi.Windows.HWND): Boolean;
+begin
+  Exit(GetIndex(hwnd)>=0);
+end;
+
+constructor TDictionary.Create;
+begin
+ FKeys:=TList.Create;
+ FValues:=TList.Create;
+end;
+
+destructor TDictionary.Destroy;
+var
+  i : integer;
+begin
+  FKeys.Free;
+   for i := 0 to FValues.Count-1 do
+      TObject(FValues[i]).Free;
+
+  FValues.Free;
+  inherited;
+end;
+
+function TDictionary.GetIndex(hwnd: Winapi.Windows.HWND): Integer;
+begin
+ Result:=FKeys.IndexOf(Pointer(hwnd));
+end;
+
+procedure TDictionary.Remove(hwnd: HWND);
+var
+  i : Integer;
+begin
+  i := GetIndex(hwnd);
+  if i>=0 then
+  begin
+    TObject(FValues[i]).Free;
+    FValues.Remove(Pointer(FValues[i]));
+    FKeys.Remove(Pointer(FKeys[i]));
+  end;
+end;
+
+{$ENDIF}
 
 procedure PatchCode(Address: Pointer; const NewCode; Size: Integer);
 var
@@ -142,8 +220,12 @@ begin
   FPreviousHandle := 0;
   FHook := 0;
   InstallHook;
+  {$IFDEF USEGENERICS}
   SysControlsWndList:= TObjectDictionary<HWND, TControlWnd>.Create([doOwnsValues]);
   PopupWndList:= TObjectDictionary<HWND, TPopupWnd>.Create([doOwnsValues]);
+  {$ELSE}
+  SysControlsWndList:= TDictionary.Create;
+  {$ENDIF}
 end;
 
 destructor TThemedSysControls.Destroy;
@@ -277,6 +359,8 @@ begin
   if FHook <> 0 then
     UnhookWindowsHookEx(FHook);
 end;
+
+
 
 initialization
 
