@@ -1,0 +1,88 @@
+#summary VCL Styles for Inno Setup.
+
+= Introduction =
+
+ The VCL Styles Utils project, includes a plugin (dll) to skin the installers created by Inno setup. The current size of the plugin is about 1.5 mb, but when is included (and compressed) in the script only add ~480 Kb to the final installer.
+
+
+= Installation =
+
+The installer for the plugin includes 30+ VCL Styles, a set of wizard images and samples inno scripts. To install just follow the installer instructions.
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Installer/1.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Installer/2.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Installer/3.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Installer/4.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Installer/5.png
+
+
+= Screenshots =
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Sample/1.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Sample/2.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Sample/3.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Sample/4.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Sample/5.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Sample/6.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%20Styles%20Inno%20Images/Sample/7.png
+
+
+
+= How to use it =
+
+In order to use the plugin you must follow these steps
+
+   # Add the VclStylesinno.dll file to your inno setup script and the VCL Style file to use.
+   # Import the function LoadVCLStyleW for Unicode versions of Inno setup or the LoadVCLStyleA method for the Ansi version
+   # Import the function UnLoadVCLStyles
+   # In the InitializeSetup function extract the style to use and call the LoadVCLStyle method passing the name of the style file
+   # Finally in the DeinitializeSetup function call the UnLoadVCLStyles method.
+
+Check the next sample script
+
+{{{
+[Files]
+Source: ..\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+Source: ..\Styles\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
+ 
+[Code]
+// Import the LoadVCLStyle function from VclStylesInno.DLL
+procedure LoadVCLStyle(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall';
+// Import the UnLoadVCLStyles function from VclStylesInno.DLL
+procedure UnLoadVCLStyles; external 'UnLoadVCLStyles@files:VclStylesInno.dll stdcall';
+ 
+function InitializeSetup(): Boolean;
+begin
+  ExtractTemporaryFile('Amakrits.vsf');
+  LoadVCLStyle(ExpandConstant('{tmp}\Amakrits.vsf'));
+  Result := True;
+end;
+ 
+procedure DeinitializeSetup();
+begin
+  UnLoadVCLStyles;
+end;
+
+}}}
+
+
+= TODO =
+
+   * Add support for TFolderTreeView and TStartMenuFolderTreeView components.
+   * Add support for themed controls in the TNewCheckBoxList component.
+   * Add support for the npbstMarquee style in the TNewProgressBar component.
+
+
+= Installer =
+
+ Download the installer of the plugin from <a href="https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/SetupVCLStylesInno.exe">here</a>.
