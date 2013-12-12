@@ -84,21 +84,8 @@ type
 
 
 var
-  StaticTextWndList : TObjectDictionary<HWND, TStaticTextWnd>;
-  EditWndList: TObjectDictionary<HWND, TEditTextWnd>;
-  MemoWndList: TObjectDictionary<HWND, TMemoWnd>;
-
-  ListBoxWndList: TObjectDictionary<HWND, TControlWnd>;
   InnoSetupControlsList: TObjectDictionary<HWND, TControlWnd>;
-
-  ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
-  CheckBoxWndList: TObjectDictionary<HWND, TCheckBoxTextWnd>;
-  BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
-  FormWndArrayList : TObjectDictionary<HWND, TFormWnd>;
-  ProgressBarWndArrayList : TObjectDictionary<HWND, TProgressBarWnd>;
-  TreeViewWndArrayList : TObjectDictionary<HWND, TTreeViewWnd>;
   ClassesList : TDictionary<HWND, string>;
-
   ThemedInnoControls: TThemedInnoControls;
   GetSysColorOrgPointer: Pointer = nil;
   //var TrampolineGetSysColor : function (nIndex: Integer): DWORD; stdcall;
@@ -106,7 +93,7 @@ var
 {$IFDEF DEBUG}
 procedure Addlog(const msg : string);
 begin
-   TFile.AppendAllText('C:\Dephi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+   TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
 end;
 {$ENDIF}
 
@@ -117,37 +104,15 @@ begin
   inherited;
   FHook_WH_CALLWNDPROC := 0;
   InstallHook;
-
-  StaticTextWndList := TObjectDictionary<HWND, TStaticTextWnd>.Create([doOwnsValues]);
-  EditWndList:= TObjectDictionary<HWND, TEditTextWnd>.Create([doOwnsValues]);
-  MemoWndList:= TObjectDictionary<HWND, TMemoWnd>.Create([doOwnsValues]);
-  ListBoxWndList:= TObjectDictionary<HWND, TControlWnd>.Create([doOwnsValues]);
   InnoSetupControlsList := TObjectDictionary<HWND, TControlWnd>.Create([doOwnsValues]);
-  ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
-  CheckBoxWndList:= TObjectDictionary<HWND, TCheckBoxTextWnd>.Create([doOwnsValues]);
-  BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
-  FormWndArrayList := TObjectDictionary<HWND, TFormWnd>.Create([doOwnsValues]);
-  ProgressBarWndArrayList  := TObjectDictionary<HWND, TProgressBarWnd>.Create([doOwnsValues]);
-  TreeViewWndArrayList := TObjectDictionary<HWND, TTreeViewWnd>.Create([doOwnsValues]);
   ClassesList := TDictionary<HWND, string>.Create;
 end;
 
 destructor TThemedInnoControls.Destroy;
 begin
   RemoveHook;
-
-  StaticTextWndList.Free;
-  EditWndList.Free;
-  MemoWndList.Free;
-  ListBoxWndList.Free;
   InnoSetupControlsList.Free;
-  ComboBoxWndList.Free;
-  CheckBoxWndList.Free;
-  BtnWndArrayList.Free;
-  ProgressBarWndArrayList.Free;
-  FormWndArrayList.Free;
   ClassesList.Free;
-  TreeViewWndArrayList.Free;
   inherited;
 end;
 
@@ -515,7 +480,7 @@ begin
         sClassName:=ClassesList[PCWPStruct(lParam)^.hwnd];
 
         {$IFDEF DEBUG}
-        if (SameText(sClassName,'TNewListBox')) then
+        if {(SameText(sClassName,'TNewListBox'))} PCWPStruct(lParam)^.message=WM_DESTROY then
         Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
         ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
         ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
@@ -526,44 +491,44 @@ begin
 
         if SameText(sClassName,'TNewButton') then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (BtnWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               BtnWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TButtonWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TButtonWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TWizardForm') or SameText(sClassName,'TSetupForm') or SameText(sClassName,'TSelectFolderForm') then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (FormWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               FormWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TFormWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TFormWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewComboBox') then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ComboBoxWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               ComboBoxWndList.Add(PCWPStruct(lParam)^.hwnd, TComboBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TComboBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewCheckBox') then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (CheckBoxWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               CheckBoxWndList.Add(PCWPStruct(lParam)^.hwnd, TCheckBoxTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TCheckBoxTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TEdit') or SameText(sClassName,'TNewEdit')  or SameText(sClassName,'TPasswordEdit')  then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (EditWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               EditWndList.Add(PCWPStruct(lParam)^.hwnd, TEditTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TEditTextWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewMemo') or SameText(sClassName,'TMemo')  then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (MemoWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               MemoWndList.Add(PCWPStruct(lParam)^.hwnd, TMemoWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TMemoWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewListBox') or SameText(sClassName,'TListBox') then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ListBoxWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               ListBoxWndList.Add(PCWPStruct(lParam)^.hwnd, Vcl.Styles.StdCtrls.TListBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, Vcl.Styles.StdCtrls.TListBoxWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewCheckListBox') then
@@ -580,40 +545,40 @@ begin
         else
 //        if SameText(sClassName,'TNewStaticText') then     //TNewStaticText is handled by the Getsyscolors hook
 //        begin
-//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (StaticTextWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-//               StaticTextWndList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
 //        end
 //        else
         if (SameText(sClassName,'TNewProgressBar')) then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (ProgressBarWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               ProgressBarWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TProgressBarWnd.Create(PCWPStruct(lParam)^.hwnd));
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TProgressBarWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
 //        if (SameText(sClassName,'TStartMenuFolderTreeView')) or (SameText(sClassName,'TFolderTreeView'))  then
 //        begin
-//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (TreeViewWndArrayList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-//               TreeViewWndArrayList.Add(PCWPStruct(lParam)^.hwnd, TTreeViewWnd.Create(PCWPStruct(lParam)^.hwnd));
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TTreeViewWnd.Create(PCWPStruct(lParam)^.hwnd));
 //        end
 //        else
 
 //        if (SameText(sClassName,'TNewNotebook')) then     //TNewNotebook is handled by the Getsyscolors hook
 //        begin
-//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-//               NotebookWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookWnd.Create(PCWPStruct(lParam)^.hwnd));
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TNotebookWnd.Create(PCWPStruct(lParam)^.hwnd));
 //        end
 //        else
 //        if (SameText(sClassName,'TNewNotebookPage')) then   //TNewNotebookPage is handled by the Getsyscolors hook
 //        begin
-//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (NotebookPageWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-//               NotebookPageWndList.Add(PCWPStruct(lParam)^.hwnd, TNotebookPagelWnd.Create(PCWPStruct(lParam)^.hwnd));
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TNotebookPagelWnd.Create(PCWPStruct(lParam)^.hwnd));
 //        end
 //
 //        else
 //        if (SameText(sClassName,'TPanel')) then   //TPanel is handled by the Getsyscolors hook
 //        begin
-//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (PanelWndList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-//               PanelWndList.Add(PCWPStruct(lParam)^.hwnd, TPanelWnd.Create(PCWPStruct(lParam)^.hwnd));
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TPanelWnd.Create(PCWPStruct(lParam)^.hwnd));
 //        end;
       end;
     end;

@@ -37,7 +37,6 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   System.Classes,
-
   Vcl.Graphics,
   Vcl.Forms,
   Vcl.Menus,
