@@ -50,11 +50,16 @@ implementation
   TPanel                             ok
 }
 
+{.$DEFINE USEGENERICS}   //-->Reduce the final exe/dll size
+
 uses
   Winapi.Windows,
   Winapi.Messages,
+  {$IFDEF USEGENERICS}
   System.Generics.Collections,
+  {$ENDIF}
   System.SysUtils,
+  System.Classes,
   {$IFDEF DEBUG}
   System.IOUtils,
   {$ENDIF}
@@ -82,10 +87,25 @@ type
     destructor Destroy; override;
   end;
 
+{$IFNDEF USEGENERICS}
+  TDictionary = class
+  private
+     FKeys, FValues : TList;
+  public
+    procedure Add(hwnd: HWND; Control : TControlWnd);
+    function ContainsKey(hwnd: Winapi.Windows.HWND) : Boolean;
+    constructor Create; overload;
+    destructor Destroy; override;
+  end;
+{$ENDIF}
 
 var
+  {$IFDEF USEGENERICS}
   InnoSetupControlsList: TObjectDictionary<HWND, TControlWnd>;
-  ClassesList : TDictionary<HWND, string>;
+  {$ELSE}
+  InnoSetupControlsList: TDictionary;
+  {$ENDIF}
+  ClassesList : TStrings; //use a  TStrings to avoid the use of generics
   ThemedInnoControls: TThemedInnoControls;
   GetSysColorOrgPointer: Pointer = nil;
   //var TrampolineGetSysColor : function (nIndex: Integer): DWORD; stdcall;
@@ -97,6 +117,46 @@ begin
 end;
 {$ENDIF}
 
+{$IFNDEF USEGENERICS}
+
+{ TDictionary }
+
+procedure TDictionary.Add(hwnd: HWND; Control: TControlWnd);
+begin
+ FKeys.Add(Pointer(hwnd));
+ FValues.Add(Control);
+end;
+
+function TDictionary.ContainsKey(hwnd: Winapi.Windows.HWND): Boolean;
+var
+  i : integer;
+begin
+ Result:=False;
+  for i := 0 to FKeys.Count-1 do
+   if  Winapi.Windows.HWND(FKeys[i])=hwnd then
+     Exit(True);
+end;
+
+constructor TDictionary.Create;
+begin
+ FKeys:=TList.Create;
+ FValues:=TList.Create;
+end;
+
+destructor TDictionary.Destroy;
+var
+  i : integer;
+begin
+  FKeys.Free;
+   for i := 0 to FValues.Count-1 do
+      TControlWnd(FValues[i]).Free;
+
+  FValues.Free;
+  inherited;
+end;
+{$ENDIF}
+
+
 { TThemedSysControls }
 
 constructor TThemedInnoControls.Create;
@@ -104,8 +164,12 @@ begin
   inherited;
   FHook_WH_CALLWNDPROC := 0;
   InstallHook;
+  {$IFDEF USEGENERICS}
   InnoSetupControlsList := TObjectDictionary<HWND, TControlWnd>.Create([doOwnsValues]);
-  ClassesList := TDictionary<HWND, string>.Create;
+  {$ELSE}
+  InnoSetupControlsList := TDictionary.Create;
+  {$ENDIF}
+  ClassesList := TStringList.Create;
 end;
 
 destructor TThemedInnoControls.Destroy;
@@ -468,16 +532,16 @@ begin
     if (StyleServices.Enabled) and not (StyleServices.IsSystemStyle) then
     begin
 
-      if not ClassesList.ContainsKey(PCWPStruct(lParam)^.hwnd) then
+      if ClassesList.IndexOfName(IntToStr(PCWPStruct(lParam)^.hwnd))=-1 then
       begin
         GetClassName(PCWPStruct(lParam)^.hwnd, C, 256);
         //Addlog('GetClassName ' + C);
-        ClassesList.Add(PCWPStruct(lParam)^.hwnd, C);
+        ClassesList.Add(Format('%d=%s',[PCWPStruct(lParam)^.hwnd, C]));
       end;
 
-      if ClassesList.ContainsKey(PCWPStruct(lParam)^.hwnd) then
+      if ClassesList.IndexOfName(IntToStr(PCWPStruct(lParam)^.hwnd))>=0 then
       begin
-        sClassName:=ClassesList[PCWPStruct(lParam)^.hwnd];
+        sClassName:=ClassesList.Values[IntToStr(PCWPStruct(lParam)^.hwnd)]; //ClassesList[PCWPStruct(lParam)^.hwnd];
 
         {$IFDEF DEBUG}
         if {(SameText(sClassName,'TNewListBox'))} PCWPStruct(lParam)^.message=WM_DESTROY then
@@ -627,6 +691,7 @@ if Assigned(ThemedInnoControls) then
   //InterceptRemove(@TrampolineGetSysColor,@GetSysColorHook);
   //RedirectProcedure(@GetSysColorHook, @Winapi.Windows.GetSysColor);
 end;
+
 
 initialization
 
