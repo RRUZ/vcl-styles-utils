@@ -74,18 +74,9 @@ type
 var
   InsertMenuItemOrgPointer: Pointer = nil;
   MenuItemInfoArray: array of TMenuItemInfo;
-  TooltipsWndList: TObjectDictionary<HWND, TooltipsWnd>;
+  SysControlsWndList: TObjectDictionary<HWND, TControlWnd>;
   PopupWndList: TObjectDictionary<HWND, TPopupWnd>;
-  StaticWndList: TObjectDictionary<HWND, TStaticWnd>;
-  DialogWndList: TObjectDictionary<HWND, TDialogWnd>;
-  EditWndList: TObjectDictionary<HWND, TEditWnd>;
-  ComboBoxWndList: TObjectDictionary<HWND, TComboBoxWnd>;
-  UnknownControlList: TObjectDictionary<HWND, TUnknownControlWnd>;
-  ToolbarWindow32WndList : TObjectDictionary<HWND, TToolbarWindow32Wnd>;
-  SysListView32WndList : TObjectDictionary<HWND, TSysListView32Wnd>;
-  BtnWndArrayList : TObjectDictionary<HWND, TButtonWnd>;
   ThemedSysControls: TThemedSysControls;
-
 
 { the Original InsertMenuItem function }
 function InsertMenuItemOrg(p1: HMENU; p2: UINT; p3: BOOL;
@@ -151,33 +142,15 @@ begin
   FPreviousHandle := 0;
   FHook := 0;
   InstallHook;
+  SysControlsWndList:= TObjectDictionary<HWND, TControlWnd>.Create([doOwnsValues]);
   PopupWndList:= TObjectDictionary<HWND, TPopupWnd>.Create([doOwnsValues]);
-  TooltipsWndList:= TObjectDictionary<HWND, TooltipsWnd>.Create([doOwnsValues]);
-  StaticWndList:= TObjectDictionary<HWND, TStaticWnd>.Create([doOwnsValues]);
-  DialogWndList:= TObjectDictionary<HWND,TDialogWnd>.Create([doOwnsValues]);
-  EditWndList:= TObjectDictionary<HWND, TEditWnd>.Create([doOwnsValues]);
-  ComboBoxWndList:= TObjectDictionary<HWND, TComboBoxWnd>.Create([doOwnsValues]);
-  UnknownControlList:= TObjectDictionary<HWND, TUnknownControlWnd>.Create([doOwnsValues]);
-  ToolbarWindow32WndList:= TObjectDictionary<HWND, TToolbarWindow32Wnd>.Create([doOwnsValues]);
-  SysListView32WndList := TObjectDictionary<HWND, TSysListView32Wnd>.Create([doOwnsValues]);
-  BtnWndArrayList := TObjectDictionary<HWND, TButtonWnd>.Create([doOwnsValues]);
 end;
 
 destructor TThemedSysControls.Destroy;
 begin
   RemoveHook;
-
+  SysControlsWndList.Free;
   PopupWndList.Free;
-  TooltipsWndList.Free;
-  StaticWndList.Free;
-  DialogWndList.Free;
-  EditWndList.Free;
-  ComboBoxWndList.Free;
-  UnknownControlList.Free;
-  ToolbarWindow32WndList.Free;
-  SysListView32WndList.Free;
-  BtnWndArrayList.Free;
-
   FBalloonHint.Free;
   inherited;
 end;
@@ -235,69 +208,8 @@ begin
       else
       if Code = HCBT_DESTROYWND then
       begin
-        sClassName := GetWindowClassName(wParam);
-          if (sClassName = '#32768') then
-          {PopupMenu}
-          begin
-            if PopupWndList.ContainsKey(wParam) then
-              PopupWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = '#32770') then
-          {Dialog}
-          begin
-            if DialogWndList.ContainsKey(wParam) then
-              DialogWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'Button') then
-          {Button}
-          begin
-            if BtnWndArrayList.ContainsKey(wParam) then
-              BtnWndArrayList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'ScrollBar') or (sClassName = 'ReBarWindow32') {or (sClassName = 'ToolbarWindow32')} then
-          begin
-            if UnknownControlList.ContainsKey(wParam) then
-              UnknownControlList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'SysListView32') then
-          begin
-            if SysListView32WndList.ContainsKey(wParam) then
-              SysListView32WndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'ToolbarWindow32') then
-          begin
-            if ToolbarWindow32WndList.ContainsKey(wParam) then
-              ToolbarWindow32WndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'Edit') then
-          begin
-            if EditWndList.ContainsKey(wParam) then
-              EditWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'Static') then
-          begin
-            if StaticWndList.ContainsKey(wParam) then
-              StaticWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'ComboBox') then
-          begin
-            if ComboBoxWndList.ContainsKey(wParam) then
-              ComboBoxWndList.Remove(wParam);
-          end
-          else
-          if (sClassName = 'tooltips_class32') then
-          begin
-            if TooltipsWndList.ContainsKey(wParam) then
-              TooltipsWndList.Remove(wParam);
-          end
+        if SysControlsWndList.ContainsKey(wParam) then
+          SysControlsWndList.Remove(wParam);
       end
       else
       if Code = HCBT_CREATEWND then
@@ -313,27 +225,27 @@ begin
             begin
               if (CBTSturct.lpcs.cx <> 0) and (CBTSturct.lpcs.cy <> 0) then
               begin
-                DialogWndList.Add(wParam, TDialogWnd.Create(wParam));
+                SysControlsWndList.Add(wParam, TDialogWnd.Create(wParam));
               end;
             end
           else
           if (sClassName = 'Button')  then
-              BtnWndArrayList.Add(wParam, TButtonWnd.Create(wParam))
+              SysControlsWndList.Add(wParam, TButtonWnd.Create(wParam))
           else
           if (sClassName = 'ScrollBar') or (sClassName = 'ReBarWindow32') {or (sClassName = 'ToolbarWindow32')} then
-              UnknownControlList.Add(wParam, TUnknownControlWnd.Create(wParam))
+              SysControlsWndList.Add(wParam, TUnknownControlWnd.Create(wParam))
           else
           if sClassName = 'SysListView32' then
-              SysListView32WndList.Add(wParam, TSysListView32Wnd.Create(wParam))
+              SysControlsWndList.Add(wParam, TSysListView32Wnd.Create(wParam))
           else
           if sClassName = 'ToolbarWindow32' then
             begin
               if not UseLatestCommonDialogs then
-                ToolbarWindow32WndList.Add(wParam, TToolbarWindow32Wnd.Create(wParam));
+                SysControlsWndList.Add(wParam, TToolbarWindow32Wnd.Create(wParam));
             end
           else
           if (sClassName = 'Edit')  then
-              EditWndList.Add(wParam, TEditWnd.Create(wParam))
+              SysControlsWndList.Add(wParam, TEditWnd.Create(wParam))
           else
           if (sClassName = 'Static') then
             begin
@@ -342,14 +254,14 @@ begin
                 (CBTSturct.lpcs.Style and SS_BITMAP <> SS_BITMAP) and
                 (CBTSturct.lpcs.Style and SS_GRAYRECT <> SS_GRAYRECT) and
                 (CBTSturct.lpcs.Style and SS_GRAYFRAME <> SS_GRAYFRAME) then
-                  StaticWndList.Add(wParam, TStaticWnd.Create(wParam));
+                  SysControlsWndList.Add(wParam, TStaticWnd.Create(wParam));
             end
           else
           if (sClassName = 'ComboBox') then
-            ComboBoxWndList.Add(wParam, TComboBoxWnd.Create(wParam))
+            SysControlsWndList.Add(wParam, TComboBoxWnd.Create(wParam))
           else
           if (sClassName = 'tooltips_class32') then
-            TooltipsWndList.Add(wParam, TooltipsWnd.Create(wParam))
+            SysControlsWndList.Add(wParam, TooltipsWnd.Create(wParam))
         end
     end;
   Result := CallNextHookEx(FHook, Code, wParam, lParam);

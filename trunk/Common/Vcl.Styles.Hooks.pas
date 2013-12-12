@@ -73,7 +73,7 @@ initialization
  begin
    //ThemeLibrary := LoadLibrary('uxtheme.dll');
    {$IFDEF DEBUG}
-   Addlog(Format('ThemeLibrary %x %d',[Integer(ThemeLibrary), Integer(ThemeLibrary)]));
+   //Addlog(Format('ThemeLibrary %x %d',[Integer(ThemeLibrary), Integer(ThemeLibrary)]));
    {$ENDIF}
 
            //original

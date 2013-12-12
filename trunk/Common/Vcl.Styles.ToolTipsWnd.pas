@@ -43,7 +43,6 @@ implementation
 
 uses
   System.Types,
-
   Vcl.GraphUtil,
   Winapi.CommCtrl,
   Winapi.Windows,
