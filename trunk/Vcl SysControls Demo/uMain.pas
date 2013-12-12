@@ -62,7 +62,6 @@ type
     SpeedButton8: TSpeedButton;
     SpeedButton9: TSpeedButton;
     TaskDialog1: TTaskDialog;
-    SpeedButton10: TSpeedButton;
     OpenDialog1: TOpenDialog;
     ReplaceDialog1: TReplaceDialog;
     Window1: TMenuItem;
@@ -136,12 +135,12 @@ end;
 
 procedure TMain.SpeedButton10Click(Sender: TObject);
 begin
-  TaskDialog1.Caption := 'Caption Text';
-  TaskDialog1.ExpandedText := 'ExpandedText ..';
-  TaskDialog1.FooterText := 'FooterText..';
-  TaskDialog1.Execute;  44
+//  TaskDialog1.Caption := 'Caption Text';
+//  TaskDialog1.ExpandedText := 'ExpandedText ..';
+//  TaskDialog1.FooterText := 'FooterText..';
+//  TaskDialog1.Execute;
 
-  issue 8
+  //issue 8
 end;
 
 procedure TMain.SpeedButton11Click(Sender: TObject);

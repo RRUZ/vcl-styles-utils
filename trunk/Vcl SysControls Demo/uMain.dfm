@@ -82,7 +82,7 @@ object Main: TMain
     OnClick = SpeedButton6Click
   end
   object SpeedButton7: TSpeedButton
-    Left = 295
+    Left = 239
     Top = 189
     Width = 84
     Height = 22
@@ -90,7 +90,7 @@ object Main: TMain
     OnClick = SpeedButton7Click
   end
   object SpeedButton8: TSpeedButton
-    Left = 96
+    Left = 40
     Top = 189
     Width = 103
     Height = 22
@@ -98,23 +98,15 @@ object Main: TMain
     OnClick = SpeedButton8Click
   end
   object SpeedButton9: TSpeedButton
-    Left = 205
+    Left = 149
     Top = 189
     Width = 84
     Height = 22
     Caption = 'ReplaceDialog'
     OnClick = SpeedButton9Click
   end
-  object SpeedButton10: TSpeedButton
-    Left = 8
-    Top = 189
-    Width = 82
-    Height = 22
-    Caption = 'TaskDialog'
-    OnClick = SpeedButton10Click
-  end
   object SpeedButton11: TSpeedButton
-    Left = 385
+    Left = 329
     Top = 189
     Width = 101
     Height = 22
@@ -346,7 +338,7 @@ object Main: TMain
     Left = 296
     Top = 144
     Bitmap = {
-      494C010106000800680010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000800700010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

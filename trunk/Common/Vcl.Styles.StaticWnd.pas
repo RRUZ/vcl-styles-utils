@@ -62,9 +62,10 @@ var
   DC: HDC;
   LDetails: TThemedElementDetails;
   PS: TPaintStruct;
-  R: TRect;
-  Font: HFont;
-  TextFormat: TTextFormat;
+  LRect: TRect;
+  LFont: HFont;
+  LCanvas : TCanvas;
+  LTextFormat : TTextFormat;
 begin
   uMsg := Message.Msg;
   case uMsg of
@@ -75,6 +76,7 @@ begin
           and (Style and SS_GRAYRECT <> SS_GRAYRECT) and
           (Style and SS_GRAYFRAME <> SS_GRAYFRAME) then
           begin
+            //DC := HDC(Message.WParam);
             SetRedraw(False);
             Message.Result := CallOrgWndProc(Message);
             SetRedraw(True);
@@ -82,30 +84,42 @@ begin
             BeginPaint(Handle, PS);
             DC := GetDC(Handle);
 
+
             FillRectangle(DC, ClientRect,
               StyleServices.GetStyleColor(scWindow));
 
             LDetails := StyleServices.GetElementDetails(States[Enabled]);
 
-            TextFormat := [tfSingleLine, tfHidePrefix];
+            LTextFormat := [{tfSingleLine, tfHidePrefix}];
             if Style and SS_LEFT = SS_LEFT then
-              include(TextFormat, tfLeft)
-            else if Style and SS_RIGHT = SS_RIGHT then
-              include(TextFormat, tfRight)
-            else if Style and SS_CENTER = SS_CENTER then
-              include(TextFormat, tfCenter);
+              include(LTextFormat, tfLeft)
+            else
+            if Style and SS_RIGHT = SS_RIGHT then
+              include(LTextFormat, tfRight)
+            else
+            if Style and SS_CENTER = SS_CENTER then
+              include(LTextFormat, tfCenter);
 
-            R := ClientRect;
+            if Style and SS_ENDELLIPSIS = SS_ENDELLIPSIS then
+              include(LTextFormat, tfEndEllipsis);
 
-            Font := CreateFont(13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Tahoma');
-            try
-              SelectObject(DC, Font);
-              StyleServices.DrawText(DC, LDetails, Text, R, TextFormat);
-              ReleaseDC(Handle, DC);
-              EndPaint(Handle, PS);
-            finally
-              DeleteObject(Font);
-            end;
+            if Style and SS_PATHELLIPSIS = SS_PATHELLIPSIS then
+              include(LTextFormat, tfPathEllipsis);
+
+            if Style and SS_WORDELLIPSIS = SS_WORDELLIPSIS then
+              include(LTextFormat, tfWordEllipsis);
+
+            if not (Style and SS_ENDELLIPSIS = SS_ENDELLIPSIS) and not (Style and SS_PATHELLIPSIS = SS_PATHELLIPSIS) and not (Style and SS_WORDELLIPSIS = SS_WORDELLIPSIS)  then
+              include(LTextFormat, tfWordBreak);
+
+            LRect := ClientRect;
+
+            LFont := Self.Font.Handle; //CreateFont(13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Tahoma');
+            SelectObject(DC, LFont);
+            StyleServices.DrawText(DC, LDetails, Text, LRect, LTextFormat);
+            ReleaseDC(Handle, DC);
+            EndPaint(Handle, PS);
+
           end
         else
           Message.Result := CallOrgWndProc(Message);
