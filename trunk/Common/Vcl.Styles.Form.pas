@@ -97,7 +97,20 @@ type
 implementation
 
 uses
+   {$IFDEF DEBUG}
+   TypInfo,
+   IOUtils,
+   {$ENDIF}
    System.SysUtils;
+
+
+{$IFDEF DEBUG}
+procedure Addlog(const msg : string);
+begin
+//   TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+end;
+{$ENDIF}
+
 
 { TFormWnd }
 
@@ -215,6 +228,8 @@ begin
   end;
 end;
 
+
+
 function TFormWnd.GetBorderSize: TRect;
 var
   LSize    : TSize;
@@ -222,6 +237,7 @@ var
   LDetail  : TThemedWindow;
 begin
   Result := Rect(0, 0, 0, 0);
+
   if BorderStyle = bsNone then Exit;
 
   //height
@@ -287,7 +303,7 @@ begin
   if ((LStyle and WS_CAPTION) = WS_CAPTION) and ((LStyle and WS_THICKFRAME) = WS_THICKFRAME) then
    Result:=bsSizeable
   else
-  if ((LStyle and WS_CAPTION) = WS_CAPTION) and ((LStyle and WS_BORDER) = WS_BORDER) then
+  if (((LStyle and WS_CAPTION) = WS_CAPTION) and ((LStyle and WS_BORDER) = WS_BORDER)) or ((LStyle and WS_SYSMENU) = WS_SYSMENU) then
    Result:=bsSingle;
 end;
 
@@ -411,6 +427,7 @@ begin
     Result := FIcon;
 end;
 
+
 procedure TFormWnd.PaintNC(Canvas: TCanvas);
 var
   Details, CaptionDetails, IconDetails: TThemedElementDetails;
@@ -421,7 +438,6 @@ var
   TextFormat: TTextFormat;
   LText: string;
 begin
-
   {init some parameters}
   FCloseButtonRect := Rect(0, 0, 0, 0);
   FMaxButtonRect := Rect(0, 0, 0, 0);
@@ -431,6 +447,7 @@ begin
   FCaptionRect := Rect(0, 0, 0, 0);
 
   R := GetBorderSize;
+  //Addlog(Format('GetBorderSize W %d H %d L %d T %d',[R.Width, R.Height, R.Left, R.Top]));
 
   {draw caption}
 
@@ -446,186 +463,189 @@ begin
   begin
    if FFormActive then
       Detail := twSmallCaptionActive
-    else
+   else
       Detail := twSmallCaptionInActive
   end;
+
   CaptionBuffer := TBitmap.Create;
-  CaptionBuffer.SetSize(Self.Width, R.Top);
+  try
+    CaptionBuffer.SetSize(Self.Width, R.Top);
 
-  {draw caption border}
-  DrawRect := Rect(0, 0, CaptionBuffer.Width, CaptionBuffer.Height);
-  Details := StyleServices.GetElementDetails(Detail);
-  StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, DrawRect);
-  TextRect := DrawRect;
-  CaptionDetails := Details;
+    {draw caption border}
+    DrawRect := Rect(0, 0, CaptionBuffer.Width, CaptionBuffer.Height);
+    Details := StyleServices.GetElementDetails(Detail);
+    StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, DrawRect);
+    TextRect := DrawRect;
+    CaptionDetails := Details;
 
-  {draw icon}
-  if (biSystemMenu in BorderIcons) and
-     (BorderStyle <> bsDialog) and
-     (BorderStyle <> bsToolWindow) and
-     (BorderStyle <> bsSizeToolWin) then
-  begin
-    IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
-    if not StyleServices.GetElementContentRect(0, IconDetails, DrawRect, ButtonRect) then
-      ButtonRect := Rect(0, 0, 0, 0);
-    R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
-    RectVCenter(R1, ButtonRect);
-    if ButtonRect.Width > 0 then
-      DrawIconEx(CaptionBuffer.Canvas.Handle, R1.Left, R1.Top, GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
-    Inc(TextRect.Left, ButtonRect.Width + 5);
-    FSysMenuButtonRect := ButtonRect;
-  end
-  else
-    Inc(TextRect.Left, R.Left);
-
-  {draw buttons}
-  if (biSystemMenu in BorderIcons) then
-  begin
-    if (BorderStyle <> bsToolWindow) and
+    {draw icon}
+    if (biSystemMenu in BorderIcons) and
+       (BorderStyle <> bsDialog) and
+       (BorderStyle <> bsToolWindow) and
        (BorderStyle <> bsSizeToolWin) then
     begin
-      if (FPressedButton = HTCLOSE) and (FHotButton = HTCLOSE) then
-        FButtonState := twCloseButtonPushed
-      else if FHotButton = HTCLOSE then
-        FButtonState := twCloseButtonHot
-      else
-        if FFormActive then
-          FButtonState := twCloseButtonNormal
-        else
-          FButtonState := twCloseButtonDisabled;
-     end
-    else
-    begin
-      if (FPressedButton = HTCLOSE) and (FHotButton = HTCLOSE) then
-        FButtonState := twSmallCloseButtonPushed
-      else if FHotButton = HTCLOSE then
-        FButtonState := twSmallCloseButtonHot
-      else
-        if FFormActive then
-          FButtonState := twSmallCloseButtonNormal
-        else
-          FButtonState := twSmallCloseButtonDisabled;
-    end;
-
-    Details := StyleServices.GetElementDetails(FButtonState);
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
-      ButtonRect := Rect(0, 0, 0, 0);
-
-    StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
-    if ButtonRect.Left > 0 then
-      TextRect.Right := ButtonRect.Left;
-    FCloseButtonRect := ButtonRect;
-  end;
-
-  if (biMaximize in BorderIcons) and
-     (biSystemMenu in BorderIcons) and
-     (BorderStyle <> bsDialog) and
-     (BorderStyle <> bsToolWindow) and
-     (BorderStyle <> bsSizeToolWin) then
-  begin
-    if WindowState = wsMaximized then
-    begin
-      if (FPressedButton = HTMAXBUTTON) and (FHotButton = HTMAXBUTTON) then
-        FButtonState := twRestoreButtonPushed
-      else if FHotButton = HTMAXBUTTON then
-        FButtonState := twRestoreButtonHot
-      else
-      if FFormActive then
-        FButtonState := twRestoreButtonNormal
-      else
-        FButtonState := twRestoreButtonDisabled;
+      IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
+      if not StyleServices.GetElementContentRect(0, IconDetails, DrawRect, ButtonRect) then
+        ButtonRect := Rect(0, 0, 0, 0);
+      R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+      RectVCenter(R1, ButtonRect);
+      if ButtonRect.Width > 0 then
+        DrawIconEx(CaptionBuffer.Canvas.Handle, R1.Left, R1.Top, GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
+      Inc(TextRect.Left, ButtonRect.Width + 5);
+      FSysMenuButtonRect := ButtonRect;
     end
     else
+      Inc(TextRect.Left, R.Left);
+
+    {draw buttons}
+    if (biSystemMenu in BorderIcons) then
     begin
-      if (FPressedButton = HTMAXBUTTON) and (FHotButton = HTMAXBUTTON) then
-        FButtonState := twMaxButtonPushed
-      else if FHotButton = HTMAXBUTTON then
-        FButtonState := twMaxButtonHot
+      if (BorderStyle <> bsToolWindow) and
+         (BorderStyle <> bsSizeToolWin) then
+      begin
+        if (FPressedButton = HTCLOSE) and (FHotButton = HTCLOSE) then
+          FButtonState := twCloseButtonPushed
+        else if FHotButton = HTCLOSE then
+          FButtonState := twCloseButtonHot
+        else
+          if FFormActive then
+            FButtonState := twCloseButtonNormal
+          else
+            FButtonState := twCloseButtonDisabled;
+       end
       else
-      if FFormActive then
-        FButtonState := twMaxButtonNormal
-      else
-        FButtonState := twMaxButtonDisabled;
+      begin
+        if (FPressedButton = HTCLOSE) and (FHotButton = HTCLOSE) then
+          FButtonState := twSmallCloseButtonPushed
+        else if FHotButton = HTCLOSE then
+          FButtonState := twSmallCloseButtonHot
+        else
+          if FFormActive then
+            FButtonState := twSmallCloseButtonNormal
+          else
+            FButtonState := twSmallCloseButtonDisabled;
+      end;
+
+      Details := StyleServices.GetElementDetails(FButtonState);
+      if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+        ButtonRect := Rect(0, 0, 0, 0);
+
+      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      if ButtonRect.Left > 0 then
+        TextRect.Right := ButtonRect.Left;
+      FCloseButtonRect := ButtonRect;
     end;
-    Details := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
-      ButtonRect := Rect(0, 0, 0, 0);
-    if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
-    if ButtonRect.Left > 0 then
-      TextRect.Right := ButtonRect.Left;
-    FMaxButtonRect := ButtonRect;
-  end;
-
-  if (biMinimize in BorderIcons) and
-     (biSystemMenu in BorderIcons) and
-     (BorderStyle <> bsDialog) and
-     (BorderStyle <> bsToolWindow) and
-     (BorderStyle <> bsSizeToolWin) then
-  begin
-    if (FPressedButton = HTMINBUTTON) and (FHotButton = HTMINBUTTON) then
-      FButtonState := twMinButtonPushed
-    else if FHotButton = HTMINBUTTON then
-      FButtonState := twMinButtonHot
-    else
-      if FFormActive then
-        FButtonState := twMinButtonNormal
+    if (biMaximize in BorderIcons) and
+       (biSystemMenu in BorderIcons) and
+       (BorderStyle <> bsDialog) and
+       (BorderStyle <> bsToolWindow) and
+       (BorderStyle <> bsSizeToolWin) then
+    begin
+      if WindowState = wsMaximized then
+      begin
+        if (FPressedButton = HTMAXBUTTON) and (FHotButton = HTMAXBUTTON) then
+          FButtonState := twRestoreButtonPushed
+        else if FHotButton = HTMAXBUTTON then
+          FButtonState := twRestoreButtonHot
+        else
+        if FFormActive then
+          FButtonState := twRestoreButtonNormal
+        else
+          FButtonState := twRestoreButtonDisabled;
+      end
       else
-        FButtonState := twMinButtonDisabled;
+      begin
+        if (FPressedButton = HTMAXBUTTON) and (FHotButton = HTMAXBUTTON) then
+          FButtonState := twMaxButtonPushed
+        else if FHotButton = HTMAXBUTTON then
+          FButtonState := twMaxButtonHot
+        else
+        if FFormActive then
+          FButtonState := twMaxButtonNormal
+        else
+          FButtonState := twMaxButtonDisabled;
+      end;
+      Details := StyleServices.GetElementDetails(FButtonState);
 
-    Details := StyleServices.GetElementDetails(FButtonState);
+      if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+        ButtonRect := Rect(0, 0, 0, 0);
+      if ButtonRect.Width > 0 then
+        StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      if ButtonRect.Left > 0 then
+        TextRect.Right := ButtonRect.Left;
+      FMaxButtonRect := ButtonRect;
+    end;
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
-      ButtonRect := Rect(0, 0, 0, 0);
-    if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
-    if ButtonRect.Left > 0 then TextRect.Right := ButtonRect.Left;
-    FMinButtonRect := ButtonRect;
+    if (biMinimize in BorderIcons) and
+       (biSystemMenu in BorderIcons) and
+       (BorderStyle <> bsDialog) and
+       (BorderStyle <> bsToolWindow) and
+       (BorderStyle <> bsSizeToolWin) then
+    begin
+      if (FPressedButton = HTMINBUTTON) and (FHotButton = HTMINBUTTON) then
+        FButtonState := twMinButtonPushed
+      else if FHotButton = HTMINBUTTON then
+        FButtonState := twMinButtonHot
+      else
+        if FFormActive then
+          FButtonState := twMinButtonNormal
+        else
+          FButtonState := twMinButtonDisabled;
+
+      Details := StyleServices.GetElementDetails(FButtonState);
+
+      if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+        ButtonRect := Rect(0, 0, 0, 0);
+      if ButtonRect.Width > 0 then
+        StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      if ButtonRect.Left > 0 then TextRect.Right := ButtonRect.Left;
+      FMinButtonRect := ButtonRect;
+    end;
+
+    if (biHelp in BorderIcons) and (biSystemMenu in BorderIcons) and
+       ((not (biMaximize in BorderIcons) and
+       not (biMinimize in BorderIcons)) or (BorderStyle = bsDialog))
+    then
+    begin
+      if (FPressedButton = HTHELP) and (FHotButton = HTHELP) then
+        FButtonState := twHelpButtonPushed
+      else if FHotButton = HTHELP then
+        FButtonState := twHelpButtonHot
+      else
+      if FFormActive then
+        FButtonState := twHelpButtonNormal
+      else
+        FButtonState := twHelpButtonDisabled;
+      Details := StyleServices.GetElementDetails(FButtonState);
+
+      if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+        ButtonRect := Rect(0, 0, 0, 0);
+      if ButtonRect.Width > 0 then
+        StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+
+      if ButtonRect.Left > 0 then
+        TextRect.Right := ButtonRect.Left;
+      FHelpButtonRect := ButtonRect;
+    end;
+
+    {draw text}
+    TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
+
+
+    LText := Text;
+    StyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+    FCaptionRect := TextRect;
+
+    {draw caption buffer}
+
+    Canvas.Draw(0, 0, CaptionBuffer);
+  finally
+   CaptionBuffer.Free;
   end;
-
-  if (biHelp in BorderIcons) and (biSystemMenu in BorderIcons) and
-     ((not (biMaximize in BorderIcons) and
-     not (biMinimize in BorderIcons)) or (BorderStyle = bsDialog))
-  then
-  begin
-    if (FPressedButton = HTHELP) and (FHotButton = HTHELP) then
-      FButtonState := twHelpButtonPushed
-    else if FHotButton = HTHELP then
-      FButtonState := twHelpButtonHot
-    else
-    if FFormActive then
-      FButtonState := twHelpButtonNormal
-    else
-      FButtonState := twHelpButtonDisabled;
-    Details := StyleServices.GetElementDetails(FButtonState);
-
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
-      ButtonRect := Rect(0, 0, 0, 0);
-    if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
-
-    if ButtonRect.Left > 0 then
-      TextRect.Right := ButtonRect.Left;
-    FHelpButtonRect := ButtonRect;
-  end;
-
-  {draw text}
-  TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
-
-
-  LText := Text;
-  StyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
-  FCaptionRect := TextRect;
-
-  {draw caption buffer}
-
-  Canvas.Draw(0, 0, CaptionBuffer);
-  CaptionBuffer.Free;
 
 
   {draw left border}
-
   if (BorderStyle <> bsToolWindow) and (BorderStyle <> bsSizeToolWin) then
   begin
     if FFormActive then

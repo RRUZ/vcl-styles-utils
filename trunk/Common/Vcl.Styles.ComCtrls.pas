@@ -145,6 +145,11 @@ begin
 
 
   case Message.Msg of
+    WM_NCCALCSIZE :
+      begin
+        Message.Result := 0;
+
+      end;
 
     WM_PAINT:
       begin
@@ -156,6 +161,10 @@ begin
           else
             LCanvas.Handle := BeginPaint(Handle, lpPaint);
 
+
+          LDetails.Element := teProgress;
+          if StyleServices.HasTransparentParts(LDetails) then
+            StyleServices.DrawParentBackground(Handle, LCanvas.Handle, LDetails, False);
 
           //Frame
           LRect := BarRect;
