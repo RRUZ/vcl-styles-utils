@@ -20,6 +20,7 @@ InternalCompressLevel=max
 
 [Files]
 Source: Win32\Release\VclStylesinno.dll; DestDir: {app}
+;Source: Win32\Debug\VclStylesinno.dll; DestDir: {app}
 Source: Styles\Amakrits.vsf; DestDir: {app}\Styles\
 Source: Styles\AmethystKamri.vsf; DestDir: {app}\Styles\
 Source: Styles\AquaGraphite.vsf; DestDir: {app}\Styles\
