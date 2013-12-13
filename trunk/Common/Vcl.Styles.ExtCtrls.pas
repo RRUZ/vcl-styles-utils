@@ -41,19 +41,19 @@ type
     constructor Create(AHandle: THandle); override;
   end;
 
-  TNotebookWnd = class(TControlWnd)
-  protected
-    procedure WndProc(var Message: TMessage); override;
-  public
-    constructor Create(AHandle: THandle); override;
-  end;
-
-  TNotebookPagelWnd = class(TControlWnd)
-  protected
-    procedure WndProc(var Message: TMessage); override;
-  public
-    constructor Create(AHandle: THandle); override;
-  end;
+//  TNotebookWnd = class(TControlWnd)
+//  protected
+//    procedure WndProc(var Message: TMessage); override;
+//  public
+//    constructor Create(AHandle: THandle); override;
+//  end;
+//
+//  TNotebookPagelWnd = class(TControlWnd)
+//  protected
+//    procedure WndProc(var Message: TMessage); override;
+//  public
+//    constructor Create(AHandle: THandle); override;
+//  end;
 
 implementation
 
@@ -174,72 +174,72 @@ begin
     Message.Result := CallOrgWndProc(Message);
   end;
 end;
-
-{ TNotebookPagelWnd }
-
-constructor TNotebookPagelWnd.Create(AHandle: THandle);
-var
-  brush :HBRUSH;
-begin
-  inherited;
-         brush := CreateSolidBrush(RGB(0, 0, 255));
-         SetClassLongPtr(Handle, -10, LONG(brush));
-
-end;
-
-
-procedure TNotebookPagelWnd.WndProc(var Message: TMessage);
-
-      procedure PaintBkgnd(DC: HDC; R: TRect);
-      var
-        LDetails: TThemedElementDetails;
-        ThemeElement: TThemedElement;
-      begin
-        ThemeElement := TThemedElement.teWindow;
-        LDetails := TThemedElementDetails.Create(ThemeElement, 0, 1);
-
-        StyleServices.DrawElement(DC, LDetails, R);
-      end;
-
-var
-  uMsg: UINT;
-begin
-
-  uMsg := Message.Msg;
-
-  case uMsg of
-
-    WM_ERASEBKGND:
-      begin
-        PaintBkgnd(Message.WParam, ClientRect);
-        Message.Result := 1;
-      end;
-
-  else
-    Message.Result := CallOrgWndProc(Message);
-  end;
-end;
-
-{ TNotebooklWnd }
-
-constructor TNotebookWnd.Create(AHandle: THandle);
-begin
-  inherited;
-
-end;
-
-procedure TNotebookWnd.WndProc(var Message: TMessage);
-var
-  uMsg: UINT;
-begin
-  uMsg := Message.Msg;
-  case uMsg of
-    WM_ERASEBKGND:
-      begin
-         CallOrgWndProc(Message);
-      end;
-  else
-    Message.Result := CallOrgWndProc(Message);
-  end;
-end;
+//
+//{ TNotebookPagelWnd }
+//
+//constructor TNotebookPagelWnd.Create(AHandle: THandle);
+//var
+//  brush :HBRUSH;
+//begin
+//  inherited;
+//         brush := CreateSolidBrush(RGB(0, 0, 255));
+//         SetClassLongPtr(Handle, -10, LONG(brush));
+//
+//end;
+//
+//
+//procedure TNotebookPagelWnd.WndProc(var Message: TMessage);
+//
+//      procedure PaintBkgnd(DC: HDC; R: TRect);
+//      var
+//        LDetails: TThemedElementDetails;
+//        ThemeElement: TThemedElement;
+//      begin
+//        ThemeElement := TThemedElement.teWindow;
+//        LDetails := TThemedElementDetails.Create(ThemeElement, 0, 1);
+//
+//        StyleServices.DrawElement(DC, LDetails, R);
+//      end;
+//
+//var
+//  uMsg: UINT;
+//begin
+//
+//  uMsg := Message.Msg;
+//
+//  case uMsg of
+//
+//    WM_ERASEBKGND:
+//      begin
+//        PaintBkgnd(Message.WParam, ClientRect);
+//        Message.Result := 1;
+//      end;
+//
+//  else
+//    Message.Result := CallOrgWndProc(Message);
+//  end;
+//end;
+//
+//{ TNotebooklWnd }
+//
+//constructor TNotebookWnd.Create(AHandle: THandle);
+//begin
+//  inherited;
+//
+//end;
+//
+//procedure TNotebookWnd.WndProc(var Message: TMessage);
+//var
+//  uMsg: UINT;
+//begin
+//  uMsg := Message.Msg;
+//  case uMsg of
+//    WM_ERASEBKGND:
+//      begin
+//         CallOrgWndProc(Message);
+//      end;
+//  else
+//    Message.Result := CallOrgWndProc(Message);
+//  end;
+//end;
 end.

@@ -16,9 +16,10 @@ VersionInfoCompany=The Road To Delphi
 VersionInfoDescription=VCL Styles Setup
 VersionInfoTextVersion=1, 0, 0, 0
 InternalCompressLevel=max
-
+;LicenseFile="ISPPExample1License.txt"
 [Files]
 Source: ..\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+;Source: ..\Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 Source: ..\Styles\Amakrits.vsf; DestDir: {app}; Flags: dontcopy
 
 

@@ -5,7 +5,7 @@ library VclStylesInno;
   {$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
 {$ENDIF}
 
-{$SetPEFlags $2000}
+{.$SetPEFlags $2000}
 uses
   System.SysUtils,
   Vcl.Themes,
