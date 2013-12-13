@@ -48,12 +48,22 @@ type
   TCheckBoxTextWnd = class(TControlWnd)
   private
     FPressed : Boolean;
-    function GetDrawState(State: TCheckBoxState): TThemedButton;
+    function GetDrawState(State: TCheckBoxState): TThemedButton; virtual;
   protected
     procedure WndProc(var Message: TMessage); override;
   public
     constructor Create(AHandle: THandle); override;
   end;
+
+  TRadioButtonWnd = class(TCheckBoxTextWnd)
+  private
+    function GetDrawState(State: TCheckBoxState): TThemedButton; override;
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+  end;
+
 
   TEditTextWnd = class(TControlWnd)
   private
@@ -702,4 +712,42 @@ begin
       Message.Result := CallOrgWndProc(Message);
   end;
 end;
+{ TRadioButtonWnd }
+
+constructor TRadioButtonWnd.Create(AHandle: THandle);
+begin
+  inherited;
+end;
+
+function TRadioButtonWnd.GetDrawState(State: TCheckBoxState): TThemedButton;
+begin
+  Result := tbButtonDontCare;
+
+  if not Enabled then
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedDisabled;
+      cbChecked: Result := tbRadioButtonCheckedDisabled;
+    end
+  else if FPressed and MouseInControl then
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedPressed;
+      cbChecked: Result := tbRadioButtonCheckedPressed;
+    end
+  else if MouseInControl then
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedHot;
+      cbChecked: Result := tbRadioButtonCheckedHot;
+    end
+  else
+    case State of
+      cbUnChecked: Result := tbRadioButtonUncheckedNormal;
+      cbChecked: Result := tbRadioButtonCheckedNormal;
+    end;
+end;
+
+procedure TRadioButtonWnd.WndProc(var Message: TMessage);
+begin
+  inherited;
+end;
+
 end.

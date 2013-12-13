@@ -545,12 +545,12 @@ begin
 
         {$IFDEF DEBUG}
         if {(SameText(sClassName,'TNewListBox'))} PCWPStruct(lParam)^.message=WM_DESTROY then
-        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
-        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
-        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
-        ' hwnd : '+ IntToHex(PCWPStruct(lParam)^.hwnd, 8) +
-        ' WNDPROC : ' + IntToHex(GetWindowLongPtr(PCWPStruct(lParam)^.hwnd, GWL_WNDPROC), 8 )
-        );
+//        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
+//        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
+//        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
+//        ' hwnd : '+ IntToHex(PCWPStruct(lParam)^.hwnd, 8) +
+//        ' WNDPROC : ' + IntToHex(GetWindowLongPtr(PCWPStruct(lParam)^.hwnd, GWL_WNDPROC), 8 )
+//        );
         {$ENDIF}
 
         if SameText(sClassName,'TNewButton') then
@@ -575,6 +575,12 @@ begin
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TCheckBoxTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+        end
+        else
+        if SameText(sClassName,'TNewRadioButton') then
+        begin
+           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TRadioButtonWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TEdit') or SameText(sClassName,'TNewEdit')  or SameText(sClassName,'TPasswordEdit')  then

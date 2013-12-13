@@ -11,6 +11,7 @@ WizardSmallImageFile=..\images\WizModernSmallImage-IS_Orange.bmp
 [Files]
 Source: compiler:WizModernSmallImage.bmp; Flags: dontcopy
 Source: ..\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
+;Source: ..\Win32\Debug\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 ;Source: ..\Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 Source: ..\Styles\Auric.vsf; DestDir: {app}; Flags: dontcopy
 [Code]
@@ -361,7 +362,7 @@ begin
   { Alter Font *after* setting Parent so the correct defaults are inherited first }
   URLLabel.Font.Style := URLLabel.Font.Style + [fsUnderline];
   if GetWindowsVersion >= $040A0000 then   { Windows 98 or later? }
-    URLLabel.Font.Color := clHotLight
+    URLLabel.Font.Color := clHighLight
   else
     URLLabel.Font.Color := clBlue;
   URLLabel.Top := AboutButton.Top + AboutButton.Height - URLLabel.Height - 2;

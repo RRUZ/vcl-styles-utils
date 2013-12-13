@@ -36,8 +36,8 @@ uses
   Vcl.Themes;
 
 var
-  //ThemeLibrary: THandle;
-  TrampolineOpenThemeData: function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
+//  ThemeLibrary: THandle;
+//  TrampolineOpenThemeData: function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
   TrampolineGetSysColor  : function (nIndex: Integer): DWORD; stdcall;
   TrampolineGetThemeSysColor :  function(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
 
@@ -45,11 +45,21 @@ var
   OpenThemeDataOrgPointer: Pointer = nil;
   GetThemeSysColorOrgPointer : Pointer = nil;
 
+{$IFDEF DEBUG}
+procedure Addlog(const msg : string);
+begin
+   TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+end;
+{$ENDIF}
 
+{$IFDEF DEBUG}
 function InterceptOpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 begin
+   Addlog('pszClassList '+pszClassList);
    Result:= TrampolineOpenThemeData(hwnd, pszClassList);
 end;
+{$ENDIF}
+
 
 function InterceptGetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
@@ -68,23 +78,34 @@ begin
 end;
 
 
+//var
+//   hThemeData : HTHEME;
+//
 initialization
+
  if StyleServices.Available then
  begin
-   //ThemeLibrary := LoadLibrary('uxtheme.dll');
-   {$IFDEF DEBUG}
-   //Addlog(Format('ThemeLibrary %x %d',[Integer(ThemeLibrary), Integer(ThemeLibrary)]));
-   {$ENDIF}
+//   ThemeLibrary := LoadLibrary('uxtheme.dll');
+//   {$IFDEF DEBUG}
+//   Addlog(Format('ThemeLibrary %x %d',[Integer(ThemeLibrary), Integer(ThemeLibrary)]));
+//   {$ENDIF}
 
-           //original
    GetSysColorOrgPointer  := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
+   //Addlog(Format('GetSysColorOrgPointer %p',[GetSysColorOrgPointer]));
    @TrampolineGetSysColor := InterceptCreate(GetSysColorOrgPointer, @InterceptGetSysColor);
+   //Addlog(Format('TrampolineGetSysColor %p',[@TrampolineGetSysColor]));
 
-        // original
-     {
-   OpenThemeDataOrgPointer  := GetProcAddress(ThemeLibrary, 'OpenThemeData');
-   @TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @InterceptOpenThemeData);
+   //InitThemeLibrary;
 
+//
+//   OpenThemeDataOrgPointer  := GetProcAddress(ThemeLibrary, 'OpenThemeData');
+//   Addlog(Format('OpenThemeDataOrgPointer %p',[OpenThemeDataOrgPointer]));
+//
+//   @TrampolineOpenThemeData := InterceptCreate(OpenThemeDataOrgPointer, @InterceptOpenThemeData);
+//   Addlog(Format('TrampolineOpenThemeData %p',[@TrampolineOpenThemeData]));
+//
+//
+   {
    GetThemeSysColorOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColor');
    @TrampolineGetThemeSysColor := InterceptCreate(GetThemeSysColorOrgPointer, @InterceptGetSysColor);
    }

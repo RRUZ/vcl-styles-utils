@@ -64,7 +64,6 @@ var
   PS: TPaintStruct;
   LRect: TRect;
   LFont: HFont;
-  LCanvas : TCanvas;
   LTextFormat : TTextFormat;
 begin
   uMsg := Message.Msg;
