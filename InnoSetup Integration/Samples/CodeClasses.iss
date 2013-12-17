@@ -11,7 +11,6 @@ WizardSmallImageFile=..\images\WizModernSmallImage-IS_Orange.bmp
 [Files]
 Source: compiler:WizModernSmallImage.bmp; Flags: dontcopy
 Source: ..\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
-;Source: ..\Win32\Debug\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 ;Source: ..\Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 Source: ..\Styles\Auric.vsf; DestDir: {app}; Flags: dontcopy
 [Code]
@@ -20,8 +19,6 @@ Source: ..\Styles\Auric.vsf; DestDir: {app}; Flags: dontcopy
 procedure LoadVCLStyle(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall';
 // Import the UnLoadVCLStyles function from VclStylesInno.DLL
 procedure UnLoadVCLStyles; external 'UnLoadVCLStyles@files:VclStylesInno.dll stdcall';
-
-function LoadLibrary(lpLibFileName: PAnsiChar): Integer; external 'LoadLibraryA@kernel32.dll stdcall';
 
 function InitializeSetup(): Boolean;
 begin

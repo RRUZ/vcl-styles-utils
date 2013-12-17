@@ -56,6 +56,12 @@ Source: Styles\TurquoiseGray.vsf; DestDir: {app}\Styles\
 Source: Styles\YellowGraphite.vsf; DestDir: {app}\Styles\
 Source: Samples\CodeClasses.iss; DestDir: {app}\Samples\
 Source: Samples\VCLStylesDemo.iss; DestDir: {app}\Samples\
+Source: Samples\Readme-German.txt; DestDir: {app}\Samples\
+Source: Samples\Components.iss; DestDir: {app}\Samples\
+Source: Samples\MyProg.chm; DestDir: {app}\Samples\
+Source: Samples\MyProg.exe; DestDir: {app}\Samples\
+Source: Samples\Readme.txt; DestDir: {app}\Samples\
+Source: Samples\Readme-Dutch.txt; DestDir: {app}\Samples\
 Source: Images\WizModernImage-IS.bmp; DestDir: {app}\Images\
 Source: Images\WizModernImage-IS_BW.bmp; DestDir: {app}\Images\
 Source: Images\WizModernImage-IS_Green.bmp; DestDir: {app}\Images\
@@ -66,7 +72,6 @@ Source: Images\WizModernSmallImage-IS_BW.bmp; DestDir: {app}\Images\
 Source: Images\WizModernSmallImage-IS_Green.bmp; DestDir: {app}\Images\
 Source: Images\WizModernSmallImage-IS_Orange.bmp; DestDir: {app}\Images\
 Source: Images\WizModernSmallImage-IS_Purple.bmp; DestDir: {app}\Images\
-
 
 [Code]
 // Import the LoadVCLStyle function from VclStylesInno.DLL
