@@ -79,10 +79,9 @@ end;
 = TODO =
 
    * Add support for TFolderTreeView and TStartMenuFolderTreeView components.
-   * Add support for themed controls in the TNewCheckBoxList component.
-   * Add support for the npbstMarquee style in the TNewProgressBar component.
+
 
 
 = Installer =
 
- Download the installer of the plugin from <a href="https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/SetupVCLStylesInno.exe">here</a>. The current version of the plugin is 1.0.5.3
+ Download the installer of the plugin from <a href="https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/SetupVCLStylesInno.exe">here</a>. The current version of the plugin is 1.0.6.1
