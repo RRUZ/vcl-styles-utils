@@ -982,7 +982,7 @@ end;
 function TIntercepts.CreateIntercept(TargetProc, InterceptProc: Pointer): Pointer;
 begin
   Assert(Assigned(TargetProc) and Assigned(InterceptProc));
-  GetMem(Result,TrampolineSize);
+  Result := VirtualAlloc(nil,TrampolineSize,MEM_COMMIT,PAGE_EXECUTE_READWRITE);
   TargetProc := GetFinalCode(TargetProc);
   InterceptProc := GetFinalCode(InterceptProc);
   if not InsertIntercept(TargetProc,Result,InterceptProc) then
@@ -1224,7 +1224,7 @@ begin
     Intercepts := NewIntercepts;
     try
       Result := Intercepts.RemoveIntercept(Trampoline,InterceptProc);
-      FreeMem(Trampoline);
+      VirtualFree(Trampoline, TrampolineSize, MEM_RELEASE);
       Trampoline := nil;
     finally
       Intercepts.Free;

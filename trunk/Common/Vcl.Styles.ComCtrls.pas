@@ -152,14 +152,37 @@ end;
 procedure TProgressBarWnd.TimerAction(Sender: TObject);
 var
   LCanvas: TCanvas;
+//  CaptionBuffer: TBitmap;
+//  LRect : TRect;
 begin
-  if StyleServices.Available and ((Style And PBS_MARQUEE)<>0) {and Visible}  then
+  if StyleServices.Available and ((Style And PBS_MARQUEE)<>0)  then
   begin
     LCanvas := TCanvas.Create;
     try
       LCanvas.Handle := GetWindowDC(Self.Handle);
-      DrawFrame(LCanvas);
-      DrawBar(LCanvas);
+
+//      CaptionBuffer := TBitmap.Create;
+//      try
+//        LRect := BarRect;
+//        CaptionBuffer.SetSize(LRect.Width, LRect.Height);
+//        DrawFrame(CaptionBuffer.Canvas);
+//        DrawBar(CaptionBuffer.Canvas);
+//        LCanvas.Draw(0, 0, CaptionBuffer);
+//      finally
+//        CaptionBuffer.Free;
+//      end;
+
+      if Self.Visible then
+      begin
+        DrawFrame(LCanvas);
+        DrawBar(LCanvas);
+      end;
+
+      Inc(FStep,1);
+      if FStep mod 20=0 then
+       FStep:=0;
+
+
     finally
       ReleaseDC(Handle, LCanvas.Handle);
       LCanvas.Handle := 0;
@@ -199,30 +222,30 @@ begin
   LRect := BarRect;
   if ((Style And PBS_MARQUEE)<>0)  then
   begin
-    InflateRect(LRect, -1, -1);
-    if Orientation = pbHorizontal then
-      LWidth := LRect.Width
-    else
-      LWidth := LRect.Height;
+      InflateRect(LRect, -1, -1);
+      if Orientation = pbHorizontal then
+        LWidth := LRect.Width
+      else
+        LWidth := LRect.Height;
 
-    LPos := Round(LWidth * 0.1);
-    FillR := LRect;
-    if Orientation = pbHorizontal then
-    begin
-      FillR.Right := FillR.Left + LPos;
-      LDetails := StyleServices.GetElementDetails(tpChunk);
-    end
-    else
-    begin
-      FillR.Top := FillR.Bottom - LPos;
-      LDetails := StyleServices.GetElementDetails(tpChunkVert);
-    end;
+      LPos := Round(LWidth * 0.05);
+      FillR := LRect;
+      if Orientation = pbHorizontal then
+      begin
+        FillR.Right := FillR.Left + LPos;
+        LDetails := StyleServices.GetElementDetails(tpChunk);
+      end
+      else
+      begin
+        FillR.Top := FillR.Bottom - LPos;
+        LDetails := StyleServices.GetElementDetails(tpChunkVert);
+      end;
 
-    FillR.SetLocation(FStep*FillR.Width, FillR.Top);
-    StyleServices.DrawElement(Canvas.Handle, LDetails, FillR);
-    Inc(FStep,1);
-    if FStep mod 10=0 then
-     FStep:=0;
+      FillR.SetLocation(FStep*FillR.Width, FillR.Top);
+      StyleServices.DrawElement(Canvas.Handle, LDetails, FillR);
+//    Inc(FStep,1);
+//    if FStep mod 20=0 then
+//     FStep:=0;
   end
   else
   begin
