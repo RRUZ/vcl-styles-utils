@@ -23,6 +23,10 @@ unit Vcl.Styles.Hooks;
 
 interface
 
+{$IFDEF CPUX64}
+  This unit only works under in 32 bits apps.
+{$ENDIF}
+
 implementation
 
 uses
