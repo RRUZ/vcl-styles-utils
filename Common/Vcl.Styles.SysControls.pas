@@ -225,6 +225,7 @@ begin
   PopupWndList:= TObjectDictionary<HWND, TPopupWnd>.Create([doOwnsValues]);
   {$ELSE}
   SysControlsWndList:= TDictionary.Create;
+  PopupWndList:= TDictionary.Create;
   {$ENDIF}
 end;
 

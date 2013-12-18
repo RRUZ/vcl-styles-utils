@@ -50,14 +50,14 @@ var
 
 
   TrampolineGetSysColor  : function (nIndex: Integer): DWORD; stdcall;
-  TrampolineGetThemeSysColor :  function(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
+  //TrampolineGetThemeSysColor :  function(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
 
   GetSysColorOrgPointer  : Pointer = nil;
   OpenThemeDataOrgPointer: Pointer = nil;
   CloseThemeDataOrgPointer: Pointer = nil;
   DrawThemeBackgroundOrgPointer: Pointer = nil;
 
-  GetThemeSysColorOrgPointer : Pointer = nil;
+  //GetThemeSysColorOrgPointer : Pointer = nil;
   HThemeClassesList : TStrings = nil; //use a  TStrings to avoid the use of generics
 
 {.$IFDEF DEBUG}
@@ -207,13 +207,13 @@ begin
    Result:= StyleServices.GetSystemColor(nIndex or Integer($FF000000));
 end;
 
-function InterceptGetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
-begin
-  if StyleServices.IsSystemStyle then
-   Result:= TrampolineGetThemeSysColor(hTheme, iColorId)
-  else
-   Result:= StyleServices.GetSystemColor(iColorId or Integer($FF000000));
-end;
+//function InterceptGetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
+//begin
+//  if StyleServices.IsSystemStyle then
+//   Result:= TrampolineGetThemeSysColor(hTheme, iColorId)
+//  else
+//   Result:= StyleServices.GetSystemColor(iColorId or Integer($FF000000));
+//end;
 
 initialization
 
@@ -234,8 +234,8 @@ initialization
    DrawThemeBackgroundOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeBackground');
    @TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @InterceptDrawThemeBackground);
 
-   GetThemeSysColorOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColor');
-   @TrampolineGetThemeSysColor := InterceptCreate(GetThemeSysColorOrgPointer, @InterceptGetThemeSysColor);
+//   GetThemeSysColorOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColor');
+//   @TrampolineGetThemeSysColor := InterceptCreate(GetThemeSysColorOrgPointer, @InterceptGetThemeSysColor);
  end;
 
 finalization
@@ -243,8 +243,8 @@ finalization
  if GetSysColorOrgPointer<>nil then
   InterceptRemove(@TrampolineGetSysColor, @InterceptGetSysColor);
 
- if GetThemeSysColorOrgPointer<>nil then
-  InterceptRemove(@TrampolineGetThemeSysColor, @InterceptGetThemeSysColor);
+// if GetThemeSysColorOrgPointer<>nil then
+//  InterceptRemove(@TrampolineGetThemeSysColor, @InterceptGetThemeSysColor);
 
  if OpenThemeDataOrgPointer<>nil then
   InterceptRemove(@TrampolineOpenThemeData, @InterceptOpenThemeData);

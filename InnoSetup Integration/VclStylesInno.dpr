@@ -5,12 +5,14 @@ library VclStylesInno;
   {$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
 {$ENDIF}
 
-{.$SetPEFlags $2000}
+{$SetPEFlags $2000}
 uses
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Dialogs,
+  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  KOLDetours in '..\Common\KOLDetours.pas',
   Vcl.Styles.InnoSetup in '..\Common\Vcl.Styles.InnoSetup.pas',
   Vcl.Styles.ButtonWnd in '..\Common\Vcl.Styles.ButtonWnd.pas',
   Vcl.Styles.ComboBoxWnd in '..\Common\Vcl.Styles.ComboBoxWnd.pas',
@@ -28,10 +30,8 @@ uses
   Vcl.Styles.ThemedDialog in '..\Common\Vcl.Styles.ThemedDialog.pas',
   Vcl.Styles.ToolbarWindow32Wnd in '..\Common\Vcl.Styles.ToolbarWindow32Wnd.pas',
   Vcl.Styles.ToolTipsWnd in '..\Common\Vcl.Styles.ToolTipsWnd.pas',
-  Vcl.Styles.UnknownControlWnd in '..\Common\Vcl.Styles.UnknownControlWnd.pas' {/Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas';},
   Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas',
-  KOLDetours in '..\Common\KOLDetours.pas',
-  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas';
+  Vcl.Styles.UnknownControlWnd in '..\Common\Vcl.Styles.UnknownControlWnd.pas';
 
 {$R *.res}
 
