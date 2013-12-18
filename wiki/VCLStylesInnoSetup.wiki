@@ -42,11 +42,11 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/VCL%2
 
 In order to use the plugin you must follow these steps
 
-   # Add the VclStylesinno.dll file to your inno setup script and the VCL Style file to use.
-   # Import the function LoadVCLStyleW for Unicode versions of Inno setup or the LoadVCLStyleA method for the Ansi version
+   # Add the !VclStylesinno.dll file to your inno setup script and the VCL Style file (skin) to use.
+   # Import the function _LoadVCLStyleW_ for Unicode versions of Inno setup or the _LoadVCLStyleA_ method for the Ansi version
    # Import the function UnLoadVCLStyles
-   # In the InitializeSetup function extract the style to use and call the LoadVCLStyle method passing the name of the style file
-   # Finally in the DeinitializeSetup function call the UnLoadVCLStyles method.
+   # In the !InitializeSetup function extract the style to use and call the _LoadVCLStyle_ method passing the name of the style file
+   # Finally in the !DeinitializeSetup function call the _UnLoadVCLStyles_ method.
 
 Check the next sample script
 
