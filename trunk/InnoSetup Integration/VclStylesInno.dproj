@@ -91,6 +91,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_Define>EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
 			<VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -109,18 +110,23 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<VerInfo_Release>6</VerInfo_Release>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+			<DCC_DebugInformation>true</DCC_DebugInformation>
+			<DCC_MapFile>3</DCC_MapFile>
+			<VerInfo_Release>7</VerInfo_Release>
 			<DCC_AssertionsAtRuntime>false</DCC_AssertionsAtRuntime>
 			<DCC_ImportedDataReferences>false</DCC_ImportedDataReferences>
-			<VerInfo_Build>1</VerInfo_Build>
+			<VerInfo_Build>51</VerInfo_Build>
 			<VerInfo_MinorVer>0</VerInfo_MinorVer>
 			<VerInfo_MajorVer>1</VerInfo_MajorVer>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.6.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.7.51;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
+			<DCCReference Include="..\Common\KOLDetours.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.InnoSetup.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ButtonWnd.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ComboBoxWnd.pas"/>
@@ -138,12 +144,8 @@
 			<DCCReference Include="..\Common\Vcl.Styles.ThemedDialog.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ToolbarWindow32Wnd.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.ToolTipsWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.UnknownControlWnd.pas">
-				<Form>/Vcl.Styles.SysControls in &apos;..\Common\Vcl.Styles.SysControls.pas&apos;;</Form>
-			</DCCReference>
 			<DCCReference Include="..\Common\Vcl.Styles.SysControls.pas"/>
-			<DCCReference Include="..\Common\KOLDetours.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.UnknownControlWnd.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -297,11 +299,6 @@
 [Exception Log]
 EurekaLog Version=7001
 Activate=0
-DeleteMapAfterCompile=0
+DeleteMapAfterCompile=1
 Encrypt Password=""
-idEurekaLog=1
-idEurekaLogDetailed=1
-idMSClassic=1
-idStepsToReproduce=1
-ProjectID="{E59B747A-5DA2-463D-8640-CD45458FCD40}"
 EurekaLog Last Line -->
