@@ -366,6 +366,7 @@ begin
       begin
         Message.Result := 1;
       end;
+
   else
       //Inherited WndProc(Message);
       Message.Result := CallOrgWndProc(Message);

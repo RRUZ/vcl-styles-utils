@@ -27,9 +27,9 @@ interface
 implementation
 
 uses
-  {$IFDEF DEBUG}
-  System.IOUtils,
-  {$ENDIF}
+  {.$IFDEF DEBUG}
+  //System.IOUtils,
+  {.$ENDIF}
   System.SysUtils,
   System.Types,
   System.Classes,
@@ -54,29 +54,25 @@ var
   CloseThemeDataOrgPointer: Pointer = nil;
   DrawThemeBackgroundOrgPointer: Pointer = nil;
 
-  //GetThemeSysColorOrgPointer : Pointer = nil;
+  GetThemeSysColorOrgPointer : Pointer = nil;
   HThemeClassesList : TStrings = nil; //use a  TStrings to avoid the use of generics
 
-{$IFDEF DEBUG}
+{.$IFDEF DEBUG}
 procedure Addlog(const msg : string);
 begin
-   TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+  // TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
 end;
-{$ENDIF}
+{.$ENDIF}
 
 
 function InterceptOpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 var
   i : integer;
 begin
-   //Addlog('pszClassList '+pszClassList);
    Result:= TrampolineOpenThemeData(hwnd, pszClassList);
-
    i:= HThemeClassesList.IndexOfName(IntToStr(Result));
    if i=-1 then
     HThemeClassesList.Add(Format('%d=%s',[Integer(Result), pszClassList]));
-
-   //Addlog('Result '+IntToStr(Result));
 end;
 
 function InterceptCloseThemeData(hTheme: HTHEME): HRESULT; stdcall;
@@ -86,7 +82,6 @@ begin
    i:= HThemeClassesList.IndexOfName(IntToStr(hTheme));
    if i>=0 then
      HThemeClassesList.Delete(i);
-
    Result:= TrampolineCloseThemeData(hTheme);
 end;
 
@@ -96,12 +91,10 @@ var
   SaveIndex, i : integer;
   pszClassList : string;
   LDetails: TThemedElementDetails;
-
 begin
    i:= HThemeClassesList.IndexOfName(IntToStr(hTheme));
    if i>=0 then
    begin
-
       pszClassList:=HThemeClassesList.Values[IntToStr(hTheme)];
       if SameText(pszClassList,'Button') then
       begin
@@ -132,29 +125,28 @@ begin
             BP_CHECKBOX  :
             begin
               case iStateId of
-                        CBS_UNCHECKEDNORMAL     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
-                        CBS_UNCHECKEDHOT        : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedHot);
-                        CBS_UNCHECKEDPRESSED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedPressed);
-                        CBS_UNCHECKEDDISABLED   : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedDisabled);
-                        CBS_CHECKEDNORMAL       : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedNormal);
-                        CBS_CHECKEDHOT          : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedHot);
-                        CBS_CHECKEDPRESSED      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedPressed);
-                        CBS_CHECKEDDISABLED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedDisabled);
-                        CBS_MIXEDNORMAL         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedNormal);
-                        CBS_MIXEDHOT            : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedHot);
-                        CBS_MIXEDPRESSED        : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedPressed);
-                        CBS_MIXEDDISABLED       : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedDisabled);
-                        { For Windows >= Vista }
-                        CBS_IMPLICITNORMAL      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitNormal);
-                        CBS_IMPLICITHOT         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitHot);
-                        CBS_IMPLICITPRESSED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitPressed);
-                        CBS_IMPLICITDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitDisabled);
-                        CBS_EXCLUDEDNORMAL      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedNormal);
-                        CBS_EXCLUDEDHOT         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedHot);
-                        CBS_EXCLUDEDPRESSED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedPressed);
-                        CBS_EXCLUDEDDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedDisabled);
+                  CBS_UNCHECKEDNORMAL     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
+                  CBS_UNCHECKEDHOT        : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedHot);
+                  CBS_UNCHECKEDPRESSED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedPressed);
+                  CBS_UNCHECKEDDISABLED   : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedDisabled);
+                  CBS_CHECKEDNORMAL       : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedNormal);
+                  CBS_CHECKEDHOT          : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedHot);
+                  CBS_CHECKEDPRESSED      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedPressed);
+                  CBS_CHECKEDDISABLED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedDisabled);
+                  CBS_MIXEDNORMAL         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedNormal);
+                  CBS_MIXEDHOT            : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedHot);
+                  CBS_MIXEDPRESSED        : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedPressed);
+                  CBS_MIXEDDISABLED       : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedDisabled);
+                  { For Windows >= Vista }
+                  CBS_IMPLICITNORMAL      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitNormal);
+                  CBS_IMPLICITHOT         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitHot);
+                  CBS_IMPLICITPRESSED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitPressed);
+                  CBS_IMPLICITDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitDisabled);
+                  CBS_EXCLUDEDNORMAL      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedNormal);
+                  CBS_EXCLUDEDHOT         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedHot);
+                  CBS_EXCLUDEDPRESSED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedPressed);
+                  CBS_EXCLUDEDDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedDisabled);
               end;
-
 
               SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
               try
@@ -167,12 +159,37 @@ begin
         else
           Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
         end;
-
-
       end
+//      else
+//      if SameText(pszClassList,'TreeView') then
+//      begin
+//        case iPartId of
+//            TVP_TREEITEM  :
+//            begin
+//              case iStateId of
+//                  TREIS_NORMAL            : LDetails:=StyleServices.GetElementDetails(ttItemNormal);
+//                  TREIS_HOT               : LDetails:=StyleServices.GetElementDetails(ttItemHot);
+//                  TREIS_SELECTED          : LDetails:=StyleServices.GetElementDetails(ttItemSelected);
+//                  TREIS_DISABLED          : LDetails:=StyleServices.GetElementDetails(ttItemDisabled);
+//                  TREIS_SELECTEDNOTFOCUS  : LDetails:=StyleServices.GetElementDetails(ttItemSelectedNotFocus);
+//                  { For Windows >= Vista }
+//                  TREIS_HOTSELECTED       : LDetails:=StyleServices.GetElementDetails(ttItemHotSelected);
+//              end;
+//
+//              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+//              try
+//                StyleServices.DrawElement(hdc, LDetails, pRect, pClipRect^);
+//              finally
+//                RestoreDC(hdc, SaveIndex);
+//              end;
+//              Result:=S_OK;
+//            end;
+//        else
+//          Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+//        end;
+//      end
       else
        Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-
    end
    else
    Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
@@ -200,7 +217,6 @@ initialization
  if StyleServices.Available then
  begin
    HThemeClassesList:=TStringList.Create;
-
    ThemeLibrary := GetModuleHandle('uxtheme.dll');
 
    GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
@@ -215,16 +231,17 @@ initialization
    DrawThemeBackgroundOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeBackground');
    @TrampolineDrawThemeBackground := InterceptCreate(DrawThemeBackgroundOrgPointer, @InterceptDrawThemeBackground);
 
-   {
    GetThemeSysColorOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColor');
-   @TrampolineGetThemeSysColor := InterceptCreate(GetThemeSysColorOrgPointer, @InterceptGetSysColor);
-   }
+   @TrampolineGetThemeSysColor := InterceptCreate(GetThemeSysColorOrgPointer, @InterceptGetThemeSysColor);
  end;
 
 finalization
 
  if GetSysColorOrgPointer<>nil then
   InterceptRemove(@TrampolineGetSysColor, @InterceptGetSysColor);
+
+ if GetThemeSysColorOrgPointer<>nil then
+  InterceptRemove(@TrampolineGetThemeSysColor, @InterceptGetThemeSysColor);
 
  if OpenThemeDataOrgPointer<>nil then
   InterceptRemove(@TrampolineOpenThemeData, @InterceptOpenThemeData);
