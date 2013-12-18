@@ -631,7 +631,6 @@ begin
 //               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TTreeViewWnd.Create(PCWPStruct(lParam)^.hwnd));
 //        end
 //        else
-
 //        if (SameText(sClassName,'TNewNotebook')) then     //TNewNotebook is handled by the Getsyscolors hook
 //        begin
 //           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
