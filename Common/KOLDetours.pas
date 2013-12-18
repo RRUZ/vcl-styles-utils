@@ -6,6 +6,10 @@ unit KOLDetours;
 
 interface
 
+{$IFDEF CPUX64}
+  Sorry, this unit only can be used  in 32 bits mode
+{$ENDIF}
+
 uses Windows, Sysutils;
 
 function InterceptCreate(const TargetProc, InterceptProc: Pointer): Pointer;
