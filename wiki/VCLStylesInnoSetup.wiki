@@ -2,7 +2,7 @@
 
 = Introduction =
 
- The VCL Styles Utils project, includes a plugin (dll) to skin the installers created by Inno setup. The current size of the plugin is about 1.5 mb, but when is included (and compressed) in the script only add ~480 Kb to the final installer.
+ The VCL Styles Utils project, includes a plugin (dll) to skin the installers created by  <a href="http://www.jrsoftware.org/isinfo.php">Inno setup</a>. The current size of the plugin is about 1.5 mb, but when is included (and compressed) in the script only add ~480 Kb to the final installer.
 
 
 = Installation =
