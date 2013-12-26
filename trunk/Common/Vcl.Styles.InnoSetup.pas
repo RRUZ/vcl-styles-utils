@@ -67,7 +67,7 @@ uses
   Vcl.Styles.ControlWnd,
   Vcl.Styles.Form,
   Vcl.Styles.StdCtrls,
-  Vcl.Styles.ExtCtrls,
+
   Vcl.Styles.ComCtrls,
   Vcl.Styles.ComboBoxWnd,
   Vcl.Styles.ButtonWnd;
@@ -613,12 +613,12 @@ begin
                InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TRichEditViewerWnd.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
-        if SameText(sClassName,'TNewStaticText') then
-        begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
-        end
-        else
+//        if SameText(sClassName,'TNewStaticText') then
+//        begin
+//           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+//               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TStaticTextWnd.Create(PCWPStruct(lParam)^.hwnd));
+//        end
+//        else
         if (SameText(sClassName,'TNewProgressBar')) then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then

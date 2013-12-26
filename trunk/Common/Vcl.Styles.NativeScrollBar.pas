@@ -37,7 +37,6 @@ uses
   Vcl.Graphics,
   Vcl.Themes,
   System.Types,
-
   Vcl.Styles.ControlWnd,
   Winapi.CommCtrl,
   System.Math;
