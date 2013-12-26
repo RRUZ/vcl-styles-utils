@@ -84,4 +84,4 @@ end;
 
 = Installer =
 
- Download the installer of the plugin from <a href="https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/SetupVCLStylesInno.exe">here</a>. The current version of the plugin is 1.0.7.51
+ Download the installer of the plugin from <a href="https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/SetupVCLStylesInno.exe">here</a>. The current version of the plugin is 1.0.8.11
