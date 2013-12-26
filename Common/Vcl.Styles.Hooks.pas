@@ -63,7 +63,7 @@ var
 {.$IFDEF DEBUG}
 procedure Addlog(const msg : string);
 begin
-  // TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+   //TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
 end;
 {.$ENDIF}
 
@@ -223,7 +223,7 @@ initialization
    ThemeLibrary := GetModuleHandle('uxtheme.dll');
 
    GetSysColorOrgPointer     := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
-   @TrampolineGetSysColor    := InterceptCreate(GetSysColorOrgPointer, @InterceptGetSysColor);
+   @TrampolineGetSysColor  :=  InterceptCreate(GetSysColorOrgPointer, @InterceptGetSysColor);
 
    OpenThemeDataOrgPointer   := GetProcAddress(ThemeLibrary, 'OpenThemeData');
    @TrampolineOpenThemeData  := InterceptCreate(OpenThemeDataOrgPointer, @InterceptOpenThemeData);

@@ -62,7 +62,6 @@ implementation
 
 uses
   System.Classes,
-
   Vcl.Graphics,
   Vcl.Themes;
 

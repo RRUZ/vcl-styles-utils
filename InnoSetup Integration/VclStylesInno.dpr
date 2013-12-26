@@ -58,7 +58,7 @@ uses
  procedure UnLoadVCLStyles; stdcall;
  begin
    if not StyleServices.Available then exit;
-   Vcl.Styles.InnoSetup.Done;
+    Vcl.Styles.InnoSetup.Done;
  end;
 
 exports

@@ -110,16 +110,15 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
-			<DCC_DebugInformation>true</DCC_DebugInformation>
+			<DCC_IOChecking>false</DCC_IOChecking>
 			<DCC_MapFile>3</DCC_MapFile>
-			<VerInfo_Release>7</VerInfo_Release>
+			<VerInfo_Release>8</VerInfo_Release>
 			<DCC_AssertionsAtRuntime>false</DCC_AssertionsAtRuntime>
 			<DCC_ImportedDataReferences>false</DCC_ImportedDataReferences>
-			<VerInfo_Build>51</VerInfo_Build>
+			<VerInfo_Build>11</VerInfo_Build>
 			<VerInfo_MinorVer>0</VerInfo_MinorVer>
 			<VerInfo_MajorVer>1</VerInfo_MajorVer>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.7.51;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.8.11;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="$(MainSource)">

@@ -1,3 +1,4 @@
+#define VCLStyle "SmokeyQuartzKamri.vsf"
 [Setup]
 AppName=My Program
 AppVersion=1.5
@@ -12,7 +13,7 @@ WizardSmallImageFile=..\images\WizModernSmallImage-IS_Orange.bmp
 Source: compiler:WizModernSmallImage.bmp; Flags: dontcopy
 Source: ..\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
 ;Source: ..\Win32\Release\VclStylesinno.dll; DestDir: {app}; Flags: dontcopy
-Source: ..\Styles\Auric.vsf; DestDir: {app}; Flags: dontcopy
+Source: ..\Styles\{#VCLStyle}; DestDir: {app}; Flags: dontcopy
 [Code]
 
 //Import the LoadVCLStyle function from VclStylesInno.DLL
@@ -22,8 +23,8 @@ procedure UnLoadVCLStyles; external 'UnLoadVCLStyles@files:VclStylesInno.dll std
 
 function InitializeSetup(): Boolean;
 begin
-	ExtractTemporaryFile('Auric.vsf');
-	LoadVCLStyle(ExpandConstant('{tmp}\Auric.vsf'));
+	ExtractTemporaryFile('{#VCLStyle}');
+	LoadVCLStyle(ExpandConstant('{tmp}\{#VCLStyle}'));
 	Result := True;
 end;
 
@@ -371,11 +372,7 @@ var
   BackgroundBitmapImage: TBitmapImage;
   BackgroundBitmapText: TNewStaticText;
 begin
-  { Custom wizard pages }
-
   CreateTheWizardPages;
-
-  { Custom controls }
 
   CreateAboutButtonAndURLLabel(WizardForm, WizardForm.CancelButton);
 
@@ -392,7 +389,6 @@ begin
   BackgroundBitmapText.Caption := 'TBitmapImage';
   BackgroundBitmapText.Parent := MainForm;
 
-  { Custom beveled label }
 
   WizardForm.BeveledLabel.Caption := '';
 end;
