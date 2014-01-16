@@ -53,6 +53,9 @@ type
 
 implementation
 
+uses
+  Vcl.Styles.Utils.SysControls;
+
 { TSysTooltipsStyleHook }
 const
   TTM_ADJUSTRECT = WM_USER + 31;
@@ -140,5 +143,14 @@ begin
   SendMessage(Handle, TTM_ADJUSTRECT, 0, UINT_PTR(@TextRect));
   PaintHint(Canvas, TextRect);
 end;
+
+initialization
+
+if StyleServices.Available then
+    TSysStyleManager.RegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
+
+finalization
+ TSysStyleManager.UnRegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
+
 
 end.

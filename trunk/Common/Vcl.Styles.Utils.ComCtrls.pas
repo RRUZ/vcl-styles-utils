@@ -218,6 +218,10 @@ type
 
 implementation
 
+uses
+  Vcl.Styles.Utils.SysControls;
+
+
 { TSysListViewStyleHook }
 
 constructor TSysListViewStyleHook.Create(AHandle: THandle);
@@ -1427,5 +1431,32 @@ end;
 
 {$ENDREGION}
 
+initialization
+
+
+if StyleServices.Available then
+begin
+  with TSysStyleManager do
+  begin
+    RegisterSysStyleHook('#32770', TSysDialogStyleHook);
+    RegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
+    RegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
+    RegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
+    RegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
+    RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+  end;
+end;
+
+finalization
+
+with TSysStyleManager do
+begin
+  UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
+  UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
+  UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
+  UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
+  UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
+  UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+end;
 
 end.

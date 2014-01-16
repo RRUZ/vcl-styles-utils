@@ -1151,4 +1151,10 @@ initialization
 
 SubMenuItemInfoArray := nil;
 
+if StyleServices.Available then
+    TSysStyleManager.RegisterSysStyleHook('#32768', TSysPopupStyleHook);
+
+finalization
+    TSysStyleManager.UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
+
 end.

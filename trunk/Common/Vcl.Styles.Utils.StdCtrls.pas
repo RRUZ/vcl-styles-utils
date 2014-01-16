@@ -2613,4 +2613,35 @@ begin
   inherited;
 end;
 
+initialization
+//
+
+if StyleServices.Available then
+begin
+  with TSysStyleManager do
+  begin
+    RegisterSysStyleHook('Button', TSysButtonStyleHook);
+    RegisterSysStyleHook('Edit', TSysEditStyleHook);
+    RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+    RegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
+    RegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
+    RegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
+    RegisterSysStyleHook('Static', TSysStaticStyleHook);
+  end;
+end;
+
+finalization
+
+with TSysStyleManager do
+begin
+  UnRegisterSysStyleHook('Button', TSysButtonStyleHook);
+  UnRegisterSysStyleHook('Edit', TSysEditStyleHook);
+  UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+  UnRegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
+  UnRegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
+  UnRegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
+  UnRegisterSysStyleHook('Static', TSysStaticStyleHook);
+end;
+
+
 end.
