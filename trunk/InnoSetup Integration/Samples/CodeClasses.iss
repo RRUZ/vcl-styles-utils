@@ -1,4 +1,4 @@
-#define VCLStyle "SmokeyQuartzKamri.vsf"
+#define VCLStyle "Amakrits.vsf"
 [Setup]
 AppName=My Program
 AppVersion=1.5
@@ -112,6 +112,7 @@ var
   BitmapImage, BitmapImage2, BitmapImage3: TBitmapImage;
   BitmapFileName: String;
   RichEditViewer: TRichEditViewer;
+  i : Integer;
 begin
   { TButton and others }
 
@@ -158,7 +159,7 @@ begin
   Memo.Top := Edit.Top + Edit.Height + ScaleY(8);
   Memo.Width := Page.SurfaceWidth;
   Memo.Height := ScaleY(89);
-  Memo.ScrollBars := ssVertical;
+  Memo.ScrollBars := ssBoth;
   Memo.Text := 'TNewMemo';
   Memo.Parent := Page.Surface;
 
@@ -178,13 +179,13 @@ begin
   ComboBox.Width := Page.SurfaceWidth;
   ComboBox.Parent := Page.Surface;
   ComboBox.Style := csDropDownList;
-  ComboBox.Items.Add('TComboBox');
-  ComboBox.Items.Add('TComboBox');
-  ComboBox.Items.Add('TComboBox');
-  ComboBox.Items.Add('TComboBox');
-  ComboBox.Items.Add('TComboBox');
-  ComboBox.Items.Add('TComboBox');
-  ComboBox.Items.Add('TComboBox');
+  ComboBox.Items.Add('TComboBox 1');
+  ComboBox.Items.Add('TComboBox 2');
+  ComboBox.Items.Add('TComboBox 3');
+  ComboBox.Items.Add('TComboBox 4');
+  ComboBox.Items.Add('TComboBox 5');
+  ComboBox.Items.Add('TComboBox 6');
+  ComboBox.Items.Add('TComboBox 7');
   ComboBox.ItemIndex := 0;
 
   ListBox := TNewListBox.Create(Page);
@@ -192,12 +193,8 @@ begin
   ListBox.Width := Page.SurfaceWidth;
   ListBox.Height := ScaleY(97);
   ListBox.Parent := Page.Surface;
-  ListBox.Items.Add('Item 1');
-  ListBox.Items.Add('Item 2');
-  ListBox.Items.Add('Item 3');
-  ListBox.Items.Add('Item 4');
-  ListBox.Items.Add('Item 5');
-  ListBox.Items.Add('Item 6');
+  for i:=1 to 10 do
+  ListBox.Items.Add('Item '+IntToStr(i));
   ListBox.ItemIndex := 0;
 
   StaticText := TNewStaticText.Create(Page);

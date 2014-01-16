@@ -14,24 +14,14 @@ uses
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
   KOLDetours in '..\Common\KOLDetours.pas',
   Vcl.Styles.InnoSetup in '..\Common\Vcl.Styles.InnoSetup.pas',
-  Vcl.Styles.ButtonWnd in '..\Common\Vcl.Styles.ButtonWnd.pas',
-  Vcl.Styles.ComboBoxWnd in '..\Common\Vcl.Styles.ComboBoxWnd.pas',
-  Vcl.Styles.ControlWnd in '..\Common\Vcl.Styles.ControlWnd.pas',
-  Vcl.Styles.EditWnd in '..\Common\Vcl.Styles.EditWnd.pas',
-  Vcl.Styles.NativeScrollBar in '..\Common\Vcl.Styles.NativeScrollBar.pas',
-  Vcl.Styles.PopupWnd in '..\Common\Vcl.Styles.PopupWnd.pas',
-  Vcl.Styles.ScrollBarWnd in '..\Common\Vcl.Styles.ScrollBarWnd.pas',
-  Vcl.Styles.StaticWnd in '..\Common\Vcl.Styles.StaticWnd.pas',
-  Vcl.Styles.ExtCtrls in '..\Common\Vcl.Styles.ExtCtrls.pas',
-  Vcl.Styles.StdCtrls in '..\Common\Vcl.Styles.StdCtrls.pas',
-  Vcl.Styles.ComCtrls in '..\Common\Vcl.Styles.ComCtrls.pas',
-  Vcl.Styles.SysListView32Wnd in '..\Common\Vcl.Styles.SysListView32Wnd.pas',
-  Vcl.Styles.Form in '..\Common\Vcl.Styles.Form.pas',
-  Vcl.Styles.ThemedDialog in '..\Common\Vcl.Styles.ThemedDialog.pas',
-  Vcl.Styles.ToolbarWindow32Wnd in '..\Common\Vcl.Styles.ToolbarWindow32Wnd.pas',
-  Vcl.Styles.ToolTipsWnd in '..\Common\Vcl.Styles.ToolTipsWnd.pas',
-  Vcl.Styles.SysControls in '..\Common\Vcl.Styles.SysControls.pas',
-  Vcl.Styles.UnknownControlWnd in '..\Common\Vcl.Styles.UnknownControlWnd.pas';
+  Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
+  Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
+  Vcl.Styles.Utils.ComCtrls in '..\Common\Vcl.Styles.Utils.ComCtrls.pas',
+  Vcl.Styles.Utils.Forms in '..\Common\Vcl.Styles.Utils.Forms.pas',
+  Vcl.Styles.Utils.Menus in '..\Common\Vcl.Styles.Utils.Menus.pas',
+  Vcl.Styles.Utils.ScreenTips in '..\Common\Vcl.Styles.Utils.ScreenTips.pas',
+  Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas',
+  Vcl.Styles.InnoSetup.StyleHooks in '..\Common\Vcl.Styles.InnoSetup.StyleHooks.pas';
 
 {$R *.res}
 
@@ -45,7 +35,7 @@ uses
    ShowMessage(Format('The Style File %s is not valid',[VClStyleFile]));
  end;
 
-  procedure LoadVCLStyleA(VCLStyleFile: PAnsiChar); stdcall;
+ procedure LoadVCLStyleA(VCLStyleFile: PAnsiChar); stdcall;
  begin
    if not StyleServices.Available then exit;
 

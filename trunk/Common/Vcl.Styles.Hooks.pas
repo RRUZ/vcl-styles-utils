@@ -15,7 +15,7 @@
 { The Original Code is Vcl.Styles.Hooks.pas.                                                       }
 {                                                                                                  }
 { The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013 Rodrigo Ruz V.                         }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
 {**************************************************************************************************}
@@ -72,7 +72,7 @@ function InterceptOpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdc
 var
   i : integer;
 begin
-   Result:= TrampolineOpenThemeData(hwnd, pszClassList);
+   Result:=TrampolineOpenThemeData(hwnd, pszClassList);
    i:= HThemeClassesList.IndexOfName(IntToStr(Result));
    if i=-1 then
     HThemeClassesList.Add(Format('%d=%s',[Integer(Result), pszClassList]));
@@ -95,6 +95,9 @@ var
   pszClassList : string;
   LDetails: TThemedElementDetails;
 begin
+  if StyleServices.IsSystemStyle then
+    Exit(TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect));
+
    i:= HThemeClassesList.IndexOfName(IntToStr(hTheme));
    if i>=0 then
    begin
@@ -191,7 +194,7 @@ begin
 //          Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
 //        end;
 //      end
-      else
+     else
        Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
    end
    else
@@ -201,7 +204,7 @@ end;
 
 function InterceptGetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
-  if StyleServices.IsSystemStyle then
+  if StyleServices.IsSystemStyle  then
    Result:= TrampolineGetSysColor(nIndex)
   else
    Result:= StyleServices.GetSystemColor(nIndex or Integer($FF000000));

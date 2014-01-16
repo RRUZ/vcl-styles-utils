@@ -6,19 +6,54 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.Buttons, Vcl.StdCtrls, Vcl.Styles, Vcl.Themes,
-  Vcl.Menus, Vcl.Samples.Spin, Vcl.ImgList, Vcl.ExtDlgs;
+  Vcl.StdCtrls, Vcl.Styles, Vcl.Themes, Vcl.Menus, Vcl.Buttons, Vcl.ImgList;
 
 type
-  TMain = class(TForm)
+  TForm1 = class(TForm)
+    LblStyles: TLabel;
+    ComboBox1: TComboBox;
     Edit1: TEdit;
     SpeedButton1: TSpeedButton;
-    ListBox1: TListBox;
+    SpeedButton2: TSpeedButton;
+    SpeedButton3: TSpeedButton;
+    SpeedButton4: TSpeedButton;
+    SpeedButton5: TSpeedButton;
+    SpeedButton6: TSpeedButton;
+    SpeedButton7: TSpeedButton;
+    SpeedButton8: TSpeedButton;
+    SpeedButton9: TSpeedButton;
+    StaticText1: TStaticText;
+    CheckBox1: TCheckBox;
+    OpenDialog1: TOpenDialog;
+    ColorDialog1: TColorDialog;
+    FontDialog1: TFontDialog;
+    ReplaceDialog1: TReplaceDialog;
+    FindDialog1: TFindDialog;
+    PrinterSetupDialog1: TPrinterSetupDialog;
+    PageSetupDialog1: TPageSetupDialog;
+    ImageList1: TImageList;
+    PopupMenu1: TPopupMenu;
+    I1: TMenuItem;
+    C2: TMenuItem;
+    S1: TMenuItem;
+    D1: TMenuItem;
+    B1: TMenuItem;
+    BreakItem11: TMenuItem;
+    R1: TMenuItem;
+    RadioItem11: TMenuItem;
+    D2: TMenuItem;
+    I2: TMenuItem;
+    C3: TMenuItem;
+    StaticText2: TStaticText;
+    PopupMenu2: TPopupMenu;
+    R2: TMenuItem;
+    RightToLeftItem11: TMenuItem;
+    RightToLeftItem12: TMenuItem;
+    RightToLeftItem13: TMenuItem;
     MainMenu1: TMainMenu;
     File1: TMenuItem;
     New1: TMenuItem;
     Open1: TMenuItem;
-    Close1: TMenuItem;
     Save1: TMenuItem;
     SaveAs1: TMenuItem;
     Print1: TMenuItem;
@@ -26,72 +61,28 @@ type
     Exit1: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
-    N3: TMenuItem;
     Help1: TMenuItem;
     Contents1: TMenuItem;
     SearchforHelpOn1: TMenuItem;
     HowtoUseHelp1: TMenuItem;
     About1: TMenuItem;
-    Label1: TLabel;
-    Label2: TLabel;
-    PopupMenu1: TPopupMenu;
-    Item11: TMenuItem;
-    CheckedItem1: TMenuItem;
-    DisabledItem1: TMenuItem;
-    Item21: TMenuItem;
-    N4: TMenuItem;
-    Item31: TMenuItem;
-    SubItem11: TMenuItem;
-    SubItem21: TMenuItem;
-    SubItem31: TMenuItem;
-    SubItem41: TMenuItem;
-    SubItem12: TMenuItem;
-    SubItem22: TMenuItem;
-    PrinterSetupDialog1: TPrinterSetupDialog;
-    SpeedButton2: TSpeedButton;
-    SpeedButton3: TSpeedButton;
-    SaveDialog1: TSaveDialog;
-    SpeedButton4: TSpeedButton;
-    FontDialog1: TFontDialog;
-    ColorDialog1: TColorDialog;
-    SpeedButton5: TSpeedButton;
-    SpeedButton6: TSpeedButton;
-    FindDialog1: TFindDialog;
-    PageSetupDialog1: TPageSetupDialog;
-    SpeedButton7: TSpeedButton;
-    SpeedButton8: TSpeedButton;
-    SpeedButton9: TSpeedButton;
-    TaskDialog1: TTaskDialog;
-    OpenDialog1: TOpenDialog;
-    ReplaceDialog1: TReplaceDialog;
-    Window1: TMenuItem;
-    NewWindow1: TMenuItem;
-    Tile1: TMenuItem;
-    Cascade1: TMenuItem;
-    ArrangeAll1: TMenuItem;
-    Hide1: TMenuItem;
-    Show1: TMenuItem;
-    N5: TMenuItem;
-    SpeedButton11: TSpeedButton;
-    PrintDialog1: TPrintDialog;
-    OpenDialog2: TOpenDialog;
-    ImageList1: TImageList;
-    OpenPictureDialog1: TOpenPictureDialog;
-    Kopi235ren1: TMenuItem;
+    Contents2: TMenuItem;
+    Contents3: TMenuItem;
+    Contents4: TMenuItem;
     procedure FormCreate(Sender: TObject);
+    procedure ComboBox1Select(Sender: TObject);
+    procedure SpeedButton9Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
-    procedure ListBox1Click(Sender: TObject);
-    procedure SpeedButton2Click(Sender: TObject);
-    procedure SpeedButton3Click(Sender: TObject);
     procedure SpeedButton4Click(Sender: TObject);
     procedure SpeedButton5Click(Sender: TObject);
+    procedure SpeedButton3Click(Sender: TObject);
     procedure SpeedButton6Click(Sender: TObject);
     procedure SpeedButton7Click(Sender: TObject);
     procedure SpeedButton8Click(Sender: TObject);
-    procedure SpeedButton9Click(Sender: TObject);
-    procedure SpeedButton10Click(Sender: TObject);
-    procedure SpeedButton11Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure CheckBox1Click(Sender: TObject);
+    procedure About1Click(Sender: TObject);
+    procedure C3Click(Sender: TObject);
+    procedure SpeedButton2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -99,103 +90,91 @@ type
   end;
 
 var
-  Main: TMain;
+  Form1: TForm1;
 
 implementation
 
 uses
-  Vcl.Styles.SysControls;
-
+  Vcl.Styles.Utils.SysControls;
 {$R *.dfm}
 
-
-procedure TMain.Button1Click(Sender: TObject);
+procedure TForm1.About1Click(Sender: TObject);
 begin
-  PrintDialog1.Execute(Handle)
+  ShowMessage('EnJoY !!');
 end;
 
-procedure TMain.FormCreate(Sender: TObject);
+procedure TForm1.C3Click(Sender: TObject);
+begin
+  ShowMessage('Hi');
+end;
+
+procedure TForm1.CheckBox1Click(Sender: TObject);
+begin
+  TSysStyleManager.Enabled := TCheckBox(Sender).Checked;
+end;
+
+procedure TForm1.ComboBox1Select(Sender: TObject);
+begin
+  TStyleManager.SetStyle(ComboBox1.Items[ComboBox1.ItemIndex]);
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
 var
   s: string;
 begin
+{$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := True;
+{$ENDIF }
   for s in TStyleManager.StyleNames do
-    ListBox1.Items.Add(s);
+    ComboBox1.Items.Add(s);
 end;
 
-procedure TMain.ListBox1Click(Sender: TObject);
-var
-  i: Integer;
-  s: string;
+procedure TForm1.SpeedButton1Click(Sender: TObject);
 begin
-  i := ListBox1.ItemIndex;
-  s := ListBox1.Items[i];
-  TStyleManager.SetStyle(s);
-end;
-
-procedure TMain.SpeedButton10Click(Sender: TObject);
-begin
-//  TaskDialog1.Caption := 'Caption Text';
-//  TaskDialog1.ExpandedText := 'ExpandedText ..';
-//  TaskDialog1.FooterText := 'FooterText..';
-//  TaskDialog1.Execute;
-
-  //issue 8
-end;
-
-procedure TMain.SpeedButton11Click(Sender: TObject);
-begin
-  raise Exception.Create('Error Message');
-end;
-
-procedure TMain.SpeedButton1Click(Sender: TObject);
-begin
-  UseLatestCommonDialogs := False;
-  if OpenDialog2.Execute() then
-    Edit1.Text := OpenDialog2.FileName;
-end;
-
-procedure TMain.SpeedButton2Click(Sender: TObject);
-begin
-  PrinterSetupDialog1.Execute(Handle)
-end;
-
-procedure TMain.SpeedButton3Click(Sender: TObject);
-begin
-  //Caption := PopupMenu1.Items[0].Caption;
   MessageBox(Handle, 'This is a simple Yes/No MessageBox .',
     'MessageBox Caption ', MB_YESNO or MB_ICONQUESTION);
 end;
 
-procedure TMain.SpeedButton4Click(Sender: TObject);
+procedure TForm1.SpeedButton2Click(Sender: TObject);
 begin
-  UseLatestCommonDialogs := False;
-  SaveDialog1.Execute(Handle);
+{$IFNDEF DEBUG}
+  raise Exception.Create('Error Message');
+{$ENDIF}
 end;
 
-procedure TMain.SpeedButton5Click(Sender: TObject);
+procedure TForm1.SpeedButton3Click(Sender: TObject);
 begin
-  ColorDialog1.Execute(Handle);
+  FontDialog1.Execute();
 end;
 
-procedure TMain.SpeedButton6Click(Sender: TObject);
+procedure TForm1.SpeedButton4Click(Sender: TObject);
 begin
-  FontDialog1.Execute(Handle);
+  ColorDialog1.Execute();
 end;
 
-procedure TMain.SpeedButton7Click(Sender: TObject);
+procedure TForm1.SpeedButton5Click(Sender: TObject);
 begin
-  FindDialog1.Execute(Handle);
+  ReplaceDialog1.Execute();
 end;
 
-procedure TMain.SpeedButton8Click(Sender: TObject);
+procedure TForm1.SpeedButton6Click(Sender: TObject);
 begin
-  PageSetupDialog1.Execute;
+  FindDialog1.Execute();
 end;
 
-procedure TMain.SpeedButton9Click(Sender: TObject);
+procedure TForm1.SpeedButton7Click(Sender: TObject);
 begin
-  ReplaceDialog1.Execute(Handle)
+  PageSetupDialog1.Execute();
+end;
+
+procedure TForm1.SpeedButton8Click(Sender: TObject);
+begin
+  PrinterSetupDialog1.Execute();
+end;
+
+procedure TForm1.SpeedButton9Click(Sender: TObject);
+begin
+  OpenDialog1.Execute();
 end;
 
 end.

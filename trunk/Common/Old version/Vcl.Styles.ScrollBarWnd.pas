@@ -103,8 +103,6 @@ type
     FHorzScrollBar: TScrollBarEx;
     FMouseDown: Boolean;
     FUpdateScrollBar: Boolean;
-    procedure UpdateVertScollBar;
-    procedure UpdateHorzScrollBar;
     procedure EraseLRCorner;
     function GetScrollInfo(ScrollBarType: TScrollBarType): TScrollInfo;
     function GetScrollBarInfo(ScrollBarType: TScrollBarType): TScrollBarInfo;
@@ -120,6 +118,8 @@ type
     function GetHorzLeftRect: TRect;
     function GetHorzRightRect: TRect;
   protected
+    procedure UpdateVertScollBar;
+    procedure UpdateHorzScrollBar;
     procedure WndProc(var Message: TMessage); override;
   public
     constructor Create(AHandle: THandle); override;

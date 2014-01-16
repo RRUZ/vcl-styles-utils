@@ -578,6 +578,14 @@ begin
         Message.Result := LRESULT(FBrush.Handle);
       end;
 
+//    WM_SIZE:
+//      begin
+//        Message.Result := CallOrgWndProc(Message);
+//            UpdateVertScollBar;
+//            UpdateHorzScrollBar;
+//      end;
+
+
   else
       //Inherited;
       Message.Result := CallOrgWndProc(Message);
