@@ -1,6 +1,6 @@
 object FrmMain: TFrmMain
-  Left = 0
-  Top = 0
+  Left = 598
+  Top = 298
   Caption = 'Simple Demo'
   ClientHeight = 224
   ClientWidth = 323
@@ -70,6 +70,10 @@ object FrmMain: TFrmMain
     object TabSheet2: TTabSheet
       Caption = 'TabSheet2'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
   end
   object Button3: TButton

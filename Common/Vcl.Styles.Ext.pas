@@ -252,24 +252,11 @@ uses
  Vcl.Dialogs,
  System.Sysutils;
 
-{$IFDEF USE_VCL_STYLESAPI}
- {$IFDEF VER230}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleUtils.inc'}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\9.0\source\vcl\StyleAPI.inc'}
- {$ENDIF}
- {$IFDEF VER240}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleUtils.inc'}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\10.0\source\vcl\StyleAPI.inc'}
- {$ENDIF}
- {$IFDEF VER250}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\11.0\source\vcl\StyleUtils.inc'}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\11.0\source\vcl\StyleAPI.inc'}
- {$ENDIF}
- {$IFDEF VER260}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\12.0\source\vcl\StyleUtils.inc'}
-   {$I 'C:\Program Files (x86)\Embarcadero\RAD Studio\12.0\source\vcl\StyleAPI.inc'}
- {$ENDIF}
-{$ENDIF}
+
+{$IF (DEFINED (USE_VCL_STYLESAPI) and (CompilerVersion >=23))}
+{$I '..\source\vcl\StyleUtils.inc'}
+{$I '..\source\vcl\StyleAPI.inc'}
+{$IFEND}
 
 
 type

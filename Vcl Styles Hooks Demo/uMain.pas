@@ -18,9 +18,12 @@ type
     MaskEdit1: TMaskEdit;
     ColorBox1: TColorBox;
     RichEdit1: TRichEdit;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
+    procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
   public
     { Public declarations }
   end;
@@ -37,12 +40,22 @@ uses
 
 {$R *.dfm}
 
+procedure TFrmMain.Button1Click(Sender: TObject);
+begin
+//  TStyleManager.SetStyle('Windows');
+end;
+
+procedure TFrmMain.CMStyleChanged(var Message: TMessage);
+begin
+
+end;
+
 procedure TFrmMain.FormCreate(Sender: TObject);
 var
   i :   integer;
   ExItem : TComboExItem;
 begin
-
+  ReportMemoryLeaksOnShutdown:=True;
   for i := 1 to 20 do
     ListBox1.Items.Add(Format('Item %d',[i]));
 

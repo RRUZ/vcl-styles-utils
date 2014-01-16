@@ -91,7 +91,6 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<DCC_Define>EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
 			<VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -112,13 +111,12 @@
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
 			<DCC_IOChecking>false</DCC_IOChecking>
 			<DCC_MapFile>3</DCC_MapFile>
-			<VerInfo_Release>8</VerInfo_Release>
+			<VerInfo_Release>2</VerInfo_Release>
 			<DCC_AssertionsAtRuntime>false</DCC_AssertionsAtRuntime>
 			<DCC_ImportedDataReferences>false</DCC_ImportedDataReferences>
-			<VerInfo_Build>11</VerInfo_Build>
-			<VerInfo_MinorVer>0</VerInfo_MinorVer>
+			<VerInfo_Build>1</VerInfo_Build>
 			<VerInfo_MajorVer>1</VerInfo_MajorVer>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.8.11;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.1.2.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="$(MainSource)">
@@ -127,24 +125,14 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
 			<DCCReference Include="..\Common\KOLDetours.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.InnoSetup.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ButtonWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ComboBoxWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ControlWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.EditWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.NativeScrollBar.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.PopupWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ScrollBarWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.StaticWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ExtCtrls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.StdCtrls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ComCtrls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.SysListView32Wnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Form.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ThemedDialog.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ToolbarWindow32Wnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.ToolTipsWnd.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.SysControls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.UnknownControlWnd.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.ComCtrls.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.Forms.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.ScreenTips.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.StdCtrls.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.InnoSetup.StyleHooks.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
