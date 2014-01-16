@@ -127,6 +127,8 @@ begin
 {$ENDIF }
   for s in TStyleManager.StyleNames do
     ComboBox1.Items.Add(s);
+
+  ComboBox1.ItemIndex:=ComboBox1.Items.IndexOf(TStyleManager.ActiveStyle.Name);
 end;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);

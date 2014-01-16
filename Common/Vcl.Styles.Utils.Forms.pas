@@ -2656,4 +2656,24 @@ begin
   inherited;
 end;
 
+initialization
+
+
+if StyleServices.Available then
+begin
+  with TSysStyleManager do
+  begin
+    RegisterSysStyleHook('#32770', TSysDialogStyleHook);
+    RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+  end;
+end;
+
+finalization
+
+with TSysStyleManager do
+begin
+  UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
+  UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+end;
+
 end.

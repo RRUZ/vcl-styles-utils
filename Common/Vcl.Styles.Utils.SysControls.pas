@@ -91,12 +91,12 @@ procedure AddToLog(Msg: string); overload;
 
 implementation
 
-uses
-  Vcl.Styles.Utils.Forms,
-  Vcl.Styles.Utils.Menus,
-  Vcl.Styles.Utils.ComCtrls,
-  Vcl.Styles.Utils.ScreenTips,
-  Vcl.Styles.Utils.StdCtrls;
+//uses
+//  Vcl.Styles.Utils.Forms,
+//  Vcl.Styles.Utils.Menus,
+//  Vcl.Styles.Utils.ComCtrls,
+//  Vcl.Styles.Utils.ScreenTips,
+//  Vcl.Styles.Utils.StdCtrls;
 
 { TSysStyleManager }
 
@@ -466,48 +466,9 @@ begin
 end;
 
 initialization
-
 UseLatestCommonDialogs := False;
-
-if StyleServices.Available then
-begin
-  with TSysStyleManager do
-  begin
-    RegisterSysStyleHook('#32770', TSysDialogStyleHook);
-    RegisterSysStyleHook('#32768', TSysPopupStyleHook);
-    RegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-    RegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-    RegisterSysStyleHook('Button', TSysButtonStyleHook);
-    RegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-    RegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-    RegisterSysStyleHook('Edit', TSysEditStyleHook);
-    RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
-    RegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
-    RegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('Static', TSysStaticStyleHook);
-    RegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
-  end;
-end;
 
 finalization
 
-with TSysStyleManager do
-begin
-  UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
-  UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
-  UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-  UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-  UnRegisterSysStyleHook('Button', TSysButtonStyleHook);
-  UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-  UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-  UnRegisterSysStyleHook('Edit', TSysEditStyleHook);
-  UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
-  UnRegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-  UnRegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
-  UnRegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
-  UnRegisterSysStyleHook('Static', TSysStaticStyleHook);
-  UnRegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
-end;
 
 end.
