@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.StdCtrls, Vcl.Styles, Vcl.Themes, Vcl.Menus, Vcl.Buttons, Vcl.ImgList;
+  Vcl.StdCtrls, Vcl.Styles, Vcl.Themes, Vcl.Menus, Vcl.Buttons, Vcl.ImgList,
+  Vcl.ExtDlgs;
 
 type
   TForm1 = class(TForm)
@@ -69,6 +70,9 @@ type
     Contents2: TMenuItem;
     Contents3: TMenuItem;
     Contents4: TMenuItem;
+    Button1: TButton;
+    OpenPictureDialog1: TOpenPictureDialog;
+    OpenTextFileDialog1: TOpenTextFileDialog;
     procedure FormCreate(Sender: TObject);
     procedure ComboBox1Select(Sender: TObject);
     procedure SpeedButton9Click(Sender: TObject);
@@ -83,6 +87,7 @@ type
     procedure About1Click(Sender: TObject);
     procedure C3Click(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -95,12 +100,21 @@ var
 implementation
 
 uses
-  Vcl.Styles.Utils.SysControls;
+  Vcl.Styles.Utils.SysControls, FileCtrl;
 {$R *.dfm}
 
 procedure TForm1.About1Click(Sender: TObject);
 begin
   ShowMessage('EnJoY !!');
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  FDir : string;
+begin
+
+   SelectDirectory('Select Directory', ExtractFileDrive(FDir), FDir,
+             [sdNewUI, sdNewFolder])
 end;
 
 procedure TForm1.C3Click(Sender: TObject);

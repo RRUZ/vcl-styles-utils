@@ -229,7 +229,7 @@ type
 implementation
 
 uses
-  System.IOUtils,
+  Vcl.Dialogs,
   Vcl.Styles.Utils.SysControls;
 
 { TSysDialogStyleHook }
@@ -1223,12 +1223,6 @@ begin
   if (FRegion <> 0) and (BorderStyle <> bsNone) and UpdateRegion then
     SetWindowRgn(Handle, FRegion, True);
   Handled := True;
-end;
-
-procedure Addlog(const msg: string);
-begin
-  TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',
-    Format('%s %s %s', [FormatDateTime('hh:nn:ss.zzz', Now), msg, sLineBreak]));
 end;
 
 procedure TSysDialogStyleHook.WndProc(var Message: TMessage);
@@ -2658,6 +2652,7 @@ end;
 
 initialization
 
+ UseLatestCommonDialogs := False;
 
 if StyleServices.Available then
 begin

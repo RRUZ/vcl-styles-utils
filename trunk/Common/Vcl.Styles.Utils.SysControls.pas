@@ -33,7 +33,6 @@ uses
   Vcl.Themes,
   System.Types,
   System.SysUtils,
-  Vcl.Dialogs,
   Vcl.Styles.Utils.SysStyleHook,
   Generics.Collections;
 
@@ -466,7 +465,6 @@ begin
 end;
 
 initialization
-UseLatestCommonDialogs := False;
 
 finalization
 
