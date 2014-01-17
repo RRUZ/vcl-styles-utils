@@ -773,7 +773,7 @@ var
   TextTopOffset: Integer;
   IconDetails: TThemedElementDetails;
   LBorderIcons: TBorderIcons;
-  LBorderStyle: TBorderStyle;
+  LBorderStyle: TFormBorderStyle;
   CaptionDetails: TThemedElementDetails;
   TextFormat: TTextFormat;
   LText: String;
@@ -2125,7 +2125,7 @@ end;
 
 procedure TSysScrollingStyleHook.WMNCCalcSize(var Message: TWMNCCalcSize);
 var
-  OrgStyle, NewStyle: DWORD;
+  OrgStyle, NewStyle: NativeInt;
   BorderSize: TRect;
 begin
   if (not OverridePaintNC) or (not StyleServicesEnabled) then

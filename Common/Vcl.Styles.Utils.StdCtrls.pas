@@ -169,7 +169,7 @@ type
     procedure UpdateColors;override;
     function IsChildHandle(AHandle: HWnd): Boolean; override;
     // function AcceptMessage(var Message: TMessage): Boolean; override;
-    procedure DrawItem(Canvas: TCanvas; Index: Integer; const R: TRect;
+    procedure DrawItem(Canvas: TCanvas; Index: UINT; const R: TRect;
       Selected: Boolean); virtual;
     procedure HookListBox(AListHandle: HWnd);
     property ListBoxInstance: Pointer read FListBoxInstance;
@@ -952,7 +952,7 @@ begin
   Handled := True;
 end;
 
-procedure TSysComboBoxStyleHook.DrawItem(Canvas: TCanvas; Index: Integer;
+procedure TSysComboBoxStyleHook.DrawItem(Canvas: TCanvas; Index: UINT;
   const R: TRect; Selected: Boolean);
 var
   DIS: TDrawItemStruct;
@@ -2093,7 +2093,7 @@ var
   PS: TPaintStruct;
   SaveIndex: Integer;
   DC: HDC;
-  LItemIndex: Integer;
+  LItemIndex: UINT;
   LDetails: TThemedElementDetails;
 begin
   DC := Message.wParam;
@@ -2122,7 +2122,7 @@ begin
       SaveIndex := SaveDC(Canvas.Handle);
       try
         IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
-        LItemIndex := SendMessage(SysControl.Handle, CB_GETCURSEL, 0, 0);
+        LItemIndex :=UINT(SendMessage(SysControl.Handle, CB_GETCURSEL, 0, 0));
         Canvas.Brush.Color := StyleServices.GetSystemColor(clWindow);
         Canvas.FillRect(R);
         if (SysControl.Style and CBS_OWNERDRAWFIXED=CBS_OWNERDRAWFIXED ) or

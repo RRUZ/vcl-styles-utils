@@ -68,8 +68,8 @@ type
     function GetParent: TSysControl;
     function GetParentHandle: THandle;
     function GetText: String;
-    function GetStyle: DWORD;
-    function GetExStyle: DWORD;
+    function GetStyle: NativeInt;
+    function GetExStyle: NativeInt;
     function GetWidth: Integer;
     function GetHeight: Integer;
     function GetLeft: Integer;
@@ -84,8 +84,8 @@ type
     function GetWndProc: NativeInt;
     procedure SetWndProc(Value: NativeInt);
     function GetBidiMode: TBidiModeDirection;
-    procedure SetExStyle(const Value: DWORD);
-    procedure SetStyle(const Value: DWORD);
+    procedure SetExStyle(const Value: NativeInt);
+    procedure SetStyle(const Value: NativeInt);
     function GetControlID: Integer;
     function GetBoundsRect: TRect;
     function GetFont: TFont;
@@ -97,8 +97,8 @@ type
     property ParentHandle: THandle read GetParentHandle;
     property Handle: THandle read FHandle write FHandle;
     property Text: String read GetText;
-    property Style: DWORD read GetStyle write SetStyle;
-    property ExStyle: DWORD read GetExStyle write SetExStyle;
+    property Style: NativeInt read GetStyle write SetStyle;
+    property ExStyle: NativeInt read GetExStyle write SetExStyle;
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property Left: Integer read GetLeft;
@@ -377,12 +377,12 @@ begin
   Result := Winapi.Windows.GetParent(Handle);
 end;
 
-function TSysControl.GetStyle: DWORD;
+function TSysControl.GetStyle: NativeInt;
 begin
   Result := GetWindowLongPtr(Handle, GWL_STYLE);
 end;
 
-function TSysControl.GetExStyle: DWORD;
+function TSysControl.GetExStyle: NativeInt;
 begin
   Result := GetWindowLongPtr(Handle, GWL_EXSTYLE);
 end;
@@ -448,12 +448,12 @@ begin
   Result := GetWindowLongPtr(Handle, GWL_WNDPROC);
 end;
 
-procedure TSysControl.SetExStyle(const Value: DWORD);
+procedure TSysControl.SetExStyle(const Value: NativeInt);
 begin
   SetWindowLongPtr(Handle, GWL_EXSTYLE, Value);
 end;
 
-procedure TSysControl.SetStyle(const Value: DWORD);
+procedure TSysControl.SetStyle(const Value: NativeInt);
 begin
   SetWindowLongPtr(Handle, GWL_STYLE, Value);
 end;

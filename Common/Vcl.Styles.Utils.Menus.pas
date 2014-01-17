@@ -617,9 +617,12 @@ procedure TSysPopupStyleHook.MNSELECTITEM(var Message: TMessage);
 var
   DC: HDC;
   Canvas: TCanvas;
-  Index, L, i: integer;
+  Index : Integer;
+  i : Word;
+  L: integer;
   ParentItem: integer;
   ParentPopup: HWND;
+  LMenu : HMENU;
 begin
   { The undocumented MN_SELECTITEM Message:
     This is the most importants message ,
@@ -637,7 +640,7 @@ begin
   DC := GetDC(Handle);
   try
     Canvas.Handle := DC;
-    Index := Message.WParam;
+    Index := Integer(Message.WParam);
 
     { Out of index . }
     if (Index > FCount - 1) or (Index < 0) then
@@ -668,10 +671,11 @@ begin
     L := Length(SubMenuItemInfoArray);
     if L <> 0 then
     begin
-      for i := 0 to L do
+      for i := 0 to L-1 do
       begin
         { Look for SubMenu Parent }
-        if SubMenuItemInfoArray[i].Menu = FMenu then
+        LMenu:= SubMenuItemInfoArray[i].Menu;
+        if LMenu = FMenu then
         begin
           ParentPopup := SubMenuItemInfoArray[i].WindowHandle;
           ParentItem := SubMenuItemInfoArray[i].ItemIndex;

@@ -297,7 +297,7 @@ begin
 
   ListView_SetBkColor(Handle, Color);
   ListView_SetTextBkColor(Handle, Color);
-  ListView_SetTextColor(Handle, FontColor);
+  ListView_SetTextColor(Handle, ColorToRGB (FontColor));
 
 end;
 
