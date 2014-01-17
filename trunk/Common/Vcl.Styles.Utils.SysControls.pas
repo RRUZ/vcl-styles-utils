@@ -148,11 +148,15 @@ begin
     Result := CallNextHookEx(FHook, nCode, wParam, lParam);
     Exit;
   end;
-  if (nCode = HCBT_CREATEWND) and not(StyleServices.IsSystemStyle) then
+  if (nCode = HCBT_CREATEWND) and not (StyleServices.IsSystemStyle) then
   begin
     CBTSturct := PCBTCreateWnd(lParam)^;
     sClassName := GetWindowClassName(wParam);
     sClassName := LowerCase(sClassName);
+      {
+    if SameText(sClassName,'SysListView32') then
+      OutputDebugString(pchar(Format('ClassName %s Handle %x ',[sClassName, wParam])));
+          }
 
     if FRegSysStylesList.ContainsKey(sClassName) then
     begin
@@ -180,7 +184,7 @@ begin
           If the Parent is a VCL control
           => Do not add the child control to the child list .
         }
-        if Parent <> nil then
+        if (Parent <> nil)  then
           FSysStyleHookList.Add(wParam, FRegSysStylesList[sClassName]
             .Create(wParam))
         else
