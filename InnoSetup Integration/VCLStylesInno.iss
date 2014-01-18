@@ -20,7 +20,6 @@ InternalCompressLevel=max
 
 [Files]
 Source: Win32\Release\VclStylesinno.dll; DestDir: {app}
-;Source: Win32\Debug\VclStylesinno.dll; DestDir: {app}
 Source: Styles\Amakrits.vsf; DestDir: {app}\Styles\
 Source: Styles\AmethystKamri.vsf; DestDir: {app}\Styles\
 Source: Styles\AquaGraphite.vsf; DestDir: {app}\Styles\
@@ -74,7 +73,6 @@ Source: Images\WizModernSmallImage-IS_Orange.bmp; DestDir: {app}\Images\
 Source: Images\WizModernSmallImage-IS_Purple.bmp; DestDir: {app}\Images\
 Source: ..\..\..\..\Program Files (x86)\Embarcadero\RAD Studio\9.0\bin\VclStyleDesigner.exe; DestDir: {app}
 Source: ..\..\..\..\Program Files (x86)\Embarcadero\RAD Studio\9.0\bin\VclStyleTest.exe; DestDir: {app}
-
 [Code]
 // Import the LoadVCLStyle function from VclStylesInno.DLL
 procedure LoadVCLStyle(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall';
