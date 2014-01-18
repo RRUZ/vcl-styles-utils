@@ -37,6 +37,7 @@ uses
   Vcl.ImgList,
   Vcl.GraphUtil,
   Vcl.ComCtrls,
+  Vcl.ExtCtrls,
   Vcl.Styles.Utils.Forms,
   Vcl.Controls;
 
@@ -215,6 +216,37 @@ type
     property List: Boolean read IsToolbarList;
     property Wrapable: Boolean read IsToolbarWrapable;
   end;
+
+  TSysProgressBarStyleHook = class(TSysStyleHook)
+  strict private
+    FStep  : Integer;
+    FOrientation: TProgressBarOrientation;
+    FTimer : TTimer;
+    procedure TimerAction(Sender: TObject);
+    function GetBarRect: TRect;
+    function GetBorderWidth: Integer;
+    function GetMax: Integer;
+    function GetMin: Integer;
+    function GetOrientation: TProgressBarOrientation;
+    function GetPercent: Single;
+    function GetPosition: Integer;
+    procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
+  strict protected
+    procedure PaintBar(Canvas: TCanvas); virtual;
+    procedure PaintFrame(Canvas: TCanvas); virtual;
+    procedure Paint(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+    property BarRect: TRect read GetBarRect;
+    property BorderWidth: Integer read GetBorderWidth;
+    property Max: Integer read GetMax;
+    property Min: Integer read GetMin;
+    property Orientation: TProgressBarOrientation read GetOrientation;
+    property Position: Integer read GetPosition;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
+
 
 implementation
 
@@ -1430,6 +1462,205 @@ end;
   end;
 
 {$ENDREGION}
+
+{ TSysProgressBarStyleHook }
+
+constructor TSysProgressBarStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+  if (SysControl.Style And PBS_VERTICAL)<>0 then
+    FOrientation:=pbVertical
+  else
+    FOrientation:=pbHorizontal;
+
+  OverridePaint := True;
+  FStep:=0;
+  FTimer := TTimer.Create(nil);
+  FTimer.Interval := 100;
+  FTimer.OnTimer := TimerAction;
+  FTimer.Enabled := ((GetWindowLong(AHandle, GWL_STYLE) And PBS_MARQUEE)<>0);
+end;
+
+destructor TSysProgressBarStyleHook.Destroy;
+begin
+  FTimer.Free;
+  inherited;
+end;
+
+function TSysProgressBarStyleHook.GetBarRect: TRect;
+begin
+  Result := TRect.Create(0, 0, SysControl.Width, SysControl.Height);
+  InflateRect(Result, -BorderWidth, -BorderWidth);
+end;
+
+function TSysProgressBarStyleHook.GetBorderWidth: Integer;
+begin
+  Result := 0;
+end;
+
+function TSysProgressBarStyleHook.GetMax: Integer;
+begin
+  Result := SendMessage(Handle, PBM_GetRange, 0, 0);
+end;
+
+
+function TSysProgressBarStyleHook.GetMin: Integer;
+begin
+  Result := SendMessage(Handle, PBM_GetRange, 1, 0);
+end;
+
+function TSysProgressBarStyleHook.GetOrientation: TProgressBarOrientation;
+begin
+  Result := pbHorizontal;
+  if (Handle <> 0) and (GetWindowLong(Handle, GWL_STYLE) and PBS_VERTICAL = PBS_VERTICAL) then
+    Result := pbVertical;
+end;
+
+
+function TSysProgressBarStyleHook.GetPercent: Single;
+var
+  LMin, LMax, LPos: Integer;
+begin
+  LMin := Min;
+  LMax := Max;
+  LPos := Position;
+  if (LMin >= 0) and (LPos >= LMin) and (LMax >= LPos) and (LMax - LMin <> 0) then
+    Result := (LPos - LMin) / (LMax - LMin)
+  else
+    Result := 0;
+end;
+
+function TSysProgressBarStyleHook.GetPosition: Integer;
+begin
+  Result := SendMessage(Handle, PBM_GETPOS, 0, 0);
+end;
+
+procedure TSysProgressBarStyleHook.Paint(Canvas: TCanvas);
+var
+  Details: TThemedElementDetails;
+begin
+  if StyleServices.Available then
+  begin
+    Details.Element := teProgress;
+    if StyleServices.HasTransparentParts(Details) then
+      StyleServices.DrawParentBackground(Handle, Canvas.Handle, Details, False);
+  end;
+  PaintFrame(Canvas);
+  PaintBar(Canvas);
+end;
+
+procedure TSysProgressBarStyleHook.PaintBar(Canvas: TCanvas);
+var
+  FillR, LRect: TRect;
+  LWidth, LPos: Integer;
+  LDetails: TThemedElementDetails;
+begin
+  LRect := BarRect;
+
+  if ((SysControl.Style And PBS_MARQUEE)<>0)  then
+  begin
+      InflateRect(LRect, -2, -2);
+      if Orientation = pbHorizontal then
+        LWidth := LRect.Width
+      else
+        LWidth := LRect.Height;
+
+      LPos := Round(LWidth * 0.05);
+      FillR := LRect;
+      if Orientation = pbHorizontal then
+      begin
+        FillR.Right := FillR.Left + LPos;
+        LDetails := StyleServices.GetElementDetails(tpChunk);
+      end
+      else
+      begin
+        FillR.Top := FillR.Bottom - LPos;
+        LDetails := StyleServices.GetElementDetails(tpChunkVert);
+      end;
+
+      FillR.SetLocation(FStep*FillR.Width, FillR.Top);
+      StyleServices.DrawElement(Canvas.Handle, LDetails, FillR);
+//    Inc(FStep,1);
+//    if FStep mod 20=0 then
+//     FStep:=0;
+  end
+  else
+  begin
+    InflateRect(LRect, -2, -2);
+    if Orientation = pbHorizontal then
+      LWidth := LRect.Width
+    else
+      LWidth := LRect.Height;
+    LPos := Round(LWidth * GetPercent);
+    FillR := LRect;
+    if Orientation = pbHorizontal then
+    begin
+      FillR.Right := FillR.Left + LPos;
+      LDetails := StyleServices.GetElementDetails(tpChunk);
+    end
+    else
+    begin
+      FillR.Top := FillR.Bottom - LPos;
+      LDetails := StyleServices.GetElementDetails(tpChunkVert);
+    end;
+    StyleServices.DrawElement(Canvas.Handle, LDetails, FillR);
+  end;
+end;
+
+procedure TSysProgressBarStyleHook.PaintFrame(Canvas: TCanvas);
+var
+  R: TRect;
+  Details: TThemedElementDetails;
+begin
+  if not StyleServices.Available then Exit;
+  R := BarRect;
+  if Orientation = pbHorizontal then
+    Details := StyleServices.GetElementDetails(tpBar)
+  else
+    Details := StyleServices.GetElementDetails(tpBarVert);
+  StyleServices.DrawElement(Canvas.Handle, Details, R);
+end;
+
+procedure TSysProgressBarStyleHook.TimerAction(Sender: TObject);
+var
+  LCanvas: TCanvas;
+begin
+  if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE)<>0)  then
+  begin
+    LCanvas := TCanvas.Create;
+    try
+      LCanvas.Handle := GetWindowDC(Self.Handle);
+
+      if SysControl.Visible then
+      begin
+        PaintFrame(LCanvas);
+        PaintBar(LCanvas);
+      end;
+
+      Inc(FStep,1);
+      if FStep mod 20=0 then
+       FStep:=0;
+
+    finally
+      ReleaseDC(Handle, LCanvas.Handle);
+      LCanvas.Handle := 0;
+      LCanvas.Free;
+    end;
+  end
+  else
+  FTimer.Enabled := False;
+end;
+
+procedure TSysProgressBarStyleHook.WMNCCalcSize(var Message: TWMNCCalcSize);
+begin
+  Message.Result := 0;
+  Handled := True;
+end;
+
+procedure TSysProgressBarStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+end;
 
 initialization
 

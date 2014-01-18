@@ -47,7 +47,6 @@ type
     procedure WndProc(var Message: TMessage); override;
   public
     constructor Create(AHandle: THandle); override;
-    Destructor Destroy; override;
   end;
 
   TNewCheckListBoxStyleHook = class(TSysScrollingStyleHook)
@@ -56,7 +55,6 @@ type
     procedure WndProc(var Message: TMessage); override;
   public
     constructor Create(AHandle: THandle); override;
-    Destructor Destroy; override;
   end;
 
    TNewButtonStyleHook = class(TSysButtonStyleHook)
@@ -76,24 +74,36 @@ begin
   OverrideFont := False;
 end;
 
-destructor TRichEditViewerStyleHook.Destroy;
-begin
-
-  inherited;
-end;
-
 function TRichEditViewerStyleHook.GetBorderSize: TRect;
 begin
   Result := inherited GetBorderSize;
   if (SysControl.HasBorder) then
-  begin
     Result := Rect(2, 2, 2, 2);
-  end;
 end;
 
 procedure TRichEditViewerStyleHook.WndProc(var Message: TMessage);
 begin
-  inherited;
+  case Message.Msg of
+    WM_ERASEBKGND:
+      begin
+        CallDefaultProc(Message);
+        Exit;
+      end;
+//    CN_CTLCOLORMSGBOX .. CN_CTLCOLORSTATIC:
+//      begin
+//        SetTextColor(Message.wParam, ColorToRGB(FontColor));
+//        SetBkColor(Message.wParam, ColorToRGB(Brush.Color));
+//        Message.Result := LRESULT(Brush.Handle);
+//      end;
+//    CM_ENABLEDCHANGED:
+//      begin
+//        UpdateColors;
+//        CallDefaultProc(Message);
+//        // Handled := False; // Allow control to handle message
+//      end
+  else
+    inherited WndProc(Message);
+  end;
 end;
 
 { TNewCheckListBoxStyleHook }
@@ -104,12 +114,6 @@ begin
   OverridePaint := False;
   OverridePaintNC := True;
   OverrideFont := False;
-end;
-
-destructor TNewCheckListBoxStyleHook.Destroy;
-begin
-
-  inherited;
 end;
 
 function TNewCheckListBoxStyleHook.GetBorderSize: TRect;
