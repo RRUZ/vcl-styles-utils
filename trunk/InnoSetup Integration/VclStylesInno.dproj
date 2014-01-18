@@ -124,7 +124,7 @@
 			</DelphiCompile>
 			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
 			<DCCReference Include="..\Common\KOLDetours.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.InnoSetup.pas"/>
+			<DCCReference Include="Vcl.Styles.InnoSetup.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ComCtrls.pas"/>
@@ -132,7 +132,7 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ScreenTips.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.StdCtrls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.InnoSetup.StyleHooks.pas"/>
+			<DCCReference Include="Vcl.Styles.InnoSetup.StyleHooks.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
