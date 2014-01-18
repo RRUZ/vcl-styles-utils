@@ -13,7 +13,7 @@ uses
   Vcl.Dialogs,
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
   KOLDetours in '..\Common\KOLDetours.pas',
-  Vcl.Styles.InnoSetup in '..\Common\Vcl.Styles.InnoSetup.pas',
+  Vcl.Styles.InnoSetup in 'Vcl.Styles.InnoSetup.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.Utils.ComCtrls in '..\Common\Vcl.Styles.Utils.ComCtrls.pas',
@@ -21,7 +21,7 @@ uses
   Vcl.Styles.Utils.Menus in '..\Common\Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Utils.ScreenTips in '..\Common\Vcl.Styles.Utils.ScreenTips.pas',
   Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas',
-  Vcl.Styles.InnoSetup.StyleHooks in '..\Common\Vcl.Styles.InnoSetup.StyleHooks.pas';
+  Vcl.Styles.InnoSetup.StyleHooks in 'Vcl.Styles.InnoSetup.StyleHooks.pas';
 
 {$R *.res}
 
