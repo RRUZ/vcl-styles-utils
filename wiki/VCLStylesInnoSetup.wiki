@@ -2,7 +2,7 @@
 
 = Introduction =
 
- The VCL Styles Utils project, includes a plugin (dll) to skin the installers created by  <a href="http://www.jrsoftware.org/isinfo.php">Inno setup</a>. The current size of the plugin is about 1.5 mb, but when is included (and compressed) in the script only add ~480 Kb to the final installer.
+ The VCL Styles Utils project, includes a plugin (dll) to skin the installers created by  <a href="http://www.jrsoftware.org/isinfo.php">Inno setup</a>. The current size of the plugin is about 1.6 mb, but when is included (and compressed) in the script only add ~500 Kb to the final installer.
 
 
 = Installation =
@@ -76,12 +76,7 @@ end;
 }}}
 
 
-= TODO =
-
-   * Add support for TFolderTreeView and TStartMenuFolderTreeView components.
-
-
 
 = Installer =
 
- Download the installer of the plugin from <a href="https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/SetupVCLStylesInno.exe">here</a>. The current version of the plugin is 1.0.8.11
+ Download the installer of the plugin from <a href="https://dl.dropboxusercontent.com/u/12733424/Blog/VCL%20Styles%20InnoSetup/SetupVCLStylesInno.exe">here</a>. The current version of the plugin is 1.2.1.2
