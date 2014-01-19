@@ -33,8 +33,8 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Dialogs,
-  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
-  KOLDetours in '..\Common\KOLDetours.pas',
+  //Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  //KOLDetours in '..\Common\KOLDetours.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.Utils.ComCtrls in '..\Common\Vcl.Styles.Utils.ComCtrls.pas',
@@ -144,6 +144,8 @@ end;
 
    Init(hwndParent, string_size, variables, stacktop);
    VCLStyleFile:=PAnsiChar(PopString);
+
+   //ShowMessage(VCLStyleFile);
 
    if TStyleManager.IsValidStyle(VCLStyleFile) then
      TStyleManager.SetStyle(TStyleManager.LoadFromFile(VCLStyleFile))

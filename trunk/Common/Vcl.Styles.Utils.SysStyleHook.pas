@@ -48,6 +48,8 @@ const
   CM_CTLCOLORSTATIC = CM_BASE + WM_CTLCOLORSTATIC;
   CM_SCROLLTRACKING = CM_BASE + 350;
   CM_PARENTHOOKED = CM_BASE + 360;
+  CM_CONTROLHOOKED = CM_BASE + 361;
+  CM_INITCHILDS = CM_BASE + 362;
 
 type
   TBidiModeDirection = (bmLeftToRight, bmRightToLeft);
@@ -62,7 +64,7 @@ type
 
   TSysControl = class
   private
-    FFont : TFont;
+    FFont: TFont;
     FParent: TSysControl;
     FHandle: THandle;
     function GetParent: TSysControl;
@@ -92,7 +94,7 @@ type
   public
     constructor Create(AHandle: THandle); virtual;
     Destructor Destroy; override;
-    property Font : TFont read GetFont;
+    property Font: TFont read GetFont;
     property Parent: TSysControl read GetParent;
     property ParentHandle: THandle read GetParentHandle;
     property Handle: THandle read FHandle write FHandle;
@@ -140,18 +142,18 @@ type
     FBrush: TBrush;
     FHandled: Boolean;
     FParentColor: Boolean;
-    {$IF CompilerVersion > 23}
+{$IF CompilerVersion > 23}
     FStyleElements: TStyleElements;
-    {$IFEND}
+{$IFEND}
     FColor: TColor;
     FFont: TFont;
     FText: string;
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
     procedure WMNCPaint(var Message: TMessage); message WM_NCPAINT;
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
-    {$IF CompilerVersion > 23}
+{$IF CompilerVersion > 23}
     procedure SetStyleElements(Value: TStyleElements);
-    {$IFEND}
+{$IFEND}
     function GetFontColor: TColor;
     function GetColor: TColor;
     procedure SetColor(Value: TColor);
@@ -195,9 +197,10 @@ type
     property ParentHandle: HWND read GetParentHandle;
     property Handled: Boolean read FHandled write FHandled;
     property SysControl: TSysControl read FSysControl write FSysControl;
-    {$IF CompilerVersion > 23}
-    property StyleElements: TStyleElements read FStyleElements write SetStyleElements;
-    {$IFEND}
+{$IF CompilerVersion > 23}
+    property StyleElements: TStyleElements read FStyleElements
+      write SetStyleElements;
+{$IFEND}
     property DoubleBuffered: Boolean read FDoubleBuffered write FDoubleBuffered;
     property OverridePaint: Boolean read FOverridePaint write SetOverridePaint;
     property OverridePaintNC: Boolean read FOverridePaintNC
@@ -248,11 +251,21 @@ type
 
 {$ENDREGION}
 
+function IsControlHooked(Handle: HWND): Boolean;
+
 implementation
 
 uses
- System.UITypes,
- Vcl.Styles.Utils.SysControls;
+  System.UITypes,
+  Vcl.Styles.Utils.SysControls;
+
+function IsControlHooked(Handle: HWND): Boolean;
+begin
+  Result := False;
+  if Handle > 0 then
+    Result := (SendMessage(Handle, CM_CONTROLHOOKED, 0, 0) = $77);
+end;
+
 { TSysControl }
 {$REGION 'TSysControl'}
 
@@ -267,8 +280,8 @@ destructor TSysControl.Destroy;
 begin
   if Assigned(FParent) then
     FreeAndNil(FParent);
-  if FFont<>nil then
-  FFont.Free;
+  if FFont <> nil then
+    FFont.Free;
   inherited;
 end;
 
@@ -279,11 +292,10 @@ begin
   if UseRightToLeftAlignment then
     if Result and DT_RIGHT = DT_RIGHT then
       Result := Result and not DT_RIGHT { removing DT_RIGHT, makes it DT_LEFT }
-    else if not (Result and DT_CENTER = DT_CENTER) then
+    else if not(Result and DT_CENTER = DT_CENTER) then
       Result := Result or DT_RIGHT;
   Result := Result or DrawTextBiDiModeFlagsReadingOnly;
 end;
-
 
 function TSysControl.DrawTextBiDiModeFlagsReadingOnly: Longint;
 begin
@@ -366,10 +378,10 @@ begin
   if Assigned(FParent) then
     FreeAndNil(FParent);
   if ParentHandle <> 0 then
-  begin
-    FParent := TSysControl.Create(ParentHandle);
-    Result := FParent;
-  end;
+    begin
+      FParent := TSysControl.Create(ParentHandle);
+      Result := FParent;
+    end;
 end;
 
 function TSysControl.GetParentHandle: THandle;
@@ -390,16 +402,16 @@ end;
 function TSysControl.GetFont: TFont;
 var
   LogFont: TLogFont;
-  hFont  : HGDIOBJ;
+  hFont: HGDIOBJ;
 begin
-  if FFont<>nil then
-   Exit(FFont);
+  if FFont <> nil then
+    Exit(FFont);
 
   hFont := SendMessage(Handle, WM_GETFONT, 0, 0);
   Result := TFont.Create;
   FillChar(LogFont, SizeOf(LogFont), 0);
-  GetObject(hFont, SizeOf(logfont), @LogFont);
-  Result.Name   := StrPas(LogFont.lffaceName);
+  GetObject(hFont, SizeOf(LogFont), @LogFont);
+  Result.Name := StrPas(LogFont.lffaceName);
   Result.Height := LogFont.lfHeight;
   if LogFont.lfWeight >= FW_MEDIUM then
     Result.Style := Result.Style + [fsBold];
@@ -410,11 +422,13 @@ begin
   if LogFont.lfStrikeout <> 0 then
     Result.Style := Result.Style + [fsStrikeout];
   case (LogFont.lfPitchAndFamily and 3) of
-    VARIABLE_PITCH: Result.Pitch := fpVariable;
-    FIXED_PITCH: Result.Pitch    := fpFixed;
+    VARIABLE_PITCH:
+      Result.Pitch := fpVariable;
+    FIXED_PITCH:
+      Result.Pitch := fpFixed;
   end;
 
-  FFont:=Result;
+  FFont := Result;
 end;
 
 function TSysControl.GetText: String;
@@ -461,19 +475,21 @@ end;
 procedure TSysControl.SetWndProc(Value: NativeInt);
 begin
   if Value <> WndProc then
-  begin
-    SetWindowLongPtr(Handle, GWL_WNDPROC, Value);
-  end;
+    begin
+      SetWindowLongPtr(Handle, GWL_WNDPROC, Value);
+    end;
 end;
 
 function TSysControl.UseRightToLeftAlignment: Boolean;
 begin
-  Result := SysLocale.MiddleEast and (BiDiMode = TBidiModeDirection.bmRightToLeft);
+  Result := SysLocale.MiddleEast and
+    (BidiMode = TBidiModeDirection.bmRightToLeft);
 end;
 
 function TSysControl.UseRightToLeftReading: Boolean;
 begin
-  Result := SysLocale.MiddleEast and (BiDiMode <> TBidiModeDirection.bmLeftToRight);
+  Result := SysLocale.MiddleEast and
+    (BidiMode <> TBidiModeDirection.bmLeftToRight);
 end;
 
 {$ENDREGION}
@@ -489,9 +505,9 @@ begin
   FProcInstance := nil;
   FBrush := nil;
   FFont := TFont.Create;
-  {$IF CompilerVersion > 23}
+{$IF CompilerVersion > 23}
   StyleElements := [];
-  {$IFEND}
+{$IFEND}
   FParentColor := False;
   FDoubleBuffered := False;
   FPaintOnEraseBkgnd := False;
@@ -500,17 +516,17 @@ begin
   OverrideEraseBkgnd := False;
   OverrideFont := False;
   if AHandle > 0 then
-  begin
-    FProcInstance := MakeObjectInstance(WndProc);
-    FSysControl := TSysControl.Create(AHandle);
-    FOrgWndProc := FSysControl.WndProc;
-    if FOrgWndProc > 0 then
     begin
-      FSysControl.WndProc := LONG_PTR(FProcInstance);
-      FBrush := TBrush.Create;
-      UpdateColors;
+      FProcInstance := MakeObjectInstance(WndProc);
+      FSysControl := TSysControl.Create(AHandle);
+      FOrgWndProc := FSysControl.WndProc;
+      if FOrgWndProc > 0 then
+        begin
+          FSysControl.WndProc := LONG_PTR(FProcInstance);
+          FBrush := TBrush.Create;
+          UpdateColors;
+        end;
     end;
-  end;
 end;
 
 destructor TSysStyleHook.Destroy;
@@ -519,10 +535,10 @@ begin
     FreeObjectInstance(FProcInstance);
 
   if Assigned(FSysControl) then
-  begin
-    FSysControl.WndProc := FOrgWndProc;
-    FreeAndNil(FSysControl);
-  end;
+    begin
+      FSysControl.WndProc := FOrgWndProc;
+      FreeAndNil(FSysControl);
+    end;
 
   if Assigned(FBrush) then
     FreeAndNil(FBrush);
@@ -559,15 +575,16 @@ begin
   Canvas.Font := SysControl.Font;
   TextFormat := TTextFormatFlags(Flags);
   if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
-  begin
-    Canvas.Font.Color := ThemeTextColor;
-    StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
-  end
+    begin
+      Canvas.Font.Color := ThemeTextColor;
+      StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat,
+        Canvas.Font.Color);
+    end
   else
-  begin
-    Canvas.Refresh;
-    StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
-  end;
+    begin
+      Canvas.Refresh;
+      StyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
+    end;
 end;
 
 procedure TSysStyleHook.DrawParentBackground(DC: HDC; ARect: PRect);
@@ -690,10 +707,11 @@ end;
 
 function TSysStyleHook.GetText: string;
 var
-  Buffer: array [0..255] of Char;
+  Buffer: array [0 .. 255] of Char;
 begin
   if (Handle <> 0) then
-    SetString(Result, Buffer, Winapi.Windows.GetWindowText(Handle, Buffer, Length(Buffer)));
+    SetString(Result, Buffer, Winapi.Windows.GetWindowText(Handle, Buffer,
+      Length(Buffer)));
   FText := Result;
 end;
 
@@ -704,12 +722,12 @@ end;
 
 procedure TSysStyleHook.SetColor(Value: TColor);
 begin
-  if (Value <> FColor) or ( (FBrush<>nil) and (Value <> FBrush.Color)) then
-  begin
-    FColor := Value;
-    if Assigned(FBrush) then
-      FBrush.Color := Value;
-  end;
+  if (Value <> FColor) or ((FBrush <> nil) and (Value <> FBrush.Color)) then
+    begin
+      FColor := Value;
+      if Assigned(FBrush) then
+        FBrush.Color := Value;
+    end;
 end;
 
 procedure TSysStyleHook.SetFont(const Value: TFont);
@@ -736,16 +754,17 @@ begin
 end;
 
 {$IF CompilerVersion > 23}
+
 procedure TSysStyleHook.SetStyleElements(Value: TStyleElements);
 begin
   if Value <> FStyleElements then
-  begin
-    FStyleElements := Value;
-    OverridePaint := (seClient in FStyleElements);
-    // OverrideEraseBkgnd := OverridePaint;
-    OverridePaintNC := (seBorder in FStyleElements);
-    OverrideFont := (seFont in FStyleElements);
-  end;
+    begin
+      FStyleElements := Value;
+      OverridePaint := (seClient in FStyleElements);
+      // OverrideEraseBkgnd := OverridePaint;
+      OverridePaintNC := (seBorder in FStyleElements);
+      OverrideFont := (seFont in FStyleElements);
+    end;
 end;
 {$IFEND}
 
@@ -801,48 +820,48 @@ var
   EmptyRect, DrawRect: TRect;
   DC: HDC;
   H, W: Integer;
-  AStyle : Integer;
+  AStyle: Integer;
   Details: TThemedElementDetails;
   BorderSize: TRect;
 begin
   BorderSize := GetBorderSize;
   with Control do
-  begin
-    ExStyle := GetWindowLong(Handle, GWL_EXSTYLE);
-    if (ExStyle and WS_EX_CLIENTEDGE) <> 0 then
     begin
-      GetWindowRect(Handle, DrawRect);
-      OffsetRect(DrawRect, -DrawRect.Left, -DrawRect.Top);
-      DC := GetWindowDC(Handle);
-      try
-        EmptyRect := DrawRect;
-        if EraseLRCorner then
+      ExStyle := GetWindowLong(Handle, GWL_EXSTYLE);
+      if (ExStyle and WS_EX_CLIENTEDGE) <> 0 then
         begin
-          AStyle := GetWindowLong(Handle, GWL_STYLE);
-          if ((AStyle and WS_HSCROLL) <> 0) and ((AStyle and WS_VSCROLL) <> 0)
-          then
-          begin
-            W := GetSystemMetrics(SM_CXVSCROLL);
-            H := GetSystemMetrics(SM_CYHSCROLL);
-            InflateRect(EmptyRect, -2, -2);
-            with EmptyRect do
-              if not UseLeftScrollBar then
-                EmptyRect := Rect(Left, Bottom - H, Left + W, Bottom)
-              else
-                EmptyRect := Rect(Right - W, Bottom - H, Right, Bottom);
-            FillRect(DC, EmptyRect, GetSysColorBrush(COLOR_BTNFACE));
+          GetWindowRect(Handle, DrawRect);
+          OffsetRect(DrawRect, -DrawRect.Left, -DrawRect.Top);
+          DC := GetWindowDC(Handle);
+          try
+            EmptyRect := DrawRect;
+            if EraseLRCorner then
+              begin
+                AStyle := GetWindowLong(Handle, GWL_STYLE);
+                if ((AStyle and WS_HSCROLL) <> 0) and
+                  ((AStyle and WS_VSCROLL) <> 0) then
+                  begin
+                    W := GetSystemMetrics(SM_CXVSCROLL);
+                    H := GetSystemMetrics(SM_CYHSCROLL);
+                    InflateRect(EmptyRect, -2, -2);
+                    with EmptyRect do
+                      if not UseLeftScrollBar then
+                        EmptyRect := Rect(Left, Bottom - H, Left + W, Bottom)
+                      else
+                        EmptyRect := Rect(Right - W, Bottom - H, Right, Bottom);
+                    FillRect(DC, EmptyRect, GetSysColorBrush(COLOR_BTNFACE));
+                  end;
+              end;
+            with DrawRect do
+              ExcludeClipRect(DC, Left + BorderSize.Left, Top + BorderSize.Top,
+                Right - BorderSize.Right, Bottom - BorderSize.Bottom);
+            Details := StyleServices.GetElementDetails(teEditTextNormal);
+            StyleServices.DrawElement(DC, Details, DrawRect);
+          finally
+            ReleaseDC(Handle, DC);
           end;
         end;
-        with DrawRect do
-          ExcludeClipRect(DC, Left + BorderSize.Left, Top + BorderSize.Top,
-            Right - BorderSize.Right, Bottom - BorderSize.Bottom);
-        Details := StyleServices.GetElementDetails(teEditTextNormal);
-        StyleServices.DrawElement(DC, Details, DrawRect);
-      finally
-        ReleaseDC(Handle, DC);
-      end;
     end;
-  end;
 end;
 
 procedure TSysStyleHook.PaintNC(Canvas: TCanvas);
@@ -874,43 +893,42 @@ begin
   UpdateColors;
 
   if FOverrideEraseBkgnd then
-  begin
-    if not FDoubleBuffered then
     begin
-      DC := HDC(Message.wParam);
+      if not FDoubleBuffered then
+        begin
+          DC := HDC(Message.wParam);
 
-      SaveIndex:=0;
-      if DC = 0 then
-        DC := GetDC(Handle)
-      else
-        SaveIndex := SaveDC(DC);
+          SaveIndex := 0;
+          if DC = 0 then
+            DC := GetDC(Handle)
+          else
+            SaveIndex := SaveDC(DC);
 
-      Canvas := TCanvas.Create;
-      try
-        Canvas.Handle := DC;
-        if Assigned(FFont) then
-          Canvas.Font.Assign(FFont);
+          Canvas := TCanvas.Create;
+          try
+            Canvas.Handle := DC;
+            if Assigned(FFont) then
+              Canvas.Font.Assign(FFont);
 
-        if (FParentColor) and (ParentHandle > 0) then
-          DrawParentBackground(Canvas.Handle)
-        else
-          PaintBackground(Canvas);
+            if (FParentColor) and (ParentHandle > 0) then
+              DrawParentBackground(Canvas.Handle)
+            else
+              PaintBackground(Canvas);
 
-        if (FPaintOnEraseBkgnd) and (Message.lParam <> $93) then
-          Paint(Canvas);
-      finally
-        Canvas.Handle := 0;
-        Canvas.Free;
-        if Message.wParam = 0 then
-          ReleaseDC(Handle, DC)
-        else
-        if SaveIndex<>0 then
-          RestoreDC(DC, SaveIndex);
-      end;
+            if (FPaintOnEraseBkgnd) and (Message.lParam <> $93) then
+              Paint(Canvas);
+          finally
+            Canvas.Handle := 0;
+            Canvas.Free;
+            if Message.wParam = 0 then
+              ReleaseDC(Handle, DC)
+            else if SaveIndex <> 0 then
+              RestoreDC(DC, SaveIndex);
+          end;
+        end;
+      Handled := True;
+      Message.Result := 1;
     end;
-    Handled := True;
-    Message.Result := 1;
-  end;
 end;
 
 function TSysStyleHook.CheckIfParentBkGndPainted: Boolean;
@@ -924,10 +942,10 @@ begin
   Result := False;
   ParentHandle := GetParent(Handle);
   if ParentHandle > 0 then
-  begin
-    SendMessage(ParentHandle, WM_ERASEBKGND, 0, lParam(PTest));
-    Result := (PTest^ = $11);
-  end;
+    begin
+      SendMessage(ParentHandle, WM_ERASEBKGND, 0, lParam(PTest));
+      Result := (PTest^ = $11);
+    end;
 end;
 
 function TSysStyleHook.CheckIfParentHooked: Boolean;
@@ -944,21 +962,21 @@ begin
     Exit;
 
   if FOverridePaintNC then
-  begin
-    Canvas := TCanvas.Create;
-    try
-      Canvas.Handle := GetWindowDC(SysControl.Handle);
-      if Assigned(FFont) then
-        Canvas.Font.Assign(FFont);
-      DrawBorder(Canvas);
-      PaintNC(Canvas);
-    finally
-      ReleaseDC(Handle, Canvas.Handle);
-      Canvas.Handle := 0;
-      Canvas.Free;
+    begin
+      Canvas := TCanvas.Create;
+      try
+        Canvas.Handle := GetWindowDC(SysControl.Handle);
+        if Assigned(FFont) then
+          Canvas.Font.Assign(FFont);
+        DrawBorder(Canvas);
+        PaintNC(Canvas);
+      finally
+        ReleaseDC(Handle, Canvas.Handle);
+        Canvas.Handle := 0;
+        Canvas.Free;
+      end;
+      Handled := True;
     end;
-    Handled := True;
-  end;
 end;
 
 procedure TSysStyleHook.WMPaint(var Message: TMessage);
@@ -973,58 +991,59 @@ begin
     Exit;
 
   if OverridePaint then
-  begin
-    DC := HDC(Message.wParam);
-    Canvas := TCanvas.Create;
-    try
-      if DC <> 0 then
-        Canvas.Handle := DC
-      else
-      begin
-        DC := GetDC(Handle);
-        BeginPaint(SysControl.Handle, PS);
-        Canvas.Handle := DC;
-      end;
-      if Assigned(FFont) then
-        Canvas.Font.Assign(FFont);
-
-      if not InternalPaint(Canvas.Handle) then
-        if FDoubleBuffered and (DC = 0) then
-        begin
-          Buffer := TBitmap.Create;
-          try
-            Buffer.SetSize(SysControl.Width, SysControl.Height);
-            PaintBackground(Buffer.Canvas);
-            Paint(Buffer.Canvas);
-            // paint other controls
-            (* if Control is TWinControl then
-              TWinControlClass(Control)
-              .PaintControls(Buffer.Canvas.Handle, nil);
-            *)
-            Canvas.Draw(0, 0, Buffer);
-          finally
-            Buffer.Free;
-          end;
-        end
+    begin
+      DC := HDC(Message.wParam);
+      Canvas := TCanvas.Create;
+      try
+        if DC <> 0 then
+          Canvas.Handle := DC
         else
-        begin
-          Paint(Canvas);
-          // paint other controls
-          // if Control is TWinControl then
-          // TWinControlClass(Control).PaintControls(Canvas.Handle, nil);
-        end;
-      if DC = 0 then
-      begin
-        ReleaseDC(SysControl.Handle, DC);
-        EndPaint(SysControl.Handle, PS);
-      end;
+          begin
+            DC := GetDC(Handle);
+            BeginPaint(SysControl.Handle, PS);
+            Canvas.Handle := DC;
+          end;
+        if Assigned(FFont) then
+          Canvas.Font.Assign(FFont);
 
-    finally
-      Canvas.Handle := 0;
-      Canvas.Free;
+        if not InternalPaint(Canvas.Handle) then
+          if FDoubleBuffered and (DC = 0) then
+            begin
+              Buffer := TBitmap.Create;
+              try
+                Buffer.SetSize(SysControl.Width, SysControl.Height);
+                PaintBackground(Buffer.Canvas);
+                Paint(Buffer.Canvas);
+                // paint other controls
+                (* if Control is TWinControl then
+                  TWinControlClass(Control)
+                  .PaintControls(Buffer.Canvas.Handle, nil);
+                *)
+
+                Canvas.Draw(0, 0, Buffer);
+              finally
+                Buffer.Free;
+              end;
+            end
+          else
+            begin
+              Paint(Canvas);
+              // paint other controls
+              // if Control is TWinControl then
+              // TWinControlClass(Control).PaintControls(Canvas.Handle, nil);
+            end;
+        if DC = 0 then
+          begin
+            ReleaseDC(SysControl.Handle, DC);
+            EndPaint(SysControl.Handle, PS);
+          end;
+
+      finally
+        Canvas.Handle := 0;
+        Canvas.Free;
+      end;
+      Handled := True;
     end;
-    Handled := True;
-  end;
 
 end;
 
@@ -1037,30 +1056,38 @@ var
   ChildHandle: HWND;
 begin
   case Message.Msg of
+    CM_INITCHILDS:
+      begin
+        Message.Result := 0;
+        with TSysStyleManagerHack(TSysStyleManager) do
+          begin
+            for ChildHandle in FChildRegSysStylesList.Keys do
+              if (not IsControlHooked(ChildHandle)) and
+                (FChildRegSysStylesList[ChildHandle].Parent = Handle) then
+                begin
+                  if not FSysStyleHookList.ContainsKey(ChildHandle) then
+                    begin
+                      FSysStyleHookList.Add(ChildHandle,
+                        FChildRegSysStylesList[ChildHandle]
+                        .StyleHookClass.Create(ChildHandle));
+                      { Child control need to be repainted . }
+                      RedrawWindow(ChildHandle, nil, 0,
+                        RDW_ERASE or RDW_FRAME or RDW_INTERNALPAINT or
+                        RDW_INVALIDATE);
+                      { Send WM_NCCALCSIZE message to the child control . }
+                      SetWindowPos(ChildHandle, 0, 0, 0, 0, 0,
+                        SWP_NOSIZE or SWP_NOMOVE or SWP_NOZORDER or
+                        SWP_FRAMECHANGED);
+                      Message.Result := 1;
+                    end;
+                end;
+          end;
+        Exit;
+      end;
 
     WM_CHANGEUISTATE, WM_PARENTNOTIFY:
       begin
-        Message.Result := CallDefaultProc(Message);
-        { Hook child control . }
-        with TSysStyleManagerHack(TSysStyleManager) do
-        begin
-          for ChildHandle in FChildRegSysStylesList.Keys do
-            if (GetParent(ChildHandle) = Handle) and IsWindow(ChildHandle) then
-            begin
-              if not FSysStyleHookList.ContainsKey(ChildHandle) then
-              begin
-                FSysStyleHookList.Add(ChildHandle,
-                  FChildRegSysStylesList[ChildHandle].Create(ChildHandle));
-                { Child control need to be repainted . }
-                RedrawWindow(ChildHandle, nil, 0, RDW_ERASE or RDW_FRAME or
-                  RDW_INTERNALPAINT or RDW_INVALIDATE);
-                { Send WM_NCCALCSIZE message to the child control . }
-                SetWindowPos(ChildHandle, 0, 0, 0, 0, 0, SWP_NOSIZE or
-                  SWP_NOMOVE or SWP_NOZORDER or SWP_FRAMECHANGED);
-              end;
-            end;
-        end;
-        Exit;
+        SendMessage(Handle, CM_INITCHILDS, 0, 0);
       end;
 
     WM_ERASEBKGND:
@@ -1068,19 +1095,19 @@ begin
         if (Message.lParam > 0) and (Message.wParam = 0) and
           (FOverrideEraseBkgnd or FOverridePaint or FPaintOnEraseBkgnd) then
           if PInteger(Message.lParam)^ = $93 then
-          begin
-            { lParam = Result
-              if (lParam=$11) then Parent background was painted .
-            }
-            PInteger(Message.lParam)^ := $11;
-            { Do not process the default message ..
-              this is only for test !! .
-            }
-            Exit; { Do not Dispatch . }
-          end;
+            begin
+              { lParam = Result
+                if (lParam=$11) then Parent background was painted .
+              }
+              PInteger(Message.lParam)^ := $11;
+              { Do not process the default message ..
+                this is only for test !! .
+              }
+              Exit; { Do not Dispatch . }
+            end;
       end;
 
-    CM_PARENTHOOKED:
+    CM_PARENTHOOKED, CM_CONTROLHOOKED:
       begin
         Message.Result := $77;
         Exit;
@@ -1096,10 +1123,10 @@ begin
     WM_CTLCOLORMSGBOX .. WM_CTLCOLORSTATIC:
       begin
         if not StyleServicesEnabled then
-        begin
-          Message.Result := CallDefaultProc(Message);
-          Exit;
-        end;
+          begin
+            Message.Result := CallDefaultProc(Message);
+            Exit;
+          end;
         TempResult := SendMessage(Handle, CM_BASE + Message.Msg, Message.wParam,
           Message.lParam);
         Message.Result := SendMessage(Message.lParam, CM_BASE + Message.Msg,
@@ -1161,28 +1188,28 @@ procedure TMouseTrackSysControlStyleHook.WMMouseMove(var Message: TWMMouse);
 begin
   inherited;
   if not FMouseInControl and not FMouseInNCArea then
-  begin
-    FMouseInControl := True;
-    StartHotTrackTimer;
-    MouseEnter;
-  end
+    begin
+      FMouseInControl := True;
+      StartHotTrackTimer;
+      MouseEnter;
+    end
   else if FMouseInNCArea and FMouseInControl then
-  begin
-    StopHotTrackTimer;
-    FMouseInControl := False;
-    MouseLeave;
-  end;
+    begin
+      StopHotTrackTimer;
+      FMouseInControl := False;
+      MouseLeave;
+    end;
 end;
 
 procedure TMouseTrackSysControlStyleHook.WMNCMouseMove(var Message: TWMMouse);
 begin
   inherited;
   if not FMouseInControl then
-  begin
-    FMouseInControl := True;
-    StartHotTrackTimer;
-    MouseEnter;
-  end;
+    begin
+      FMouseInControl := True;
+      StartHotTrackTimer;
+      MouseEnter;
+    end;
 end;
 
 procedure TMouseTrackSysControlStyleHook.StartHotTrackTimer;
@@ -1199,10 +1226,10 @@ end;
 procedure TMouseTrackSysControlStyleHook.StopHotTrackTimer;
 begin
   if FHotTrackTimer <> nil then
-  begin
-    TTimer(FHotTrackTimer).Enabled := False;
-    FreeAndNil(FHotTrackTimer);
-  end;
+    begin
+      TTimer(FHotTrackTimer).Enabled := False;
+      FreeAndNil(FHotTrackTimer);
+    end;
 end;
 
 function TMouseTrackSysControlStyleHook.IsChildHandle(AHandle: HWND): Boolean;
@@ -1218,11 +1245,11 @@ begin
   GetCursorPos(P);
   FWindowHandle := WindowFromPoint(P);
   if (FWindowHandle <> Handle) and not IsChildHandle(FWindowHandle) then
-  begin
-    StopHotTrackTimer;
-    FMouseInControl := False;
-    MouseLeave;
-  end;
+    begin
+      StopHotTrackTimer;
+      FMouseInControl := False;
+      MouseLeave;
+    end;
 end;
 
 procedure TMouseTrackSysControlStyleHook.MouseEnter;
@@ -1237,4 +1264,3 @@ end;
 {$ENDREGION}
 
 end.
-
