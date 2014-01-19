@@ -40,6 +40,7 @@ uses
   Winapi.UxTheme,
   WinApi.Windows,
   Vcl.Styles,
+  Vcl.Graphics,
   Vcl.Themes;
 
 var
@@ -207,7 +208,7 @@ begin
   if StyleServices.IsSystemStyle  then
    Result:= TrampolineGetSysColor(nIndex)
   else
-   Result:= StyleServices.GetSystemColor(nIndex or Integer($FF000000));
+   Result:= DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
 end;
 
 //function InterceptGetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;

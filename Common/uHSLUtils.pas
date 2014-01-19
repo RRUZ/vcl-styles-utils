@@ -245,22 +245,13 @@ Uses
   Math;
 
 type
-  PRGB24     = ^TRGB24;
-  TRGB24 = record
-    B, G, R: byte;
-  end;
   PRGBArray24 = ^TRGBArray24;
-  TRGBArray24 = array[0..0] of TRGB24;
+  TRGBArray24 = array[0..0] of TRGBTriple;
 
-  PRGB32     = ^TRGB32;
-  TRGB32 = record
-    B, G, R, A: byte;
-  end;
   PRGBArray32 = ^TRGBArray32;
-  TRGBArray32 = array[0..0] of TRGB32;
+  TRGBArray32 = array[0..0] of TRGBQuad;
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
-
 
 
 function RoundIntToByte(i: integer): byte;
@@ -297,18 +288,36 @@ begin
   begin
     for x := 0 to Dest.Width - 1 do
     begin
-      r    := PRGBArray32(Line)[x].R;
-      g    := PRGBArray32(Line)[x].G;
-      b    := PRGBArray32(Line)[x].B;
-      a    := PRGBArray32(Line)[x].A;
-
+      {$IFOPT R+}
+        {$DEFINE RANGEON}
+        {$R-}
+      {$ELSE}
+        {$UNDEF RANGEON}
+      {$ENDIF}
+      r    := PRGBArray32(Line)[x].rgbRed;
+      g    := PRGBArray32(Line)[x].rgbGreen;
+      b    := PRGBArray32(Line)[x].rgbBlue;
+      a    := PRGBArray32(Line)[x].rgbReserved;
+      {$IFDEF RANGEON}
+        {$R+}
+        {$UNDEF RANGEON}
+      {$ENDIF}
       _Process(RGB(r,g,b), Value, ARGB);
       GetRGB(ARGB, r, g, b);
-
-      PRGBArray32(Line)[x].R := r;
-      PRGBArray32(Line)[x].G := g;
-      PRGBArray32(Line)[x].B := b;
-      PRGBArray32(Line)[x].A := a;
+      {$IFOPT R+}
+        {$DEFINE RANGEON}
+        {$R-}
+      {$ELSE}
+        {$UNDEF RANGEON}
+      {$ENDIF}
+      PRGBArray32(Line)[x].rgbRed := r;
+      PRGBArray32(Line)[x].rgbGreen := g;
+      PRGBArray32(Line)[x].rgbBlue := b;
+      PRGBArray32(Line)[x].rgbReserved := a;
+      {$IFDEF RANGEON}
+        {$R+}
+        {$UNDEF RANGEON}
+      {$ENDIF}
     end;
     Inc(Line, Delta);
   end;
@@ -351,21 +360,40 @@ begin
     begin
       for x := 0 to Dest.Width - 1 do
       begin
-        r    := PRGBArray32(LineDest)[x].R;
-        g    := PRGBArray32(LineDest)[x].G;
-        b    := PRGBArray32(LineDest)[x].B;
-        a    := PRGBArray32(LineDest)[x].A;
+      {$IFOPT R+}
+        {$DEFINE RANGEON}
+        {$R-}
+      {$ELSE}
+        {$UNDEF RANGEON}
+      {$ENDIF}        r    := PRGBArray32(LineDest)[x].rgbRed;
+        g    := PRGBArray32(LineDest)[x].rgbGreen;
+        b    := PRGBArray32(LineDest)[x].rgbBlue;
+        a    := PRGBArray32(LineDest)[x].rgbReserved;
+      {$IFDEF RANGEON}
+        {$R+}
+        {$UNDEF RANGEON}
+      {$ENDIF}
 
-        Value:=RGB(PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
+        Value:=RGB(PRGBArray24(LineSource)[x].rgbtRed, PRGBArray24(LineSource)[x].rgbtGreen, PRGBArray24(LineSource)[x].rgbtBlue);
 
 
         _Process(RGB(r,g,b), Value, ARGB);
         GetRGB(ARGB, r, g, b);
 
-        PRGBArray32(LineDest)[x].R := r;
-        PRGBArray32(LineDest)[x].G := g;
-        PRGBArray32(LineDest)[x].B := b;
-        PRGBArray32(LineDest)[x].A := a;
+      {$IFOPT R+}
+        {$DEFINE RANGEON}
+        {$R-}
+      {$ELSE}
+        {$UNDEF RANGEON}
+      {$ENDIF}
+        PRGBArray32(LineDest)[x].rgbRed := r;
+        PRGBArray32(LineDest)[x].rgbGreen := g;
+        PRGBArray32(LineDest)[x].rgbBlue := b;
+        PRGBArray32(LineDest)[x].rgbReserved := a;
+      {$IFDEF RANGEON}
+        {$R+}
+        {$UNDEF RANGEON}
+      {$ENDIF}
       end;
       Inc(LineDest, DeltaDest);
       Inc(LineSource, DeltaSource);
@@ -390,16 +418,36 @@ begin
   begin
     for x := 0 to ABitMap.Width - 1 do
     begin
-      r    := PRGBArray24(Line)[x].R;
-      g    := PRGBArray24(Line)[x].G;
-      b    := PRGBArray24(Line)[x].B;
+      {$IFOPT R+}
+        {$DEFINE RANGEON}
+        {$R-}
+      {$ELSE}
+        {$UNDEF RANGEON}
+      {$ENDIF}
+      r    := PRGBArray24(Line)[x].rgbtRed;
+      g    := PRGBArray24(Line)[x].rgbtGreen;
+      b    := PRGBArray24(Line)[x].rgbtBlue;
+      {$IFDEF RANGEON}
+        {$R+}
+        {$UNDEF RANGEON}
+      {$ENDIF}
 
       _Process(RGB(r,g,b), Value, ARGB);
       GetRGB(ARGB, r, g, b);
 
-      PRGBArray24(Line)[x].R := r;
-      PRGBArray24(Line)[x].G := g;
-      PRGBArray24(Line)[x].B := b;
+      {$IFOPT R+}
+        {$DEFINE RANGEON}
+        {$R-}
+      {$ELSE}
+        {$UNDEF RANGEON}
+      {$ENDIF}
+      PRGBArray24(Line)[x].rgbtRed := r;
+      PRGBArray24(Line)[x].rgbtGreen := g;
+      PRGBArray24(Line)[x].rgbtBlue := b;
+      {$IFDEF RANGEON}
+        {$R+}
+        {$UNDEF RANGEON}
+      {$ENDIF}
     end;
     Inc(Line, Delta);
   end;
@@ -442,18 +490,18 @@ begin
     begin
       for x := 0 to Dest.Width - 1 do
       begin
-        r    := PRGBArray24(LineDest)[x].R;
-        g    := PRGBArray24(LineDest)[x].G;
-        b    := PRGBArray24(LineDest)[x].B;
+        r    := PRGBArray24(LineDest)[x].rgbtRed;
+        g    := PRGBArray24(LineDest)[x].rgbtGreen;
+        b    := PRGBArray24(LineDest)[x].rgbtBlue;
 
-        Value:=RGB(PRGBArray24(LineSource)[x].R, PRGBArray24(LineSource)[x].G, PRGBArray24(LineSource)[x].B);
+        Value:=RGB(PRGBArray24(LineSource)[x].rgbtRed, PRGBArray24(LineSource)[x].rgbtGreen, PRGBArray24(LineSource)[x].rgbtBlue);
 
         _Process(RGB(r,g,b), Value, ARGB);
         GetRGB(ARGB, r, g, b);
 
-        PRGBArray32(LineDest)[x].R := r;
-        PRGBArray32(LineDest)[x].G := g;
-        PRGBArray32(LineDest)[x].B := b;
+        PRGBArray32(LineDest)[x].rgbRed := r;
+        PRGBArray32(LineDest)[x].rgbGreen := g;
+        PRGBArray32(LineDest)[x].rgbBlue := b;
       end;
       Inc(LineDest, DeltaDest);
       Inc(LineSource, DeltaSource);
@@ -930,12 +978,12 @@ begin
   begin
     for x := 0 to ABitMap.Width - 1 do
     begin
-      r    := PRGBArray24(Line)[x].R;
-      g    := PRGBArray24(Line)[x].G;
-      b    := PRGBArray24(Line)[x].B;
-      PRGBArray24(Line)[x].R := RoundIntToByte(r+DR);
-      PRGBArray24(Line)[x].G := RoundIntToByte(g+DG);
-      PRGBArray24(Line)[x].B := RoundIntToByte(b+DB);
+      r    := PRGBArray24(Line)[x].rgbtRed;
+      g    := PRGBArray24(Line)[x].rgbtGreen;
+      b    := PRGBArray24(Line)[x].rgbtBlue;
+      PRGBArray24(Line)[x].rgbtRed := RoundIntToByte(r+DR);
+      PRGBArray24(Line)[x].rgbtGreen := RoundIntToByte(g+DG);
+      PRGBArray24(Line)[x].rgbtBlue := RoundIntToByte(b+DB);
     end;
     Inc(Line, Delta);
   end;
@@ -954,14 +1002,14 @@ begin
   begin
     for x := 0 to ABitMap.Width - 1 do
     begin
-      r    := PRGBArray32(Line)[x].R;
-      g    := PRGBArray32(Line)[x].G;
-      b    := PRGBArray32(Line)[x].B;
-      a    := PRGBArray32(Line)[x].A;
-      PRGBArray32(Line)[x].R := RoundIntToByte(r+DR);
-      PRGBArray32(Line)[x].G := RoundIntToByte(g+DG);
-      PRGBArray32(Line)[x].B := RoundIntToByte(b+DB);
-      PRGBArray32(Line)[x].A := a;
+      r    := PRGBArray32(Line)[x].rgbRed;
+      g    := PRGBArray32(Line)[x].rgbGreen;
+      b    := PRGBArray32(Line)[x].rgbBlue;
+      a    := PRGBArray32(Line)[x].rgbReserved;
+      PRGBArray32(Line)[x].rgbRed := RoundIntToByte(r+DR);
+      PRGBArray32(Line)[x].rgbGreen := RoundIntToByte(g+DG);
+      PRGBArray32(Line)[x].rgbBlue := RoundIntToByte(b+DB);
+      PRGBArray32(Line)[x].rgbReserved := a;
     end;
     Inc(Line, Delta);
   end;
