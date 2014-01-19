@@ -69,6 +69,7 @@ implementation
 
 Uses
   Winapi.Windows,
+  System.UITypes,
   Vcl.Graphics,
   Vcl.Themes,
   Vcl.Styles;
