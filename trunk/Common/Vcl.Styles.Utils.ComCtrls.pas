@@ -1675,6 +1675,7 @@ begin
     RegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
     RegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
     RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+    RegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
   end;
 end;
 
@@ -1688,6 +1689,7 @@ begin
   UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
   UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
   UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+  UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
 end;
 
 end.
