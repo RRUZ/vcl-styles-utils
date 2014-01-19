@@ -81,8 +81,6 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
-			<DCCReference Include="..\Common\KOLDetours.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ComCtrls.pas"/>

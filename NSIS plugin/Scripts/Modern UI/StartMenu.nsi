@@ -65,7 +65,7 @@ Section "Dummy Section" SecDummy
   SetOutPath "$INSTDIR"
   
   ;ADD YOUR OWN FILES HERE...
-  File Amakrits.vsf 
+
   ;Store installation folder
   WriteRegStr HKCU "Software\Modern UI Test" "" $INSTDIR
   
@@ -114,5 +114,8 @@ Section "Uninstall"
 SectionEnd
 
 Function .onInit
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD "Amakrits.vsf"
+  SetOutPath $TEMP
+  File /oname=Amakrits.vsf "Amakrits.vsf"
+  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
+  Delete $TEMP\Amakrits.vsf
 FunctionEnd

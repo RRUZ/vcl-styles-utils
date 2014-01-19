@@ -52,7 +52,7 @@ type
 
   TSysButtonStyleHook = class(TMouseTrackSysControlStyleHook)
   private
-    FOwnerDraw: Boolean;
+    // FOwnerDraw: Boolean;
     function GetCaptionRect(Canvas: TCanvas): TRect;
     function GetBoxRect: TRect;
     function IsCheckBox: Boolean;
@@ -66,6 +66,7 @@ type
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
     procedure WMNCPaint(var Message: TMessage); message WM_NCPAINT;
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
+    function IsOwnerDraw: Boolean;
   protected
     procedure DrawCheckBoxText(DC: HDC; Text: String;
       LDetails: TThemedElementDetails; R: TRect); virtual;
@@ -91,6 +92,7 @@ type
     property CheckBoxState: TSysCheckBoxState read GetCheckBoxState;
     property TextAlign: TTextFormat read GetTextAlign;
     property ShowText: Boolean read GetShowText;
+    property OwnerDraw: Boolean read IsOwnerDraw;
   end;
 
   TSysEditStyleHook = class(TMouseTrackSysControlStyleHook)
@@ -166,7 +168,7 @@ type
     procedure WMDrawItem(var Message: TWMDrawItem); message WM_DRAWITEM;
     procedure WMParentNotify(var Message: TMessage); message WM_PARENTNOTIFY;
   strict protected
-    procedure UpdateColors;override;
+    procedure UpdateColors; override;
     function IsChildHandle(AHandle: HWnd): Boolean; override;
     // function AcceptMessage(var Message: TMessage): Boolean; override;
     procedure DrawItem(Canvas: TCanvas; Index: UINT; const R: TRect;
@@ -280,21 +282,22 @@ var
   R: TRect;
 begin
   if StyleServicesEnabled and SysControl.HasBorder then
-  begin
-    if Focused then
-      Details := StyleServices.GetElementDetails(teEditBorderNoScrollFocused)
-    else if MouseInControl then
-      Details := StyleServices.GetElementDetails(teEditBorderNoScrollHot)
-    else if SysControl.Enabled then
-      Details := StyleServices.GetElementDetails(teEditBorderNoScrollNormal)
-    else
-      Details := StyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
-    R := Rect(0, 0, SysControl.Width, SysControl.Height);
-    InflateRect(R, -2, -2);
-    ExcludeClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
-    StyleServices.DrawElement(Canvas.Handle, Details,
-      Rect(0, 0, SysControl.Width, SysControl.Height));
-  end;
+    begin
+      if Focused then
+        Details := StyleServices.GetElementDetails(teEditBorderNoScrollFocused)
+      else if MouseInControl then
+        Details := StyleServices.GetElementDetails(teEditBorderNoScrollHot)
+      else if SysControl.Enabled then
+        Details := StyleServices.GetElementDetails(teEditBorderNoScrollNormal)
+      else
+        Details := StyleServices.GetElementDetails
+          (teEditBorderNoScrollDisabled);
+      R := Rect(0, 0, SysControl.Width, SysControl.Height);
+      InflateRect(R, -2, -2);
+      ExcludeClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+      StyleServices.DrawElement(Canvas.Handle, Details,
+        Rect(0, 0, SysControl.Width, SysControl.Height));
+    end;
 end;
 
 procedure TSysEditStyleHook.UpdateColors;
@@ -327,12 +330,12 @@ begin
   Params := Message.CalcSize_Params;
   if SysControl.HasBorder then
     with Params^.rgrc[0] do
-    begin
-      Inc(Left, 2);
-      Inc(Top, 2);
-      Dec(Right, 2);
-      Dec(Bottom, 2);
-    end;
+      begin
+        Inc(Left, 2);
+        Inc(Top, 2);
+        Dec(Right, 2);
+        Dec(Bottom, 2);
+      end;
   Handled := True;
 end;
 
@@ -376,15 +379,15 @@ function TSysListBoxStyleHook.GetBorderSize: TRect;
 begin
   Result := inherited GetBorderSize;
   if (SysControl.HasBorder) then
-  begin
-    Result := Rect(2, 2, 2, 2);
-  end;
+    begin
+      Result := Rect(2, 2, 2, 2);
+    end;
   if SysControl.ControlClassName = 'ComboLBox' then
-  begin
-    if SysControl.Parent.Style and CBS_SIMPLE = CBS_SIMPLE then
-      Exit;
-    Result := Rect(0, 0, 0, 0);
-  end;
+    begin
+      if SysControl.Parent.Style and CBS_SIMPLE = CBS_SIMPLE then
+        Exit;
+      Result := Rect(0, 0, 0, 0);
+    end;
 end;
 
 procedure TSysListBoxStyleHook.WndProc(var Message: TMessage);
@@ -420,20 +423,20 @@ var
   TextFormat: TTextFormat;
 begin
   if ShowText then
-  begin
-    TextFormat := [tfVerticalCenter, tfHidePrefix];
-    if (SysControl.Style and BS_MULTILINE = BS_MULTILINE) then
-      include(TextFormat, tfWordBreak)
-    else
-      include(TextFormat, tfSingleLine);
-    if (SysControl.Style and BS_LEFT = BS_LEFT) then
-      include(TextFormat, tfLeft)
-    else if (SysControl.Style and BS_RIGHT = BS_RIGHT) then
-      include(TextFormat, tfRight)
-    else if (SysControl.Style and BS_CENTER = BS_CENTER) then
-      include(TextFormat, tfCenter);
-    DrawText(DC, LDetails, SysControl.Text, R, TextFormat);
-  end;
+    begin
+      TextFormat := [tfVerticalCenter, tfHidePrefix];
+      if (SysControl.Style and BS_MULTILINE = BS_MULTILINE) then
+        include(TextFormat, tfWordBreak)
+      else
+        include(TextFormat, tfSingleLine);
+      if (SysControl.Style and BS_LEFT = BS_LEFT) then
+        include(TextFormat, tfLeft)
+      else if (SysControl.Style and BS_RIGHT = BS_RIGHT) then
+        include(TextFormat, tfRight)
+      else if (SysControl.Style and BS_CENTER = BS_CENTER) then
+        include(TextFormat, tfCenter);
+      DrawText(DC, LDetails, SysControl.Text, R, TextFormat);
+    end;
 end;
 
 function TSysButtonStyleHook.GetCheckBoxState: TSysCheckBoxState;
@@ -453,10 +456,10 @@ function TSysButtonStyleHook.GetTextAlign: TTextFormat;
 begin
   Result := [];
   with SysControl do
-  begin
-    // if Style and BS_LEFTTEXT then
+    begin
+      // if Style and BS_LEFTTEXT then
 
-  end;
+    end;
 end;
 
 function TSysButtonStyleHook.IsCheckBox: Boolean;
@@ -469,6 +472,11 @@ end;
 function TSysButtonStyleHook.IsGroupBox: Boolean;
 begin
   Result := (SysControl.Style and BS_GROUPBOX = BS_GROUPBOX);
+end;
+
+function TSysButtonStyleHook.IsOwnerDraw: Boolean;
+begin
+  Result := (SysControl.Style and BS_OWNERDRAW = BS_OWNERDRAW);
 end;
 
 function TSysButtonStyleHook.IsPushButton: Boolean;
@@ -499,7 +507,7 @@ end;
 
 procedure TSysButtonStyleHook.MouseLeave;
 begin
-   Invalidate;
+  Invalidate;
 end;
 
 procedure TSysButtonStyleHook.Paint(Canvas: TCanvas);
@@ -551,34 +559,34 @@ begin
 
   if SplitButton then
     with Canvas, SysControl do
-    begin
-      { draw vertical line }
-      Pen.Color := StyleServices.GetSystemColor(clBtnShadow);
-      MoveTo(Width - 15, 3);
-      LineTo(Width - 15, Height - 3);
-      if Enabled then
-        Pen.Color := StyleServices.GetSystemColor(clBtnHighLight)
-      else
-        Pen.Color := Font.Color;
-      MoveTo(Width - 14, 3);
-      LineTo(Width - 14, Height - 3);
-      { Draw arrow }
-      Pen.Color := Font.Color;
-      X := Width - 8;
-      Y := Height div 2 + 1;
-      for i := 3 downto 0 do
       begin
-        MoveTo(X - i, Y - i);
-        LineTo(X + i + 1, Y - i);
+        { draw vertical line }
+        Pen.Color := StyleServices.GetSystemColor(clBtnShadow);
+        MoveTo(Width - 15, 3);
+        LineTo(Width - 15, Height - 3);
+        if Enabled then
+          Pen.Color := StyleServices.GetSystemColor(clBtnHighLight)
+        else
+          Pen.Color := Font.Color;
+        MoveTo(Width - 14, 3);
+        LineTo(Width - 14, Height - 3);
+        { Draw arrow }
+        Pen.Color := Font.Color;
+        X := Width - 8;
+        Y := Height div 2 + 1;
+        for i := 3 downto 0 do
+          begin
+            MoveTo(X - i, Y - i);
+            LineTo(X + i + 1, Y - i);
+          end;
       end;
-    end;
   if ShowText then
-  begin
-    TextFormat := [tfCenter, tfVerticalCenter, tfSingleLine, tfHidePrefix];
-    if (SysControl.Style and BS_MULTILINE = BS_MULTILINE) then
-      Exclude(TextFormat, tfSingleLine);
-    DrawText(Canvas.Handle, LDetails, SysControl.Text, LRect, TextFormat);
-  end;
+    begin
+      TextFormat := [tfCenter, tfVerticalCenter, tfSingleLine, tfHidePrefix];
+      if (SysControl.Style and BS_MULTILINE = BS_MULTILINE) then
+        Exclude(TextFormat, tfSingleLine);
+      DrawText(Canvas.Handle, LDetails, SysControl.Text, LRect, TextFormat);
+    end;
 end;
 
 function TSysButtonStyleHook.GetBoxRect: TRect;
@@ -588,10 +596,10 @@ var
 begin
   DC := GetDC(Handle);
   with SysControl do
-  begin
-    GetTextExtentPoint32(DC, Text, Length(Text) - 1, sSize);
-    Result := Rect(0, sSize.Height div 2 + 1, Width - 0, Height - 0);
-  end;
+    begin
+      GetTextExtentPoint32(DC, Text, Length(Text) - 1, sSize);
+      Result := Rect(0, sSize.Height div 2 + 1, Width - 0, Height - 0);
+    end;
   ReleaseDC(Handle, DC);
   DeleteDC(DC);
 end;
@@ -643,17 +651,17 @@ begin
   BoxRect := Rect(0, 0, Size.cx, Size.cy);
   RectVCenter(BoxRect, LRect);
 
-  if (SysControl.Style = BS_LEFTTEXT) then
-  begin
-    BoxRect.Left := LRect.Right - BoxRect.Width - 2;
-    BoxRect.Right := LRect.Right;
-    TxtRect := Rect(LRect.Left + 1, LRect.Top, BoxRect.Left, LRect.Bottom);
-  end
+  if (SysControl.Style and BS_LEFTTEXT = BS_LEFTTEXT) then
+    begin
+      BoxRect.Left := LRect.Right - BoxRect.Width - 2;
+      BoxRect.Right := LRect.Right;
+      TxtRect := Rect(LRect.Left + 1, LRect.Top, BoxRect.Left, LRect.Bottom);
+    end
   else
-  begin
-    OffsetRect(BoxRect, 1, 0);
-    TxtRect := Rect(BoxRect.Right + 2, LRect.Top, LRect.Right, LRect.Bottom);
-  end;
+    begin
+      OffsetRect(BoxRect, 1, 0);
+      TxtRect := Rect(BoxRect.Right + 2, LRect.Top, LRect.Right, LRect.Bottom);
+    end;
 
   StyleServices.DrawElement(DC, LDetails, BoxRect);
 
@@ -700,20 +708,19 @@ begin
 
   LDetails := StyleServices.GetElementDetails(Detail);
   BoxRect := Rect(0, 0, Size.cx, Size.cy);
-  RectVCenter(BoxRect, LRect);
+  BoxRect := RectVCenter(BoxRect, LRect);
 
-  if (SysControl.Style = BS_LEFTTEXT) then
-  begin
-    BoxRect.Left := LRect.Right - BoxRect.Width - 2;
-    BoxRect.Right := LRect.Right;
-    TxtRect := Rect(LRect.Left + 1, LRect.Top, BoxRect.Left, LRect.Bottom);
-
-  end
+  if (SysControl.Style and BS_LEFTTEXT = BS_LEFTTEXT) then
+    begin
+      BoxRect.Left := LRect.Right - BoxRect.Width - 2;
+      BoxRect.Right := LRect.Right;
+      TxtRect := Rect(LRect.Left + 1, LRect.Top, BoxRect.Left, LRect.Bottom);
+    end
   else
-  begin
-    OffsetRect(BoxRect, 1, 0);
-    TxtRect := Rect(BoxRect.Right + 2, LRect.Top, LRect.Right, LRect.Bottom);
-  end;
+    begin
+      OffsetRect(BoxRect, 1, 0);
+      TxtRect := Rect(BoxRect.Right + 2, LRect.Top, LRect.Right, LRect.Bottom);
+    end;
 
   StyleServices.DrawElement(DC, LDetails, BoxRect);
 
@@ -739,7 +746,8 @@ begin
 
   SaveIndex := SaveDC(Canvas.Handle);
   try
-    ExcludeClipRect(Canvas.Handle, CaptionRect.Left, CaptionRect.Top,  CaptionRect.Right, CaptionRect.Bottom);
+    ExcludeClipRect(Canvas.Handle, CaptionRect.Left, CaptionRect.Top,
+      CaptionRect.Right, CaptionRect.Bottom);
     StyleServices.DrawElement(Canvas.Handle, LDetails, R);
   finally
     RestoreDC(Canvas.Handle, SaveIndex);
@@ -765,11 +773,11 @@ end;
 procedure TSysButtonStyleHook.WMEraseBkgnd(var Message: TMessage);
 begin
   Handled := False;
-  if (FOwnerDraw or (not ParentBkGndPainted) or GroupBox) then
-  begin
-    Message.Result := 1;
-    Exit;
-  end;
+  if (OwnerDraw or (not ParentBkGndPainted) or GroupBox) then
+    begin
+      Message.Result := 1;
+      Exit;
+    end;
   inherited;
 end;
 
@@ -779,18 +787,18 @@ var
   Canvas: TCanvas;
 begin
   Handled := False;
-  if (FOwnerDraw or not ParentBkGndPainted) then
+  if (OwnerDraw or not ParentBkGndPainted) then
     Exit;
 
   if GroupBox then
-  begin
-    Canvas := TCanvas.Create;
-    Canvas.Handle := BeginPaint(Handle, PS);
-    PaintNC(Canvas);
-    EndPaint(Handle, PS);
-    Canvas.Free;
-    Handled := True;
-  end
+    begin
+      Canvas := TCanvas.Create;
+      Canvas.Handle := BeginPaint(Handle, PS);
+      PaintNC(Canvas);
+      EndPaint(Handle, PS);
+      Canvas.Free;
+      Handled := True;
+    end
   else
     inherited;
 end;
@@ -798,28 +806,32 @@ end;
 procedure TSysButtonStyleHook.WMPaint(var Message: TMessage);
 begin
   if ParentBkGndPainted then
-  begin
-    Handled := False;
-    if not FOwnerDraw then
-      inherited;
-  end
+    begin
+      Handled := False;
+      if not OwnerDraw then
+        inherited
+      else
+        Exit;
+    end
   else
-    Handled := False;
+    begin
+      Handled := False;
+      Exit;
+    end;
+  Handled := True;
 end;
 
 procedure TSysButtonStyleHook.WndProc(var Message: TMessage);
-var
-  NCStruct: CREATESTRUCT;
 begin
   case Message.Msg of
 
-    WM_NCCREATE:
+    (* WM_NCCREATE:
       begin
-        NCStruct := PCREATESTRUCT(Message.LPARAM)^;
-        if NCStruct.Style and BS_OWNERDRAW = BS_OWNERDRAW then
-          FOwnerDraw := True;
+      NCStruct := PCREATESTRUCT(Message.LPARAM)^;
+      if NCStruct.Style and BS_OWNERDRAW = BS_OWNERDRAW then
+      FOwnerDraw := True;
       end;
-
+    *)
     WM_ENABLE:
       begin
         { Check first if Window is visible
@@ -827,9 +839,29 @@ begin
         }
         if SysControl.Visible then
           Invalidate;
+        inherited;
       end;
+    WM_STYLECHANGING, WM_STYLECHANGED:
+      begin
+        Invalidate;
+
+      end;
+    WM_SETTEXT:
+      begin
+        SetRedraw(False);
+        CallDefaultProc(Message);
+        SetRedraw(True);
+        Invalidate;
+      end;
+    WM_SETFOCUS, WM_KILLFOCUS:
+      begin
+        inherited;
+        Invalidate;
+      end;
+  else
+    inherited;
   end;
-  inherited;
+
 end;
 
 { TSysMemoStyleHook }
@@ -837,12 +869,12 @@ end;
 constructor TSysMemoStyleHook.Create(AHandle: THandle);
 begin
   inherited;
-  {$IF CompilerVersion > 23}
+{$IF CompilerVersion > 23}
   StyleElements := [seBorder, seFont];
-  {$ELSE}
+{$ELSE}
   OverridePaintNC := True;
   OverrideFont := True;
-  {$IFEND}
+{$IFEND}
   UpdateColors;
 end;
 
@@ -917,11 +949,11 @@ end;
 destructor TSysComboBoxStyleHook.Destroy;
 begin
   if (FListHandle <> 0) and (FListBoxInstance <> nil) then
-  begin
-    SetWindowLong(FListHandle, GWL_WNDPROC, IntPtr(FDefListBoxProc));
-    FreeObjectInstance(FListBoxInstance);
-    FListBoxInstance := nil;
-  end;
+    begin
+      SetWindowLong(FListHandle, GWL_WNDPROC, IntPtr(FDefListBoxProc));
+      FreeObjectInstance(FListBoxInstance);
+      FListBoxInstance := nil;
+    end;
   if FListBoxTimerCode <> 0 then
     ListBoxStopTimer;
   inherited;
@@ -938,12 +970,12 @@ begin
     (Message.NotifyCode = CBN_SELENDOK) or (Message.NotifyCode = CBN_CLOSEUP) or
     (Message.NotifyCode = CBN_DROPDOWN) or (Message.NotifyCode = CBN_SELCHANGE)
   then
-  begin
-    if FListBoxTimerCode <> 0 then
-      ListBoxStopTimer;
-    FMouseOnButton := False;
-    Invalidate;
-  end;
+    begin
+      if FListBoxTimerCode <> 0 then
+        ListBoxStopTimer;
+      FMouseOnButton := False;
+      Invalidate;
+    end;
 end;
 
 procedure TSysComboBoxStyleHook.CNDrawItem(var Message: TWMDrawItem);
@@ -988,20 +1020,20 @@ begin
     P.X := P.X - R.Left;
     P.Y := P.Y - R.Top;
     if (R.Width < 5000) and (R.Height < 5000) then
-    begin
-      GetClientRect(FListHandle, R);
-      ExcludeClipRect(Canvas.Handle, P.X, P.Y, R.Right - R.Left + P.X,
-        R.Bottom - R.Top + P.Y);
-      GetWindowRect(FListHandle, R);
-      OffsetRect(R, -R.Left, -R.Top);
-      SaveIdx := SaveDC(Canvas.Handle);
-      try
-        PaintListBoxBorder(Canvas, R);
-      finally
-        RestoreDC(Canvas.Handle, SaveIdx);
+      begin
+        GetClientRect(FListHandle, R);
+        ExcludeClipRect(Canvas.Handle, P.X, P.Y, R.Right - R.Left + P.X,
+          R.Bottom - R.Top + P.Y);
+        GetWindowRect(FListHandle, R);
+        OffsetRect(R, -R.Left, -R.Top);
+        SaveIdx := SaveDC(Canvas.Handle);
+        try
+          PaintListBoxBorder(Canvas, R);
+        finally
+          RestoreDC(Canvas.Handle, SaveIdx);
+        end;
+        DrawListBoxVertScroll(Canvas.Handle);
       end;
-      DrawListBoxVertScroll(Canvas.Handle);
-    end;
   finally
     ReleaseDC(FListHandle, Canvas.Handle);
     Canvas.Handle := 0;
@@ -1025,50 +1057,51 @@ begin
     else
       Canvas.Handle := GetWindowDC(FListHandle);
     if ListBoxVertScrollRect.Width > 0 then
-    begin
-      B := TBitmap.Create;
-      try
-        B.Width := ListBoxVertScrollRect.Width;
-        B.Height := ListBoxVertScrollRect.Height;
-        MoveWindowOrg(B.Canvas.Handle, -ListBoxVertScrollRect.Left,
-          -ListBoxVertScrollRect.Top);
+      begin
+        B := TBitmap.Create;
+        try
+          B.Width := ListBoxVertScrollRect.Width;
+          B.Height := ListBoxVertScrollRect.Height;
+          MoveWindowOrg(B.Canvas.Handle, -ListBoxVertScrollRect.Left,
+            -ListBoxVertScrollRect.Top);
 
-        if StyleServices.Available then
-        begin
-          R := ListBoxVertScrollRect;
-          R.Top := ListBoxVertUpButtonRect.Bottom;
-          R.Bottom := ListBoxVertDownButtonRect.Top;
-          if R.Height > 0 then
-          begin
-            Details := StyleServices.GetElementDetails(tsUpperTrackVertNormal);
-            StyleServices.DrawElement(B.Canvas.Handle, Details, R);
-          end;
-          Details := StyleServices.GetElementDetails(FVSliderState);
-          StyleServices.DrawElement(B.Canvas.Handle, Details,
-            ListBoxVertSliderRect);
-          Details := StyleServices.GetElementDetails(FVUpState);
-          StyleServices.DrawElement(B.Canvas.Handle, Details,
-            ListBoxVertUpButtonRect);
-          Details := StyleServices.GetElementDetails(FVDownState);
-          StyleServices.DrawElement(B.Canvas.Handle, Details,
-            ListBoxVertDownButtonRect);
+          if StyleServices.Available then
+            begin
+              R := ListBoxVertScrollRect;
+              R.Top := ListBoxVertUpButtonRect.Bottom;
+              R.Bottom := ListBoxVertDownButtonRect.Top;
+              if R.Height > 0 then
+                begin
+                  Details := StyleServices.GetElementDetails
+                    (tsUpperTrackVertNormal);
+                  StyleServices.DrawElement(B.Canvas.Handle, Details, R);
+                end;
+              Details := StyleServices.GetElementDetails(FVSliderState);
+              StyleServices.DrawElement(B.Canvas.Handle, Details,
+                ListBoxVertSliderRect);
+              Details := StyleServices.GetElementDetails(FVUpState);
+              StyleServices.DrawElement(B.Canvas.Handle, Details,
+                ListBoxVertUpButtonRect);
+              Details := StyleServices.GetElementDetails(FVDownState);
+              StyleServices.DrawElement(B.Canvas.Handle, Details,
+                ListBoxVertDownButtonRect);
+            end;
+
+          MoveWindowOrg(B.Canvas.Handle, ListBoxVertScrollRect.Left,
+            ListBoxVertScrollRect.Top);
+          Canvas.Draw(ListBoxVertScrollRect.Left, ListBoxVertScrollRect.Top, B);
+        finally
+          B.Free;
         end;
-
-        MoveWindowOrg(B.Canvas.Handle, ListBoxVertScrollRect.Left,
-          ListBoxVertScrollRect.Top);
-        Canvas.Draw(ListBoxVertScrollRect.Left, ListBoxVertScrollRect.Top, B);
-      finally
-        B.Free;
       end;
-    end;
   finally
     if DC <> 0 then
       Canvas.Handle := 0
     else
-    begin
-      ReleaseDC(FListHandle, Canvas.Handle);
-      Canvas.Handle := 0;
-    end;
+      begin
+        ReleaseDC(FListHandle, Canvas.Handle);
+        Canvas.Handle := 0;
+      end;
     Canvas.Free;
   end;
 end;
@@ -1094,12 +1127,12 @@ end;
 procedure TSysComboBoxStyleHook.HookListBox(AListHandle: HWnd);
 begin
   if (AListHandle <> 0) and (FListBoxInstance = nil) then
-  begin
-    FListHandle := AListHandle;
-    FListBoxInstance := MakeObjectInstance(ListBoxWndProc);
-    FDefListBoxProc := Pointer(GetWindowLong(FListHandle, GWL_WNDPROC));
-    SetWindowLong(FListHandle, GWL_WNDPROC, IntPtr(FListBoxInstance));
-  end;
+    begin
+      FListHandle := AListHandle;
+      FListBoxInstance := MakeObjectInstance(ListBoxWndProc);
+      FDefListBoxProc := Pointer(GetWindowLong(FListHandle, GWL_WNDPROC));
+      SetWindowLong(FListHandle, GWL_WNDPROC, IntPtr(FListBoxInstance));
+    end;
 end;
 
 function TSysComboBoxStyleHook.IsChildHandle(AHandle: HWnd): Boolean;
@@ -1147,10 +1180,10 @@ end;
 function TSysComboBoxStyleHook.ListBoxVertScrollArea: TRect;
 begin
   if GetWindowLong(FListHandle, GWL_STYLE) and WS_VSCROLL = 0 then
-  begin
-    Result := TRect.Empty;
-    Exit;
-  end;
+    begin
+      Result := TRect.Empty;
+      Exit;
+    end;
   Result := ListBoxBoundsRect;
   OffsetRect(Result, -Result.Left, -Result.Top);
   if SysControl.BiDiMode <> bmRightToLeft then
@@ -1183,35 +1216,35 @@ begin
   FInvsibleCount := 0;
   LBoundsHeight := ListBoxBoundsRect.Height;
   for i := 0 to SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - 1 do
-  begin
-    LItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, i, 0);
-    LTotalHeight := LTotalHeight + LItemHeight;
-    if (LTotalHeight > LBoundsHeight) and (FInvsibleCount = 0) then
-      FInvsibleCount := SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - i;
-  end;
+    begin
+      LItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, i, 0);
+      LTotalHeight := LTotalHeight + LItemHeight;
+      if (LTotalHeight > LBoundsHeight) and (FInvsibleCount = 0) then
+        FInvsibleCount := SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - i;
+    end;
 
   LVisibleHeight := 0;
   for i := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0)
     to SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - 1 do
-  begin
-    LVisibleHeight := LVisibleHeight + SendMessage(FListHandle,
-      LB_GETITEMHEIGHT, i, 0);
-    if Style <> csSimple then
-      LBorderHeight := 2
-    else
-      LBorderHeight := 4;
-    if LVisibleHeight >= ListBoxBoundsRect.Height - LBorderHeight then
-      Break;
-  end;
+    begin
+      LVisibleHeight := LVisibleHeight + SendMessage(FListHandle,
+        LB_GETITEMHEIGHT, i, 0);
+      if Style <> csSimple then
+        LBorderHeight := 2
+      else
+        LBorderHeight := 4;
+      if LVisibleHeight >= ListBoxBoundsRect.Height - LBorderHeight then
+        Break;
+    end;
 
   Result.Bottom := Result.Top + Round((LVisibleHeight / LTotalHeight) * LSize);
   if (i = SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - 1) and
     (Result.Bottom <> ListBoxVertDownButtonRect.Top) then
-  begin
-    LFinalHeight := Result.Height;
-    Result.Bottom := ListBoxVertDownButtonRect.Top;
-    Result.Top := Result.Bottom - LFinalHeight;
-  end;
+    begin
+      LFinalHeight := Result.Height;
+      Result.Bottom := ListBoxVertDownButtonRect.Top;
+      Result.Top := Result.Bottom - LFinalHeight;
+    end;
   FSliderSize := Round((LVisibleHeight / LTotalHeight) * LSize);
 end;
 
@@ -1219,10 +1252,10 @@ function TSysComboBoxStyleHook.ListBoxVertTrackRect: TRect;
 begin
   Result := ListBoxVertScrollRect;
   if Result.Width > 0 then
-  begin
-    Result.Top := Result.Top + GetSystemMetrics(SM_CYVTHUMB);
-    Result.Bottom := Result.Bottom - GetSystemMetrics(SM_CYVTHUMB);
-  end
+    begin
+      Result.Top := Result.Top + GetSystemMetrics(SM_CYVTHUMB);
+      Result.Bottom := Result.Bottom - GetSystemMetrics(SM_CYVTHUMB);
+    end
   else
     Result := TRect.Empty;
 end;
@@ -1264,57 +1297,57 @@ var
     LStyle := GetWindowLong(FListHandle, GWL_STYLE);
     if ((LStyle and WS_VSCROLL = WS_VSCROLL) or
       (LStyle and WS_HSCROLL = WS_HSCROLL)) then
-    begin
-      LNewStyle := LStyle and not WS_VSCROLL and not WS_HSCROLL;
-      FIgnoreStyleChanged := True;
-      SetWindowLong(FListHandle, GWL_STYLE, LNewStyle);
-      Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
-        TMessage(Msg).Msg, TMessage(Msg).wParam, TMessage(Msg).LPARAM);
-      SetWindowLong(FListHandle, GWL_STYLE, LStyle);
-      FIgnoreStyleChanged := False;
-    end
+      begin
+        LNewStyle := LStyle and not WS_VSCROLL and not WS_HSCROLL;
+        FIgnoreStyleChanged := True;
+        SetWindowLong(FListHandle, GWL_STYLE, LNewStyle);
+        Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
+          TMessage(Msg).Msg, TMessage(Msg).wParam, TMessage(Msg).LPARAM);
+        SetWindowLong(FListHandle, GWL_STYLE, LStyle);
+        FIgnoreStyleChanged := False;
+      end
     else
       Msg.Result := CallWindowProc(FDefListBoxProc, FListHandle,
         TMessage(Msg).Msg, TMessage(Msg).wParam, TMessage(Msg).LPARAM);
 
     if (Msg.CalcValidRects) then
-    begin
-      LCalcSizeParams := Msg.CalcSize_Params;
-      if SysControl.BiDiMode <> bmRightToLeft then
       begin
-        LLeft := 1;
-        if LStyle and WS_VSCROLL = WS_VSCROLL then
-          LRight := ListBoxVertScrollRect.Width + 1
+        LCalcSizeParams := Msg.CalcSize_Params;
+        if SysControl.BiDiMode <> bmRightToLeft then
+          begin
+            LLeft := 1;
+            if LStyle and WS_VSCROLL = WS_VSCROLL then
+              LRight := ListBoxVertScrollRect.Width + 1
+            else
+              LRight := 1;
+          end
         else
-          LRight := 1;
-      end
-      else
-      begin
-        LRight := 1;
-        if LStyle and WS_VSCROLL = WS_VSCROLL then
-          LLeft := ListBoxVertScrollRect.Width + 1
-        else
-          LLeft := 1;
-      end;
+          begin
+            LRight := 1;
+            if LStyle and WS_VSCROLL = WS_VSCROLL then
+              LLeft := ListBoxVertScrollRect.Width + 1
+            else
+              LLeft := 1;
+          end;
 
-      LTop := 1;
-      LBottom := 1;
-      LWindowPos := LCalcSizeParams.lppos;
-      with LCalcSizeParams^.rgrc[0] do
-      begin
-        Left := LWindowPos^.X;
-        Top := LWindowPos^.Y;
-        Right := LWindowPos^.X + LWindowPos^.cx;
-        Bottom := LWindowPos^.Y + LWindowPos^.cy;
-        Left := Left + LLeft;
-        Top := Top + LTop;
-        Right := Right - LRight;
-        Bottom := Bottom - LBottom;
+        LTop := 1;
+        LBottom := 1;
+        LWindowPos := LCalcSizeParams.lppos;
+        with LCalcSizeParams^.rgrc[0] do
+          begin
+            Left := LWindowPos^.X;
+            Top := LWindowPos^.Y;
+            Right := LWindowPos^.X + LWindowPos^.cx;
+            Bottom := LWindowPos^.Y + LWindowPos^.cy;
+            Left := Left + LLeft;
+            Top := Top + LTop;
+            Right := Right - LRight;
+            Bottom := Bottom - LBottom;
+          end;
+        LCalcSizeParams^.rgrc[1] := LCalcSizeParams^.rgrc[0];
+        Msg.CalcSize_Params := LCalcSizeParams;
+        Msg.Result := WVR_VALIDRECTS;
       end;
-      LCalcSizeParams^.rgrc[1] := LCalcSizeParams^.rgrc[0];
-      Msg.CalcSize_Params := LCalcSizeParams;
-      Msg.Result := WVR_VALIDRECTS;
-    end;
     Msg.Result := 0;
     MsgHandled := True;
   end;
@@ -1345,31 +1378,31 @@ var
   begin
     P := Point(Msg.XPos, Msg.YPos);
     if ListBoxVertScrollArea.Contains(P) then
-    begin
-      if ListBoxVertUpButtonRect.Contains(Point(Msg.XPos, Msg.YPos)) then
       begin
-        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
-        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle,
-          LB_GETTOPINDEX, 0, 0) - 1, 0);
-        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
-        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
-        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
-        DrawListBoxVertScroll(0);
-        Exit;
-      end;
+        if ListBoxVertUpButtonRect.Contains(Point(Msg.XPos, Msg.YPos)) then
+          begin
+            SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+            SendMessage(FListHandle, LB_SETTOPINDEX,
+              SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) - 1, 0);
+            SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+            R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+            RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+            DrawListBoxVertScroll(0);
+            Exit;
+          end;
 
-      if ListBoxVertDownButtonRect.Contains(Point(Msg.XPos, Msg.YPos)) then
-      begin
-        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
-        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle,
-          LB_GETTOPINDEX, 0, 0) + 1, 0);
-        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
-        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
-        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
-        DrawListBoxVertScroll(0);
-        Exit;
+        if ListBoxVertDownButtonRect.Contains(Point(Msg.XPos, Msg.YPos)) then
+          begin
+            SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+            SendMessage(FListHandle, LB_SETTOPINDEX,
+              SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) + 1, 0);
+            SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+            R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+            RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+            DrawListBoxVertScroll(0);
+            Exit;
+          end;
       end;
-    end;
     MsgHandled := True;
   end;
 
@@ -1385,96 +1418,96 @@ var
       P.X := -P.X;
     FDownPos := P;
     if ListBoxVertScrollArea.Contains(P) then
-    begin
-      if Style = csSimple then
-        SetCapture(FListHandle);
-      FDownPos := P;
-      if ListBoxVertTrackRectUp.Contains(P) then
       begin
-        ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
-        if ItemHeight > 0 then
-          VisibleCount := ListBoxClientRect.Height div ItemHeight
-        else
-          VisibleCount := 0;
-        TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) -
-          VisibleCount + 1;
-        if TopIndex < 0 then
-          TopIndex := 0;
-        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
-        SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
-        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
-        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
-        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
-        DrawListBoxVertScroll(0);
-        ListBoxSetTimer(3);
-      end
-      else if ListBoxVertTrackRectDown.Contains(P) then
-      begin
-        ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
-        if ItemHeight > 0 then
-          VisibleCount := ListBoxClientRect.Height div ItemHeight
-        else
-          VisibleCount := 0;
-        TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) +
-          VisibleCount - 1;
-        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
-        SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
-        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
-        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
-        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
-        DrawListBoxVertScroll(0);
-        ListBoxSetTimer(4);
-      end
-      else if ListBoxVertSliderRect.Contains(P) then
-      begin
-        FVSliderState := tsThumbBtnVertPressed;
-        FDownSliderPos := FDownPos.Y - ListBoxVertSliderRect.Top;
-        DrawListBoxVertScroll(0);
-      end
-      else if ListBoxVertDownButtonRect.Contains(P) then
-      begin
-        FListBoxDownBtnDown := True;
-        FVDownState := tsArrowBtnDownPressed;
-        DrawListBoxVertScroll(0);
+        if Style = csSimple then
+          SetCapture(FListHandle);
+        FDownPos := P;
+        if ListBoxVertTrackRectUp.Contains(P) then
+          begin
+            ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
+            if ItemHeight > 0 then
+              VisibleCount := ListBoxClientRect.Height div ItemHeight
+            else
+              VisibleCount := 0;
+            TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) -
+              VisibleCount + 1;
+            if TopIndex < 0 then
+              TopIndex := 0;
+            SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+            SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
+            SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+            R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+            RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+            DrawListBoxVertScroll(0);
+            ListBoxSetTimer(3);
+          end
+        else if ListBoxVertTrackRectDown.Contains(P) then
+          begin
+            ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
+            if ItemHeight > 0 then
+              VisibleCount := ListBoxClientRect.Height div ItemHeight
+            else
+              VisibleCount := 0;
+            TopIndex := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) +
+              VisibleCount - 1;
+            SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+            SendMessage(FListHandle, LB_SETTOPINDEX, TopIndex, 0);
+            SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+            R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+            RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+            DrawListBoxVertScroll(0);
+            ListBoxSetTimer(4);
+          end
+        else if ListBoxVertSliderRect.Contains(P) then
+          begin
+            FVSliderState := tsThumbBtnVertPressed;
+            FDownSliderPos := FDownPos.Y - ListBoxVertSliderRect.Top;
+            DrawListBoxVertScroll(0);
+          end
+        else if ListBoxVertDownButtonRect.Contains(P) then
+          begin
+            FListBoxDownBtnDown := True;
+            FVDownState := tsArrowBtnDownPressed;
+            DrawListBoxVertScroll(0);
 
-        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
-        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle,
-          LB_GETTOPINDEX, 0, 0) + 1, 0);
-        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
-        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
-        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+            SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+            SendMessage(FListHandle, LB_SETTOPINDEX,
+              SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) + 1, 0);
+            SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+            R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+            RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
 
-        ListBoxSetTimer(2);
+            ListBoxSetTimer(2);
+          end
+        else if ListBoxVertUpButtonRect.Contains(P) then
+          begin
+            FListBoxUpBtnDown := True;
+            FVUpState := tsArrowBtnUpPressed;
+            DrawListBoxVertScroll(0);
+
+            SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+            SendMessage(FListHandle, LB_SETTOPINDEX,
+              SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0) - 1, 0);
+            SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+            R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
+            RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+
+            ListBoxSetTimer(1);
+          end;
+        MsgHandled := True;
       end
-      else if ListBoxVertUpButtonRect.Contains(P) then
-      begin
-        FListBoxUpBtnDown := True;
-        FVUpState := tsArrowBtnUpPressed;
-        DrawListBoxVertScroll(0);
-
-        SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
-        SendMessage(FListHandle, LB_SETTOPINDEX, SendMessage(FListHandle,
-          LB_GETTOPINDEX, 0, 0) - 1, 0);
-        SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
-        R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
-        RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
-
-        ListBoxSetTimer(1);
-      end;
-      MsgHandled := True;
-    end
     else
-    begin
-      if (FVSliderState <> tsThumbBtnVertNormal) or
-        (FVUpState <> tsArrowBtnUpNormal) or
-        (FVDownState <> tsArrowBtnDownNormal) then
       begin
-        FVSliderState := tsArrowBtnUpNormal;
-        FVUpState := tsArrowBtnUpNormal;
-        FVDownState := tsArrowBtnDownNormal;
-        DrawListBoxVertScroll(0);
+        if (FVSliderState <> tsThumbBtnVertNormal) or
+          (FVUpState <> tsArrowBtnUpNormal) or
+          (FVDownState <> tsArrowBtnDownNormal) then
+          begin
+            FVSliderState := tsArrowBtnUpNormal;
+            FVUpState := tsArrowBtnUpNormal;
+            FVDownState := tsArrowBtnDownNormal;
+            DrawListBoxVertScroll(0);
+          end;
       end;
-    end;
     FOldIdx := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0);
   end;
 
@@ -1491,123 +1524,124 @@ var
 
     FMovePos := P;
     if (FVSliderState = tsThumbBtnVertPressed) then
-    begin
-      Index := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0);
-      Dist := (ListBoxVertScrollRect.Height - ListBoxVertUpButtonRect.Height -
-        ListBoxVertDownButtonRect.Height - ListBoxVertSliderRect.Height);
-      if Dist > 0 then
       begin
-        NewIndex :=
-          Round((((FMovePos.Y - FDownSliderPos - ListBoxVertUpButtonRect.Bottom)
-          / Dist) * FInvsibleCount));
-        if NewIndex <> Index then
-        begin
-          if NewIndex < 0 then
-            NewIndex := 0;
-          if NewIndex >= SendMessage(FListHandle, LB_GETCOUNT, 0, 0) then
-            NewIndex := SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - 1;
-          SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
-          SendMessage(FListHandle, LB_SETTOPINDEX, NewIndex, 0);
-          SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
-          R := Rect(0, 0, ListBoxBoundsRect.Width, ListBoxBoundsRect.Height);
-          RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
-          DrawListBoxVertScroll(0);
-        end;
+        Index := SendMessage(FListHandle, LB_GETTOPINDEX, 0, 0);
+        Dist := (ListBoxVertScrollRect.Height - ListBoxVertUpButtonRect.Height -
+          ListBoxVertDownButtonRect.Height - ListBoxVertSliderRect.Height);
+        if Dist > 0 then
+          begin
+            NewIndex :=
+              Round((((FMovePos.Y - FDownSliderPos -
+              ListBoxVertUpButtonRect.Bottom) / Dist) * FInvsibleCount));
+            if NewIndex <> Index then
+              begin
+                if NewIndex < 0 then
+                  NewIndex := 0;
+                if NewIndex >= SendMessage(FListHandle, LB_GETCOUNT, 0, 0) then
+                  NewIndex := SendMessage(FListHandle, LB_GETCOUNT, 0, 0) - 1;
+                SendMessage(FListHandle, WM_SETREDRAW, 0, 0);
+                SendMessage(FListHandle, LB_SETTOPINDEX, NewIndex, 0);
+                SendMessage(FListHandle, WM_SETREDRAW, 1, 0);
+                R := Rect(0, 0, ListBoxBoundsRect.Width,
+                  ListBoxBoundsRect.Height);
+                RedrawWindow(FListHandle, @R, 0, RDW_INVALIDATE or RDW_ERASE);
+                DrawListBoxVertScroll(0);
+              end;
+          end;
+        MsgHandled := True;
+        Exit;
       end;
-      MsgHandled := True;
-      Exit;
-    end;
 
     if FListBoxUpBtnDown and not ListBoxVertUpButtonRect.Contains(P) and
       (FVUpState = tsArrowBtnUpPressed) then
-    begin
-      FVUpState := tsArrowBtnUpNormal;
-      DrawListBoxVertScroll(0);
-      ListBoxStopTimer;
-      Exit;
-    end;
+      begin
+        FVUpState := tsArrowBtnUpNormal;
+        DrawListBoxVertScroll(0);
+        ListBoxStopTimer;
+        Exit;
+      end;
 
     if FListBoxUpBtnDown and ListBoxVertUpButtonRect.Contains(P) and
       (FVUpState = tsArrowBtnUpNormal) then
-    begin
-      FVUpState := tsArrowBtnUpPressed;
-      DrawListBoxVertScroll(0);
-      ListBoxSetTimer(5);
-      Exit;
-    end;
+      begin
+        FVUpState := tsArrowBtnUpPressed;
+        DrawListBoxVertScroll(0);
+        ListBoxSetTimer(5);
+        Exit;
+      end;
 
     if FListBoxDownBtnDown and not ListBoxVertDownButtonRect.Contains(P) and
       (FVDownState = tsArrowBtnDownPressed) then
-    begin
-      FVDownState := tsArrowBtnDownNormal;
-      DrawListBoxVertScroll(0);
-      ListBoxStopTimer;
-      Exit;
-    end;
+      begin
+        FVDownState := tsArrowBtnDownNormal;
+        DrawListBoxVertScroll(0);
+        ListBoxStopTimer;
+        Exit;
+      end;
 
     if FListBoxDownBtnDown and ListBoxVertDownButtonRect.Contains(P) and
       (FVDownState = tsArrowBtnDownNormal) then
-    begin
-      FVDownState := tsArrowBtnDownPressed;
-      DrawListBoxVertScroll(0);
-      ListBoxSetTimer(6);
-      Exit;
-    end;
+      begin
+        FVDownState := tsArrowBtnDownPressed;
+        DrawListBoxVertScroll(0);
+        ListBoxSetTimer(6);
+        Exit;
+      end;
 
     if ListBoxVertScrollArea.Contains(P) then
-    begin
-      if ListBoxVertSliderRect.Contains(P) and
-        (FVSliderState = tsThumbBtnVertNormal) then
       begin
-        FVSliderState := tsThumbBtnVertHot;
-        DrawListBoxVertScroll(0);
+        if ListBoxVertSliderRect.Contains(P) and
+          (FVSliderState = tsThumbBtnVertNormal) then
+          begin
+            FVSliderState := tsThumbBtnVertHot;
+            DrawListBoxVertScroll(0);
+          end
+        else if not ListBoxVertSliderRect.Contains(P) and
+          (FVSliderState = tsThumbBtnVertHot) then
+          begin
+            FVSliderState := tsThumbBtnVertNormal;
+            DrawListBoxVertScroll(0);
+          end
+        else if ListBoxVertUpButtonRect.Contains(P) and
+          (FVUpState = tsArrowBtnUpNormal) then
+          begin
+            FVUpState := tsArrowBtnUpHot;
+            DrawListBoxVertScroll(0);
+          end
+        else if not ListBoxVertUpButtonRect.Contains(P) and
+          (FVUpState = tsArrowBtnUpHot) then
+          begin
+            FVUpState := tsArrowBtnUpNormal;
+            DrawListBoxVertScroll(0);
+          end
+        else if ListBoxVertDownButtonRect.Contains(P) and
+          (FVDownState = tsArrowBtnDownNormal) then
+          begin
+            FVDownState := tsArrowBtnDownHot;
+            DrawListBoxVertScroll(0);
+          end
+        else if not ListBoxVertDownButtonRect.Contains(P) and
+          (FVDownState = tsArrowBtnDownHot) then
+          begin
+            FVDownState := tsArrowBtnDownNormal;
+            DrawListBoxVertScroll(0);
+          end;
+        MsgHandled := True;
       end
-      else if not ListBoxVertSliderRect.Contains(P) and
-        (FVSliderState = tsThumbBtnVertHot) then
-      begin
-        FVSliderState := tsThumbBtnVertNormal;
-        DrawListBoxVertScroll(0);
-      end
-      else if ListBoxVertUpButtonRect.Contains(P) and
-        (FVUpState = tsArrowBtnUpNormal) then
-      begin
-        FVUpState := tsArrowBtnUpHot;
-        DrawListBoxVertScroll(0);
-      end
-      else if not ListBoxVertUpButtonRect.Contains(P) and
-        (FVUpState = tsArrowBtnUpHot) then
-      begin
-        FVUpState := tsArrowBtnUpNormal;
-        DrawListBoxVertScroll(0);
-      end
-      else if ListBoxVertDownButtonRect.Contains(P) and
-        (FVDownState = tsArrowBtnDownNormal) then
-      begin
-        FVDownState := tsArrowBtnDownHot;
-        DrawListBoxVertScroll(0);
-      end
-      else if not ListBoxVertDownButtonRect.Contains(P) and
-        (FVDownState = tsArrowBtnDownHot) then
-      begin
-        FVDownState := tsArrowBtnDownNormal;
-        DrawListBoxVertScroll(0);
-      end;
-      MsgHandled := True;
-    end
     else
-    begin
-      if (FVSliderState <> tsThumbBtnVertNormal) or
-        (FVUpState <> tsArrowBtnUpNormal) or (FVUpState <> tsArrowBtnDownNormal)
-      then
       begin
-        if FListBoxTimerCode <> 0 then
-          ListBoxStopTimer;
-        FVSliderState := tsThumbBtnVertNormal;
-        FVUpState := tsArrowBtnUpNormal;
-        FVDownState := tsArrowBtnDownNormal;
-        DrawListBoxVertScroll(0);
+        if (FVSliderState <> tsThumbBtnVertNormal) or
+          (FVUpState <> tsArrowBtnUpNormal) or
+          (FVUpState <> tsArrowBtnDownNormal) then
+          begin
+            if FListBoxTimerCode <> 0 then
+              ListBoxStopTimer;
+            FVSliderState := tsThumbBtnVertNormal;
+            FVUpState := tsArrowBtnUpNormal;
+            FVDownState := tsArrowBtnDownNormal;
+            DrawListBoxVertScroll(0);
+          end;
       end;
-    end;
   end;
 
   procedure WMLButtonUp(var Msg: TWMMouse);
@@ -1658,10 +1692,10 @@ var
     P := Point(Msg.XPos, Msg.YPos);
     ScreenToClient(FListHandle, P);
     with P do
-    begin
-      Msg.XPos := X;
-      Msg.YPos := Y;
-    end;
+      begin
+        Msg.XPos := X;
+        Msg.YPos := Y;
+      end;
     WMLButtonDown(Msg);
     MsgHandled := True;
   end;
@@ -1676,25 +1710,25 @@ var
       Msg.wParam, Msg.LPARAM);
 
     if (Msg.LPARAM and PRF_NONCLIENT = PRF_NONCLIENT) and (Msg.wParam > 0) then
-    begin
-      SaveIndex := 0;
-      Canvas := TCanvas.Create;
-      try
-        SaveIndex := SaveDC(Msg.wParam);
-        Canvas.Handle := Msg.wParam;
-        GetWindowRect(FListHandle, R);
-        OffsetRect(R, -R.Left, -R.Top);
-        ExcludeClipRect(Canvas.Handle, R.Left + 2, R.Top + 2, R.Right - 2,
-          R.Bottom - 2);
-        PaintListBoxBorder(Canvas, R);
-      finally
-        if SaveIndex <> 0 then
-          RestoreDC(Canvas.Handle, SaveIndex);
-        Canvas.Handle := 0;
-        Canvas.Free;
+      begin
+        SaveIndex := 0;
+        Canvas := TCanvas.Create;
+        try
+          SaveIndex := SaveDC(Msg.wParam);
+          Canvas.Handle := Msg.wParam;
+          GetWindowRect(FListHandle, R);
+          OffsetRect(R, -R.Left, -R.Top);
+          ExcludeClipRect(Canvas.Handle, R.Left + 2, R.Top + 2, R.Right - 2,
+            R.Bottom - 2);
+          PaintListBoxBorder(Canvas, R);
+        finally
+          if SaveIndex <> 0 then
+            RestoreDC(Canvas.Handle, SaveIndex);
+          Canvas.Handle := 0;
+          Canvas.Free;
+        end;
+        DrawListBoxVertScroll(Msg.wParam);
       end;
-      DrawListBoxVertScroll(Msg.wParam);
-    end;
     MsgHandled := True;
   end;
 
@@ -1736,10 +1770,10 @@ var
         begin
           if ListBoxVertSliderRect.Contains(FMovePos) or
             (FMovePos.Y > ListBoxVertSliderRect.Bottom) then
-          begin
-            ListBoxStopTimer;
-            Exit;
-          end;
+            begin
+              ListBoxStopTimer;
+              Exit;
+            end;
           ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
           if ItemHeight > 0 then
             VisibleCount := ListBoxClientRect.Height div ItemHeight
@@ -1760,10 +1794,10 @@ var
         begin
           if ListBoxVertSliderRect.Contains(FMovePos) or
             (FMovePos.Y < ListBoxVertSliderRect.Top) then
-          begin
-            ListBoxStopTimer;
-            Exit;
-          end;
+            begin
+              ListBoxStopTimer;
+              Exit;
+            end;
           ItemHeight := SendMessage(FListHandle, LB_GETITEMHEIGHT, 0, 0);
           if ItemHeight > 0 then
             VisibleCount := ListBoxClientRect.Height div ItemHeight
@@ -1785,33 +1819,33 @@ begin
 
   MsgHandled := False;
   if ListBoxVertScrollArea.Height = 0 then
-  begin
-    case Msg.Msg of
-      WM_NCCALCSIZE:
-        WMNCCalcSize(TWMNCCalcSize(Msg));
-      WM_NCPAINT:
-        begin
-          DrawListBoxBorder;
-          MsgHandled := True;
-        end;
-    end;
-  end
+    begin
+      case Msg.Msg of
+        WM_NCCALCSIZE:
+          WMNCCalcSize(TWMNCCalcSize(Msg));
+        WM_NCPAINT:
+          begin
+            DrawListBoxBorder;
+            MsgHandled := True;
+          end;
+      end;
+    end
   else
     case Msg.Msg of
       WM_NCHITTEST:
         if Style = csSimple then
-        begin
-          Msg.Result := HTCLIENT;
-          MsgHandled := True;
-        end;
+          begin
+            Msg.Result := HTCLIENT;
+            MsgHandled := True;
+          end;
       WM_MOUSELEAVE, WM_NCMOUSELEAVE:
         if Style = csSimple then
-        begin
-          FVSliderState := tsThumbBtnVertNormal;
-          FVUpState := tsArrowBtnUpNormal;
-          FVDownState := tsArrowBtnDownNormal;
-          DrawListBoxVertScroll(0);
-        end;
+          begin
+            FVSliderState := tsThumbBtnVertNormal;
+            FVUpState := tsArrowBtnUpNormal;
+            FVDownState := tsArrowBtnDownNormal;
+            DrawListBoxVertScroll(0);
+          end;
       WM_TIMER:
         WMTimer(Msg);
       WM_UpdateUIState:
@@ -1856,10 +1890,10 @@ begin
         end;
       WM_STYLECHANGED, WM_STYLECHANGING:
         if FIgnoreStyleChanged then
-        begin
-          Msg.Result := 0;
-          MsgHandled := True;
-        end;
+          begin
+            Msg.Result := 0;
+            MsgHandled := True;
+          end;
 
     end;
   if not MsgHandled then
@@ -1877,10 +1911,10 @@ procedure TSysComboBoxStyleHook.MouseLeave;
 begin
   inherited;
   if not DroppedDown and FMouseOnButton then
-  begin
-    FMouseOnButton := False;
-    Invalidate;
-  end
+    begin
+      FMouseOnButton := False;
+      Invalidate;
+    end
 end;
 
 procedure TSysComboBoxStyleHook.PaintBorder(Canvas: TCanvas);
@@ -1919,22 +1953,22 @@ begin
     // draw border + client in buffer
     Details := StyleServices.GetElementDetails(DrawState);
     if (Style = csSimple) and (FListHandle <> 0) then
-    begin
-      GetWindowRect(FListHandle, ListRect);
-      GetWindowRect(Handle, ControlRect);
-      R.Bottom := ListRect.Top - ControlRect.Top;
-      StyleServices.DrawElement(Buffer.Canvas.Handle, Details, R);
-      R := Rect(0, SysControl.Height - (ControlRect.Bottom - ListRect.Bottom),
-        SysControl.Width, SysControl.Height);
-      with Buffer.Canvas do
       begin
-        Brush.Style := bsSolid;
-        Brush.Color := StyleServices.GetSystemColor(clBtnFace);
-        FillRect(R);
-      end;
-      R := Rect(0, 0, Buffer.Width, Buffer.Height);
-      R.Bottom := ListRect.Top - ControlRect.Top;
-    end
+        GetWindowRect(FListHandle, ListRect);
+        GetWindowRect(Handle, ControlRect);
+        R.Bottom := ListRect.Top - ControlRect.Top;
+        StyleServices.DrawElement(Buffer.Canvas.Handle, Details, R);
+        R := Rect(0, SysControl.Height - (ControlRect.Bottom - ListRect.Bottom),
+          SysControl.Width, SysControl.Height);
+        with Buffer.Canvas do
+          begin
+            Brush.Style := bsSolid;
+            Brush.Color := StyleServices.GetSystemColor(clBtnFace);
+            FillRect(R);
+          end;
+        R := Rect(0, 0, Buffer.Width, Buffer.Height);
+        R.Bottom := ListRect.Top - ControlRect.Top;
+      end
     else
       StyleServices.DrawElement(Buffer.Canvas.Handle, Details, R);
 
@@ -1951,26 +1985,26 @@ begin
     // end;
     // draw button in buffer
     if Style <> csSimple then
-    begin
-      Details := StyleServices.GetElementDetails(BtnDrawState);
-      StyleServices.DrawElement(Buffer.Canvas.Handle, Details, ButtonRect);
-    end;
+      begin
+        Details := StyleServices.GetElementDetails(BtnDrawState);
+        StyleServices.DrawElement(Buffer.Canvas.Handle, Details, ButtonRect);
+      end;
     // calculation of exclude area for drawing buffer
     if (SendMessage(Handle, CB_GETCURSEL, 0, 0) >= 0) and (FEditHandle = 0) then
-    begin
-      R := SysControl.ClientRect;
-      InflateRect(R, -3, -3);
-      R.Right := ButtonRect.Left - 2;
-      ExcludeClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
-    end
+      begin
+        R := SysControl.ClientRect;
+        InflateRect(R, -3, -3);
+        R.Right := ButtonRect.Left - 2;
+        ExcludeClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+      end
     else if FEditHandle <> 0 then
-    begin
-      GetWindowRect(Handle, R);
-      GetWindowRect(FEditHandle, EditRect);
-      OffsetRect(EditRect, -R.Left, -R.Top);
-      with EditRect do
-        ExcludeClipRect(Canvas.Handle, Left, Top, Right, Bottom);
-    end;
+      begin
+        GetWindowRect(Handle, R);
+        GetWindowRect(FEditHandle, EditRect);
+        OffsetRect(EditRect, -R.Left, -R.Top);
+        with EditRect do
+          ExcludeClipRect(Canvas.Handle, Left, Top, Right, Bottom);
+      end;
     // draw buffer
     Canvas.Draw(0, 0, Buffer);
   finally
@@ -1982,10 +2016,10 @@ procedure TSysComboBoxStyleHook.PaintListBoxBorder(Canvas: TCanvas;
   const R: TRect);
 begin
   with Canvas do
-  begin
-    Brush.Color := StyleServices.GetSystemColor(clWindowFrame);
-    FillRect(R);
-  end;
+    begin
+      Brush.Color := StyleServices.GetSystemColor(clWindowFrame);
+      FillRect(R);
+    end;
 end;
 
 function TSysComboBoxStyleHook.Style: TComboBoxStyle;
@@ -1997,23 +2031,23 @@ var
   LStyle: Cardinal;
 begin
   if Handle <> 0 then
-  begin
-    LStyle := GetWindowLong(Handle, GWL_STYLE);
-    Result := csDropDown;
-    if LStyle and ComboBoxStyles[csDropDown] = ComboBoxStyles[csDropDown] then
+    begin
+      LStyle := GetWindowLong(Handle, GWL_STYLE);
       Result := csDropDown;
-    if LStyle and ComboBoxStyles[csSimple] = ComboBoxStyles[csSimple] then
-      Result := csSimple;
-    if LStyle and ComboBoxStyles[csDropDownList] = ComboBoxStyles[csDropDownList]
-    then
-      Result := csDropDownList;
-    if LStyle and ComboBoxStyles[csOwnerDrawFixed] = ComboBoxStyles
-      [csOwnerDrawFixed] then
-      Result := csOwnerDrawFixed;
-    if LStyle and ComboBoxStyles[csOwnerDrawVariable] = ComboBoxStyles
-      [csOwnerDrawVariable] then
-      Result := csOwnerDrawVariable;
-  end
+      if LStyle and ComboBoxStyles[csDropDown] = ComboBoxStyles[csDropDown] then
+        Result := csDropDown;
+      if LStyle and ComboBoxStyles[csSimple] = ComboBoxStyles[csSimple] then
+        Result := csSimple;
+      if LStyle and ComboBoxStyles[csDropDownList] = ComboBoxStyles
+        [csDropDownList] then
+        Result := csDropDownList;
+      if LStyle and ComboBoxStyles[csOwnerDrawFixed] = ComboBoxStyles
+        [csOwnerDrawFixed] then
+        Result := csOwnerDrawFixed;
+      if LStyle and ComboBoxStyles[csOwnerDrawVariable] = ComboBoxStyles
+        [csOwnerDrawVariable] then
+        Result := csOwnerDrawVariable;
+    end
   else
     Result := csDropDown;
 end;
@@ -2028,7 +2062,7 @@ var
   LStyle: TCustomStyleServices;
 begin
   LStyle := StyleServices;
-  {$IF CompilerVersion > 23}
+{$IF CompilerVersion > 23}
   if seClient in StyleElements then
     Brush.Color := LStyle.GetStyleColor(ColorStates[SysControl.Enabled])
   else
@@ -2037,10 +2071,10 @@ begin
     FontColor := LStyle.GetStyleFontColor(FontColorStates[SysControl.Enabled])
   else
     FontColor := clWindowText;
-  {$ELSE}
-    Brush.Color := LStyle.GetStyleColor(ColorStates[SysControl.Enabled]);
-    FontColor := LStyle.GetStyleFontColor(FontColorStates[SysControl.Enabled]);
-  {$IFEND}
+{$ELSE}
+  Brush.Color := LStyle.GetStyleColor(ColorStates[SysControl.Enabled]);
+  FontColor := LStyle.GetStyleFontColor(FontColorStates[SysControl.Enabled]);
+{$IFEND}
 end;
 
 procedure TSysComboBoxStyleHook.WMCommand(var Message: TWMCommand);
@@ -2049,12 +2083,12 @@ begin
     (Message.NotifyCode = CBN_SELENDOK) or (Message.NotifyCode = CBN_CLOSEUP) or
     (Message.NotifyCode = CBN_DROPDOWN) or (Message.NotifyCode = CBN_SELCHANGE)
   then
-  begin
-    if FListBoxTimerCode <> 0 then
-      ListBoxStopTimer;
-    FMouseOnButton := False;
-    Invalidate;
-  end;
+    begin
+      if FListBoxTimerCode <> 0 then
+        ListBoxStopTimer;
+      FMouseOnButton := False;
+      Invalidate;
+    end;
 end;
 
 procedure TSysComboBoxStyleHook.WMDrawItem(var Message: TWMDrawItem);
@@ -2112,34 +2146,37 @@ begin
     end;
 
     if (Style <> csSimple) and (FEditHandle = 0) then
-    begin
-      R := SysControl.ClientRect;
-      InflateRect(R, -3, -3);
-      if SysControl.BiDiMode <> bmRightToLeft then
-        R.Right := ButtonRect.Left - 1
-      else
-        R.Left := ButtonRect.Right + 1;
-      SaveIndex := SaveDC(Canvas.Handle);
-      try
-        IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
-        LItemIndex :=UINT(SendMessage(SysControl.Handle, CB_GETCURSEL, 0, 0));
-        Canvas.Brush.Color := StyleServices.GetSystemColor(clWindow);
-        Canvas.FillRect(R);
-        if (SysControl.Style and CBS_OWNERDRAWFIXED=CBS_OWNERDRAWFIXED ) or
-        (SysControl.Style and CBS_OWNERDRAWVARIABLE=CBS_OWNERDRAWVARIABLE ) then
+      begin
+        R := SysControl.ClientRect;
+        InflateRect(R, -3, -3);
+        if SysControl.BiDiMode <> bmRightToLeft then
+          R.Right := ButtonRect.Left - 1
+        else
+          R.Left := ButtonRect.Right + 1;
+        SaveIndex := SaveDC(Canvas.Handle);
+        try
+          IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+          LItemIndex := UINT(SendMessage(SysControl.Handle,
+            CB_GETCURSEL, 0, 0));
+          Canvas.Brush.Color := StyleServices.GetSystemColor(clWindow);
+          Canvas.FillRect(R);
+          if (SysControl.Style and CBS_OWNERDRAWFIXED = CBS_OWNERDRAWFIXED) or
+            (SysControl.Style and CBS_OWNERDRAWVARIABLE = CBS_OWNERDRAWVARIABLE)
+          then
 
-        DrawItem(Canvas, LItemIndex, R, Focused)
-        else begin
-        LDetails := StyleServices.GetElementDetails
-          (TThemedComboBox.tcComboBoxDontCare);
-        DrawText(Canvas.Handle, LDetails, SysControl.Text, R,
-          [tfLeft, tfVerticalCenter, tfSingleLine]);
-         end;
-           // open inno
-      finally
-        RestoreDC(Canvas.Handle, SaveIndex);
+            DrawItem(Canvas, LItemIndex, R, Focused)
+          else
+            begin
+              LDetails := StyleServices.GetElementDetails
+                (TThemedComboBox.tcComboBoxDontCare);
+              DrawText(Canvas.Handle, LDetails, SysControl.Text, R,
+                [tfLeft, tfVerticalCenter, tfSingleLine]);
+            end;
+          // open inno
+        finally
+          RestoreDC(Canvas.Handle, SaveIndex);
+        end;
       end;
-    end;
 
   finally
     Canvas.Handle := 0;
@@ -2154,10 +2191,10 @@ end;
 procedure TSysComboBoxStyleHook.WMParentNotify(var Message: TMessage);
 begin
   if (FListHandle = 0) and (LoWord(Message.wParam) = WM_CREATE) then
-  begin
-    if (Message.LPARAM <> 0) and (FListBoxInstance = nil) then
-      HookListBox(Message.LPARAM);
-  end
+    begin
+      if (Message.LPARAM <> 0) and (FListBoxInstance = nil) then
+        HookListBox(Message.LPARAM);
+    end
   else if (FEditHandle = 0) and (LoWord(Message.wParam) = WM_CREATE) then
     FEditHandle := Message.LPARAM;
 end;
@@ -2167,12 +2204,8 @@ const
   States: array [Boolean] of TStyleColor = (scEditDisabled, scComboBox);
 begin
   case Message.Msg of
-    //:
-      //begin
-        //Exit;
-      //end;
 
-    CB_SETCURSEL,WM_KILLFOCUS:
+    CB_SETCURSEL, WM_KILLFOCUS:
       begin
         SetRedraw(False); // do not allow default drawing .
         CallDefaultProc(Message);
@@ -2250,31 +2283,31 @@ function TSysStaticStyleHook.GetTextFormat: TTextFormat;
 begin
   Result := [tfHidePrefix];
   with SysControl do
-  begin
-    if Style and SS_LEFT = SS_LEFT then
-      include(Result, tfLeft)
-    else if Style and SS_RIGHT = SS_RIGHT then
-      include(Result, tfRight)
-    else if Style and SS_CENTER = SS_CENTER then
-      include(Result, tfCenter);
+    begin
+      if Style and SS_LEFT = SS_LEFT then
+        include(Result, tfLeft)
+      else if Style and SS_RIGHT = SS_RIGHT then
+        include(Result, tfRight)
+      else if Style and SS_CENTER = SS_CENTER then
+        include(Result, tfCenter);
 
-    if Style and SS_ENDELLIPSIS = SS_ENDELLIPSIS then
-      include(Result, tfEndEllipsis);
+      if Style and SS_ENDELLIPSIS = SS_ENDELLIPSIS then
+        include(Result, tfEndEllipsis);
 
-    if Style and SS_PATHELLIPSIS = SS_PATHELLIPSIS then
-      include(Result, tfPathEllipsis);
+      if Style and SS_PATHELLIPSIS = SS_PATHELLIPSIS then
+        include(Result, tfPathEllipsis);
 
-    if Style and SS_WORDELLIPSIS = SS_WORDELLIPSIS then
-      include(Result, tfWordEllipsis);
+      if Style and SS_WORDELLIPSIS = SS_WORDELLIPSIS then
+        include(Result, tfWordEllipsis);
 
-    if Style and SS_NOPREFIX = SS_NOPREFIX then
-      include(Result, tfNoPrefix);
+      if Style and SS_NOPREFIX = SS_NOPREFIX then
+        include(Result, tfNoPrefix);
 
-    if not(Style and SS_ENDELLIPSIS = SS_ENDELLIPSIS) and
-      not(Style and SS_PATHELLIPSIS = SS_PATHELLIPSIS) and
-      not(Style and SS_WORDELLIPSIS = SS_WORDELLIPSIS) then
-      include(Result, tfWordBreak);
-  end;
+      if not(Style and SS_ENDELLIPSIS = SS_ENDELLIPSIS) and
+        not(Style and SS_PATHELLIPSIS = SS_PATHELLIPSIS) and
+        not(Style and SS_WORDELLIPSIS = SS_WORDELLIPSIS) then
+        include(Result, tfWordBreak);
+    end;
 end;
 
 procedure TSysStaticStyleHook.Paint(Canvas: TCanvas);
@@ -2307,12 +2340,12 @@ begin
     WM_PAINT:
       begin
         if OverridePaint and StyleServicesEnabled then
-        begin
-          if IsText and (Length(SysControl.Text) > 0) then
-            inherited
-          else
-            CallDefaultProc(Message);
-        end
+          begin
+            if IsText and (Length(SysControl.Text) > 0) then
+              inherited
+            else
+              CallDefaultProc(Message);
+          end
         else
           CallDefaultProc(Message);
       end;
@@ -2417,71 +2450,73 @@ var
   ElementSize: TElementSize;
 begin
   if StyleServices.Available then
-  begin
-    State := TSysCheckBoxState(SendMessage(Handle, BM_GETCHECK, 0, 0));
-    Details := StyleServices.GetElementDetails(GetDrawState(State));
-
-    Spacing := 3;
-    LRect := System.Classes.Rect(0, 0, 20, 20);
-    ElementSize := esActual;
-    R := SysControl.ClientRect;
-    with StyleServices do
-      if not GetElementSize(Canvas.Handle,
-        GetElementDetails(tbCheckBoxCheckedNormal), LRect, ElementSize, BoxSize)
-      then
-      begin
-        BoxSize.cx := 13;
-        BoxSize.cy := 13;
-      end;
-    if not RightAlignment then
     begin
-      R := Rect(0, 0, BoxSize.cx, BoxSize.cy);
-      RectVCenter(R, Rect(0, 0, SysControl.Width, SysControl.Height));
-    end
-    else
-    begin
-      R := Rect(SysControl.Width - BoxSize.cx - 1, 0, SysControl.Width,
-        SysControl.Height);
-      RectVCenter(R, Rect(SysControl.Width - BoxSize.cy - 1, 0,
-        SysControl.Width, SysControl.Height));
-    end;
+      State := TSysCheckBoxState(SendMessage(Handle, BM_GETCHECK, 0, 0));
+      Details := StyleServices.GetElementDetails(GetDrawState(State));
 
-    StyleServices.DrawElement(Canvas.Handle, Details, R);
-    Canvas.Font := SysControl.Font;
+      Spacing := 3;
+      LRect := System.Classes.Rect(0, 0, 20, 20);
+      ElementSize := esActual;
+      R := SysControl.ClientRect;
+      with StyleServices do
+        if not GetElementSize(Canvas.Handle,
+          GetElementDetails(tbCheckBoxCheckedNormal), LRect, ElementSize,
+          BoxSize) then
+          begin
+            BoxSize.cx := 13;
+            BoxSize.cy := 13;
+          end;
+      if not RightAlignment then
+        begin
+          R := Rect(0, 0, BoxSize.cx, BoxSize.cy);
+          RectVCenter(R, Rect(0, 0, SysControl.Width, SysControl.Height));
+        end
+      else
+        begin
+          R := Rect(SysControl.Width - BoxSize.cx - 1, 0, SysControl.Width,
+            SysControl.Height);
+          RectVCenter(R, Rect(SysControl.Width - BoxSize.cy - 1, 0,
+            SysControl.Width, SysControl.Height));
+        end;
 
-    R := Rect(0, 0, SysControl.Width - BoxSize.cx - 10, SysControl.Height);
-    LCaption := Text;
-    Winapi.Windows.DrawText(Canvas.Handle, PWideChar(LCaption),
-      Length(LCaption), R, SysControl.DrawTextBiDiModeFlags(DT_CALCRECT or
-      DT_EXPANDTABS));
+      StyleServices.DrawElement(Canvas.Handle, Details, R);
+      Canvas.Font := SysControl.Font;
 
-    if not RightAlignment then
-      RectVCenter(R, Rect(BoxSize.cx + Spacing, 0, SysControl.Width,
-        SysControl.Height))
-    else
-    begin
-      if SysControl.BiDiMode <> bmRightToLeft then
-        RectVCenter(R, Rect(3, 0, SysControl.Width - BoxSize.cx - Spacing,
+      R := Rect(0, 0, SysControl.Width - BoxSize.cx - 10, SysControl.Height);
+      LCaption := Text;
+      Winapi.Windows.DrawText(Canvas.Handle, PWideChar(LCaption),
+        Length(LCaption), R, SysControl.DrawTextBiDiModeFlags(DT_CALCRECT or
+        DT_EXPANDTABS));
+
+      if not RightAlignment then
+        RectVCenter(R, Rect(BoxSize.cx + Spacing, 0, SysControl.Width,
           SysControl.Height))
       else
-        RectVCenter(R, Rect(SysControl.Width - BoxSize.cx - Spacing - R.Right,
-          0, SysControl.Width - BoxSize.cx - Spacing, SysControl.Height));
-    end;
+        begin
+          if SysControl.BiDiMode <> bmRightToLeft then
+            RectVCenter(R, Rect(3, 0, SysControl.Width - BoxSize.cx - Spacing,
+              SysControl.Height))
+          else
+            RectVCenter(R, Rect(SysControl.Width - BoxSize.cx - Spacing -
+              R.Right, 0, SysControl.Width - BoxSize.cx - Spacing,
+              SysControl.Height));
+        end;
 
-    DrawControlText(Canvas, Details, LCaption, R,
-      SysControl.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or DT_EXPANDTABS));
+      DrawControlText(Canvas, Details, LCaption, R,
+        SysControl.DrawTextBiDiModeFlags(DT_LEFT or DT_VCENTER or
+        DT_EXPANDTABS));
 
-    if Focused then
-    begin
-      InflateRect(R, 2, 1);
-      if R.Top < 0 then
-        R.Top := 0;
-      if R.Bottom > SysControl.Height then
-        R.Bottom := SysControl.Height;
-      Canvas.Brush.Color := StyleServices.GetSystemColor(clBtnFace);
-      Canvas.DrawFocusRect(R);
+      if Focused then
+        begin
+          InflateRect(R, 2, 1);
+          if R.Top < 0 then
+            R.Top := 0;
+          if R.Bottom > SysControl.Height then
+            R.Bottom := SysControl.Height;
+          Canvas.Brush.Color := StyleServices.GetSystemColor(clBtnFace);
+          Canvas.DrawFocusRect(R);
+        end;
     end;
-  end;
 end;
 
 procedure TSysCheckBoxStyleHook.PaintBackground(Canvas: TCanvas);
@@ -2489,11 +2524,12 @@ var
   Details: TThemedElementDetails;
 begin
   if StyleServices.Available then
-  begin
-    Details.Element := teButton;
-    if StyleServices.HasTransparentParts(Details) then
-      StyleServices.DrawParentBackground(Handle, Canvas.Handle, Details, False);
-  end;
+    begin
+      Details.Element := teButton;
+      if StyleServices.HasTransparentParts(Details) then
+        StyleServices.DrawParentBackground(Handle, Canvas.Handle,
+          Details, False);
+    end;
 end;
 
 function TSysCheckBoxStyleHook.RightAlignment: Boolean;
@@ -2509,10 +2545,10 @@ begin
     SetRedraw(False);
   CallDefaultProc(TMessage(Message));
   if Message.CharCode = VK_SPACE then
-  begin
-    SetRedraw(True);
-    Invalidate;
-  end;
+    begin
+      SetRedraw(True);
+      Invalidate;
+    end;
   Handled := True;
 end;
 
@@ -2522,10 +2558,10 @@ begin
     SetRedraw(False);
   CallDefaultProc(TMessage(Message));
   if Message.CharCode = VK_SPACE then
-  begin
-    SetRedraw(True);
-    Invalidate;
-  end;
+    begin
+      SetRedraw(True);
+      Invalidate;
+    end;
   Handled := True;
 end;
 
@@ -2614,34 +2650,34 @@ begin
 end;
 
 initialization
+
 //
 
 if StyleServices.Available then
-begin
-  with TSysStyleManager do
   begin
-    RegisterSysStyleHook('Button', TSysButtonStyleHook);
-    RegisterSysStyleHook('Edit', TSysEditStyleHook);
-    RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
-    RegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
-    RegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('Static', TSysStaticStyleHook);
+    with TSysStyleManager do
+      begin
+        RegisterSysStyleHook('Button', TSysButtonStyleHook);
+        RegisterSysStyleHook('Edit', TSysEditStyleHook);
+        RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+        RegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
+        RegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
+        RegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
+        RegisterSysStyleHook('Static', TSysStaticStyleHook);
+      end;
   end;
-end;
 
 finalization
 
 with TSysStyleManager do
-begin
-  UnRegisterSysStyleHook('Button', TSysButtonStyleHook);
-  UnRegisterSysStyleHook('Edit', TSysEditStyleHook);
-  UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
-  UnRegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-  UnRegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
-  UnRegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
-  UnRegisterSysStyleHook('Static', TSysStaticStyleHook);
-end;
-
+  begin
+    UnRegisterSysStyleHook('Button', TSysButtonStyleHook);
+    UnRegisterSysStyleHook('Edit', TSysEditStyleHook);
+    UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+    UnRegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
+    UnRegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
+    UnRegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
+    UnRegisterSysStyleHook('Static', TSysStaticStyleHook);
+  end;
 
 end.

@@ -1,9 +1,5 @@
-; example1.nsi
+; example1_SkinUninstaller.nsi
 ;
-; This script is perhaps one of the simplest NSIs you can make. All of the
-; optional settings are left to their default settings. The installer simply 
-; prompts the user asking them where to install, and drops a copy of example1.nsi
-; there. 
 
 ;--------------------------------
 CRCCheck off
@@ -36,7 +32,11 @@ Section "" ;No components page, name is not important
   SetOutPath $INSTDIR
   
   ; Put file there
-  File example1.nsi
+  File example1_SkinUninstaller.nsi
+  
+  ;Create uninstaller
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  
 SectionEnd ; end the section
 
 Function .onInit
@@ -44,4 +44,10 @@ Function .onInit
   File /oname=Amakrits.vsf "Amakrits.vsf"
   NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
   Delete $TEMP\Amakrits.vsf
+FunctionEnd
+
+Function un.onInit
+ SetOutPath $TEMP
+ File /oname=Amakrits.vsf "Amakrits.vsf"
+ NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
 FunctionEnd
