@@ -86,8 +86,8 @@ SectionEnd
 
 Function .onInit
   SetOutPath $TEMP
-  File /oname=Amakrits.vsf "Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
-  Delete $TEMP\Amakrits.vsf
+  File /oname=AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
+  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\AmethystKamri.vsf
+  Delete $TEMP\AmethystKamri.vsf
 FunctionEnd
 

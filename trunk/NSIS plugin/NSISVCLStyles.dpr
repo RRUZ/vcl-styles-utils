@@ -43,6 +43,8 @@ uses
   Vcl.Styles.Utils.ScreenTips in '..\Common\Vcl.Styles.Utils.ScreenTips.pas',
   Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas';
 
+  //NSIS Scripting Reference
+  //http://nsis.sourceforge.net/Docs/Chapter4.html
 {$R *.res}
 
 type
