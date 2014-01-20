@@ -6,10 +6,16 @@
   ;Name and file
   Name "VCL Styles for NSIS"
   OutFile "Output\NSISVCLStyles.exe"
+  SetCompressor lzma
   InstallDir "$PROGRAMFILES\The Road To Delphi\NSISVCLStyles"
   InstallDirRegKey HKCU "Software\NSISVCLStyles" ""
-  RequestExecutionLevel user
-
+  RequestExecutionLevel admin
+  !define _VERSION "1.0.0.2"
+  VIProductVersion "${_VERSION}"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "VCL Styles for NSIS"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "The Road To Delphi"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${_VERSION}"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "InternalName" "NSISVCLStyles.exe"
 ;--------------------------------
 ;Interface Settings
 
@@ -92,9 +98,6 @@ SectionEnd
 
 ;--------------------------------
 ;Descriptions
-
-  ;Language strings
-  ;LangString DESC_SecDummy ${LANG_ENGLISH} "A test section."
 
   ;Assign language strings to sections
   ;!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN

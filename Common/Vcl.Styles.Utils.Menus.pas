@@ -403,10 +403,8 @@ begin
     begin
       { Draw Vcl PopupMenu Bitmap }
       ImageIndex := MI.ImageIndex;
-      if (MI.GetParentMenu.Images <> nil) then
         with MI.GetParentMenu do
           begin
-            LImageWidth := Images.Width;
             if (ImageIndex < 0) and (MI.Bitmap <> nil) then
               begin
                 Bmp := MI.Bitmap;
@@ -423,8 +421,10 @@ begin
                  Canvas.Draw( LImageRect.Left, LImageRect.Top,Bmp);
 
               end
-            else if (ImageIndex > -1) then
+            else
+              if (MI.GetParentMenu.Images <> nil) and (ImageIndex > -1) then
               begin
+                LImageWidth := Images.Width;
                 DisplayCheckedGlyph := False;
                 LImageRect := Rect(0, 0, Images.Width, Images.Height);
                 RectVCenter(LImageRect, ItemRect);
