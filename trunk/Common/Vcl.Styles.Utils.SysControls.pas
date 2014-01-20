@@ -41,7 +41,7 @@ type
 
   TChildControlInfo = record
     Parent: HWND;
-    ParentStyle: HWND;
+    ParentStyle: NativeInt;
     StyleHookClass: TSysStyleHookClass;
   end;
 

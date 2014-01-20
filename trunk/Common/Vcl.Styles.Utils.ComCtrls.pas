@@ -1506,7 +1506,8 @@ begin
   FStep:=0;
   FTimer := TTimer.Create(nil);
   FTimer.Interval := 100;
-  FTimer.OnTimer := TimerAction;
+  if ((SysControl.Style And PBS_MARQUEE)<>0)  then
+   FTimer.OnTimer := TimerAction;
   FTimer.Enabled := ((GetWindowLong(AHandle, GWL_STYLE) And PBS_MARQUEE)<>0);
 end;
 
@@ -1727,7 +1728,7 @@ var
   Format: PCharFormat2;
 begin
   Format := PCharFormat2(Message.LParam);
-  //if {TCustomRichEdit(Control).PlainText and} (Format.dwMask and CFM_COLOR = CFM_COLOR) then
+  if (Format.dwMask and CFM_COLOR = CFM_COLOR) then
   begin
     Format.crTextColor := ColorToRGB(StyleServices.GetStyleFontColor(TextColor[SysControl.Enabled]));
     Format.crBackColor := ColorToRGB(StyleServices.GetStyleColor(BkColor[SysControl.Enabled]));
