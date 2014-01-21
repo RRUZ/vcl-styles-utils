@@ -14,7 +14,7 @@
 {                                                                                                  }
 { The Original Code is uSysStyleHook.pas.                                                          }
 {                                                                                                  }
-{ Portions created by Safafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                     }
+{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                    }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
@@ -50,6 +50,7 @@ const
   CM_PARENTHOOKED = CM_BASE + 360;
   CM_CONTROLHOOKED = CM_BASE + 361;
   CM_INITCHILDS = CM_BASE + 362;
+  CM_CONTROLHOOKEDDIRECTLY = CM_BASE + 363;
 
 type
   TBidiModeDirection = (bmLeftToRight, bmRightToLeft);
@@ -91,6 +92,7 @@ type
     function GetControlID: Integer;
     function GetBoundsRect: TRect;
     function GetFont: TFont;
+    function IsControlChild: Boolean;
   public
     constructor Create(AHandle: THandle); virtual;
     Destructor Destroy; override;
@@ -116,6 +118,7 @@ type
     property BidiMode: TBidiModeDirection read GetBidiMode;
     property ControlID: Integer read GetControlID;
     property BoundsRect: TRect read GetBoundsRect;
+    property IsChild: Boolean read IsControlChild;
     function DrawTextBiDiModeFlags(Flags: Longint): Longint;
     function UseRightToLeftAlignment: Boolean; dynamic;
     function DrawTextBiDiModeFlagsReadingOnly: Longint;
@@ -148,6 +151,7 @@ type
     FColor: TColor;
     FFont: TFont;
     FText: string;
+    FHookedDirectly: Boolean;
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
     procedure WMNCPaint(var Message: TMessage); message WM_NCPAINT;
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
@@ -181,6 +185,9 @@ type
     procedure WndProc(var Message: TMessage); virtual;
     function InternalPaint(DC: HDC): Boolean; virtual;
     procedure UpdateColors; virtual;
+    function PaintControls(AControl: HWND; DC: HDC): Boolean;
+    property HookedDirectly: Boolean read FHookedDirectly write FHookedDirectly;
+
   public
     constructor Create(AHandle: THandle); virtual;
     Destructor Destroy; override;
@@ -462,6 +469,11 @@ begin
   Result := GetWindowLongPtr(Handle, GWL_WNDPROC);
 end;
 
+function TSysControl.IsControlChild: Boolean;
+begin
+  Result := (Style and WS_CHILD = WS_CHILD);
+end;
+
 procedure TSysControl.SetExStyle(const Value: NativeInt);
 begin
   SetWindowLongPtr(Handle, GWL_EXSTYLE, Value);
@@ -511,6 +523,7 @@ begin
   FParentColor := False;
   FDoubleBuffered := False;
   FPaintOnEraseBkgnd := False;
+  FHookedDirectly := False;
   OverridePaint := False;
   OverridePaintNC := False;
   OverrideEraseBkgnd := False;
@@ -864,6 +877,52 @@ begin
     end;
 end;
 
+function TSysStyleHook.PaintControls(AControl: HWND; DC: HDC): Boolean;
+var
+  Child: HWND;
+  SavedDC: HDC;
+  SysChild: TSysControl;
+  P: TPoint;
+  FrameBrush: HBRUSH;
+begin
+  Result := False;
+  Child := GetTopWindow(AControl);
+  while Child <> 0 do
+    begin
+      Result := True;
+      SysChild := TSysControl.Create(Child);
+      with SysChild do
+        begin
+          SavedDC := SaveDC(DC);
+          P := Point(Left, Top);
+          ScreenToClient(ParentHandle, P);
+          if Visible and IsChild and
+            RectVisible(DC, Rect(P.X, P.Y, P.X + Width, P.Y + Height)) then
+            begin
+              MoveWindowOrg(DC, P.X, P.Y);
+              IntersectClipRect(DC, 0, 0, Width, Height);
+              SendMessage(Child, WM_PAINT, lParam(DC), 0);
+              if SysChild.HasBorder then
+                begin
+                  // SendMessage(Child, WM_NCPAINT, 0, 0);
+                  FrameBrush := CreateSolidBrush(ColorToRGB(clBtnShadow));
+                  FrameRect(DC, System.Types.Rect(0, 0, Width, Height),
+                    FrameBrush);
+                  DeleteObject(FrameBrush);
+                  FrameBrush := CreateSolidBrush(ColorToRGB(clBtnHighlight));
+                  FrameRect(DC, System.Types.Rect(0, 0, Width + 1, Height + 1),
+                    FrameBrush);
+                  DeleteObject(FrameBrush);
+                end;
+            end;
+          FreeAndNil(SysChild);
+          PaintControls(Child, DC);
+          RestoreDC(DC, SavedDC);
+          Child := GetNextWindow(Child, GW_HWNDNEXT);
+        end;
+    end;
+end;
+
 procedure TSysStyleHook.PaintNC(Canvas: TCanvas);
 begin
 
@@ -937,12 +996,15 @@ var
   PTest: PInteger;
   ParentHandle: HWND;
 begin
+
   Test := $93;
   PTest := @Test;
   Result := False;
   ParentHandle := GetParent(Handle);
   if ParentHandle > 0 then
     begin
+      if not IsControlHooked(ParentHandle) then
+        Exit(False);
       SendMessage(ParentHandle, WM_ERASEBKGND, 0, lParam(PTest));
       Result := (PTest^ = $11);
     end;
@@ -985,6 +1047,48 @@ var
   Buffer: TBitmap;
   Canvas: TCanvas;
   PS: TPaintStruct;
+
+  function ClipControls(AControl: HWND; Siblings: Boolean): Boolean;
+  var
+    Child: HWND;
+    SysChild: TSysControl;
+    P: TPoint;
+  begin
+    Result := False;
+    SysChild := nil;
+    Child := GetTopWindow(AControl);
+    if GetParent(Child) = Handle then
+      while Child <> 0 do
+        begin
+          Result := True;
+          SysChild := TSysControl.Create(Child);
+          with SysChild, P do
+            begin
+              P := Point(Left, Top);
+              ScreenToClient(Self.Handle, P);
+              if Visible and IsChild and
+                RectVisible(DC, Rect(X, Y, X + Width, Y + Height)) then
+                begin
+                  ExcludeClipRect(DC, X, Y, X + Width, Y + Height);
+                end;
+              FreeAndNil(SysChild);
+              if Siblings then
+                ClipControls(Child, Siblings);
+              Child := GetNextWindow(Child, GW_HWNDNEXT);
+            end;
+        end;
+    if Assigned(SysChild) then
+      FreeAndNil(SysChild);
+  end;
+
+  function DoClipControls: Boolean;
+  begin
+    if SysControl.Style and WS_CLIPSIBLINGS = WS_CLIPSIBLINGS then
+      Result := ClipControls(Handle, True)
+    else if SysControl.Style and WS_CLIPCHILDREN = WS_CLIPCHILDREN then
+      Result := ClipControls(Handle, False);
+  end;
+
 begin
   Handled := False;
   if not StyleServicesEnabled then
@@ -1012,14 +1116,10 @@ begin
               Buffer := TBitmap.Create;
               try
                 Buffer.SetSize(SysControl.Width, SysControl.Height);
+                DoClipControls;
                 PaintBackground(Buffer.Canvas);
                 Paint(Buffer.Canvas);
-                // paint other controls
-                (* if Control is TWinControl then
-                  TWinControlClass(Control)
-                  .PaintControls(Buffer.Canvas.Handle, nil);
-                *)
-
+                // PaintControls(Handle,Canvas.Handle);
                 Canvas.Draw(0, 0, Buffer);
               finally
                 Buffer.Free;
@@ -1027,10 +1127,9 @@ begin
             end
           else
             begin
+              DoClipControls;
               Paint(Canvas);
-              // paint other controls
-              // if Control is TWinControl then
-              // TWinControlClass(Control).PaintControls(Canvas.Handle, nil);
+              // PaintControls(Handle,Canvas.Handle);
             end;
         if DC = 0 then
           begin
@@ -1056,6 +1155,13 @@ var
   ChildHandle: HWND;
 begin
   case Message.Msg of
+
+    CM_CONTROLHOOKEDDIRECTLY:
+      begin
+        FHookedDirectly := True;
+        Exit;
+      end;
+
     CM_INITCHILDS:
       begin
         Message.Result := 0;
@@ -1085,6 +1191,12 @@ begin
         Exit;
       end;
 
+    CM_PARENTHOOKED, CM_CONTROLHOOKED:
+      begin
+        Message.Result := $77;
+        Exit;
+      end;
+
     WM_CHANGEUISTATE, WM_PARENTNOTIFY:
       begin
         SendMessage(Handle, CM_INITCHILDS, 0, 0);
@@ -1105,12 +1217,6 @@ begin
               }
               Exit; { Do not Dispatch . }
             end;
-      end;
-
-    CM_PARENTHOOKED, CM_CONTROLHOOKED:
-      begin
-        Message.Result := $77;
-        Exit;
       end;
 
     WM_SETREDRAW:

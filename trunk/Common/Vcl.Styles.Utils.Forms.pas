@@ -13,7 +13,7 @@
 { and limitations under the License.                                                               }
 {                                                                                                  }
 {                                                                                                  }
-{ Portions created by Safafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                     }
+{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                    }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
@@ -63,7 +63,6 @@ type
     FHorzBtnSliderDetail: TThemedScrollBar;
     FNCMouseDown: Boolean;
     FAllowScrolling: Boolean;
-    FFirstMsg: Cardinal;
     function NormalizePoint(P: TPoint): TPoint;
     function GetDefaultScrollBarSize: TSize;
     procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
@@ -1352,7 +1351,6 @@ constructor TSysScrollingStyleHook.Create(AHandle: THandle);
 begin
   inherited;
   FTracking := False;
-  FFirstMsg := 0;
   FNCMouseDown := False;
   FAllowScrolling := True;
   FTrackingPos := 0;
@@ -2158,7 +2156,7 @@ begin
   if OrgStyle <> NewStyle then
     begin
       SysControl.Style := NewStyle;
-      if FFirstMsg <> WM_NCCALCSIZE then
+      if not HookedDirectly then
         Message.Result := CallDefaultProc(TMessage(Message));
       SysControl.Style := OrgStyle;
     end;
@@ -2506,9 +2504,16 @@ end;
 
 procedure TSysScrollingStyleHook.WndProc(var Message: TMessage);
 begin
-  if FFirstMsg = 0 then
-    FFirstMsg := Message.msg;
   case Message.msg of
+
+    WM_MOUSEWHEEL:
+      begin
+        Inherited;
+        if FVertScrollBar then
+          DrawVertScroll(0);
+        // if FHorzScrollBar then
+        // DrawHorzScroll(0);
+      end;
 
     WM_VSCROLL, WM_HSCROLL:
       begin

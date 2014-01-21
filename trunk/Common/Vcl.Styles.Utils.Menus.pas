@@ -1,22 +1,22 @@
 { ************************************************************************************************** }
-{ }
-{ Unit Vcl.Styles.Utils.Menus }
-{ unit for the VCL Styles Utils }
-{ http://code.google.com/p/vcl-styles-utils/ }
-{ }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the }
-{ License at http://www.mozilla.org/MPL/ }
-{ }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights }
-{ and limitations under the License. }
-{ }
-{ }
-{ Portions created by Safafi Mahdi [SMP3]   e-mail SMP@LIVE.FR }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V. }
-{ All Rights Reserved. }
-{ }
+{                                                                                                    }
+{ Unit Vcl.Styles.Utils.Menus                                                                        }
+{ unit for the VCL Styles Utils                                                                      }
+{ http://code.google.com/p/vcl-styles-utils/                                                         }
+{                                                                                                    }
+{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");   }
+{ you may not use this file except in compliance with the License. You may obtain a copy of the      }
+{ License at http://www.mozilla.org/MPL/                                                             }
+{                                                                                                    }
+{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF     }
+{ ANY KIND, either express or implied. See the License for the specific language governing rights    }
+{ and limitations under the License.                                                                 }
+{                                                                                                    }
+{                                                                                                    }
+{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                      }
+{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                      }
+{ All Rights Reserved.                                                                               }
+{                                                                                                    }
 { ************************************************************************************************** }
 unit Vcl.Styles.Utils.Menus;
 

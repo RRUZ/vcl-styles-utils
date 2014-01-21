@@ -13,7 +13,7 @@
 { and limitations under the License.                                                               }
 {                                                                                                  }
 {                                                                                                  }
-{ Portions created by Safafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                     }
+{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                    }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
@@ -52,7 +52,6 @@ type
 
   TSysButtonStyleHook = class(TMouseTrackSysControlStyleHook)
   private
-    // FOwnerDraw: Boolean;
     function GetCaptionRect(Canvas: TCanvas): TRect;
     function GetBoxRect: TRect;
     function IsCheckBox: Boolean;
@@ -772,13 +771,14 @@ end;
 
 procedure TSysButtonStyleHook.WMEraseBkgnd(var Message: TMessage);
 begin
-  Handled := False;
-  if (OwnerDraw or (not ParentBkGndPainted) or GroupBox) then
+  if (not OwnerDraw) and (not GroupBox and ParentBkGndPainted) then
+    Message.Result := 1
+  else
     begin
-      Message.Result := 1;
+      Handled := False;
       Exit;
     end;
-  inherited;
+  Handled := True;
 end;
 
 procedure TSysButtonStyleHook.WMNCPaint(var Message: TMessage);
@@ -786,33 +786,20 @@ var
   PS: TPaintStruct;
   Canvas: TCanvas;
 begin
-  Handled := False;
-  if (OwnerDraw or not ParentBkGndPainted) then
-    Exit;
-
-  if GroupBox then
-    begin
-      Canvas := TCanvas.Create;
-      Canvas.Handle := BeginPaint(Handle, PS);
-      PaintNC(Canvas);
-      EndPaint(Handle, PS);
-      Canvas.Free;
-      Handled := True;
-    end
+  if (not OwnerDraw and ParentBkGndPainted) then
+    Inherited
   else
-    inherited;
+    begin
+      Handled := False;
+      Exit;
+    end;
+  Handled := True;
 end;
 
 procedure TSysButtonStyleHook.WMPaint(var Message: TMessage);
 begin
-  if ParentBkGndPainted then
-    begin
-      Handled := False;
-      if not OwnerDraw then
-        inherited
-      else
-        Exit;
-    end
+  if (not OwnerDraw and ParentBkGndPainted) then
+    Inherited
   else
     begin
       Handled := False;
@@ -823,29 +810,25 @@ end;
 
 procedure TSysButtonStyleHook.WndProc(var Message: TMessage);
 begin
+  //AddToLog(Message);
+
   case Message.Msg of
 
-    (* WM_NCCREATE:
-      begin
-      NCStruct := PCREATESTRUCT(Message.LPARAM)^;
-      if NCStruct.Style and BS_OWNERDRAW = BS_OWNERDRAW then
-      FOwnerDraw := True;
-      end;
-    *)
     WM_ENABLE:
       begin
         { Check first if Window is visible
           if you dont check ..the InVisible window will be visible .
         }
+
         if SysControl.Visible then
           Invalidate;
-        inherited;
       end;
+
     WM_STYLECHANGING, WM_STYLECHANGED:
       begin
         Invalidate;
-
       end;
+
     WM_SETTEXT:
       begin
         SetRedraw(False);
@@ -853,11 +836,13 @@ begin
         SetRedraw(True);
         Invalidate;
       end;
+
     WM_SETFOCUS, WM_KILLFOCUS:
       begin
         inherited;
         Invalidate;
       end;
+
   else
     inherited;
   end;
@@ -905,17 +890,18 @@ begin
         CallDefaultProc(Message);
         Exit;
       end;
+
     CN_CTLCOLORMSGBOX .. CN_CTLCOLORSTATIC:
       begin
         SetTextColor(Message.wParam, ColorToRGB(FontColor));
         SetBkColor(Message.wParam, ColorToRGB(Brush.Color));
         Message.Result := LRESULT(Brush.Handle);
       end;
+
     CM_ENABLEDCHANGED:
       begin
         UpdateColors;
         CallDefaultProc(Message);
-        // Handled := False; // Allow control to handle message
       end
   else
     inherited WndProc(Message);
@@ -2062,18 +2048,16 @@ var
   LStyle: TCustomStyleServices;
 begin
   LStyle := StyleServices;
+  Color := StyleServices.GetStyleColor(ColorStates[SysControl.Enabled]);
 {$IF CompilerVersion > 23}
-  if seClient in StyleElements then
-    Brush.Color := LStyle.GetStyleColor(ColorStates[SysControl.Enabled])
-  else
-    Brush.Color := clWindow;
-  if seFont in StyleElements then
-    FontColor := LStyle.GetStyleFontColor(FontColorStates[SysControl.Enabled])
+  if OverrideFont then
+    FontColor := StyleServices.GetStyleFontColor(FontColorStates[True])
   else
     FontColor := clWindowText;
 {$ELSE}
+  FontColor := StyleServices.GetStyleFontColor
+    (FontColorStates[SysControl.Enabled]);
   Brush.Color := LStyle.GetStyleColor(ColorStates[SysControl.Enabled]);
-  FontColor := LStyle.GetStyleFontColor(FontColorStates[SysControl.Enabled]);
 {$IFEND}
 end;
 
@@ -2659,7 +2643,6 @@ if StyleServices.Available then
       begin
         RegisterSysStyleHook('Button', TSysButtonStyleHook);
         RegisterSysStyleHook('Edit', TSysEditStyleHook);
-        RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
         RegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
         RegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
         RegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
@@ -2673,7 +2656,6 @@ with TSysStyleManager do
   begin
     UnRegisterSysStyleHook('Button', TSysButtonStyleHook);
     UnRegisterSysStyleHook('Edit', TSysEditStyleHook);
-    UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
     UnRegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
     UnRegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
     UnRegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
