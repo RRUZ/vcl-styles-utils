@@ -13,7 +13,7 @@
 { and limitations under the License.                                                               }
 {                                                                                                  }
 {                                                                                                  }
-{ Portions created by Safafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                     }
+{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                    }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
@@ -97,13 +97,13 @@ procedure AddToLog(S: string; Value: Integer); overload;
 procedure AddToLog(Msg: string); overload;
 {$ENDIF }
 
-{$IFDEF DEBUG}
+{$IFDEF EventLog}
 function WM_To_String(WM_Message: Integer): string;
 {$ENDIF }
 
 implementation
 
-{$IFDEF DEBUG}
+{$IFDEF EventLog}
 function WM_To_String(WM_Message: Integer): string;
 begin
   case WM_Message of
@@ -506,6 +506,7 @@ var
     if FSysStyleHookList.ContainsKey(Handle) then
       FSysStyleHookList.Remove(Handle);
     FSysStyleHookList.Add(Handle, FRegSysStylesList[sClassName].Create(Handle));
+    SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
   end;
 
 begin
@@ -528,6 +529,11 @@ begin
         ParentStyle := GetWindowLongPtr(Parent, GWL_STYLE);
       if FRegSysStylesList.ContainsKey(sClassName) then
         begin
+          if not HookVclControls then
+            begin
+              if IsVCLControl(wParam) then
+                Exit;
+            end;
           if (Style and DS_CONTROL = DS_CONTROL) then
             begin
               AddControl(wParam);
@@ -540,7 +546,12 @@ begin
           else if (Style and WS_CHILD = WS_CHILD) then
             begin
               if FSysStyleHookList.ContainsKey(Parent) then
-                AddChildControl(wParam)
+                begin
+                  if IsVCLControl(Parent) then
+                    AddControl(wParam)
+                  else
+                    AddChildControl(wParam)
+                end
               else
                 AddControl(wParam);
             end
@@ -593,7 +604,7 @@ end;
 procedure AddToLog(Msg: TMessage);
 begin
   with Msg do
-    OutputDebugString(PChar('Msg = ' + IntToStr(Msg) + ' wParam = ' +
+    OutputDebugString(PChar('Msg = ' + WM_To_String(Msg) + ' wParam = ' +
       IntToStr(wParam) + ' LParam = ' + IntToStr(lParam)));
 end;
 

@@ -13,11 +13,11 @@
 { and limitations under the License.                                                               }
 {                                                                                                  }
 {                                                                                                  }
-{ Portions created by Safafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                     }
+{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                    }
 { Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
 { All Rights Reserved.                                                                             }
 {                                                                                                  }
-{**************************************************************************************************}
+{ ************************************************************************************************ }
 unit Vcl.Styles.Utils.ComCtrls;
 
 interface
@@ -162,10 +162,14 @@ type
   strict private
     procedure EMSetBkgndColor(var Message: TMessage); message EM_SETBKGNDCOLOR;
     procedure EMSetCharFormat(var Message: TMessage); message EM_SETCHARFORMAT;
-  strict protected
+  strict private
+    FBackColor: TColor;
+  protected
+    procedure UpdateColors; override;
     procedure WndProc(var Message: TMessage); override;
     function GetBorderSize: TRect; override;
   public
+    property BackColor: TColor read FBackColor write FBackColor;
     constructor Create(AHandle: THandle); override;
   end;
 
@@ -1692,7 +1696,6 @@ begin
   inherited;
 end;
 
-
 { TSysRichEditStyleHook }
 
 constructor TSysRichEditStyleHook.Create(AHandle: THandle);
@@ -1708,7 +1711,7 @@ end;
 
 procedure TSysRichEditStyleHook.EMSetBkgndColor(var Message: TMessage);
 begin
-  Message.LParam := ColorToRGB(StyleServices.GetStyleColor(scEdit));
+  Message.LParam := Color;
   Handled := False;
 end;
 
@@ -1718,28 +1721,45 @@ begin
     Result := Rect(2, 2, 2, 2);
 end;
 
+procedure TSysRichEditStyleHook.UpdateColors;
+var
+  cf: TCharFormat2;
+const
+  TextColor: array [Boolean] of TStyleFont = (sfEditBoxTextDisabled,
+    sfEditBoxTextNormal);
+  BkColor: array [Boolean] of TStyleColor = (scEditDisabled, scEdit);
+begin
+  Color := ColorToRGB(StyleServices.GetStyleColor(scEdit));
+  FontColor := ColorToRGB(StyleServices.GetStyleFontColor
+    (TextColor[SysControl.Enabled]));
+  BackColor := ColorToRGB(StyleServices.GetStyleColor
+    (BkColor[SysControl.Enabled]));
+
+  ZeroMemory(@cf, sizeof(TCharFormat2));
+  cf.cbSize := sizeof(TCharFormat2);
+  cf.dwMask := CFM_ALL;
+  { Need to send this message .. }
+  SendMessage(Handle, EM_SETBKGNDCOLOR, 0, 0);
+  SendMessage(Handle, EM_GETCHARFORMAT, SCF_DEFAULT, LParam(@cf));
+  SendMessage(Handle, EM_SETCHARFORMAT, SCF_DEFAULT, LParam(@cf));
+end;
+
 procedure TSysRichEditStyleHook.EMSetCharFormat(var Message: TMessage);
 type
   PCharFormat2 = ^TCharFormat2;
-const
-  TextColor: array[Boolean] of TStyleFont = (sfEditBoxTextDisabled, sfEditBoxTextNormal);
-  BkColor: array[Boolean] of TStyleColor = (scEditDisabled, scEdit);
 var
   Format: PCharFormat2;
 begin
   Format := PCharFormat2(Message.LParam);
-  if (Format.dwMask and CFM_COLOR = CFM_COLOR) then
-  begin
-    Format.crTextColor := ColorToRGB(StyleServices.GetStyleFontColor(TextColor[SysControl.Enabled]));
-    Format.crBackColor := ColorToRGB(StyleServices.GetStyleColor(BkColor[SysControl.Enabled]));
-    Format.dwEffects := Format.dwEffects and not CFE_AUTOCOLOR;
-  end;
+  Format.crTextColor := FontColor;
+  Format.crBackColor := BackColor;
+  Format.dwEffects := Format.dwEffects and not CFE_AUTOCOLOR;
   Handled := False;
 end;
 
 procedure TSysRichEditStyleHook.WndProc(var Message: TMessage);
 begin
-  //OutputDebugString(Pchar(Format('TSysRichEditStyleHook Message %x %s',[Message.Msg , WM_To_String(Message.Msg)])));
+  // AddToLog(Message);
   inherited;
 end;
 
@@ -1749,7 +1769,6 @@ if StyleServices.Available then
   begin
     with TSysStyleManager do
       begin
-        RegisterSysStyleHook('#32770', TSysDialogStyleHook);
         RegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
         RegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
         RegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
@@ -1764,14 +1783,13 @@ finalization
 
 with TSysStyleManager do
   begin
-    UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
     UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
     UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
     UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
     UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-  	UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
-  	UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
-  	UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+    UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
+    UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
+    UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
   end;
 
 end.
