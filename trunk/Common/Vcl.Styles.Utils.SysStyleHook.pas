@@ -534,7 +534,7 @@ begin
     FProcInstance := MakeObjectInstance(WndProc);
     FSysControl := TSysControl.Create(AHandle);
     FOrgWndProc := FSysControl.WndProc;
-    if FOrgWndProc > 0 then
+    // if FOrgWndProc > 0 then
     begin
       FSysControl.WndProc := LONG_PTR(FProcInstance);
       FBrush := TBrush.Create;
@@ -1083,11 +1083,10 @@ var
 
   function DoClipControls: Boolean;
   begin
-    Result:=False;
+    Result := False;
     if SysControl.Style and WS_CLIPSIBLINGS = WS_CLIPSIBLINGS then
       Result := ClipControls(Handle, True)
-    else
-    if SysControl.Style and WS_CLIPCHILDREN = WS_CLIPCHILDREN then
+    else if SysControl.Style and WS_CLIPCHILDREN = WS_CLIPCHILDREN then
       Result := ClipControls(Handle, False);
   end;
 

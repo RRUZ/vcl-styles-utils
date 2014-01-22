@@ -64,6 +64,7 @@ type
     FHorzBtnSliderDetail: TThemedScrollBar;
     FNCMouseDown: Boolean;
     FAllowScrolling: Boolean;
+    FLstPos: Integer;
     function NormalizePoint(P: TPoint): TPoint;
     function GetDefaultScrollBarSize: TSize;
     procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
@@ -1995,6 +1996,7 @@ begin
     case ScrollType of
       skTracking:
         begin
+          FLstPos := Pos;
           FAllowScrolling := True;
           SendMessage(Handle, WM_VSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
           FAllowScrolling := False;
@@ -2014,6 +2016,7 @@ begin
     case ScrollType of
       skTracking:
         begin
+          FLstPos := Pos;
           FAllowScrolling := True;
           SendMessage(Handle, WM_HSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
           FAllowScrolling := False;
@@ -2485,6 +2488,8 @@ begin
 end;
 
 procedure TSysScrollingStyleHook.WndProc(var Message: TMessage);
+var
+  NewInfo: TScrollInfo;
 begin
   case Message.msg of
 
@@ -2493,19 +2498,23 @@ begin
         Inherited;
         if FVertScrollBar then
           DrawVertScroll(0);
-        // if FHorzScrollBar then
-        // DrawHorzScroll(0);
       end;
 
     WM_VSCROLL, WM_HSCROLL:
       begin
+        if Word(Message.WParam) = SB_THUMBPOSITION then
+        begin
+          Message.WParam := MakeWParam(SB_THUMBPOSITION, FLstPos);
+          CallDefaultProc(Message);
+          Exit;
+        end;
         if (not OverridePaintNC) or (not StyleServicesEnabled) then
         begin
           CallDefaultProc(Message);
           Exit;
         end;
-        if not FAllowScrolling then
-          Exit;
+        // if not FAllowScrolling then
+        // Exit;
         inherited;
       end;
 

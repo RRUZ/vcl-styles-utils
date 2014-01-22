@@ -1,4 +1,4 @@
-//***************************************************************************************************
+// ***************************************************************************************************
 //
 // Unit Vcl.Styles.Utils.SysControls
 // unit for the VCL Styles Utils
@@ -878,6 +878,7 @@ var
   Parent: HWND;
   Style, ParentStyle, ExStyle, ParentExStyle: NativeInt;
   Info: TControlInfo;
+  W: NativeInt;
   procedure AddChildControl(Handle: HWND);
   var
     Info: TChildControlInfo;
@@ -919,13 +920,16 @@ begin
     ExStyle := CBTSturct.lpcs.dwExStyle;
     ParentExStyle := 0;
     ParentStyle := 0;
+
     if Parent > 0 then
     begin
       ParentStyle := GetWindowLongPtr(Parent, GWL_STYLE);
       ParentExStyle := GetWindowLongPtr(Parent, GWL_EXSTYLE);
     end;
+
     if FRegSysStylesList.ContainsKey(sClassName) then
     begin
+
       Info.Handle := wParam;
       Info.Parent := Parent;
       Info.Style := Style;
@@ -941,11 +945,13 @@ begin
         if IsVCLControl(wParam) then
           Exit;
       end;
+
       if Assigned(FBeforeHookingControlProc) then
       begin
         if not BeforeHookingControl(@Info) then
           Exit;
       end;
+
       if (Style and DS_CONTROL = DS_CONTROL) then
       begin
         { TabSheet ! }
@@ -976,6 +982,7 @@ begin
       else
         { Not (WS_CHILD or WS_POPUP) !! }
         AddControl(wParam);
+     
     end;
 
     if nCode = HCBT_DESTROYWND then
