@@ -1693,6 +1693,7 @@ end;
 constructor TSysRichEditStyleHook.Create(AHandle: THandle);
 begin
   inherited;
+
 {$IF CompilerVersion > 23}
   StyleElements := [seBorder];
 {$ELSE}
@@ -1767,6 +1768,7 @@ begin
     RegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
     RegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
     RegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+
   end;
 end;
 
