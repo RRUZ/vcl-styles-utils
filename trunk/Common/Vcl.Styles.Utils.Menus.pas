@@ -1,23 +1,23 @@
-{ ************************************************************************************************** }
-{                                                                                                    }
-{ Unit Vcl.Styles.Utils.Menus                                                                        }
-{ unit for the VCL Styles Utils                                                                      }
-{ http://code.google.com/p/vcl-styles-utils/                                                         }
-{                                                                                                    }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");   }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the      }
-{ License at http://www.mozilla.org/MPL/                                                             }
-{                                                                                                    }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF     }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights    }
-{ and limitations under the License.                                                                 }
-{                                                                                                    }
-{                                                                                                    }
-{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                      }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                      }
-{ All Rights Reserved.                                                                               }
-{                                                                                                    }
-{ ************************************************************************************************** }
+// **************************************************************************************************
+//
+// Unit Vcl.Styles.Utils.Menus
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+//
+// Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+// **************************************************************************************************
 unit Vcl.Styles.Utils.Menus;
 
 interface
@@ -250,6 +250,7 @@ var
   SysItem: TSysPopupItem;
   sShortCut: String;
   Bmp: TBitmap;
+
   procedure DrawSubMenu(const ItemRect: TRect);
   var
     Bmp: TBitmap;
@@ -294,6 +295,8 @@ var
     end;
     Dec(LTextRect.Right, LSubMenuRect.Width);
   end;
+
+
   procedure DrawVisualSysBitmap(Bmp: HBITMAP);
   var
     Theme: HTHEME;
@@ -408,17 +411,36 @@ begin
             if (ImageIndex < 0) and (MI.Bitmap <> nil) then
               begin
                 Bmp := MI.Bitmap;
-               // LImageWidth := Bmp.Width;
-                 LImageRect := Rect(0, 0, Bmp.Width, Bmp.Height);
-                RectVCenter(LImageRect, ItemRect);
-                if not RightToLeft then
-                  OffsetRect(LImageRect, 4, 0)
-                else
+                 if (Bmp.Width=16) and (Bmp.Height=16) then
+                 begin
+                  LImageWidth := Bmp.Width;
+                  LImageRect  := Rect(0, 0, Bmp.Width, Bmp.Height);
+                  RectVCenter(LImageRect, ItemRect);
+                  if not RightToLeft then
+                   OffsetRect(LImageRect, 4, 0)
+                  else
                   begin
-                    LImageRect.Left := ItemRect.Right - Images.Width - 4;
+                    LImageRect.Left := ItemRect.Right - Bmp.Width - 4;
                     LImageRect.Right := ItemRect.Right;
                   end;
-                 Canvas.Draw( LImageRect.Left, LImageRect.Top,Bmp);
+
+                  Canvas.Draw( LImageRect.Left, LImageRect.Top,Bmp)
+                 end
+                 else
+                 begin
+                  LImageWidth := 16;
+                  LImageRect  := Rect(0, 0, 16, 16);
+                  RectVCenter(LImageRect, ItemRect);
+                  if not RightToLeft then
+                   OffsetRect(LImageRect, 4, 0)
+                  else
+                  begin
+                    LImageRect.Left := ItemRect.Right - 16 - 4;
+                    LImageRect.Right := ItemRect.Right;
+                  end;
+
+                   Canvas.StretchDraw( LImageRect, Bmp);
+                 end;
 
               end
             else
