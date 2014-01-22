@@ -1,25 +1,25 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit Vcl.Styles.InnoSetup                                                                        }
-{ unit for the VCL Styles Utils                                                                    }
-{ http://code.google.com/p/vcl-styles-utils/                                                       }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{ The Original Code is  Vcl.Styles.InnoSetup.pas.                                                  }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{                                                                                                  }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// Unit Vcl.Styles.InnoSetup
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is  Vcl.Styles.InnoSetup.pas.
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+//
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 unit Vcl.Styles.InnoSetup;
 
 interface
@@ -49,7 +49,7 @@ implementation
   TPanel                             ok
 }
 
-{$DEFINE USEGENERICS}   //-->Reduce the final exe/dll size
+{.$DEFINE USEGENERICS}   //-->Reduce the final exe/dll size
 
 uses
   Winapi.Windows,
@@ -90,7 +90,7 @@ type
   private
      FKeys, FValues : TList;
   public
-    procedure Add(hwnd: HWND; Control : TControlWnd);
+    procedure Add(hwnd: HWND; StyleHook : TSysStyleHook);
     function ContainsKey(hwnd: Winapi.Windows.HWND) : Boolean;
     constructor Create; overload;
     destructor Destroy; override;
@@ -119,10 +119,10 @@ end;
 
 { TDictionary }
 
-procedure TDictionary.Add(hwnd: HWND; Control: TControlWnd);
+procedure TDictionary.Add(hwnd: HWND; StyleHook: TSysStyleHook);
 begin
  FKeys.Add(Pointer(hwnd));
- FValues.Add(Control);
+ FValues.Add(StyleHook);
 end;
 
 function TDictionary.ContainsKey(hwnd: Winapi.Windows.HWND): Boolean;
@@ -147,7 +147,7 @@ var
 begin
   FKeys.Free;
    for i := 0 to FValues.Count-1 do
-      TControlWnd(FValues[i]).Free;
+      TSysStyleHook(FValues[i]).Free;
 
   FValues.Free;
   inherited;
@@ -224,10 +224,11 @@ begin
                InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TNewButtonStyleHook.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
+
         if SameText(sClassName,'TWizardForm') or SameText(sClassName,'TSetupForm') or SameText(sClassName,'TSelectFolderForm') then
         begin
            if (PCWPStruct(lParam)^.message=WM_NCCALCSIZE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TSysDialogStyleHook.Create(PCWPStruct(lParam)^.hwnd));
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TWizardFormStyleHook.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewComboBox') then
@@ -257,13 +258,16 @@ begin
         if SameText(sClassName,'TNewMemo') or SameText(sClassName,'TMemo')  then
         begin
            if (PCWPStruct(lParam)^.message=WM_NCCALCSIZE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TSysMemoStyleHook.Create(PCWPStruct(lParam)^.hwnd));
+             begin
+             InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TNewMemoStyleHook.Create(PCWPStruct(lParam)^.hwnd));
+
+             end;
         end
         else
         if SameText(sClassName,'TNewListBox') or SameText(sClassName,'TListBox') then
         begin
            if (PCWPStruct(lParam)^.message=WM_NCCALCSIZE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TSysListBoxStyleHook.Create(PCWPStruct(lParam)^.hwnd));
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TNewListBoxStyleHook.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
         if SameText(sClassName,'TNewCheckListBox') then
@@ -274,7 +278,7 @@ begin
         else
         if SameText(sClassName,'TRichEditViewer') then
         begin
-           if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+           if (PCWPStruct(lParam)^.message=WM_NCCALCSIZE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TRichEditViewerStyleHook.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
@@ -293,7 +297,7 @@ begin
         if (SameText(sClassName,'TStartMenuFolderTreeView')) or (SameText(sClassName,'TFolderTreeView'))  then
         begin
            if (PCWPStruct(lParam)^.message=WM_CREATE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
-               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TSysTreeViewStyleHook.Create(PCWPStruct(lParam)^.hwnd));
+               InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TFolderTreeViewStyleHook.Create(PCWPStruct(lParam)^.hwnd));
         end
         else
 //        if (SameText(sClassName,'TNewNotebook')) then     //TNewNotebook is handled by the Getsyscolors hook

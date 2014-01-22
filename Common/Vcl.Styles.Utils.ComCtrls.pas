@@ -1,23 +1,23 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit Vcl.Styles.Utils.ComCtrls                                                                   }
-{ unit for the VCL Styles Utils                                                                    }
-{ http://code.google.com/p/vcl-styles-utils/                                                       }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{                                                                                                  }
-{ Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR                                    }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{ ************************************************************************************************ }
+// **************************************************************************************************
+//
+// Unit Vcl.Styles.Utils.ComCtrls
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+//
+// Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+// ************************************************************************************************
 unit Vcl.Styles.Utils.ComCtrls;
 
 interface
@@ -160,6 +160,7 @@ type
 
   TSysRichEditStyleHook = class(TSysScrollingStyleHook)
   strict private
+
     procedure EMSetBkgndColor(var Message: TMessage); message EM_SETBKGNDCOLOR;
     procedure EMSetCharFormat(var Message: TMessage); message EM_SETCHARFORMAT;
   strict private
@@ -237,9 +238,9 @@ type
 
   TSysProgressBarStyleHook = class(TSysStyleHook)
   strict private
-    FStep  : Integer;
+    FStep: Integer;
     FOrientation: TProgressBarOrientation;
-    FTimer : TTimer;
+    FTimer: TTimer;
     procedure TimerAction(Sender: TObject);
     function GetBarRect: TRect;
     function GetBorderWidth: Integer;
@@ -294,28 +295,28 @@ var
   R: TRect;
 begin
   if ScrollType = skTracking then
+  begin
+    if Kind = sbVertical then
     begin
-      if Kind = sbVertical then
-        begin
-          if ListView_GetView(Handle) = LVS_REPORT then
-            begin
-              R := Rect(0, 0, 0, 0);
-              ListView_GetItemRect(Handle, 0, R, LVIR_BOUNDS);
-              Delta := Delta * R.Height;
-            end;
-          ListView_Scroll(Handle, 0, Delta);
-        end;
-      if Kind = sbHorizontal then
-        begin
-          if ListView_GetView(Handle) = LVS_LIST then
-            begin
-              R := TRect.Empty;
-              ListView_GetItemRect(Handle, 0, R, LVIR_BOUNDS);
-              Delta := Delta * R.Width;
-            end;
-          ListView_Scroll(Handle, Delta, 0);
-        end;
-    end
+      if ListView_GetView(Handle) = LVS_REPORT then
+      begin
+        R := Rect(0, 0, 0, 0);
+        ListView_GetItemRect(Handle, 0, R, LVIR_BOUNDS);
+        Delta := Delta * R.Height;
+      end;
+      ListView_Scroll(Handle, 0, Delta);
+    end;
+    if Kind = sbHorizontal then
+    begin
+      if ListView_GetView(Handle) = LVS_LIST then
+      begin
+        R := TRect.Empty;
+        ListView_GetItemRect(Handle, 0, R, LVIR_BOUNDS);
+        Delta := Delta * R.Width;
+      end;
+      ListView_Scroll(Handle, Delta, 0);
+    end;
+  end
   else
     inherited;
 end;
@@ -375,10 +376,10 @@ begin
         HeaderHandle := ListView_GetHeader(Handle);
         // GetWindow(Handle, GW_CHILD);
         if (HeaderHandle <> 0) and (not Assigned(FHeaderStyleHook)) then
-          begin
-            FHeaderStyleHook := TSysHeaderStyleHook.Create(HeaderHandle);
-            FHeaderStyleHook.FListViewStyleHook := Self;
-          end;
+        begin
+          FHeaderStyleHook := TSysHeaderStyleHook.Create(HeaderHandle);
+          FHeaderStyleHook.FListViewStyleHook := Self;
+        end;
         if (Message.WParam <> 0) and (Message.LParam <> 0) then
           Message.Result := CallDefaultProc(Message);
         Exit;
@@ -422,12 +423,12 @@ function TSysListViewStyleHook.TSysHeaderStyleHook.GetItem(Index: Integer)
 begin
   Result := nil;
   if (Index > -1) and (index < ButtonsCount) then
-    begin
-      if Assigned(FSysSection) then
-        FreeAndNil(FSysSection);
-      FSysSection := TSysSection.Create(SysControl, Index);
-      Result := FSysSection;
-    end;
+  begin
+    if Assigned(FSysSection) then
+      FreeAndNil(FSysSection);
+    FSysSection := TSysSection.Create(SysControl, Index);
+    Result := FSysSection;
+  end;
 end;
 
 procedure TSysListViewStyleHook.TSysHeaderStyleHook.MouseLeave;
@@ -461,88 +462,87 @@ begin
   StyleServices.DrawElement(DC, LDetails, R);
 
   for i := 0 to ButtonsCount - 1 do
+  begin
+    with Items[i] do
     begin
-
-      with Items[i] do
-        begin
-          LSectionRect := SectionRect;
-          LTextFormat := TextFormat;
-          LText := Text;
-          LDropDownRect := DropDownRect;
-        end;
-      SectionHot := False;
-      if (MouseInControl) and (not FMouseDown) then
-        begin
-          GetCursorPos(P);
-          ScreenToClient(Handle, P);
-          if LSectionRect.Contains(P) then
-            SectionHot := True;
-        end;
-
-      LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
-      if SectionHot then
-        LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
-      if FPressedSection = i then
-        LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
-      StyleServices.DrawElement(DC, LDetails, LSectionRect);
-
-      TxtRect := LSectionRect;
-      inc(TxtRect.Left, 4);
-
-      if Items[i].HasSplitButton then
-        begin
-          LSplitDetails := StyleServices.GetElementDetails
-            (ttbDropDownButtonGlyphHot);;
-          R := LDropDownRect;
-          if SectionHot then
-            begin
-              StyleServices.DrawElement(DC, LSplitDetails, R);
-              with Bmp.Canvas do
-                begin
-                  Pen.Color := StyleServices.GetSystemColor(clBtnShadow);
-                  MoveTo(R.Left, 3);
-                  LineTo(R.Left, R.Height - 3);
-                  Pen.Color := StyleServices.GetSystemColor(clBtnHighLight);
-                  MoveTo(R.Left - 1, 3);
-                  LineTo(R.Left - 1, R.Height - 3);
-                end;
-            end;
-          dec(TxtRect.Right, R.Width);
-        end;
-
-      if (Items[i].ShowImage) and (Items[i].ImageListHandle > 0) then
-        begin
-          LImageList := TImageList.Create(nil);
-          try
-            LImageList.Handle := Items[i].ImageListHandle;
-            LImageList.Masked := True;
-            LImageList.BkColor := clNone; { Transparent bitmap }
-            R := LSectionRect;
-            ImgRect := Rect(0, 0, LImageList.Width, LImageList.Height);
-            ImgRect := RectCenter(ImgRect, R);
-            if not Items[i].BitmapOnRight then
-              begin
-                ImgRect.Left := R.Left + 2;
-                ImgRect.Right := ImgRect.Left + 2 + LImageList.Width;
-                inc(TxtRect.Left, ImgRect.Width + 2);
-              end
-            else
-              begin
-                ImgRect.Left := LSectionRect.Right - LImageList.Width - 2;
-                ImgRect.Right := LSectionRect.Right;
-                TxtRect.Right := TxtRect.Right - ImgRect.Width - 2;
-              end;
-            LImageList.Draw(Bmp.Canvas, ImgRect.Left, ImgRect.Top,
-              Items[i].ImageIndex);
-          finally
-            LImageList.Free;
-          end;
-        end;
-
-      include(LTextFormat, tfSingleLine);
-      include(LTextFormat, tfVerticalCenter);
-      StyleServices.DrawText(DC, LDetails, LText, TxtRect, LTextFormat);
+      LSectionRect := SectionRect;
+      LTextFormat := TextFormat;
+      LText := Text;
+      LDropDownRect := DropDownRect;
     end;
+    SectionHot := False;
+    if (MouseInControl) and (not FMouseDown) then
+    begin
+      GetCursorPos(P);
+      ScreenToClient(Handle, P);
+      if LSectionRect.Contains(P) then
+        SectionHot := True;
+    end;
+
+    LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
+    if SectionHot then
+      LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
+    if FPressedSection = i then
+      LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
+    StyleServices.DrawElement(DC, LDetails, LSectionRect);
+
+    TxtRect := LSectionRect;
+    inc(TxtRect.Left, 4);
+
+    if Items[i].HasSplitButton then
+    begin
+      LSplitDetails := StyleServices.GetElementDetails
+        (ttbDropDownButtonGlyphHot);;
+      R := LDropDownRect;
+      if SectionHot then
+      begin
+        StyleServices.DrawElement(DC, LSplitDetails, R);
+        with Bmp.Canvas do
+        begin
+          Pen.Color := StyleServices.GetSystemColor(clBtnShadow);
+          MoveTo(R.Left, 3);
+          LineTo(R.Left, R.Height - 3);
+          Pen.Color := StyleServices.GetSystemColor(clBtnHighLight);
+          MoveTo(R.Left - 1, 3);
+          LineTo(R.Left - 1, R.Height - 3);
+        end;
+      end;
+      dec(TxtRect.Right, R.Width);
+    end;
+
+    if (Items[i].ShowImage) and (Items[i].ImageListHandle > 0) then
+    begin
+      LImageList := TImageList.Create(nil);
+      try
+        LImageList.Handle := Items[i].ImageListHandle;
+        LImageList.Masked := True;
+        LImageList.BkColor := clNone; { Transparent bitmap }
+        R := LSectionRect;
+        ImgRect := Rect(0, 0, LImageList.Width, LImageList.Height);
+        ImgRect := RectCenter(ImgRect, R);
+        if not Items[i].BitmapOnRight then
+        begin
+          ImgRect.Left := R.Left + 2;
+          ImgRect.Right := ImgRect.Left + 2 + LImageList.Width;
+          inc(TxtRect.Left, ImgRect.Width + 2);
+        end
+        else
+        begin
+          ImgRect.Left := LSectionRect.Right - LImageList.Width - 2;
+          ImgRect.Right := LSectionRect.Right;
+          TxtRect.Right := TxtRect.Right - ImgRect.Width - 2;
+        end;
+        LImageList.Draw(Bmp.Canvas, ImgRect.Left, ImgRect.Top,
+          Items[i].ImageIndex);
+      finally
+        LImageList.Free;
+      end;
+    end;
+
+    include(LTextFormat, tfSingleLine);
+    include(LTextFormat, tfVerticalCenter);
+    StyleServices.DrawText(DC, LDetails, LText, TxtRect, LTextFormat);
+  end;
   Canvas.Draw(0, 0, Bmp);
   Bmp.Free;
 end;
@@ -642,29 +642,28 @@ begin
   item.pszText := @Buffer;
   item.cchTextMax := Length(Buffer);
   if Header_GetItem(FHeaderHandle, FColumnIndex, item) then
+  begin
+    with item do
     begin
-      with item do
-        begin
-          FImageIndex := iImage;
-          FText := String(pszText);
-          FHasSplitButton := (fmt and HDF_SPLITBUTTON = HDF_SPLITBUTTON);
-          LRtlReading := (fmt and HDF_RTLREADING = HDF_RTLREADING);
-          FTextFormat := [];
-          if (fmt and HDF_LEFT = HDF_LEFT) then
-            include(FTextFormat, tfLeft)
-          else if (fmt and HDF_RIGHT = HDF_RIGHT) then
-            include(FTextFormat, tfRight)
-          else if (fmt and HDF_CENTER = HDF_CENTER) then
-            include(FTextFormat, tfCenter);
+      FImageIndex := iImage;
+      FText := String(pszText);
+      FHasSplitButton := (fmt and HDF_SPLITBUTTON = HDF_SPLITBUTTON);
+      LRtlReading := (fmt and HDF_RTLREADING = HDF_RTLREADING);
+      FTextFormat := [];
+      if (fmt and HDF_LEFT = HDF_LEFT) then
+        include(FTextFormat, tfLeft)
+      else if (fmt and HDF_RIGHT = HDF_RIGHT) then
+        include(FTextFormat, tfRight)
+      else if (fmt and HDF_CENTER = HDF_CENTER) then
+        include(FTextFormat, tfCenter);
 
-          if LRtlReading then
-            include(FTextFormat, tfRtlReading);
-          FBitmapOnRight := (fmt and HDF_BITMAP_ON_RIGHT = HDF_BITMAP_ON_RIGHT);
+      if LRtlReading then
+        include(FTextFormat, tfRtlReading);
+      FBitmapOnRight := (fmt and HDF_BITMAP_ON_RIGHT = HDF_BITMAP_ON_RIGHT);
 
-          FShowImage := (FImageIndex > -1) and
-            (fmt and HDF_BITMAP = HDF_BITMAP);
-        end;
+      FShowImage := (FImageIndex > -1) and (fmt and HDF_BITMAP = HDF_BITMAP);
     end;
+  end;
   R := TRect.Empty;
   if Header_GetItemDropDownRect(FHeaderHandle, FIndex, R) then
     FDropDownRect := R;
@@ -711,11 +710,11 @@ begin
       begin
         UpdateColors;
         if (TreeView_GetBkColor(Handle) <> COLORREF(Color)) then
-          begin
-            // SetWindowTheme(Handle, '', '');
-            TreeView_SetBkColor(Handle, Color);
-            TreeView_SetTextColor(Handle, FontColor);
-          end;
+        begin
+          // SetWindowTheme(Handle, '', '');
+          TreeView_SetBkColor(Handle, Color);
+          TreeView_SetTextColor(Handle, FontColor);
+        end;
         Message.Result := CallDefaultProc(Message);
         Exit;
       end;
@@ -829,11 +828,11 @@ begin
   end;
   { Draw tabs }
   for i := 0 to TabCount - 1 do
-    begin
-      // if I = TabIndex then
-      // Continue;
-      DrawTab(Canvas, i);
-    end;
+  begin
+    // if I = TabIndex then
+    // Continue;
+    DrawTab(Canvas, i);
+  end;
   case TabPosition of
     tpTop:
       InflateRect(R, SysControl.Width - R.Right, SysControl.Height - R.Bottom);
@@ -846,10 +845,10 @@ begin
   end;
 
   if StyleServices.Available then
-    begin
-      Details := StyleServices.GetElementDetails(ttPane);
-      StyleServices.DrawElement(Canvas.Handle, Details, R);
-    end;
+  begin
+    Details := StyleServices.GetElementDetails(ttPane);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
   { Draw active tab }
   if TabIndex >= 0 then
     DrawTab(Canvas, TabIndex);
@@ -866,27 +865,27 @@ var
   FImageIndex: Integer;
 begin
   if (Images <> nil) and (Index < Images.Count) then
-    begin
-      ImageWidth := Images.Width;
-      ImageHeight := Images.Height;
-      ImageStep := 3;
-    end
+  begin
+    ImageWidth := Images.Width;
+    ImageHeight := Images.Height;
+    ImageStep := 3;
+  end
   else
-    begin
-      ImageWidth := 0;
-      ImageHeight := 0;
-      ImageStep := 0;
-    end;
+  begin
+    ImageWidth := 0;
+    ImageHeight := 0;
+    ImageStep := 0;
+  end;
 
   R := TabRect[Index];
   if R.Left < 0 then
     Exit;
 
   if TabPosition in [tpTop, tpBottom] then
-    begin
-      if Index = TabIndex then
-        InflateRect(R, 0, 2);
-    end
+  begin
+    if Index = TabIndex then
+      InflateRect(R, 0, 2);
+  end
   else if Index = TabIndex then
     dec(R.Left, 2)
   else
@@ -935,10 +934,10 @@ begin
   end;
 
   if StyleServices.Available then
-    begin
-      Details := StyleServices.GetElementDetails(DrawState);
-      StyleServices.DrawElement(Canvas.Handle, Details, R);
-    end;
+  begin
+    Details := StyleServices.GetElementDetails(DrawState);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
 
   { Image }
 
@@ -946,79 +945,79 @@ begin
 
   if (Images <> nil) and (FImageIndex >= 0) and (FImageIndex < Images.Count)
   then
-    begin
-      GlyphR := LayoutR;
-      case TabPosition of
-        tpTop, tpBottom:
-          begin
-            GlyphR.Left := GlyphR.Left + ImageStep;
-            GlyphR.Right := GlyphR.Left + ImageWidth;
-            LayoutR.Left := GlyphR.Right;
-            GlyphR.Top := GlyphR.Top + (GlyphR.Bottom - GlyphR.Top) div 2 -
-              ImageHeight div 2;
-            if (TabPosition = tpTop) and (Index = TabIndex) then
-              OffsetRect(GlyphR, 0, -1)
-            else if (TabPosition = tpBottom) and (Index = TabIndex) then
-              OffsetRect(GlyphR, 0, 1);
-          end;
-        tpLeft:
-          begin
-            GlyphR.Bottom := GlyphR.Bottom - ImageStep;
-            GlyphR.Top := GlyphR.Bottom - ImageHeight;
-            LayoutR.Bottom := GlyphR.Top;
-            GlyphR.Left := GlyphR.Left + (GlyphR.Right - GlyphR.Left) div 2 -
-              ImageWidth div 2;
-          end;
-        tpRight:
-          begin
-            GlyphR.Top := GlyphR.Top + ImageStep;
-            GlyphR.Bottom := GlyphR.Top + ImageHeight;
-            LayoutR.Top := GlyphR.Bottom;
-            GlyphR.Left := GlyphR.Left + (GlyphR.Right - GlyphR.Left) div 2 -
-              ImageWidth div 2;
-          end;
-      end;
-      if StyleServices.Available then
-        StyleServices.DrawIcon(Canvas.Handle, Details, GlyphR, Images.Handle,
-          FImageIndex);
+  begin
+    GlyphR := LayoutR;
+    case TabPosition of
+      tpTop, tpBottom:
+        begin
+          GlyphR.Left := GlyphR.Left + ImageStep;
+          GlyphR.Right := GlyphR.Left + ImageWidth;
+          LayoutR.Left := GlyphR.Right;
+          GlyphR.Top := GlyphR.Top + (GlyphR.Bottom - GlyphR.Top) div 2 -
+            ImageHeight div 2;
+          if (TabPosition = tpTop) and (Index = TabIndex) then
+            OffsetRect(GlyphR, 0, -1)
+          else if (TabPosition = tpBottom) and (Index = TabIndex) then
+            OffsetRect(GlyphR, 0, 1);
+        end;
+      tpLeft:
+        begin
+          GlyphR.Bottom := GlyphR.Bottom - ImageStep;
+          GlyphR.Top := GlyphR.Bottom - ImageHeight;
+          LayoutR.Bottom := GlyphR.Top;
+          GlyphR.Left := GlyphR.Left + (GlyphR.Right - GlyphR.Left) div 2 -
+            ImageWidth div 2;
+        end;
+      tpRight:
+        begin
+          GlyphR.Top := GlyphR.Top + ImageStep;
+          GlyphR.Bottom := GlyphR.Top + ImageHeight;
+          LayoutR.Top := GlyphR.Bottom;
+          GlyphR.Left := GlyphR.Left + (GlyphR.Right - GlyphR.Left) div 2 -
+            ImageWidth div 2;
+        end;
     end;
+    if StyleServices.Available then
+      StyleServices.DrawIcon(Canvas.Handle, Details, GlyphR, Images.Handle,
+        FImageIndex);
+  end;
 
   { Text }
   if StyleServices.Available then
-    begin
-      if (TabPosition = tpTop) and (Index = TabIndex) then
-        OffsetRect(LayoutR, 0, -1)
-      else if (TabPosition = tpBottom) and (Index = TabIndex) then
-        OffsetRect(LayoutR, 0, 1);
+  begin
+    if (TabPosition = tpTop) and (Index = TabIndex) then
+      OffsetRect(LayoutR, 0, -1)
+    else if (TabPosition = tpBottom) and (Index = TabIndex) then
+      OffsetRect(LayoutR, 0, 1);
 
-      if TabPosition = tpLeft then
-        begin
-          TX := LayoutR.Left + (LayoutR.Right - LayoutR.Left) div 2 -
-            Canvas.TextHeight(Tabs[Index]) div 2;
-          TY := LayoutR.Top + (LayoutR.Bottom - LayoutR.Top) div 2 +
-            Canvas.TextWidth(Tabs[Index]) div 2;
-          if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor)
-          then
-            Canvas.Font.Color := ThemeTextColor;
-          AngleTextOut(Canvas, 900, TX, TY, Tabs[Index]);
-        end
-      else if TabPosition = tpRight then
-        begin
-          TX := LayoutR.Left + (LayoutR.Right - LayoutR.Left) div 2 +
-            Canvas.TextHeight(Tabs[Index]) div 2;
-          TY := LayoutR.Top + (LayoutR.Bottom - LayoutR.Top) div 2 -
-            Canvas.TextWidth(Tabs[Index]) div 2;
-          if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor)
-          then
-            Canvas.Font.Color := ThemeTextColor;
-          AngleTextOut(Canvas, -900, TX, TY, Tabs[Index]);
-        end
-      else
-        StyleServices.DrawText(Canvas.Handle, Details, Tabs[Index], LayoutR,
-          [tfSingleLine, tfVerticalCenter, tfCenter, tfNoClip]);
-      // DrawControlText(Canvas, Details, Tabs[Index], LayoutR,
-      // DT_VCENTER or DT_CENTER or DT_SINGLELINE or DT_NOCLIP);
-    end;
+    if TabPosition = tpLeft then
+    begin
+      TX := LayoutR.Left + (LayoutR.Right - LayoutR.Left) div 2 -
+        Canvas.TextHeight(Tabs[Index]) div 2;
+      TY := LayoutR.Top + (LayoutR.Bottom - LayoutR.Top) div 2 +
+        Canvas.TextWidth(Tabs[Index]) div 2;
+      if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor)
+      then
+        Canvas.Font.Color := ThemeTextColor;
+      AngleTextOut(Canvas, 900, TX, TY, Tabs[Index]);
+    end
+    else if TabPosition = tpRight then
+    begin
+      TX := LayoutR.Left + (LayoutR.Right - LayoutR.Left) div 2 +
+        Canvas.TextHeight(Tabs[Index]) div 2;
+      TY := LayoutR.Top + (LayoutR.Bottom - LayoutR.Top) div 2 -
+        Canvas.TextWidth(Tabs[Index]) div 2;
+      if StyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor)
+      then
+        Canvas.Font.Color := ThemeTextColor;
+      AngleTextOut(Canvas, -900, TX, TY, Tabs[Index]);
+    end
+    else
+      StyleServices.DrawText(Canvas.Handle, Details, Tabs[Index], LayoutR,
+        [tfSingleLine, tfVerticalCenter, tfCenter, tfNoClip]);
+    // DrawControlText(Canvas, Details, Tabs[Index], LayoutR,
+    // DT_VCENTER or DT_CENTER or DT_SINGLELINE or DT_NOCLIP);
+  end;
 end;
 
 procedure TSysTabControlStyleHook.PaintBackground(Canvas: TCanvas);
@@ -1081,12 +1080,12 @@ function TSysToolbarStyleHook.GetItem(Index: Integer): TSysToolbarButton;
 begin
   Result := nil;
   if (Index > -1) and (index <= Count) then
-    begin
-      if Assigned(FSysToolbarButton) then
-        FreeAndNil(FSysToolbarButton);
-      FSysToolbarButton := TSysToolbarButton.Create(SysControl, Index);
-      Result := FSysToolbarButton;
-    end;
+  begin
+    if Assigned(FSysToolbarButton) then
+      FreeAndNil(FSysToolbarButton);
+    FSysToolbarButton := TSysToolbarButton.Create(SysControl, Index);
+    Result := FSysToolbarButton;
+  end;
 end;
 
 function TSysToolbarStyleHook.GetShowText: Boolean;
@@ -1132,18 +1131,18 @@ var
 begin
   H := SendMessage(Handle, TB_GETIMAGELIST, 0, 0);
   if (H <> 0) and (FImages = nil) then
-    begin
-      FImages := TImageList.Create(nil);
-      FImages.ShareImages := True;
-      FImages.Handle := H;
-    end;
+  begin
+    FImages := TImageList.Create(nil);
+    FImages.ShareImages := True;
+    FImages.Handle := H;
+  end;
   H := SendMessage(Handle, TB_GETDISABLEDIMAGELIST, 0, 0);
   if (H <> 0) and (FDisabledImages = nil) then
-    begin
-      FDisabledImages := TImageList.Create(nil);
-      FDisabledImages.ShareImages := True;
-      FDisabledImages.Handle := H;
-    end;
+  begin
+    FDisabledImages := TImageList.Create(nil);
+    FDisabledImages.ShareImages := True;
+    FDisabledImages.Handle := H;
+  end;
 end;
 
 procedure TSysToolbarStyleHook.Paint(Canvas: TCanvas);
@@ -1168,10 +1167,10 @@ begin
   try
     ApplyImageList;
     if Assigned(FImages) then
-      begin
-        FImages.Masked := True;
-        FImages.BkColor := clNone; { Transparent bitmap }
-      end;
+    begin
+      FImages.Masked := True;
+      FImages.BkColor := clNone; { Transparent bitmap }
+    end;
     ImgRect := Rect(0, 0, 0, 0);
     TxtRect := Rect(0, 0, 0, 0);
     Bmp.SetSize(SysControl.Width, SysControl.Height);
@@ -1186,19 +1185,19 @@ begin
       TxtFlags := DT_NOPREFIX;
 
     if Flat or Transparent then
-      begin
-        { Dont paint the toolbar background => the toolbar is transparent . }
-      end
+    begin
+      { Dont paint the toolbar background => the toolbar is transparent . }
+    end
     else
-      begin
-        { Toolbar is not transparent }
-        LDetails.Element := teToolBar;
-        LDetails.Part := 0;
-        LDetails.State := 0;
-        if StyleServices.HasTransparentParts(LDetails) then
-          StyleServices.DrawParentBackground(Handle, DC, LDetails, False);
-        StyleServices.DrawElement(DC, LDetails, R);
-      end;
+    begin
+      { Toolbar is not transparent }
+      LDetails.Element := teToolBar;
+      LDetails.Part := 0;
+      LDetails.State := 0;
+      if StyleServices.HasTransparentParts(LDetails) then
+        StyleServices.DrawParentBackground(Handle, DC, LDetails, False);
+      StyleServices.DrawElement(DC, LDetails, R);
+    end;
   except
     Bmp.Free;
     Exit;
@@ -1207,178 +1206,172 @@ begin
   try
     { Draw toolbar buttons }
     for i := 0 to Count - 1 do
+    begin
+      if i = Count - 1 then
+        FButtonsPainted := True;
+
+      ItemRect := Items[i].ItemRect;
+      with Items[i] do
       begin
-        if i = Count - 1 then
-          FButtonsPainted := True;
-
-        ItemRect := Items[i].ItemRect;
-        with Items[i] do
-          begin
-            LState := State;
-            LStyle := Style;
-            LText := Text;
-            LImageIndex := ImageIndex;
-            LDropDownWidth := DropDownWidth;
-          end;
-
-        LButtonHot := False;
-        if not(bsHidden in LState) then
-          begin
-            if MouseInControl then
-              begin
-                GetCursorPos(P);
-                ScreenToClient(Handle, P);
-                if ItemRect.Contains(P) then
-                  LButtonHot := True;
-              end;
-
-            if (bsEnabled in LState) then
-              LDetails := StyleServices.GetElementDetails(ttbButtonNormal)
-            else
-              LDetails := StyleServices.GetElementDetails(ttbButtonDisabled);
-            if (LButtonHot) and (bsEnabled in LState) then
-              begin
-                LDetails := StyleServices.GetElementDetails(ttbButtonHot);
-              end;
-            if (bsPressed in LState) and (bsEnabled in LState) then
-              LDetails := StyleServices.GetElementDetails(ttbButtonPressed);
-
-            if bsChecked in LState then
-              LDetails := StyleServices.GetElementDetails(ttbButtonChecked);
-
-            if not(bsSep in LStyle) then
-              begin
-                if Flat then
-                  begin
-                    // Bmp.Canvas.FillRect(ItemRect);
-                    DrawParentBackground(DC, @ItemRect);
-                    if (LButtonHot or (bsPressed in LState) or
-                      (bsChecked in LState)) and (bsEnabled in LState) then
-                      begin
-                        StyleServices.DrawElement(DC, LDetails, ItemRect);
-                      end;
-                  end
-                else
-                  StyleServices.DrawElement(DC, LDetails, ItemRect);
-              end
-            else
-              begin
-                LDetails := StyleServices.GetElementDetails(ttbSeparatorNormal);
-                StyleServices.DrawElement(DC, LDetails, ItemRect);
-              end;
-
-            if not(bsSep in LStyle) then
-              begin
-                R := ItemRect;
-                ImgRect := TRect.Empty;
-                if Assigned(FImages) then
-                  ImgRect := Rect(0, 0, FImages.Width, FImages.Height);
-                ImgRect := CenteredRect(R, ImgRect);
-
-                if bsDropDown in LStyle then
-                  begin
-                    { If button is DropDown then draw the button glyph. }
-                    R := ItemRect;
-                    R := Rect(R.Right - LDropDownWidth, R.Top, R.Right,
-                      R.Bottom);
-                    if bsEnabled in LState then
-                      LDetails := StyleServices.GetElementDetails
-                        (ttbDropDownButtonGlyphNormal)
-                    else
-                      LDetails := StyleServices.GetElementDetails
-                        (ttbDropDownButtonGlyphDisabled);
-                    if (LButtonHot and (bsEnabled in LState)) then
-                      LDetails := StyleServices.GetElementDetails
-                        (ttbDropDownButtonGlyphHot);
-                    if ((bsPressed in LState) and (bsEnabled in LState)) then
-                      LDetails := StyleServices.GetElementDetails
-                        (ttbDropDownButtonGlyphPressed);
-                    StyleServices.DrawElement(DC, LDetails, R);
-
-                    { Adjust bitmap position }
-
-                    if Assigned(FImages) then
-                      ImgRect := Rect(0, 0, FImages.Width, FImages.Height);
-                    R := ItemRect;
-                    R.Right := R.Right - LDropDownWidth;
-                    ImgRect := CenteredRect(R, ImgRect);
-                    inc(ImgRect.Left, 2);
-                  end;
-
-                { Adjust bitmap & Text positions }
-                if Wrapable then
-                  begin
-                    R := Rect(0, 0, 0, 0);
-                    if (ShowText and not List) then
-                      begin
-                        Winapi.Windows.DrawText(DC, LText, -1, R,
-                          DT_CENTER or DT_CALCRECT);
-                      end;
-                    ImgRect.Offset(0, -R.Height);
-                  end
-                else if List then
-                  begin
-                    R := Rect(0, 0, 0, 0);
-                    if ShowText then
-                      begin
-                        Winapi.Windows.DrawText(DC, LText, -1, R,
-                          DT_CENTER or DT_CALCRECT or TxtFlags);
-                      end;
-                    ImgRect := Rect(0, 0, FImages.Width, FImages.Height);
-                    R2 := ItemRect;
-                    dec(R2.Right, R.Width + 2);
-                    ImgRect := CenteredRect(R2, ImgRect);
-                  end;
-
-                { Draw Bitmap }
-                if (LImageIndex > -1) and (Assigned(FImages)) then
-                  begin
-                    if bsEnabled in LState then
-                      FImages.DrawingStyle := Vcl.ImgList.TDrawingStyle.dsNormal
-                    else
-                      FImages.DrawingStyle :=
-                        Vcl.ImgList.TDrawingStyle.dsSelected;
-                    FImages.Draw(Bmp.Canvas, ImgRect.Left, ImgRect.Top,
-                      LImageIndex);
-                  end;
-
-                { Draw Text }
-                TxtRect := Rect(0, 0, 0, 0);
-                if ShowText then
-                  begin
-                    if not List then
-                      begin
-                        { Text appear under the button bitmap }
-                        if (ImgRect.Width > 0) and (LImageIndex > -1) then
-                          TxtRect := Rect(ItemRect.Left, ImgRect.Bottom,
-                            ItemRect.Right, ItemRect.Bottom)
-                        else
-                          TxtRect := ItemRect;
-                        if LText <> '' then
-                          DrawTextCentered(DC, LDetails, TxtRect, LText,
-                            TxtFlags);
-                      end
-                    else
-                      begin
-                        { List }
-                        { Text appear to the right of the button bitmap }
-                        if (ImgRect.Width > 0) and (LImageIndex > -1) then
-                          TxtRect := Rect(ImgRect.Right + 2, ItemRect.Top,
-                            ItemRect.Right, ItemRect.Bottom)
-                        else
-                          TxtRect := ItemRect;
-                        TxtFormat := [tfCenter, tfVerticalCenter,
-                          tfSingleLine, tfLeft];
-                        if TxtFlags <> 0 then
-                          include(TxtFormat, tfNoPrefix);
-                        if LText <> '' then
-                          StyleServices.DrawText(DC, LDetails, LText, TxtRect,
-                            TxtFormat);
-                      end;
-                  end;
-              end;
-          end;
+        LState := State;
+        LStyle := Style;
+        LText := Text;
+        LImageIndex := ImageIndex;
+        LDropDownWidth := DropDownWidth;
       end;
+
+      LButtonHot := False;
+      if not(bsHidden in LState) then
+      begin
+        if MouseInControl then
+        begin
+          GetCursorPos(P);
+          ScreenToClient(Handle, P);
+          if ItemRect.Contains(P) then
+            LButtonHot := True;
+        end;
+
+        if (bsEnabled in LState) then
+          LDetails := StyleServices.GetElementDetails(ttbButtonNormal)
+        else
+          LDetails := StyleServices.GetElementDetails(ttbButtonDisabled);
+        if (LButtonHot) and (bsEnabled in LState) then
+        begin
+          LDetails := StyleServices.GetElementDetails(ttbButtonHot);
+        end;
+        if (bsPressed in LState) and (bsEnabled in LState) then
+          LDetails := StyleServices.GetElementDetails(ttbButtonPressed);
+
+        if bsChecked in LState then
+          LDetails := StyleServices.GetElementDetails(ttbButtonChecked);
+
+        if not(bsSep in LStyle) then
+        begin
+          if Flat then
+          begin
+            // Bmp.Canvas.FillRect(ItemRect);
+            DrawParentBackground(DC, @ItemRect);
+            if (LButtonHot or (bsPressed in LState) or (bsChecked in LState))
+              and (bsEnabled in LState) then
+            begin
+              StyleServices.DrawElement(DC, LDetails, ItemRect);
+            end;
+          end
+          else
+            StyleServices.DrawElement(DC, LDetails, ItemRect);
+        end
+        else
+        begin
+          LDetails := StyleServices.GetElementDetails(ttbSeparatorNormal);
+          StyleServices.DrawElement(DC, LDetails, ItemRect);
+        end;
+
+        if not(bsSep in LStyle) then
+        begin
+          R := ItemRect;
+          ImgRect := TRect.Empty;
+          if Assigned(FImages) then
+            ImgRect := Rect(0, 0, FImages.Width, FImages.Height);
+          ImgRect := CenteredRect(R, ImgRect);
+
+          if bsDropDown in LStyle then
+          begin
+            { If button is DropDown then draw the button glyph. }
+            R := ItemRect;
+            R := Rect(R.Right - LDropDownWidth, R.Top, R.Right, R.Bottom);
+            if bsEnabled in LState then
+              LDetails := StyleServices.GetElementDetails
+                (ttbDropDownButtonGlyphNormal)
+            else
+              LDetails := StyleServices.GetElementDetails
+                (ttbDropDownButtonGlyphDisabled);
+            if (LButtonHot and (bsEnabled in LState)) then
+              LDetails := StyleServices.GetElementDetails
+                (ttbDropDownButtonGlyphHot);
+            if ((bsPressed in LState) and (bsEnabled in LState)) then
+              LDetails := StyleServices.GetElementDetails
+                (ttbDropDownButtonGlyphPressed);
+            StyleServices.DrawElement(DC, LDetails, R);
+
+            { Adjust bitmap position }
+
+            if Assigned(FImages) then
+              ImgRect := Rect(0, 0, FImages.Width, FImages.Height);
+            R := ItemRect;
+            R.Right := R.Right - LDropDownWidth;
+            ImgRect := CenteredRect(R, ImgRect);
+            inc(ImgRect.Left, 2);
+          end;
+
+          { Adjust bitmap & Text positions }
+          if Wrapable then
+          begin
+            R := Rect(0, 0, 0, 0);
+            if (ShowText and not List) then
+            begin
+              Winapi.Windows.DrawText(DC, LText, -1, R,
+                DT_CENTER or DT_CALCRECT);
+            end;
+            ImgRect.Offset(0, -R.Height);
+          end
+          else if List then
+          begin
+            R := Rect(0, 0, 0, 0);
+            if ShowText then
+            begin
+              Winapi.Windows.DrawText(DC, LText, -1, R,
+                DT_CENTER or DT_CALCRECT or TxtFlags);
+            end;
+            ImgRect := Rect(0, 0, FImages.Width, FImages.Height);
+            R2 := ItemRect;
+            dec(R2.Right, R.Width + 2);
+            ImgRect := CenteredRect(R2, ImgRect);
+          end;
+
+          { Draw Bitmap }
+          if (LImageIndex > -1) and (Assigned(FImages)) then
+          begin
+            if bsEnabled in LState then
+              FImages.DrawingStyle := Vcl.ImgList.TDrawingStyle.dsNormal
+            else
+              FImages.DrawingStyle := Vcl.ImgList.TDrawingStyle.dsSelected;
+            FImages.Draw(Bmp.Canvas, ImgRect.Left, ImgRect.Top, LImageIndex);
+          end;
+
+          { Draw Text }
+          TxtRect := Rect(0, 0, 0, 0);
+          if ShowText then
+          begin
+            if not List then
+            begin
+              { Text appear under the button bitmap }
+              if (ImgRect.Width > 0) and (LImageIndex > -1) then
+                TxtRect := Rect(ItemRect.Left, ImgRect.Bottom, ItemRect.Right,
+                  ItemRect.Bottom)
+              else
+                TxtRect := ItemRect;
+              if LText <> '' then
+                DrawTextCentered(DC, LDetails, TxtRect, LText, TxtFlags);
+            end
+            else
+            begin
+              { List }
+              { Text appear to the right of the button bitmap }
+              if (ImgRect.Width > 0) and (LImageIndex > -1) then
+                TxtRect := Rect(ImgRect.Right + 2, ItemRect.Top, ItemRect.Right,
+                  ItemRect.Bottom)
+              else
+                TxtRect := ItemRect;
+              TxtFormat := [tfCenter, tfVerticalCenter, tfSingleLine, tfLeft];
+              if TxtFlags <> 0 then
+                include(TxtFormat, tfNoPrefix);
+              if LText <> '' then
+                StyleServices.DrawText(DC, LDetails, LText, TxtRect, TxtFormat);
+            end;
+          end;
+        end;
+      end;
+    end;
     Canvas.Draw(0, 0, Bmp);
   finally
     Bmp.Free;
@@ -1444,33 +1437,33 @@ begin
   FText := String(Buffer);
   FImageIndex := BtnInfo.iImage;
   with BtnInfo do
-    begin
-      { Button State }
-      if fsState and TBSTATE_ENABLED = TBSTATE_ENABLED then
-        include(FState, bsEnabled);
-      if fsState and TBSTATE_PRESSED = TBSTATE_PRESSED then
-        include(FState, bsPressed);
-      if fsState and TBSTATE_CHECKED = TBSTATE_CHECKED then
-        include(FState, bsChecked);
-      if fsState and TBSTATE_HIDDEN = TBSTATE_HIDDEN then
-        include(FState, bsHidden);
+  begin
+    { Button State }
+    if fsState and TBSTATE_ENABLED = TBSTATE_ENABLED then
+      include(FState, bsEnabled);
+    if fsState and TBSTATE_PRESSED = TBSTATE_PRESSED then
+      include(FState, bsPressed);
+    if fsState and TBSTATE_CHECKED = TBSTATE_CHECKED then
+      include(FState, bsChecked);
+    if fsState and TBSTATE_HIDDEN = TBSTATE_HIDDEN then
+      include(FState, bsHidden);
 
-      { Button Style }
-      if fsStyle and TBSTYLE_BUTTON = TBSTYLE_BUTTON then
-        include(FStyle, bsBtn);
-      if fsStyle and TBSTYLE_SEP = TBSTYLE_SEP then
-        include(FStyle, bsSep);
-      if fsStyle and TBSTYLE_CHECK = TBSTYLE_CHECK then
-        include(FStyle, bsCheck);
-      if fsStyle and TBSTYLE_GROUP = TBSTYLE_GROUP then
-        include(FStyle, bsGroup);
-      if fsStyle and TBSTYLE_CHECKGROUP = TBSTYLE_CHECKGROUP then
-        include(FStyle, bsCheckGroup);
-      if (fsStyle and TBSTYLE_DROPDOWN = TBSTYLE_DROPDOWN) or
-        (fsStyle and BTNS_WHOLEDROPDOWN = BTNS_WHOLEDROPDOWN) then
-        include(FStyle, bsDropDown);
+    { Button Style }
+    if fsStyle and TBSTYLE_BUTTON = TBSTYLE_BUTTON then
+      include(FStyle, bsBtn);
+    if fsStyle and TBSTYLE_SEP = TBSTYLE_SEP then
+      include(FStyle, bsSep);
+    if fsStyle and TBSTYLE_CHECK = TBSTYLE_CHECK then
+      include(FStyle, bsCheck);
+    if fsStyle and TBSTYLE_GROUP = TBSTYLE_GROUP then
+      include(FStyle, bsGroup);
+    if fsStyle and TBSTYLE_CHECKGROUP = TBSTYLE_CHECKGROUP then
+      include(FStyle, bsCheckGroup);
+    if (fsStyle and TBSTYLE_DROPDOWN = TBSTYLE_DROPDOWN) or
+      (fsStyle and BTNS_WHOLEDROPDOWN = BTNS_WHOLEDROPDOWN) then
+      include(FStyle, bsDropDown);
 
-    end;
+  end;
 
 end;
 
@@ -1494,25 +1487,23 @@ begin
 end;
 
 {$ENDREGION}
-
-
 { TSysProgressBarStyleHook }
 
 constructor TSysProgressBarStyleHook.Create(AHandle: THandle);
 begin
   inherited;
-  if (SysControl.Style And PBS_VERTICAL)<>0 then
-    FOrientation:=pbVertical
+  if (SysControl.Style And PBS_VERTICAL) <> 0 then
+    FOrientation := pbVertical
   else
-    FOrientation:=pbHorizontal;
+    FOrientation := pbHorizontal;
 
   OverridePaint := True;
-  FStep:=0;
+  FStep := 0;
   FTimer := TTimer.Create(nil);
   FTimer.Interval := 100;
-  if ((SysControl.Style And PBS_MARQUEE)<>0)  then
-   FTimer.OnTimer := TimerAction;
-  FTimer.Enabled := ((GetWindowLong(AHandle, GWL_STYLE) And PBS_MARQUEE)<>0);
+  if ((SysControl.Style And PBS_MARQUEE) <> 0) then
+    FTimer.OnTimer := TimerAction;
+  FTimer.Enabled := ((GetWindowLong(AHandle, GWL_STYLE) And PBS_MARQUEE) <> 0);
 end;
 
 destructor TSysProgressBarStyleHook.Destroy;
@@ -1537,7 +1528,6 @@ begin
   Result := SendMessage(Handle, PBM_GetRange, 0, 0);
 end;
 
-
 function TSysProgressBarStyleHook.GetMin: Integer;
 begin
   Result := SendMessage(Handle, PBM_GetRange, 1, 0);
@@ -1546,10 +1536,10 @@ end;
 function TSysProgressBarStyleHook.GetOrientation: TProgressBarOrientation;
 begin
   Result := pbHorizontal;
-  if (Handle <> 0) and (GetWindowLong(Handle, GWL_STYLE) and PBS_VERTICAL = PBS_VERTICAL) then
+  if (Handle <> 0) and (GetWindowLong(Handle, GWL_STYLE) and
+    PBS_VERTICAL = PBS_VERTICAL) then
     Result := pbVertical;
 end;
-
 
 function TSysProgressBarStyleHook.GetPercent: Single;
 var
@@ -1558,7 +1548,8 @@ begin
   LMin := Min;
   LMax := Max;
   LPos := Position;
-  if (LMin >= 0) and (LPos >= LMin) and (LMax >= LPos) and (LMax - LMin <> 0) then
+  if (LMin >= 0) and (LPos >= LMin) and (LMax >= LPos) and (LMax - LMin <> 0)
+  then
     Result := (LPos - LMin) / (LMax - LMin)
   else
     Result := 0;
@@ -1591,32 +1582,32 @@ var
 begin
   LRect := BarRect;
 
-  if ((SysControl.Style And PBS_MARQUEE)<>0)  then
+  if ((SysControl.Style And PBS_MARQUEE) <> 0) then
   begin
-      InflateRect(LRect, -2, -2);
-      if Orientation = pbHorizontal then
-        LWidth := LRect.Width
-      else
-        LWidth := LRect.Height;
+    InflateRect(LRect, -2, -2);
+    if Orientation = pbHorizontal then
+      LWidth := LRect.Width
+    else
+      LWidth := LRect.Height;
 
-      LPos := Round(LWidth * 0.05);
-      FillR := LRect;
-      if Orientation = pbHorizontal then
-      begin
-        FillR.Right := FillR.Left + LPos;
-        LDetails := StyleServices.GetElementDetails(tpChunk);
-      end
-      else
-      begin
-        FillR.Top := FillR.Bottom - LPos;
-        LDetails := StyleServices.GetElementDetails(tpChunkVert);
-      end;
+    LPos := Round(LWidth * 0.05);
+    FillR := LRect;
+    if Orientation = pbHorizontal then
+    begin
+      FillR.Right := FillR.Left + LPos;
+      LDetails := StyleServices.GetElementDetails(tpChunk);
+    end
+    else
+    begin
+      FillR.Top := FillR.Bottom - LPos;
+      LDetails := StyleServices.GetElementDetails(tpChunkVert);
+    end;
 
-      FillR.SetLocation(FStep*FillR.Width, FillR.Top);
-      StyleServices.DrawElement(Canvas.Handle, LDetails, FillR);
-//    Inc(FStep,1);
-//    if FStep mod 20=0 then
-//     FStep:=0;
+    FillR.SetLocation(FStep * FillR.Width, FillR.Top);
+    StyleServices.DrawElement(Canvas.Handle, LDetails, FillR);
+    // Inc(FStep,1);
+    // if FStep mod 20=0 then
+    // FStep:=0;
   end
   else
   begin
@@ -1646,7 +1637,8 @@ var
   R: TRect;
   Details: TThemedElementDetails;
 begin
-  if not StyleServices.Available then Exit;
+  if not StyleServices.Available then
+    Exit;
   R := BarRect;
   if Orientation = pbHorizontal then
     Details := StyleServices.GetElementDetails(tpBar)
@@ -1659,7 +1651,7 @@ procedure TSysProgressBarStyleHook.TimerAction(Sender: TObject);
 var
   LCanvas: TCanvas;
 begin
-  if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE)<>0)  then
+  if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
   begin
     LCanvas := TCanvas.Create;
     try
@@ -1671,9 +1663,9 @@ begin
         PaintBar(LCanvas);
       end;
 
-      Inc(FStep,1);
-      if FStep mod 20=0 then
-       FStep:=0;
+      inc(FStep, 1);
+      if FStep mod 20 = 0 then
+        FStep := 0;
 
     finally
       ReleaseDC(Handle, LCanvas.Handle);
@@ -1682,7 +1674,7 @@ begin
     end;
   end
   else
-  FTimer.Enabled := False;
+    FTimer.Enabled := False;
 end;
 
 procedure TSysProgressBarStyleHook.WMNCCalcSize(var Message: TWMNCCalcSize);
@@ -1759,37 +1751,36 @@ end;
 
 procedure TSysRichEditStyleHook.WndProc(var Message: TMessage);
 begin
-  // AddToLog(Message);
   inherited;
 end;
 
 initialization
 
 if StyleServices.Available then
+begin
+  with TSysStyleManager do
   begin
-    with TSysStyleManager do
-      begin
-        RegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-        RegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-        RegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-        RegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-        RegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
-        RegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
-        RegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
-      end;
+    RegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
+    RegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
+    RegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
+    RegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
+    RegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
+    RegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
   end;
+end;
 
 finalization
 
 with TSysStyleManager do
-  begin
-    UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-    UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-    UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-    UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-    UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
-    UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
-    UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
-  end;
+begin
+  UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
+  UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
+  UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
+  UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
+  UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
+  UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+end;
 
 end.
