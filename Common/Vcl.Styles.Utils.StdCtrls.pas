@@ -36,6 +36,7 @@ uses
   Vcl.StdCtrls,
   Vcl.Styles.Utils.Forms,
   Vcl.GraphUtil,
+  Vcl.Dialogs,
   Vcl.Controls;
 
 const
@@ -193,14 +194,17 @@ type
     FUpdatedColor: TColor;
     function GetIsText: Boolean;
     function GetTextFormat: TTextFormat;
+    function GetIsFrameOrLine: Boolean;
   protected
     procedure Paint(Canvas: TCanvas); override;
+    procedure PaintNC(Canvas: TCanvas); override;
     procedure UpdateColors; override;
     procedure WndProc(var Message: TMessage); override;
   public
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
     property IsText: Boolean read GetIsText;
+    property IsFrameOrLine: Boolean read GetIsFrameOrLine;
     property TextFormat: TTextFormat read GetTextFormat;
   end;
 
@@ -237,8 +241,15 @@ type
 implementation
 
 uses
+  //IOUTILS,
+  Vcl.ExtCtrls,
   System.UITypes,
   Vcl.Styles.Utils.SysControls;
+
+procedure Addlog(const msg : string);
+begin
+   //TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+end;
 
 { TSysEditStyleHook }
 
@@ -758,7 +769,6 @@ end;
 
 procedure TSysButtonStyleHook.PaintNC(Canvas: TCanvas);
 begin
-  // inherited;
   if GroupBox then
     PaintGroupBox(Canvas);
 end;
@@ -806,7 +816,6 @@ end;
 
 procedure TSysButtonStyleHook.WndProc(var Message: TMessage);
 begin
-  // AddToLog(Message);
   case Message.Msg of
     WM_ENABLE:
       begin
@@ -2229,14 +2238,24 @@ begin
   StyleElements := [seFont, seClient];
 {$ELSE}
   OverridePaint := True;
+  OverridePaintNC :=True;
   OverrideFont := True;
 {$IFEND}
   UpdateColors;
+  Addlog('TSysStaticStyleHook '+ IntToHex(AHandle, 8));
 end;
 
 destructor TSysStaticStyleHook.Destroy;
 begin
   inherited;
+end;
+
+function TSysStaticStyleHook.GetIsFrameOrLine: Boolean;
+begin
+  with SysControl do
+    Result := (Style and SS_ETCHEDFRAME = SS_ETCHEDFRAME) or
+              (Style and SS_ETCHEDHORZ = SS_ETCHEDHORZ)  or
+              (Style and SS_ETCHEDVERT = SS_ETCHEDVERT);
 end;
 
 function TSysStaticStyleHook.GetIsText: Boolean;
@@ -2293,9 +2312,42 @@ var
   LDetails: TThemedElementDetails;
   LRect: TRect;
 begin
-  LDetails := StyleServices.GetElementDetails(States[SysControl.Enabled]);
   LRect := SysControl.ClientRect;
+  if GetBkMode(Canvas.Handle) = TRANSPARENT then
+  begin
+    LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
+    StyleServices.DrawParentBackground(Handle, Canvas.Handle, LDetails, False);
+    Canvas.Brush.Style := bsClear;
+  end
+  else
+  begin
+    Canvas.Brush.Color := StyleServices.GetStyleColor(scWindow);
+    Canvas.FillRect(LRect);
+  end;
+
+  LDetails := StyleServices.GetElementDetails(States[SysControl.Enabled]);
   DrawText(Canvas.Handle, LDetails, SysControl.Text, LRect, TextFormat);
+end;
+
+procedure TSysStaticStyleHook.PaintNC(Canvas: TCanvas);
+var
+  LRect: TRect;
+  LBitMap : TBitmap;
+begin
+   if IsFrameOrLine then
+   begin
+      LRect := Rect(0, 0, SysControl.Width, SysControl.Height);
+      LBitMap := TBitMap.Create;
+      try
+        LBitMap.Width := LRect.Width;
+        LBitMap.Height := LRect.Height;
+        Frame3D(LBitMap.Canvas, LRect, StyleServices.ColorToRGB(clBtnShadow), StyleServices.ColorToRGB(clBtnHighLight), 1);
+        ExcludeClipRect(Canvas.Handle, 1, 1, SysControl.Width - 1, SysControl.Height - 1);
+        Canvas.Draw(0, 0, LBitMap);
+      finally
+        LBitMap.Free;
+      end;
+   end;
 end;
 
 procedure TSysStaticStyleHook.UpdateColors;
@@ -2310,18 +2362,29 @@ end;
 
 procedure TSysStaticStyleHook.WndProc(var Message: TMessage);
 begin
+  Addlog(Format('TSysStaticStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
   case Message.Msg of
+    WM_ENABLE :  if SysControl.Visible then
+                   Invalidate;
+
     WM_PAINT:
       begin
         if OverridePaint and StyleServicesEnabled then
         begin
-          if IsText and (Length(SysControl.Text) > 0) then
+          if (IsText and (Length(SysControl.Text) > 0)) then
             inherited
           else
+          begin
+            //Addlog('CallDefaultProc 1');
             CallDefaultProc(Message);
+          end;
         end
         else
+        begin
+          //Addlog('CallDefaultProc 2');
           CallDefaultProc(Message);
+        end;
+
       end;
   else
     inherited;

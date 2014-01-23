@@ -878,7 +878,7 @@ var
   Parent: HWND;
   Style, ParentStyle, ExStyle, ParentExStyle: NativeInt;
   Info: TControlInfo;
-  W: NativeInt;
+
   procedure AddChildControl(Handle: HWND);
   var
     Info: TChildControlInfo;

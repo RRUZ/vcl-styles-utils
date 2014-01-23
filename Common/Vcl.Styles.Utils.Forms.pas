@@ -2488,8 +2488,6 @@ begin
 end;
 
 procedure TSysScrollingStyleHook.WndProc(var Message: TMessage);
-var
-  NewInfo: TScrollInfo;
 begin
   case Message.msg of
 
