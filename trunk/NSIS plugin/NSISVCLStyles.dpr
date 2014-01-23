@@ -13,9 +13,11 @@
 //
 // The Original Code is  NSISVCLStyles.dpr
 //
-// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// The Initial Developer of the Original Code is Rodrigo Ruz V. 
 //
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Safsafi Mahdi [SMP3]   e-mail SMP@LIVE.FR
+//
 // All Rights Reserved.
 //
 //**************************************************************************************************

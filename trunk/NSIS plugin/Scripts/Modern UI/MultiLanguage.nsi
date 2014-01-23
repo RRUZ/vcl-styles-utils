@@ -136,13 +136,7 @@ SectionEnd
 ;--------------------------------
 ;Installer Functions
 
-Function .onInit
-  SetOutPath $TEMP
-  File /oname=Amakrits.vsf "..\..\Styles\Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
-  Delete $TEMP\Amakrits.vsf
-  !insertmacro MUI_LANGDLL_DISPLAY
-FunctionEnd
+
 
 ;--------------------------------
 ;Descriptions
@@ -177,4 +171,12 @@ Function un.onInit
 
   !insertmacro MUI_UNGETLANGUAGE
   
+FunctionEnd
+
+Function .onInit
+  SetOutPath $TEMP
+  File /oname=Amakrits.vsf "..\..\Styles\Amakrits.vsf"
+  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
+  Delete $TEMP\Amakrits.vsf  
+  !insertmacro MUI_LANGDLL_DISPLAY
 FunctionEnd

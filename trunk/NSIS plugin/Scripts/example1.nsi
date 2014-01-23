@@ -19,7 +19,7 @@ InstallDir $DESKTOP\Example1
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel user
-
+SetCompressor lzma
 ;--------------------------------
 
 ; Pages
