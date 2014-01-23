@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{47B51DE4-40FC-4E6F-A398-70073289355C}</ProjectGuid>
 			<ProjectVersion>13.4</ProjectVersion>
-			<FrameworkType>None</FrameworkType>
+			<FrameworkType>VCL</FrameworkType>
 			<MainSource>NSISVCLStyles.dpr</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Release</Config>
@@ -47,7 +47,7 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_UsePackage>bindcompfmx;fmx;rtl;dbrtl;IndySystem;DbxClientDriver;bindcomp;inetdb;DBXInterBaseDriver;DataSnapClient;DataSnapCommon;DataSnapServer;DataSnapProviderClient;xmlrtl;DbxCommonDriver;IndyProtocols;DBXMySQLDriver;dbxcds;soaprtl;bindengine;DBXOracleDriver;CustomIPTransport;dsnap;DBXInformixDriver;fmxase;IndyCore;DBXFirebirdDriver;inet;fmxobj;inetdbxpress;DBXSybaseASADriver;fmxdae;IPIndyImpl;dbexpress;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
-			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
+			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<GenDll>true</GenDll>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
 			<DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
@@ -101,6 +101,9 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ScreenTips.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.StdCtrls.pas"/>
+			<DCCReference Include="Vcl.Styles.NSIS.pas"/>
+			<DCCReference Include="..\Common\KOLDetours.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
