@@ -784,8 +784,10 @@ end;
 
 function TSysStyleHook.StyleServicesEnabled: Boolean;
 begin
-  Result := (StyleServices.Available) and not(StyleServices.IsSystemStyle) and
-    (FindControl(Handle) = nil);
+  Result := (StyleServices.Available) and not(StyleServices.IsSystemStyle);
+  if Result then
+    if not TSysStyleManager.HookVclControls then
+      Result := not(IsVCLControl(Handle));
 end;
 
 procedure TSysStyleHook.UpdateColors;

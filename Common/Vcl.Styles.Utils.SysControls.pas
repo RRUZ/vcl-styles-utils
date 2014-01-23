@@ -19,7 +19,7 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
-{.$DEFINE EventLog}
+{ .$DEFINE EventLog }
 
 interface
 
@@ -837,9 +837,14 @@ begin
   { NB: The ClassName is always in lowercase . }
   LInfo := Info^;
   Result := True;
+  Root := GetAncestor(LInfo.Parent, GA_ROOT);
+  if FindWinFromRoot(Root, 'DirectUIHWND') > 0 then
+  begin
+    Result := False;
+    Exit;
+  end;
   if SameText(LInfo.ClassName, 'ToolBarWindow32') then
   begin
-    Root := GetAncestor(LInfo.Parent, GA_ROOT);
     if Root > 0 then
     begin
       C := FindWinFromRoot(Root, 'ReBarWindow32');
@@ -982,7 +987,7 @@ begin
       else
         { Not (WS_CHILD or WS_POPUP) !! }
         AddControl(wParam);
-     
+
     end;
 
     if nCode = HCBT_DESTROYWND then
