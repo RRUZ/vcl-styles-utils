@@ -3,13 +3,18 @@
 
 = Introduction =
 
-The _NSISVCLStyles_ plugin (dll) allow you skin the installers created by <a href="http://nsis.sourceforge.net/Main_Page">NSIS</a>. The size of the plugin is about 1.6 mb, but when is included (and compressed) in the script only add ~550 Kb to the final installer. 
+https://dl.dropboxusercontent.com/u/12733424/Blog/NSIS%20Images/Main.png
+
+The _NSISVCLStyles_ plugin (dll) allow you skin the installers created by <a href="http://nsis.sourceforge.net/Main_Page">NSIS</a> (2.46 and 3.0). The size of the plugin is about 1.6 mb, but when is included (and compressed) in the script only add ~550 Kb to the final installer. 
 
 
 = Installation =
 
 The installer for the plugin includes 30+ VCL Styles and samples NSIS scripts. To install just follow the installer instructions.
 
+https://dl.dropboxusercontent.com/u/12733424/Blog/NSIS%20Images/Installer/1.png
+
+https://dl.dropboxusercontent.com/u/12733424/Blog/NSIS%20Images/Installer/2.png
 
 = Sample Script=
 
