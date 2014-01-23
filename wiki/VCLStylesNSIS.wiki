@@ -1,0 +1,40 @@
+#summary VCL Styles plugin for NSIS
+
+
+= Introduction =
+
+The _NSISVCLStyles_ plugin (dll) allow you skin the installers created by <a href="http://nsis.sourceforge.net/Main_Page">NSIS</a>. The size of the plugin is about 1.6 mb, but when is included (and compressed) in the script only add ~550 Kb to the final installer. 
+
+
+= Installation =
+
+The installer for the plugin includes 30+ VCL Styles and samples NSIS scripts. To install just follow the installer instructions.
+
+
+= Sample Script=
+
+  To use the plugin in a NSIS installer you must call the  _LoadVCLStyleA_ function passing the skin name in the _.onInit_ function.
+
+
+{{{
+Function .onInit
+  SetOutPath $TEMP
+  ;Get the skin file to use
+  File /oname=Amakrits.vsf "..\Styles\Amakrits.vsf" 
+  ;Load the skin using the LoadVCLStyleA function 
+  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
+  ;remove the used skin
+  Delete $TEMP\Amakrits.vsf
+FunctionEnd
+
+}}}
+
+  To use the plugin in a NSIS Uninstaller you must call the  _LoadVCLStyleA_ function passing the skin name in the _un.onInit_ function.
+
+{{{
+Function un.onInit
+ SetOutPath $TEMP
+ File /oname=Amakrits.vsf "..\Styles\Amakrits.vsf"
+ NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
+FunctionEnd
+}}}
