@@ -1,12 +1,13 @@
+  
   !include "MUI2.nsh"
   !addplugindir "Win32\Release" 
 ;--------------------------------
 ;General
-
+  ;SetCompressor lzma
+  ;!insertmacro MUI_LANGUAGE "English"
   ;Name and file
   Name "VCL Styles for NSIS"
-  OutFile "Output\NSISVCLStyles.exe"
-  SetCompressor lzma
+  OutFile "Output\NSISVCLStyles.exe"  
   InstallDir "$PROGRAMFILES\The Road To Delphi\NSISVCLStyles"
   InstallDirRegKey HKCU "Software\NSISVCLStyles" ""
   RequestExecutionLevel admin
@@ -16,6 +17,8 @@
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "The Road To Delphi"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${_VERSION}"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "InternalName" "NSISVCLStyles.exe"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "VCL Styles for NSIS"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "MPL 1.1"  
 ;--------------------------------
 ;Interface Settings
 
