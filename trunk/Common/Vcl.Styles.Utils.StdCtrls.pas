@@ -170,7 +170,6 @@ type
   strict protected
     procedure UpdateColors; override;
     function IsChildHandle(AHandle: HWnd): Boolean; override;
-    // function AcceptMessage(var Message: TMessage): Boolean; override;
     procedure DrawItem(Canvas: TCanvas; Index: UINT; const R: TRect;
       Selected: Boolean); virtual;
     procedure HookListBox(AListHandle: HWnd);
@@ -946,11 +945,6 @@ begin
     ListBoxStopTimer;
   inherited;
 end;
-
-// function TSysComboBoxStyleHook.AcceptMessage(var Message: TMessage): Boolean;
-// begin
-// Result := seBorder in Control.StyleElements;
-// end;
 
 procedure TSysComboBoxStyleHook.CNCommand(var Message: TWMCommand);
 begin
@@ -2235,7 +2229,7 @@ begin
   FUpdatedColor := 0;
 
 {$IF CompilerVersion > 23}
-  StyleElements := [seFont, seClient];
+  StyleElements := [seFont, seBorder, seClient];
 {$ELSE}
   OverridePaint := True;
   OverridePaintNC :=True;
@@ -2362,7 +2356,7 @@ end;
 
 procedure TSysStaticStyleHook.WndProc(var Message: TMessage);
 begin
-  Addlog(Format('TSysStaticStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
+  //Addlog(Format('TSysStaticStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
   case Message.Msg of
     WM_ENABLE :  if SysControl.Visible then
                    Invalidate;

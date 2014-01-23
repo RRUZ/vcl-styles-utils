@@ -19,7 +19,7 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
-{$DEFINE EventLog}
+{.$DEFINE EventLog}
 
 interface
 
@@ -837,7 +837,7 @@ begin
   { NB: The ClassName is always in lowercase . }
   LInfo := Info^;
   Result := True;
-  if LInfo.ClassName = 'toolbarwindow32' then
+  if SameText(LInfo.ClassName, 'ToolBarWindow32') then
   begin
     Root := GetAncestor(LInfo.Parent, GA_ROOT);
     if Root > 0 then
