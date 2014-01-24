@@ -85,8 +85,9 @@ Section
 SectionEnd
 
 Function .onInit
-  SetOutPath $TEMP
-  File /oname=AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\AmethystKamri.vsf
-  Delete $TEMP\AmethystKamri.vsf
+   InitPluginsDir
+   ;Get the skin file to use
+   File /oname=$PLUGINSDIR\AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
+   ;Load the skin using the LoadVCLStyleA function
+   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\AmethystKamri.vsf 
 FunctionEnd

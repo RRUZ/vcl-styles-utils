@@ -90,8 +90,9 @@ Section "Uninstall"
 SectionEnd
 
 Function .onInit
-  SetOutPath $TEMP
-  File /oname=SmokeyQuartzKamri.vsf "..\..\Styles\SmokeyQuartzKamri.vsf"
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\SmokeyQuartzKamri.vsf
-  Delete $TEMP\SmokeyQuartzKamri.vsf
+   InitPluginsDir
+   ;Get the skin file to use
+   File /oname=$PLUGINSDIR\SmokeyQuartzKamri.vsf "..\..\Styles\SmokeyQuartzKamri.vsf"
+   ;Load the skin using the LoadVCLStyleA function
+   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\SmokeyQuartzKamri.vsf   
 FunctionEnd

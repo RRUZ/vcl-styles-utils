@@ -92,8 +92,9 @@ Section "Uninstall"
 SectionEnd
 
 Function .onInit
-  SetOutPath $TEMP
-  File /oname=Amakrits.vsf "..\..\Styles\Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
-  Delete $TEMP\Amakrits.vsf
+   InitPluginsDir
+   ;Get the skin file to use
+   File /oname=$PLUGINSDIR\Amakrits.vsf "..\..\Styles\Amakrits.vsf"
+   ;Load the skin using the LoadVCLStyleA function
+   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\Amakrits.vsf  
 FunctionEnd

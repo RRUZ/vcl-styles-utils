@@ -25,10 +25,11 @@ Var FREESPACE
 Var HEADLINE_FONT
 
 Function .onInit
-  SetOutPath $TEMP
-  File /oname=Amakrits.vsf "..\..\Styles\Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
-  Delete $TEMP\Amakrits.vsf
+   InitPluginsDir
+   ;Get the skin file to use
+   File /oname=$PLUGINSDIR\AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
+   ;Load the skin using the LoadVCLStyleA function
+   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\AmethystKamri.vsf 
   
 	CreateFont $HEADLINE_FONT "$(^Font)" "14" "700"
 
