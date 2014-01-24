@@ -18,29 +18,53 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/NSIS%20VCL%20Styles/NSIS%20Ima
 
 = Sample Script=
 
-  To use the plugin in a NSIS installer you must call the  _LoadVCLStyleA_ function passing the skin name in the _.onInit_ function.
+  To use the plugin in a NSIS installer you must call the  _LoadVCLStyleA_ function for ANSI versions scripts and _LoadVCLStyleW_ for UNICODE scripts, passing the skin name in the _.onInit_ function.
 
 
 {{{
+;ANSI sample
 Function .onInit
   InitPluginsDir
   ;Get the skin file to use
   File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  ;Load the skin using the LoadVCLStyleA function
+  ;Load the skin using the LoadVCLStyleA ANSI function 
   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\Amakrits.vsf
 FunctionEnd
 }}}
 
-  To use the plugin in a NSIS Uninstaller you must call the  _LoadVCLStyleA_ function passing the skin name in the _un.onInit_ function.
+{{{
+;UNICODE sample
+Function .onInit
+  InitPluginsDir
+  ;Get the skin file to use
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;Load the skin using the LoadVCLStyleW UNICODE function 
+  NSISVCLStyles::LoadVCLStyleW $PLUGINSDIR\Amakrits.vsf
+FunctionEnd
+}}}
+
+  To use the plugin in a NSIS Uninstaller you must call the  _LoadVCLStyleA_ function for ANSI versions scripts and _LoadVCLStyleW_ for UNICODE scripts passing the skin name in the _un.onInit_ function.
 
 {{{
+;ANSI sample
 Function un.onInit
   InitPluginsDir
   File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;Load the skin using the LoadVCLStyleA ANSI function 
   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\Amakrits.vsf
+FunctionEnd
+}}}
+
+{{{
+;UNICODE sample
+Function un.onInit
+  InitPluginsDir
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;Load the skin using the LoadVCLStyleW UNICODE function 
+  NSISVCLStyles::LoadVCLStyleW $PLUGINSDIR\Amakrits.vsf
 FunctionEnd
 }}}
 
 = Installer =
 
- Download the installer of the plugin from <a href="http://goo.gl/Ab55qH">here</a>. The current version of the plugin is 1.0.0.3
+ Download the installer of the plugin from <a href="http://goo.gl/Ab55qH">here</a>. The current version of the plugin is 1.0.0.4
