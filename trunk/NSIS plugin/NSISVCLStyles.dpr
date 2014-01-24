@@ -44,114 +44,34 @@ uses
   Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas',
   Vcl.Styles.NSIS in 'Vcl.Styles.NSIS.pas',
   KOLDetours in '..\Common\KOLDetours.pas',
-  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas';
+  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  nsis in 'nsis.pas';
 
-//NSIS Scripting Reference
+  //NSIS Scripting Reference
   //http://nsis.sourceforge.net/Docs/Chapter4.html
 {$R *.res}
 
-type
-  VarConstants = (
-    INST_0,       // $0
-    INST_1,       // $1
-    INST_2,       // $2
-    INST_3,       // $3
-    INST_4,       // $4
-    INST_5,       // $5
-    INST_6,       // $6
-    INST_7,       // $7
-    INST_8,       // $8
-    INST_9,       // $9
-    INST_R0,      // $R0
-    INST_R1,      // $R1
-    INST_R2,      // $R2
-    INST_R3,      // $R3
-    INST_R4,      // $R4
-    INST_R5,      // $R5
-    INST_R6,      // $R6
-    INST_R7,      // $R7
-    INST_R8,      // $R8
-    INST_R9,      // $R9
-    INST_CMDLINE, // $CMDLINE
-    INST_INSTDIR, // $INSTDIR
-    INST_OUTDIR,  // $OUTDIR
-    INST_EXEDIR,  // $EXEDIR
-    INST_LANG,    // $LANGUAGE
-    __INST_LAST
-    );
-  TVariableList = INST_0..__INST_LAST;
-  pstack_t = ^stack_t;
-  stack_t = record
-    next: pstack_t;
-    text: PAnsiChar;
-  end;
 
 var
-  g_stringsize: integer;
-  g_stacktop: ^pstack_t;
-  g_variables: PAnsiChar;
-  g_hwndParent: HWND;
+ _NSISCallBack: TRegisterPluginCallback;
 
-procedure Init(const hwndParent: HWND; const string_size: integer; const variables: PAnsiChar; const stacktop: pointer);
+function NSISCallback(const NSPIM: Integer): Integer; cdecl;
 begin
-  g_stringsize := string_size;
-  g_hwndParent := hwndParent;
-  g_stacktop   := stacktop;
-  g_variables  := variables;
-end;
-
-function PopString(): AnsiString;
-var
-  th: pstack_t;
-begin
-  if integer(g_stacktop^) <> 0 then
-  begin
-    th := g_stacktop^;
-    Result :=PAnsiChar(@th.text);
-    g_stacktop^ := th.next;
-    GlobalFree(HGLOBAL(th));
-  end;
-end;
-
-procedure PushString(const str: AnsiString='');
-var
-  th: pstack_t;
-begin
-  if integer(g_stacktop) <> 0 then
-  begin
-    th := pstack_t(GlobalAlloc(GPTR, SizeOf(stack_t) + g_stringsize));
-    lstrcpynA(@th.text, PAnsiChar(str), g_stringsize);
-    th.next := g_stacktop^;
-    g_stacktop^ := th;
-  end;
-end;
-
-function GetUserVariable(const varnum: TVariableList): AnsiString;
-begin
-  if (integer(varnum) >= 0) and (integer(varnum) < integer(__INST_LAST)) then
-    Result := g_variables + integer(varnum) * g_stringsize
-  else
-    Result := '';
-end;
-
-procedure SetUserVariable(const varnum: TVariableList; const value: AnsiString);
-begin
-  if (value <> '') and (integer(varnum) >= 0) and (integer(varnum) < integer(__INST_LAST)) then
-    lstrcpyA(g_variables + integer(varnum) * g_stringsize, PAnsiChar(value));
+  Result := 0;
 end;
 
  //procedure LoadVCLStyleA(VCLStyleFile: PAnsiChar); cdecl;
- procedure LoadVCLStyleA(const hwndParent: HWND; const string_size: integer; const variables: PAnsiChar; const stacktop: pointer); cdecl;
+ procedure LoadVCLStyleA(const hwndParent: HWND; const string_size: integer; const variables: PAnsiChar; const stacktop: pointer; const extraparameters: pointer = nil); cdecl;
  var
   VCLStyleFile : PAnsiChar;
  begin
    if not StyleServices.Available then exit;
+   Init(hwndParent, string_size, variables, stacktop, extraparameters);
 
-   Init(hwndParent, string_size, variables, stacktop);
+   @_NSISCallBack := extrap.RegisterPluginCallback;
+   _NSISCallBack(HInstance, @NSISCallback);
+
    VCLStyleFile:=PAnsiChar(PopString);
-
-   //ShowMessage(VCLStyleFile);
-
    if TStyleManager.IsValidStyle(String(VCLStyleFile)) then
      TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)))
    else

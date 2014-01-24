@@ -84,9 +84,9 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<VerInfo_Build>2</VerInfo_Build>
+			<VerInfo_Build>3</VerInfo_Build>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-			<VerInfo_Keys>CompanyName=The Road To Delphi;FileDescription=VCL Styles for NSIS;FileVersion=1.0.0.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=VCL Styles for NSIS;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=The Road To Delphi;FileDescription=VCL Styles for NSIS;FileVersion=1.0.0.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=VCL Styles for NSIS;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Manifest_File>None</Manifest_File>
 		</PropertyGroup>
@@ -104,6 +104,7 @@
 			<DCCReference Include="Vcl.Styles.NSIS.pas"/>
 			<DCCReference Include="..\Common\KOLDetours.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
+			<DCCReference Include="nsis.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
