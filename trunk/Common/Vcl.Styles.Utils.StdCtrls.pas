@@ -36,7 +36,6 @@ uses
   Vcl.StdCtrls,
   Vcl.Styles.Utils.Forms,
   Vcl.GraphUtil,
-  Vcl.Dialogs,
   Vcl.Controls;
 
 const
@@ -2238,7 +2237,7 @@ begin
   OverrideFont := True;
 {$IFEND}
   UpdateColors;
-  Addlog('TSysStaticStyleHook ' + IntToHex(AHandle, 8));
+  //Addlog('TSysStaticStyleHook ' + IntToHex(AHandle, 8));
 end;
 
 destructor TSysStaticStyleHook.Destroy;

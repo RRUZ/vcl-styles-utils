@@ -34,7 +34,6 @@ uses
   WinApi.Windows,
   Vcl.Themes,
   Vcl.Styles,
-  Vcl.Dialogs,
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.Utils.ComCtrls in '..\Common\Vcl.Styles.Utils.ComCtrls.pas',
@@ -75,7 +74,7 @@ end;
    if TStyleManager.IsValidStyle(String(VCLStyleFile)) then
      TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)))
    else
-   ShowMessage(Format('The Style File %s is not valid',[VCLStyleFile]));
+   MessageBox(hwndParent, 'Error', PChar(Format('The Style File %s is not valid',[VCLStyleFile])), MB_OK);
  end;
 
  procedure LoadVCLStyleW(const hwndParent: HWND; const string_size: integer; const variables: PChar; const stacktop: pointer; const extraparameters: pointer = nil); cdecl;
@@ -93,7 +92,7 @@ end;
    if TStyleManager.IsValidStyle(String(VCLStyleFile)) then
      TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)))
    else
-   ShowMessage(Format('The Style File %s is not valid',[VCLStyleFile]));
+   MessageBox(hwndParent,'Error', PChar(Format('The Style File %s is not valid',[VCLStyleFile])), MB_OK);
  end;
 
  procedure UnLoadVCLStyles; cdecl;
