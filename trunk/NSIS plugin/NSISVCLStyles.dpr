@@ -66,12 +66,30 @@ end;
   VCLStyleFile : PAnsiChar;
  begin
    if not StyleServices.Available then exit;
-   Init(hwndParent, string_size, variables, stacktop, extraparameters);
+   InitA(hwndParent, string_size, variables, stacktop, extraparameters);
 
    @_NSISCallBack := extrap.RegisterPluginCallback;
    _NSISCallBack(HInstance, @NSISCallback);
 
-   VCLStyleFile:=PAnsiChar(PopString);
+   VCLStyleFile:=PAnsiChar(PopStringA());
+   if TStyleManager.IsValidStyle(String(VCLStyleFile)) then
+     TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)))
+   else
+   ShowMessage(Format('The Style File %s is not valid',[VCLStyleFile]));
+ end;
+
+ procedure LoadVCLStyleW(const hwndParent: HWND; const string_size: integer; const variables: PChar; const stacktop: pointer; const extraparameters: pointer = nil); cdecl;
+ var
+  VCLStyleFile : PChar;
+ begin
+   if not StyleServices.Available then exit;
+   InitW(hwndParent, string_size, variables, stacktop, extraparameters);
+
+   @_NSISCallBack := extrap.RegisterPluginCallback;
+   _NSISCallBack(HInstance, @NSISCallback);
+
+   VCLStyleFile:=PChar(PopStringW());
+
    if TStyleManager.IsValidStyle(String(VCLStyleFile)) then
      TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)))
    else
@@ -85,6 +103,6 @@ end;
  end;
 
 exports
-  LoadVCLStyleA, UnLoadVCLStyles;
+  LoadVCLStyleA, LoadVCLStyleW, UnLoadVCLStyles;
 begin
 end.

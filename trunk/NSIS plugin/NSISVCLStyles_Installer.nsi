@@ -11,14 +11,14 @@
   InstallDir "$PROGRAMFILES\The Road To Delphi\NSISVCLStyles"
   InstallDirRegKey HKCU "Software\NSISVCLStyles" ""
   RequestExecutionLevel admin
-  !define _VERSION "1.0.0.2"
+  !define _VERSION "1.0.0.4"
   VIProductVersion "${_VERSION}"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "VCL Styles for NSIS"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "The Road To Delphi"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${_VERSION}"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "InternalName" "NSISVCLStyles.exe"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "VCL Styles for NSIS"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "MPL 1.1"  
+  VIAddVersionKey  "ProductName" "VCL Styles for NSIS"
+  VIAddVersionKey  "CompanyName" "The Road To Delphi"
+  VIAddVersionKey  "FileVersion" "${_VERSION}"
+  VIAddVersionKey  "InternalName" "NSISVCLStyles.exe"
+  VIAddVersionKey  "FileDescription" "VCL Styles for NSIS"
+  VIAddVersionKey  "LegalCopyright" "MPL 1.1"  
 ;--------------------------------
 ;Interface Settings
 
@@ -41,8 +41,38 @@
 
 ;--------------------------------
 ;Installer Sections
+Var NSIS
+Var NSISMajorVersion
 
-Section "" 
+Section "" 		
+    ReadRegDWORD $NSISMajorVersion HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\\NSIS" "VersionMajor"
+	;IfErrors 0 done 
+	;ClearErrors	
+	;MessageBox MB_OK "$NSISMajorVersion"
+	
+    ReadRegStr $NSIS HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\\NSIS" "InstallLocation"
+    IfErrors 0 begin
+    ClearErrors
+    begin:
+	;MessageBox MB_OK "$NSIS"
+	IfFileExists "$NSIS" 0 done
+    ;DetailPrint "$NSIS"
+	;MessageBox MB_OK "$NSIS"
+	
+	${If} $NSISMajorVersion > 2
+	IfFileExists "$NSIS\Plugins\x86-ansi" 0 done
+	SetOutPath "$NSIS\Plugins\x86-ansi"
+	File "Win32\Release\NSISVCLStyles.dll"	
+
+	IfFileExists "$NSIS\Plugins\x86-unicode" 0 done
+	SetOutPath "$NSIS\Plugins\x86-unicode"
+	File "Win32\Release\NSISVCLStyles.dll"	
+	${Else}
+	IfFileExists "$NSIS\Plugins" 0 done
+	SetOutPath "$NSIS\Plugins"
+	File "Win32\Release\NSISVCLStyles.dll"		
+	${EndIf}
+
     SetOutPath "$INSTDIR"
     ;ADD YOUR OWN FILES HERE...
     File "c:\Program Files (x86)\Embarcadero\RAD Studio\9.0\bin\VclStyleDesigner.exe"
@@ -81,22 +111,26 @@ Section ""
 	File "..\Styles\SmokeyQuartzKamri.vsf"
 	File "..\Styles\TurquoiseGray.vsf"
 	File "..\Styles\YellowGraphite.vsf"  
-    SetOutPath "${NSISDIR}\Plugins"	
-    File "Win32\Release\NSISVCLStyles.dll"
 	SetOutPath "$INSTDIR\Scripts"
     File "Scripts\example1.nsi"
     File "Scripts\example1_SkinUninstaller.nsi"	
+    File "Scripts\unicode.nsi"		
 	SetOutPath "$INSTDIR\Scripts\Modern UI"	
     File "Scripts\Modern UI\Basic.nsi"		
     File "Scripts\Modern UI\HeaderBitmap.nsi"		
     File "Scripts\Modern UI\MultiLanguage.nsi"		
     File "Scripts\Modern UI\StartMenu.nsi"		
     File "Scripts\Modern UI\WelcomeFinish.nsi"		
+	
 	;Store installation folder
-  WriteRegStr HKCU "Software\NSISVCLStyles" "" $INSTDIR
-  
-  ;Create uninstaller
-  WriteUninstaller "$INSTDIR\Uninstall.exe"
+    WriteRegStr HKCU "Software\NSISVCLStyles" "" $INSTDIR
+	WriteUninstaller "$INSTDIR\Uninstall.exe"
+    Goto completed	
+    ;Create uninstaller
+    done:
+    DetailPrint "NSIS installation data was not found"	
+	;MessageBox MB_OK "File not found."
+	completed:
 SectionEnd
 
 ;--------------------------------
@@ -118,7 +152,14 @@ Section "Uninstall"
   RMDir /r $INSTDIR\Scripts  
   RMDir /r $INSTDIR\Styles    
   RMDir /r $INSTDIR  
-  Delete "${NSISDIR}\Plugins\NSISVCLStyles.dll"
+  
+  ReadRegStr $NSIS HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\\NSIS" "InstallLocation"
+  IfErrors 0 begin
+  ClearErrors
+  begin:  
+  Delete "$NSIS\Plugins\NSISVCLStyles.dll"    
+  Delete "$NSIS\Plugins\x86-ansi\NSISVCLStyles.dll"  
+  Delete "$NSIS\Plugins\x86-unicode\NSISVCLStyles.dll"
   DeleteRegKey /ifempty HKCU "Software\NSISVCLStyles"
 SectionEnd
 
