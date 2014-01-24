@@ -30,6 +30,7 @@ uses
   System.Types,
   Vcl.Styles,
   Vcl.Themes,
+  Vcl.Dialogs,
   Vcl.Graphics,
   System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
@@ -231,8 +232,13 @@ type
 implementation
 
 uses
-  Vcl.Dialogs,
+  //IOUTILS,
   Vcl.Styles.Utils.SysControls;
+
+//procedure Addlog(const Msg: string);
+//begin
+//   TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+//end;
 
 { TSysDialogStyleHook }
 
@@ -1146,6 +1152,7 @@ begin
       }
       { Before handling the default message => this proc is WMNCLBUTTONDOWN }
       Message.Result := CallDefaultProc(TMessage(Message));
+      //Addlog('Result '+IntToStr(Message.Result));
       { After handling the default message => this proc is WMNCLBUTTONUP }
 
       SetRedraw(True);
@@ -1155,10 +1162,13 @@ begin
       GetCursorPos(P);
       P := NormalizePoint(P);
 
+
       case Message.HitTest of
+
         HTCLOSE:
           if CloseButtonRect.Contains(P) then
-            Close;
+            if Message.Result<>0 then //only if the app doesn't processes this message
+              Close;
         HTMAXBUTTON:
           begin
             if MaxButtonRect.Contains(P) then
@@ -1230,6 +1240,7 @@ var
   BorderSize: TRect;
   LParentHandle: HWND;
 begin
+   //Addlog(Format('TSysDialogStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
   case Message.msg of
 
     WM_WINDOWPOSCHANGED:
