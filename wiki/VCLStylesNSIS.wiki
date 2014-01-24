@@ -23,27 +23,24 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/NSIS%20VCL%20Styles/NSIS%20Ima
 
 {{{
 Function .onInit
-  SetOutPath $TEMP
+  InitPluginsDir
   ;Get the skin file to use
-  File /oname=Amakrits.vsf "..\Styles\Amakrits.vsf" 
-  ;Load the skin using the LoadVCLStyleA function 
-  NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
-  ;remove the used skin
-  Delete $TEMP\Amakrits.vsf
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  ;Load the skin using the LoadVCLStyleA function
+  NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\Amakrits.vsf
 FunctionEnd
-
 }}}
 
   To use the plugin in a NSIS Uninstaller you must call the  _LoadVCLStyleA_ function passing the skin name in the _un.onInit_ function.
 
 {{{
 Function un.onInit
- SetOutPath $TEMP
- File /oname=Amakrits.vsf "..\Styles\Amakrits.vsf"
- NSISVCLStyles::LoadVCLStyleA /NOUNLOAD $TEMP\Amakrits.vsf
+  InitPluginsDir
+  File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
+  NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\Amakrits.vsf
 FunctionEnd
 }}}
 
 = Installer =
 
- Download the installer of the plugin from <a href="http://goo.gl/Ab55qH">here</a>. The current version of the plugin is 1.0.0.2
+ Download the installer of the plugin from <a href="http://goo.gl/Ab55qH">here</a>. The current version of the plugin is 1.0.0.3
