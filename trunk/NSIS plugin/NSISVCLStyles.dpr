@@ -41,7 +41,6 @@ uses
   Vcl.Styles.Utils.Menus in '..\Common\Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Utils.ScreenTips in '..\Common\Vcl.Styles.Utils.ScreenTips.pas',
   Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas',
-  Vcl.Styles.NSIS in 'Vcl.Styles.NSIS.pas',
   KOLDetours in '..\Common\KOLDetours.pas',
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
   nsis in 'nsis.pas';
