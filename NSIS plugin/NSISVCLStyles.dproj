@@ -75,6 +75,11 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_DebugDCUs>true</DCC_DebugDCUs>
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+			<Manifest_File>None</Manifest_File>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<DCC_MapFile>3</DCC_MapFile>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -84,9 +89,9 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<VerInfo_Build>5</VerInfo_Build>
+			<VerInfo_Build>6</VerInfo_Build>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-			<VerInfo_Keys>CompanyName=The Road To Delphi;FileDescription=VCL Styles for NSIS;FileVersion=1.0.0.5;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=VCL Styles for NSIS;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=The Road To Delphi;FileDescription=VCL Styles for NSIS;FileVersion=1.0.0.6;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=VCL Styles for NSIS;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Manifest_File>None</Manifest_File>
 		</PropertyGroup>
@@ -101,7 +106,6 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ScreenTips.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.StdCtrls.pas"/>
-			<DCCReference Include="Vcl.Styles.NSIS.pas"/>
 			<DCCReference Include="..\Common\KOLDetours.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
 			<DCCReference Include="nsis.pas"/>

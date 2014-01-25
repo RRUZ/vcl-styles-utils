@@ -235,10 +235,10 @@ uses
   //IOUTILS,
   Vcl.Styles.Utils.SysControls;
 
-//procedure Addlog(const Msg: string);
-//begin
-//   TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-//end;
+procedure Addlog(const Msg: string);
+begin
+   //TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+end;
 
 { TSysDialogStyleHook }
 
@@ -265,6 +265,7 @@ begin
   FIconHandle := 0;
   FIcon := nil;
   FSysMenuButtonRect := Rect(0, 0, 0, 0);
+  //ShowMessage('ok');
 end;
 
 destructor TSysDialogStyleHook.Destroy;
@@ -787,7 +788,7 @@ var
   ItemDisabled: Boolean;
 begin
   LBorderStyle := BorderStyle;
-  if LBorderStyle = bsNone then
+  if (LBorderStyle = bsNone) or (WindowState=wsMinimized) then  //  (WindowState=wsMinimized) avoid bug in windows 8.1  and increase performance
     Exit;
 
   LBorderIcons := BorderIcons;
@@ -1011,6 +1012,7 @@ begin
     else
       LDetails := StyleServices.GetElementDetails(twSmallFrameLeftInActive);
   end;
+
   R := Rect(0, LCaptionRect.Height, LBorderSize.Left, SysControl.Height);
   if SysControl.Width > LBorderSize.Left then
     StyleServices.DrawElement(DC, LDetails, R);
@@ -1053,7 +1055,6 @@ begin
   R := Rect(0, SysControl.Height - LBorderSize.Bottom, SysControl.Width,
     SysControl.Height);
   StyleServices.DrawElement(DC, LDetails, R);
-
 end;
 
 procedure TSysDialogStyleHook.Restore;
@@ -1152,7 +1153,7 @@ begin
       }
       { Before handling the default message => this proc is WMNCLBUTTONDOWN }
       Message.Result := CallDefaultProc(TMessage(Message));
-      //Addlog('Result '+IntToStr(Message.Result));
+
       { After handling the default message => this proc is WMNCLBUTTONUP }
 
       SetRedraw(True);
