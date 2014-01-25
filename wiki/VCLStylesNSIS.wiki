@@ -67,4 +67,4 @@ FunctionEnd
 
 = Installer =
 
- Download the installer of the plugin from <a href="http://goo.gl/Ab55qH">here</a>. The current version of the plugin is 1.0.0.5
+ Download the installer of the plugin from <a href="http://goo.gl/Ab55qH">here</a>. The current version of the plugin is 1.0.0.6
