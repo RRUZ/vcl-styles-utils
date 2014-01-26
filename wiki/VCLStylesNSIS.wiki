@@ -18,7 +18,7 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/NSIS%20VCL%20Styles/NSIS%20Ima
 
 = Sample Script=
 
-  To use the plugin in a NSIS installer you must call the  _LoadVCLStyleA_ function for ANSI versions scripts and _LoadVCLStyleW_ for UNICODE scripts, passing the skin name in the _.onInit_ function.
+  To use the plugin in a NSIS ¿you must call the  _LoadVCLStyleA_ function for ANSI installers and _LoadVCLStyleW_ for UNICODE installers (Unicode True), passing the skin name in the _.onInit_ function.
 
 
 {{{
@@ -43,7 +43,7 @@ Function .onInit
 FunctionEnd
 }}}
 
-  To use the plugin in a NSIS Uninstaller you must call the  _LoadVCLStyleA_ function for ANSI versions scripts and _LoadVCLStyleW_ for UNICODE scripts passing the skin name in the _un.onInit_ function.
+  To use the plugin in a NSIS Uninstaller you must call the  _LoadVCLStyleA_ function for ANSI installers and _LoadVCLStyleW_ for UNICODE installers (Unicode True) passing the skin name in the _un.onInit_ function.
 
 {{{
 ;ANSI sample
