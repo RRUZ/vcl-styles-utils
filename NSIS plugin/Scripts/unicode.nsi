@@ -1,7 +1,7 @@
 ﻿; unicode is not enabled by default
 ; unicode installers will not be able to run on Windows 9x!
 Unicode true
-!addplugindir "..\Win32\Release" 
+!addplugindir "..\Win32\Release_UNICODE" 
 Name "Unicode Games"
 OutFile "unicode.exe"
 
@@ -34,6 +34,6 @@ Function .onInit
    InitPluginsDir
    ;Get the skin file to use
    File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-   ;Load the skin using the LoadVCLStyleA function
-   NSISVCLStyles::LoadVCLStyleW $PLUGINSDIR\Amakrits.vsf  
+   ;Load the skin using the LoadVCLStyle function
+   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf  
 FunctionEnd
