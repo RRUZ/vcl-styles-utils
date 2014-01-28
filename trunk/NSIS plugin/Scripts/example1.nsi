@@ -7,7 +7,7 @@
 
 ;--------------------------------
 CRCCheck off
-!addplugindir "..\Win32\Release" 
+!addplugindir "..\Win32\Release_ANSI" 
 ; The name of the installer
 Name "Example1"
 
@@ -44,5 +44,5 @@ Function .onInit
    ;Get the skin file to use
    File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
    ;Load the skin using the LoadVCLStyleA function
-   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\Amakrits.vsf  
+   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf  
 FunctionEnd

@@ -1,9 +1,9 @@
   
   !include "MUI2.nsh"
-  !addplugindir "Win32\Release" 
+  !addplugindir "Win32\Release_ANSI" 
 ;--------------------------------
 ;General
-  ;SetCompressor lzma
+  SetCompressor lzma
   ;!insertmacro MUI_LANGUAGE "English"
   ;Name and file
   Name "VCL Styles for NSIS"
@@ -11,7 +11,7 @@
   InstallDir "$PROGRAMFILES\The Road To Delphi\NSISVCLStyles"
   InstallDirRegKey HKCU "Software\NSISVCLStyles" ""
   RequestExecutionLevel admin
-  !define _VERSION "1.0.0.6"
+  !define _VERSION "1.0.0.7"
   VIProductVersion "${_VERSION}"
   VIAddVersionKey  "ProductName" "VCL Styles for NSIS"
   VIAddVersionKey  "CompanyName" "The Road To Delphi"
@@ -62,15 +62,15 @@ Section ""
 	${If} $NSISMajorVersion > 2
 	IfFileExists "$NSIS\Plugins\x86-ansi" 0 done
 	SetOutPath "$NSIS\Plugins\x86-ansi"
-	File "Win32\Release\NSISVCLStyles.dll"	
+	File "Win32\Release_ANSI\NSISVCLStyles.dll"	
 
 	IfFileExists "$NSIS\Plugins\x86-unicode" 0 done
 	SetOutPath "$NSIS\Plugins\x86-unicode"
-	File "Win32\Release\NSISVCLStyles.dll"	
+	File "Win32\Release_UNICODE\NSISVCLStyles.dll"	
 	${Else}
 	IfFileExists "$NSIS\Plugins" 0 done
 	SetOutPath "$NSIS\Plugins"
-	File "Win32\Release\NSISVCLStyles.dll"		
+	File "Win32\Release_ANSI\NSISVCLStyles.dll"		
 	${EndIf}
 
     SetOutPath "$INSTDIR"
@@ -166,11 +166,11 @@ SectionEnd
 Function .onInit
   InitPluginsDir
   File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\Amakrits.vsf  
+  NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf  
 FunctionEnd
 
 Function un.onInit
   InitPluginsDir
   File /oname=$PLUGINSDIR\Amakrits.vsf "..\Styles\Amakrits.vsf"
-  NSISVCLStyles::LoadVCLStyleA  $PLUGINSDIR\Amakrits.vsf
+  NSISVCLStyles::LoadVCLStyle  $PLUGINSDIR\Amakrits.vsf
 FunctionEnd

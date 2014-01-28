@@ -6,7 +6,7 @@
 ;Include Modern UI
 
   !include "MUI2.nsh"
-  !addplugindir "..\..\Win32\Release" 
+  !addplugindir "..\..\Win32\Release_ANSI" 
 ;--------------------------------
 ;General
 
@@ -88,7 +88,7 @@ Function .onInit
    InitPluginsDir
    ;Get the skin file to use
    File /oname=$PLUGINSDIR\AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
-   ;Load the skin using the LoadVCLStyleA function
-   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\AmethystKamri.vsf 
+   ;Load the skin using the LoadVCLStyle function
+   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\AmethystKamri.vsf 
 FunctionEnd
 

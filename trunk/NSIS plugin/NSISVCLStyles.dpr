@@ -23,6 +23,7 @@
 //**************************************************************************************************
 library NSISVCLStyles;
 
+
 {$IFNDEF DEBUG}
   {$IFOPT D-}{$WEAKLINKRTTI ON}{$ENDIF}
   {$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
@@ -34,6 +35,7 @@ uses
   WinApi.Windows,
   Vcl.Themes,
   Vcl.Styles,
+  //Vcl.Imaging.jpeg,
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.Utils.ComCtrls in '..\Common\Vcl.Styles.Utils.ComCtrls.pas',
@@ -47,7 +49,15 @@ uses
 
   //NSIS Scripting Reference
   //http://nsis.sourceforge.net/Docs/Chapter4.html
-{$R *.res}
+{.$R *.res}
+
+{$IFDEF NSIS_ANSI}
+{$R VersionInfoANSI.res}
+{$ENDIF}
+
+{$IFDEF NSIS_UNICODE}
+{$R VersionInfoUNICODE.res}
+{$ENDIF}
 
 
 var
@@ -59,7 +69,9 @@ begin
 end;
 
  //procedure LoadVCLStyleA(VCLStyleFile: PAnsiChar); cdecl;
- procedure LoadVCLStyleA(const hwndParent: HWND; const string_size: integer; const variables: PAnsiChar; const stacktop: pointer; const extraparameters: pointer = nil); cdecl;
+
+ {$IFDEF NSIS_ANSI}
+ procedure LoadVCLStyle(const hwndParent: HWND; const string_size: integer; const variables: PAnsiChar; const stacktop: pointer; const extraparameters: pointer = nil); cdecl;
  var
   VCLStyleFile : PAnsiChar;
  begin
@@ -71,12 +83,24 @@ end;
 
    VCLStyleFile:=PAnsiChar(PopStringA());
    if TStyleManager.IsValidStyle(String(VCLStyleFile)) then
-     TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)))
+   begin
+     TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)));
+
+//     TSysDialogStyleHookBackground.MergeImages := True;
+//     TSysDialogStyleHookBackground.SharedImageLocation := 'C:\Delphi\google-code\vcl-styles-utils\Vcl Style Color Hook Form\Images\500.jpg';
+//     TSysDialogStyleHookBackground.BackGroundSettings.UseImage := True;
+//     TSysDialogStyleHookBackground.BackGroundSettings.Enabled  := True;
+//     TSysStyleManager.UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
+//     TSysStyleManager.RegisterSysStyleHook('#32770', TSysDialogStyleHookBackground);
+   end
    else
    MessageBox(hwndParent, 'Error', PChar(Format('The Style File %s is not valid',[VCLStyleFile])), MB_OK);
  end;
+{$ENDIF}
 
- procedure LoadVCLStyleW(const hwndParent: HWND; const string_size: integer; const variables: PChar; const stacktop: pointer; const extraparameters: pointer = nil); cdecl;
+
+ {$IFDEF NSIS_UNICODE}
+ procedure LoadVCLStyle(const hwndParent: HWND; const string_size: integer; const variables: PChar; const stacktop: pointer; const extraparameters: pointer = nil); cdecl;
  var
   VCLStyleFile : PChar;
  begin
@@ -93,6 +117,7 @@ end;
    else
    MessageBox(hwndParent,'Error', PChar(Format('The Style File %s is not valid',[VCLStyleFile])), MB_OK);
  end;
+{$ENDIF}
 
  procedure UnLoadVCLStyles; cdecl;
  begin
@@ -101,6 +126,6 @@ end;
  end;
 
 exports
-  LoadVCLStyleA, LoadVCLStyleW, UnLoadVCLStyles;
+  LoadVCLStyle, UnLoadVCLStyles;
 begin
 end.
