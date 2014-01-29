@@ -25,7 +25,6 @@ interface
 uses
   Winapi.Windows,
   Winapi.Messages,
-  Winapi.CommDlg,
   System.Classes,
   System.Types,
   Vcl.Styles,
@@ -217,6 +216,8 @@ type
     property SysCloseButtonDisabled: Boolean read FSysCloseButtonDisabled;
   end;
 
+
+
   {
     Note: The development of this class is not finished yet .
     Only ScrollBar with SIZEBOX is supported !!.
@@ -235,10 +236,10 @@ uses
   //IOUTILS,
   Vcl.Styles.Utils.SysControls;
 
-procedure Addlog(const Msg: string);
-begin
-   //TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-end;
+//procedure Addlog(const Msg: string);
+//begin
+//   TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+//end;
 
 { TSysDialogStyleHook }
 
@@ -2665,6 +2666,8 @@ begin
 
   inherited;
 end;
+
+
 
 initialization
 

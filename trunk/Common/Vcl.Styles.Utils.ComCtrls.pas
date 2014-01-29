@@ -178,6 +178,47 @@ type
   TSysToolbarButtonStyle = set of (bsBtn, bsSep, bsCheck, bsGroup, bsCheckGroup,
     bsDropDown);
 
+  TSysReBarStyleHook = class(TSysStyleHook)
+  strict private
+    function GetBandText(Index: Integer): string;
+    function GetBandRect(Index: Integer): TRect;
+    function GetBandBorder(Index: Integer): TRect;
+    function GetBandCount: Integer;
+  strict protected
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintNC(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+  end;
+
+  TSysStatusBarStyleHook = class(TSysStyleHook)
+  strict protected
+    procedure Paint(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+  end;
+
+  TSysTrackBarStyleHook = class(TSysStyleHook)
+  strict private
+    FMouseOnThumb: Boolean;
+    FThumbPressed: Boolean;
+    procedure CNHScroll(var Message: TWMHScroll); message CN_HSCROLL;
+    procedure CNVScroll(var Message: TWMVScroll); message CN_VSCROLL;
+    procedure WMMouseMove(var Message: TWMMouse); message WM_MOUSEMOVE;
+    procedure WMLButtonUp(var Message: TWMMouse); message WM_LBUTTONUP;
+    procedure WMLButtonDown(var Message: TWMMouse); message WM_LBUTTONDOWN;
+  strict protected
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+  end;
+
+
   TSysToolbarStyleHook = class(TMouseTrackSysControlStyleHook)
   private type
 {$REGION 'TSysToolbarButton'}
@@ -268,7 +309,13 @@ type
 implementation
 
 uses
+  //IOUTILS,
   Vcl.Styles.Utils.SysControls;
+
+//procedure Addlog(const Msg: string);
+//begin
+//   TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+//end;
 
 { TSysListViewStyleHook }
 
@@ -1754,6 +1801,279 @@ begin
   inherited;
 end;
 
+{ TSysReBarStyleHook }
+
+constructor TSysReBarStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+  OverrideEraseBkgnd:=True;
+  OverridePaint := True;
+  OverridePaintNC := True;
+end;
+
+function TSysReBarStyleHook.GetBandBorder(Index: Integer): TRect;
+begin
+  SendMessage(Handle, RB_GETBANDBORDERS, Index, IntPtr(@Result));
+end;
+
+function TSysReBarStyleHook.GetBandCount: Integer;
+begin
+  Result := SendMessage(Handle, RB_GETBANDCOUNT, 0, 0);
+end;
+
+function TSysReBarStyleHook.GetBandRect(Index: Integer): TRect;
+begin
+  Result := Rect(0, 0, 0, 0);
+  SendMessage(Handle, RB_GETRECT, Index, IntPtr(@Result));
+end;
+
+function SizeOfReBarBandInfo: Integer;
+var
+  ReBarBandInfo: TReBarBandInfo;
+begin
+  if GetComCtlVersion >= $60001 then
+    Result := Sizeof(TReBarBandInfo)
+  else
+    // Platforms prior to Vista do not support the fields rcChevronLocation & uChevronState
+    Result := SizeOf(TReBarBandInfo) - SizeOf(ReBarBandInfo.rcChevronLocation) -
+      SizeOf(ReBarBandInfo.uChevronState);
+end;
+
+function TSysReBarStyleHook.GetBandText(Index: Integer): string;
+const
+  BufSize = 255;
+var
+  Info: TRebarBandInfo;
+  Buffer: array [0..BufSize - 1] of Char;
+begin
+  FillChar(Info, SizeOf(Info), 0);
+  Info.cbSize := SizeOfReBarBandInfo; // Size differs depending on OS and ComCtl32.dll version
+  Info.fMask := RBBIM_TEXT;
+  Info.lpText := @Buffer;
+  Info.cch := BufSize;
+  if BOOL(SendMessage(Handle, RB_GETBANDINFO, Index, IntPtr(@Info))) then
+    Result := Info.lpText
+  else
+    Result := '';
+end;
+procedure TSysReBarStyleHook.Paint(Canvas: TCanvas);
+var
+  I : integer;
+  R, Margin, LTextRect: TRect;
+  S: string;
+  Details: TThemedElementDetails;
+begin
+  for I := 0 to GetBandCount - 1 do
+  begin
+    R := GetBandRect(I);
+    Margin := GetBandBorder(I);
+    InflateRect(R, 1, 1);
+    if R.Top < 0 then R.Top := 0;
+    if R.Left < 0 then R.Left := 0;
+    if R.Right > SysControl.ClientRect.Right then
+      R.Right := SysControl.ClientRect.Right;
+    if R.Bottom > SysControl.ClientRect.Bottom then
+      R.Bottom := SysControl.ClientRect.Bottom;
+    {band}
+    Details := StyleServices.GetElementDetails(trBand);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+    {text}
+    LTextRect := Rect(R.Left + 10, R.Top, R.Left + Margin.Left, R.Bottom);
+
+    S := GetBandText(I);
+    if S <> '' then
+      DrawControlText(Canvas, Details, S, LTextRect, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
+
+    {gripper}
+    R := Rect(R.Left + 2, R.Top + 2, R.Left + 6, R.Bottom - 2);
+    Details := StyleServices.GetElementDetails(trGripper);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
+end;
+
+procedure TSysReBarStyleHook.PaintBackground(Canvas: TCanvas);
+var
+  LRect: TRect;
+  LDetails: TThemedElementDetails;
+begin
+  LRect := Rect(0, 0, SysControl.ClientWidth, SysControl.ClientHeight);
+  InflateRect(LRect, 2, 2);
+  LDetails.Element := teToolBar;
+  LDetails.Part := 0;
+  if StyleServices.HasTransparentParts(LDetails) then
+    StyleServices.DrawParentBackground(Handle, Canvas.Handle, LDetails, False);
+  StyleServices.DrawElement(Canvas.Handle, LDetails, LRect);
+end;
+
+procedure TSysReBarStyleHook.PaintNC(Canvas: TCanvas);
+var
+  LDetails: TThemedElementDetails;
+begin
+  ExcludeClipRect(Canvas.Handle,  2, 2, SysControl.Width - 2, SysControl.Height - 2);
+  Canvas.Brush.Color := StyleServices.ColorToRGB(clBtnFace);
+  Canvas.FillRect(Rect(0, 0, SysControl.Width, SysControl.Height));
+  LDetails.Element := teToolBar;
+  LDetails.Part := 0;
+  StyleServices.DrawElement(Canvas.Handle,
+    LDetails, Rect(0, 0, SysControl.Width, SysControl.Height));
+end;
+
+procedure TSysReBarStyleHook.WndProc(var Message: TMessage);
+begin
+  case Message.Msg of
+   WM_SIZE :
+             begin
+                CallDefaultProc(Message);
+                Invalidate;
+                Handled := True;
+             end;
+  else
+       inherited;
+  end;
+end;
+
+{ TSysStatusBarStyleHook }
+
+constructor TSysStatusBarStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+  OverridePaint := True;
+  //DoubleBuffered := True;
+end;
+
+
+procedure TSysStatusBarStyleHook.Paint(Canvas: TCanvas);
+const
+  AlignStyles: array [TAlignment] of Integer = (DT_LEFT, DT_RIGHT, DT_CENTER);
+var
+  R, R1: TRect;
+  Res, Count, I: Integer;
+  Idx, Flags: Cardinal;
+  Details: TThemedElementDetails;
+  LText: string;
+  Borders: array [0..2] of Integer;
+begin
+  Details := StyleServices.GetElementDetails(tsStatusRoot);
+  StyleServices.DrawElement(Canvas.Handle, Details, Rect(0, 0, SysControl.Width, SysControl.Height));
+
+  if SendMessage(Handle, SB_ISSIMPLE, 0, 0) > 0 then
+  begin
+    R := SysControl.ClientRect;
+    FillChar(Borders, SizeOf(Borders), 0);
+    SendMessage(Handle, SB_GETBORDERS, 0, IntPtr(@Borders));
+    R.Left := Borders[0] + Borders[2];
+    R.Top := Borders[1];
+    R.Bottom := R.Bottom - Borders[1];
+    R.Right := R.Right - Borders[2];
+
+    Details := StyleServices.GetElementDetails(tsPane);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+
+    R1 := SysControl.ClientRect;
+    R1.Left := R1.Right - R.Height;
+    Details := StyleServices.GetElementDetails(tsGripper);
+    StyleServices.DrawElement(Canvas.Handle, Details, R1);
+    Details := StyleServices.GetElementDetails(tsPane);
+    SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, 0, 0)));
+    if Length(LText) > 0 then
+    begin
+     SendMessage(Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
+     Flags := SysControl.DrawTextBiDiModeFlags(DT_LEFT);
+     DrawControlText(Canvas, Details, LText, R, Flags);
+    end;
+  end
+  else
+  begin
+    AddToLog('2');
+   Count := SendMessage(Handle, SB_GETPARTS, 0, 0);
+    for I := 0 to Count - 1 do
+    begin
+      R := Rect(0, 0, 0, 0);
+      SendMessage(Handle, SB_GETRECT, I, IntPtr(@R));
+      if IsRectEmpty(R) then
+        Exit;
+      Details := StyleServices.GetElementDetails(tsPane);
+      StyleServices.DrawElement(Canvas.Handle, Details, R);
+      if I = Count - 1 then
+      begin
+        R1 := SysControl.ClientRect;
+        R1.Left := R1.Right - R.Height;
+        Details := StyleServices.GetElementDetails(tsGripper);
+        StyleServices.DrawElement(Canvas.Handle, Details, R1);
+      end;
+      Details := StyleServices.GetElementDetails(tsPane);
+      InflateRect(R, -1, -1);
+
+      Flags := SysControl.DrawTextBiDiModeFlags(DT_LEFT);
+      Idx := I;
+      SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, Idx, 0)));
+      if Length(LText) > 0 then
+      begin
+        Res := SendMessage(Handle, SB_GETTEXT, Idx, IntPtr(@LText[1]));
+        if (Res and SBT_OWNERDRAW = 0) then
+          DrawControlText(Canvas, Details, LText, R, Flags);
+      end;
+    end;
+  end;
+end;
+
+procedure TSysStatusBarStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
+
+{ TSysTrackBarStyleHook }
+
+procedure TSysTrackBarStyleHook.CNHScroll(var Message: TWMHScroll);
+begin
+
+end;
+
+procedure TSysTrackBarStyleHook.CNVScroll(var Message: TWMVScroll);
+begin
+
+end;
+
+constructor TSysTrackBarStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+
+end;
+
+procedure TSysTrackBarStyleHook.Paint(Canvas: TCanvas);
+begin
+  inherited;
+
+end;
+
+procedure TSysTrackBarStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+  inherited;
+
+end;
+
+procedure TSysTrackBarStyleHook.WMLButtonDown(var Message: TWMMouse);
+begin
+
+end;
+
+procedure TSysTrackBarStyleHook.WMLButtonUp(var Message: TWMMouse);
+begin
+
+end;
+
+procedure TSysTrackBarStyleHook.WMMouseMove(var Message: TWMMouse);
+begin
+
+end;
+
+procedure TSysTrackBarStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
+
 initialization
 
 if StyleServices.Available then
@@ -1767,20 +2087,24 @@ begin
     RegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
     RegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
     RegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
+    RegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
   end;
 end;
 
 finalization
 
-with TSysStyleManager do
-begin
-  UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-  UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-  UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-  UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-  UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
-  UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
-  UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
-end;
+  with TSysStyleManager do
+  begin
+    UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
+    UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
+    UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
+    UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
+    UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
+    UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
+    UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+    UnRegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
+    UnRegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
+  end;
 
 end.

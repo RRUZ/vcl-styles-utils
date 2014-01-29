@@ -93,9 +93,13 @@ type
     function GetBoundsRect: TRect;
     function GetFont: TFont;
     function IsControlChild: Boolean;
+    function GetClientHeight: Integer;
+    function GetClientWidth: Integer;
   public
     constructor Create(AHandle: THandle); virtual;
     Destructor Destroy; override;
+    property ClientHeight: Integer read GetClientHeight;
+    property ClientWidth: Integer read GetClientWidth;
     property Font: TFont read GetFont;
     property Parent: TSysControl read GetParent;
     property ParentHandle: THandle read GetParentHandle;
@@ -347,10 +351,20 @@ begin
   Result := ExStyle and WS_EX_CLIENTEDGE = WS_EX_CLIENTEDGE;
 end;
 
+function TSysControl.GetClientHeight: Integer;
+begin
+  Result := ClientRect.Bottom;
+end;
+
 function TSysControl.GetClientRect: TRect;
 begin
   Result := Rect(0, 0, 0, 0);
   Winapi.Windows.GetClientRect(Handle, Result);
+end;
+
+function TSysControl.GetClientWidth: Integer;
+begin
+  Result := ClientRect.Right;
 end;
 
 function TSysControl.GetControlClassName: String;
@@ -1253,6 +1267,7 @@ begin
     CM_CTLCOLORMSGBOX .. CM_CTLCOLORSTATIC:
       begin
         SetTextColor(Message.wParam, ColorToRGB(FontColor));
+        //SetBkMode (Message.wParam, TRANSPARENT);
         SetBkColor(Message.wParam, ColorToRGB(FBrush.Color));
         Message.Result := LRESULT(FBrush.Handle);
         Exit;

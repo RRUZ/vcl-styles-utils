@@ -2237,6 +2237,11 @@ begin
   OverrideFont := True;
 {$IFEND}
   UpdateColors;
+
+//  if (SysControl.ExStyle and WS_EX_TRANSPARENT <> WS_EX_TRANSPARENT) then
+//   SysControl.ExStyle  := SysControl.ExStyle or WS_EX_TRANSPARENT;
+
+
   //Addlog('TSysStaticStyleHook ' + IntToHex(AHandle, 8));
 end;
 
@@ -2354,7 +2359,7 @@ const
     sfEditBoxTextNormal);
 begin
   Color := StyleServices.GetStyleColor(scWindow);
-  FontColor := StyleServices.GetSystemColor(clWindowText)
+  FontColor := StyleServices.GetSystemColor(clWindowText);
 end;
 
 procedure TSysStaticStyleHook.WndProc(var Message: TMessage);
@@ -2372,18 +2377,12 @@ begin
           if (IsText and (Length(SysControl.Text) > 0)) then
             inherited
           else
-          begin
-            // Addlog('CallDefaultProc 1');
             CallDefaultProc(Message);
-          end;
         end
         else
-        begin
-          // Addlog('CallDefaultProc 2');
           CallDefaultProc(Message);
-        end;
-
       end;
+
   else
     inherited;
   end;
