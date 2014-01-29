@@ -95,6 +95,7 @@ type
     class property Enabled: Boolean read FEnabled write FEnabled;
     class property HookVclControls: Boolean read FHookVclControls
       write FHookVclControls;
+    class property SysStyleHookList: TObjectDictionary<HWND, TSysStyleHook> read FSysStyleHookList;
   end;
 
 function GetWindowText(Window: HWND): String;
