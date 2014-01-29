@@ -29,20 +29,22 @@ Procedure  Done;
 implementation
 
 {
+  TODO:
+
   TNewEdit = class(TEdit)            ok
   TEdit                              ok
   TPasswordEdit                      ok
-  TNewMemo = class(TMemo)            ow/ scrollbar
+  TNewMemo = class(TMemo)            ok
   TNewComboBox = class(TComboBox)    ok
-  TNewListBox = class(TListBox)      ow/ scrollbar
-  TListBox                           ow/ scrollbar
+  TNewListBox = class(TListBox)      ok
+  TListBox                           ok
   TNewButton = class(TButton)        ok
   TNewCheckBox = class(TCheckBox)    ok
   TNewRadioButton = class(TRadioButton)
   TSelectFolderForm                  ok
-  TFolderTreeView
-  TStartMenuFolderTreeView
-  TRichEditViewer                    ow/ scrollbar
+  TFolderTreeView                    ok
+  TStartMenuFolderTreeView           ok
+  TRichEditViewer                    ok
   TNewStaticText                     ok
   TNewNotebook                       ok
   TNewNotebookPage                   ok
@@ -105,8 +107,6 @@ var
   {$ENDIF}
   ClassesList : TStrings; //use a  TStrings to avoid the use of generics
   ThemedInnoControls: TThemedInnoControls;
-  GetSysColorOrgPointer: Pointer = nil;
-  //var TrampolineGetSysColor : function (nIndex: Integer): DWORD; stdcall;
 
 {$IFDEF DEBUG}
 procedure Addlog(const msg : string);
@@ -168,10 +168,6 @@ begin
   InnoSetupControlsList := TDictionary.Create;
   {$ENDIF}
   ClassesList := TStringList.Create;
-
-//  with TSysStyleManager do
-//    RegisterSysStyleHook('TNewEdit', TSysEditStyleHook);
-
 end;
 
 destructor TThemedInnoControls.Destroy;
@@ -332,27 +328,6 @@ begin
     UnhookWindowsHookEx(FHook_WH_CALLWNDPROC);
 end;
 
-{
-
-function ColorToRGB(Color: TColor): Longint;
-begin
-  if Color < 0 then
-    Result := GetSysColor(Color and $000000FF) else
-    Result := Color;
-end;
-}
-
-//function GetSysColorHook(nIndex: Integer): DWORD; stdcall;
-//begin
-////  if nIndex = COLOR_BTNFACE then
-////  begin
-////   Result:= StyleServices.GetSystemColor(clBtnFace);
-////   Addlog(IntToHex(Result, 8));
-////  end
-////  else
-//   Result:= StyleServices.GetSystemColor(nIndex or Integer($FF000000));
-//end;
-
 Procedure  Done;
 begin
 if Assigned(ThemedInnoControls) then
@@ -360,23 +335,16 @@ if Assigned(ThemedInnoControls) then
     ThemedInnoControls.Free;
     ThemedInnoControls:=nil;
   end;
-
-  //InterceptRemove(@TrampolineGetSysColor,@GetSysColorHook);
-  //RedirectProcedure(@GetSysColorHook, @Winapi.Windows.GetSysColor);
 end;
 
 
 initialization
-
   ThemedInnoControls:=nil;
   if StyleServices.Available then
   begin
    ThemedInnoControls := TThemedInnoControls.Create;
-   GetSysColorOrgPointer  := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
-   //@TrampolineGetSysColor := InterceptCreate(GetSysColorOrgPointer, @GetSysColorHook);
-   //RedirectProcedure(GetSysColorOrgPointer, @GetSysColorHook);
+   TSysStyleManager.HookVclControls:=True;
   end;
-  TSysStyleManager.HookVclControls:=True;
 finalization
    Done;
 end.
