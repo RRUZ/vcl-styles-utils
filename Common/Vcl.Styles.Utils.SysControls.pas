@@ -96,12 +96,11 @@ type
     class property HookVclControls: Boolean read FHookVclControls
       write FHookVclControls;
     class property SysStyleHookList: TObjectDictionary<HWND, TSysStyleHook> read FSysStyleHookList;
+    class property ChildRegSysStylesList : TObjectDictionary<HWND, TChildControlInfo> read FChildRegSysStylesList;
   end;
 
 function GetWindowText(Window: HWND): String;
 function GetWindowClassName(Window: HWND): String;
-function GET_X_LPARAM(Value: DWORD): Longint;
-function GET_Y_LPARAM(Value: DWORD): Longint;
 function RectVCenter(var R: TRect; Bounds: TRect): TRect;
 procedure MoveWindowOrg(DC: HDC; DX, DY: Integer);
 function GetBmpInfo(hBmp: HBITMAP): BITMAP;
@@ -123,6 +122,16 @@ function WM_To_String(WM_Message: Integer): string;
 {$ENDIF }
 
 implementation
+
+//
+//Uses
+// IOUTILS;
+//
+//procedure Addlog(const Msg: string);
+//begin
+//  TFile.AppendAllText('C:\Test\log.txt',
+//    Format('%s %s %s', [FormatDateTime('hh:nn:ss.zzz', Now), Msg, sLineBreak]));
+//end;
 
 {$IFDEF EventLog}
 
@@ -844,6 +853,7 @@ begin
     Result := False;
     Exit;
   end;
+
   if SameText(LInfo.ClassName, 'ToolBarWindow32') then
   begin
     if Root > 0 then
@@ -889,6 +899,9 @@ var
   var
     Info: TChildControlInfo;
   begin
+//    if SameText('Static', sClassName) then
+//      Addlog(Format('AddChildControl $0x%x %s', [Handle, sClassName]));
+
     { The child control will be hooked inside it's parent control. }
     ZeroMemory(@Info, sizeof(TChildControlInfo));
     Info.Parent := Parent;
@@ -898,18 +911,21 @@ var
       FChildRegSysStylesList.Remove(Handle);
     FChildRegSysStylesList.Add(Handle, Info);
     if Assigned(FSysHookNotificationProc) then
-      OnHookNotification(cAdded, @Info);
+      FSysHookNotificationProc(cAdded, @Info);
   end;
 
   procedure AddControl(Handle: HWND);
   begin
+//    if SameText('Static', sClassName) then
+//      Addlog(Format('AddControl $0x%x %s', [Handle, sClassName]));
+
     { Hook the control directly ! }
     if FSysStyleHookList.ContainsKey(Handle) then
       FSysStyleHookList.Remove(Handle);
     FSysStyleHookList.Add(Handle, FRegSysStylesList[sClassName].Create(Handle));
     SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
     if Assigned(FSysHookNotificationProc) then
-      OnHookNotification(cAdded, @Info);
+      FSysHookNotificationProc(cAdded, @Info);
   end;
 
 begin
@@ -954,7 +970,7 @@ begin
 
       if Assigned(FBeforeHookingControlProc) then
       begin
-        if not BeforeHookingControl(@Info) then
+        if not FBeforeHookingControlProc(@Info) then
           Exit;
       end;
 

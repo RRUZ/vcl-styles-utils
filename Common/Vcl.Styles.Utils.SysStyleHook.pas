@@ -267,8 +267,17 @@ function IsControlHooked(Handle: HWND): Boolean;
 implementation
 
 uses
+  //IOUTILS,
   System.UITypes,
   Vcl.Styles.Utils.SysControls;
+
+
+//procedure Addlog(const Msg: string);
+//begin
+//  TFile.AppendAllText('C:\Test\log.txt',
+//    Format('%s %s %s', [FormatDateTime('hh:nn:ss.zzz', Now), Msg, sLineBreak]));
+//end;
+
 
 function IsControlHooked(Handle: HWND): Boolean;
 begin
@@ -1164,7 +1173,7 @@ begin
 end;
 
 type
-  TSysStyleManagerHack = type TSysStyleManager;
+  TSysStyleManagerClass = type TSysStyleManager;
 
 procedure TSysStyleHook.WndProc(var Message: TMessage);
 var
@@ -1183,7 +1192,7 @@ begin
     CM_INITCHILDS:
       begin
         Message.Result := 0;
-        with TSysStyleManagerHack(TSysStyleManager) do
+        with TSysStyleManagerClass(TSysStyleManager) do
         begin
           for ChildHandle in FChildRegSysStylesList.Keys do
             if (not IsControlHooked(ChildHandle)) and
@@ -1250,11 +1259,14 @@ begin
 
     WM_CTLCOLORMSGBOX .. WM_CTLCOLORSTATIC:
       begin
-        if not StyleServicesEnabled then
+                                          //avoid use cuurent style colors on ignored controls
+        if (not StyleServicesEnabled) or (not TSysStyleManager.SysStyleHookList.ContainsKey(Message.lParam)) then
+        //if (not StyleServicesEnabled) then
         begin
           Message.Result := CallDefaultProc(Message);
           Exit;
         end;
+
         TempResult := SendMessage(Handle, CM_BASE + Message.Msg, Message.wParam,
           Message.lParam);
         Message.Result := SendMessage(Message.lParam, CM_BASE + Message.Msg,
@@ -1267,7 +1279,6 @@ begin
     CM_CTLCOLORMSGBOX .. CM_CTLCOLORSTATIC:
       begin
         SetTextColor(Message.wParam, ColorToRGB(FontColor));
-        //SetBkMode (Message.wParam, TRANSPARENT);
         SetBkColor(Message.wParam, ColorToRGB(FBrush.Color));
         Message.Result := LRESULT(FBrush.Handle);
         Exit;

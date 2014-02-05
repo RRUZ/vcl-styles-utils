@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>NSISVCLStyles.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Release_ANSI</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>1</TargetedPlatforms>
 			<AppType>Library</AppType>
@@ -136,6 +136,7 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="Vcl.Styles.NSIS.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ComCtrls.pas"/>

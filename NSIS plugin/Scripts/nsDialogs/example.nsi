@@ -1,6 +1,6 @@
 !include nsDialogs.nsh
 !include LogicLib.nsh
-!addplugindir "..\..\Win32\Release" 
+!addplugindir "..\..\Win32\Release_ANSI" 
 Name "nsDialogs Example"
 OutFile "nsDialogs Example.exe"
 
@@ -26,6 +26,7 @@ Function nsDialogsPage
 
 	${NSD_CreateButton} 0 0 100% 12u Test
 	Pop $BUTTON
+	;MessageBox MB_OK "$BUTTON"
 	GetFunctionAddress $0 OnClick
 	nsDialogs::OnClick $BUTTON $0
 
@@ -86,8 +87,6 @@ SectionEnd
 
 Function .onInit
    InitPluginsDir
-   ;Get the skin file to use
    File /oname=$PLUGINSDIR\AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
-   ;Load the skin using the LoadVCLStyleA function
-   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\AmethystKamri.vsf 
+   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\AmethystKamri.vsf 
 FunctionEnd
