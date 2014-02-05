@@ -1002,7 +1002,7 @@ begin
         Exit;
       end;
 
-    WM_NCCALCSIZE, WM_NCPAINT:
+    WM_NCCALCSIZE: // , WM_NCPAINT:
       begin
         if (not OverridePaint) or (not OverridePaintNC) then
         begin
@@ -1095,7 +1095,7 @@ begin
   GetMenuItemInfo(FMenu, FIndex, True, info);
   if not(info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
   begin
-    { The Size neede for the Buffer . }
+    { The Size needed for the Buffer . }
     StrSize := info.cch * 2 + 2;
     GetMem(Buffer, StrSize);
     try
@@ -1159,16 +1159,16 @@ function TSysPopupStyleHook.TSysPopupItem.GetVCLMenuItems: TMenuItem;
 var
   i, j: integer;
   PopupMenu: TPopupMenu;
-  Form: TForm;
+  Form: TCustomForm;
   MI: TMenuItem;
 begin
   // MI := nil;
   Result := nil;
   for i := 0 to Application.ComponentCount - 1 do
   begin
-    if Application.Components[i] is TForm then
+    if Application.Components[i] is TCustomForm then
     begin
-      Form := TForm(Application.Components[i]);
+      Form := TCustomForm(Application.Components[i]);
       for j := 0 to Form.ComponentCount - 1 do
       begin
         if Form.Components[j] is TMenuItem then
