@@ -1,7 +1,7 @@
 !include LogicLib.nsh
 !include nsDialogs.nsh
 !include WinMessages.nsh
-!addplugindir "..\..\Win32\Release" 
+!addplugindir "..\..\Win32\Release_ANSI" 
 Name "nsDialogs Timer Example"
 OutFile "nsDialogs Timer Example.exe"
 XPStyle on
@@ -106,8 +106,6 @@ Section
 SectionEnd
 Function .onInit
    InitPluginsDir
-   ;Get the skin file to use
    File /oname=$PLUGINSDIR\AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
-   ;Load the skin using the LoadVCLStyleA function
-   NSISVCLStyles::LoadVCLStyleA $PLUGINSDIR\AmethystKamri.vsf 
+   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\AmethystKamri.vsf 
 FunctionEnd

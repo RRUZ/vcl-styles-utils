@@ -11,7 +11,7 @@
   InstallDir "$PROGRAMFILES\The Road To Delphi\NSISVCLStyles"
   InstallDirRegKey HKCU "Software\NSISVCLStyles" ""
   RequestExecutionLevel admin
-  !define _VERSION "1.0.0.7"
+  !define _VERSION "1.0.0.8"
   VIProductVersion "${_VERSION}"
   VIAddVersionKey  "ProductName" "VCL Styles for NSIS"
   VIAddVersionKey  "CompanyName" "The Road To Delphi"
@@ -121,7 +121,12 @@ Section ""
     File "Scripts\Modern UI\MultiLanguage.nsi"		
     File "Scripts\Modern UI\StartMenu.nsi"		
     File "Scripts\Modern UI\WelcomeFinish.nsi"		
-	
+	SetOutPath "$INSTDIR\Scripts\nsDialogs"	
+    File "Scripts\nsDialogs\example.nsi"		
+    File "Scripts\nsDialogs\InstallOptions.nsi"	
+    File "Scripts\nsDialogs\timer.nsi"	
+    File "Scripts\nsDialogs\welcome.nsi"	
+    File "Scripts\nsDialogs\welcome_colors.nsi"	
 	;Store installation folder
     WriteRegStr HKCU "Software\NSISVCLStyles" "" $INSTDIR
 	WriteUninstaller "$INSTDIR\Uninstall.exe"

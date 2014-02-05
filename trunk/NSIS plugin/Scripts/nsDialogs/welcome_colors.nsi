@@ -6,7 +6,7 @@
 !addplugindir "..\..\Win32\Release_ANSI" 
 Name "nsDialogs Welcome"
 OutFile "nsDialogs Welcome.exe"
-
+;Unicode true
 Page custom nsDialogsWelcome
 Page custom nsDialogsDirectory
 !insertmacro MUI_PAGE_INSTFILES
@@ -21,16 +21,15 @@ Var IMAGECTL
 Var IMAGE
 Var DIRECTORY
 Var FREESPACE
-
 Var HEADLINE_FONT
 
 Function .onInit
-   InitPluginsDir
-   ;Get the skin file to use
-   File /oname=$PLUGINSDIR\Amakrits.vsf "..\..\Styles\Amakrits.vsf"
-   ;Load the skin using the LoadVCLStyle function
-   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf 
-  
+    InitPluginsDir
+    ;Get the skin file to use
+    File /oname=$PLUGINSDIR\Amakrits.vsf "..\..\Styles\Amakrits.vsf"
+    ;Load the skin using the LoadVCLStyle function
+    NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf 
+    NSISVCLStyles::RemoveStyleNCArea
 	CreateFont $HEADLINE_FONT "$(^Font)" "14" "700"
 
 	InitPluginsDir
@@ -66,12 +65,11 @@ Function HideControls
 FunctionEnd
 
 Function ShowControls
-
     LockWindow on
     GetDlgItem $0 $HWNDPARENT 1028
-    ShowWindow $0 ${SW_NORMAL}
-
-    GetDlgItem $0 $HWNDPARENT 1256
+	ShowWindow $0 ${SW_NORMAL}
+     
+    GetDlgItem $0 $HWNDPARENT 1256	
     ShowWindow $0 ${SW_NORMAL}
 
     GetDlgItem $0 $HWNDPARENT 1035
@@ -80,16 +78,15 @@ Function ShowControls
     GetDlgItem $0 $HWNDPARENT 1037
     ShowWindow $0 ${SW_NORMAL}
 
-    GetDlgItem $0 $HWNDPARENT 1038
+    GetDlgItem $0 $HWNDPARENT 1038	
     ShowWindow $0 ${SW_NORMAL}
 
-    GetDlgItem $0 $HWNDPARENT 1039
+    GetDlgItem $0 $HWNDPARENT 1039	
     ShowWindow $0 ${SW_NORMAL}
 
     GetDlgItem $0 $HWNDPARENT 1045
     ShowWindow $0 ${SW_HIDE}
     LockWindow off
-
 FunctionEnd
 
 Function nsDialogsWelcome
@@ -108,25 +105,29 @@ Function nsDialogsWelcome
 
 	nsDialogs::CreateControl STATIC ${WS_VISIBLE}|${WS_CHILD}|${WS_CLIPSIBLINGS} 0 120u 10u -130u 20u "Welcome to nsDialogs!"
 	Pop $HEADLINE
-
+	NSISVCLStyles::RemoveStyleControl $HEADLINE
+	
+	;GetDlgItem $0 $HWNDPARENT 1
+	;NSISVCLStyles::RemoveStyleControl $0
+	
 	SendMessage $HEADLINE ${WM_SETFONT} $HEADLINE_FONT 0
 
 	nsDialogs::CreateControl STATIC ${WS_VISIBLE}|${WS_CHILD}|${WS_CLIPSIBLINGS} 0 120u 32u -130u -32u "nsDialogs is the next generation of user interfaces in NSIS. It gives the developer full control over custom pages. Some of the features include control text containing variables, callbacks directly into script functions and creation of any type of control. Create boring old edit boxes or load some external library and create custom controls with no need of creating your own plug-in.$\r$\n$\r$\nUnlike InstallOptions, nsDialogs doesn't use INI files to communicate with the script. By interacting directly with the script, nsDialogs can perform much faster without the need of costly, old and inefficient INI operations. Direct interaction also allows direct calls to functions defined in the script and removes the need of conversion functions like Io2Nsis.$\r$\n$\r$\nHit the Next button to see how it all fits into a mock directory page."
 	Pop $TEXT
-
+	NSISVCLStyles::RemoveStyleControl $TEXT
+	
 	SetCtlColors $DIALOG "" 0xffffff
-	SetCtlColors $HEADLINE "" 0xffffff
-	SetCtlColors $TEXT "" 0xffffff
+	SetCtlColors $HEADLINE  0xff0000 transparent
+	SetCtlColors $TEXT  0x0000ff transparent
 
-	Call HideControls
-
+	Call HideControls ;Hide standard NSIS Controls
 	nsDialogs::Show
-
 	Call ShowControls
 
 	System::Call gdi32::DeleteObject(p$IMAGE)
 
 FunctionEnd
+
 
 !define SHACF_FILESYSTEM 1
 
@@ -142,8 +143,9 @@ Function nsDialogsDirectory
 
 	nsDialogs::CreateControl STATIC ${WS_VISIBLE}|${WS_CHILD}|${WS_CLIPSIBLINGS}|${SS_CENTER} 0 0 0 100% 30 "Directory page"
 	Pop $HEADLINE
-
+    NSISVCLStyles::RemoveStyleControl $HEADLINE
 	SendMessage $HEADLINE ${WM_SETFONT} $HEADLINE_FONT 0
+	SetCtlColors $HEADLINE  0x00ff00 transparent
 
 	nsDialogs::CreateControl STATIC ${WS_VISIBLE}|${WS_CHILD}|${WS_CLIPSIBLINGS} 0 0 30 100% 40 "Select the installation directory of NSIS to continue. $_CLICK"
 	Pop $TEXT
@@ -217,4 +219,3 @@ FunctionEnd
 
 Section
 SectionEnd
-

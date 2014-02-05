@@ -239,15 +239,9 @@ type
 implementation
 
 uses
-  // IOUTILS,
   Vcl.ExtCtrls,
   System.UITypes,
   Vcl.Styles.Utils.SysControls;
-
-procedure Addlog(const Msg: string);
-begin
-  // TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-end;
 
 { TSysEditStyleHook }
 
@@ -2237,12 +2231,6 @@ begin
   OverrideFont := True;
 {$IFEND}
   UpdateColors;
-
-//  if (SysControl.ExStyle and WS_EX_TRANSPARENT <> WS_EX_TRANSPARENT) then
-//   SysControl.ExStyle  := SysControl.ExStyle or WS_EX_TRANSPARENT;
-
-
-  //Addlog('TSysStaticStyleHook ' + IntToHex(AHandle, 8));
 end;
 
 destructor TSysStaticStyleHook.Destroy;
@@ -2305,9 +2293,7 @@ end;
 
 procedure TSysStaticStyleHook.Paint(Canvas: TCanvas);
 const
-  Alignments: array [TAlignment] of Word = (DT_LEFT, DT_RIGHT, DT_CENTER);
-  States: array [Boolean] of TThemedTextLabel = (ttlTextLabelDisabled,
-    ttlTextLabelNormal);
+  States: array [Boolean] of TThemedTextLabel = (ttlTextLabelDisabled,  ttlTextLabelNormal);
 var
   LDetails: TThemedElementDetails;
   LRect: TRect;
@@ -2326,6 +2312,7 @@ begin
   end;
 
   LDetails := StyleServices.GetElementDetails(States[SysControl.Enabled]);
+  Canvas.Font:=SysControl.Font;
   DrawText(Canvas.Handle, LDetails, SysControl.Text, LRect, TextFormat);
 end;
 
@@ -2497,8 +2484,8 @@ begin
         GetElementDetails(tbCheckBoxCheckedNormal), LRect, ElementSize, BoxSize)
       then
       begin
-        BoxSize.cx := 13;
-        BoxSize.cy := 13;
+        BoxSize.cx := GetSystemMetrics(SM_CXMENUCHECK);
+        BoxSize.cy := GetSystemMetrics(SM_CYMENUCHECK);
       end;
     if not RightAlignment then
     begin
@@ -2682,7 +2669,6 @@ end;
 
 initialization
 
-//
 
 if StyleServices.Available then
 begin

@@ -36,7 +36,6 @@ uses
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Forms,
   Vcl.ImgList,
-  Vcl.GraphUtil,
   Vcl.ComCtrls,
   Vcl.ExtCtrls,
   Vcl.Styles.Utils.Forms,
