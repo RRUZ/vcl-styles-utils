@@ -1051,15 +1051,9 @@ end;
 
 function GetWindowText(Window: HWND): String;
 var
-  Text: PChar;
+  Buffer: array [0..1023] of Char;
 begin
-  GetMem(Text, 256);
-  try
-    Winapi.Windows.GetWindowText(Window, Text, 256);
-    Result := String(Text);
-  finally
-    FreeMem(Text, 256);
-  end;
+  SetString(Result, Buffer, Winapi.Windows.GetWindowText(Window, Buffer, Length(Buffer))) ;
 end;
 
 function GetWindowClassName(Window: HWND): String;

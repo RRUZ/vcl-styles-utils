@@ -30,7 +30,6 @@ Function .onInit
    File /oname=$PLUGINSDIR\Amakrits.vsf "..\..\Styles\Amakrits.vsf"
    ;Load the skin using the LoadVCLStyle function
    NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf 
-  
 	CreateFont $HEADLINE_FONT "$(^Font)" "14" "700"
 
 	InitPluginsDir
