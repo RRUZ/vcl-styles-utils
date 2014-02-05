@@ -1002,7 +1002,7 @@ begin
         Exit;
       end;
 
-    WM_NCCALCSIZE: // , WM_NCPAINT:
+    WM_NCCALCSIZE, WM_NCPAINT:
       begin
         if (not OverridePaint) or (not OverridePaintNC) then
         begin
