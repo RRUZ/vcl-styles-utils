@@ -303,13 +303,7 @@ type
 implementation
 
 uses
-//  IOUTILS,
   Vcl.Styles.Utils.SysControls;
-
-//procedure Addlog(const Msg: string);
-//begin
-//   TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-//end;
 
 { TSysListViewStyleHook }
 
@@ -1826,11 +1820,12 @@ function SizeOfReBarBandInfo: Integer;
 var
   ReBarBandInfo: TReBarBandInfo;
 begin
+  ZeroMemory(@ReBarBandInfo, SizeOf(ReBarBandInfo));
   if GetComCtlVersion >= $60001 then
     Result := Sizeof(TReBarBandInfo)
   else
     // Platforms prior to Vista do not support the fields rcChevronLocation & uChevronState
-    Result := SizeOf(TReBarBandInfo) - SizeOf(ReBarBandInfo.rcChevronLocation) -
+    Result := SizeOf(ReBarBandInfo) - SizeOf(ReBarBandInfo.rcChevronLocation) -
       SizeOf(ReBarBandInfo.uChevronState);
 end;
 
@@ -1979,7 +1974,6 @@ begin
   end
   else
   begin
-    AddToLog('2');
    Count := SendMessage(Handle, SB_GETPARTS, 0, 0);
     for I := 0 to Count - 1 do
     begin

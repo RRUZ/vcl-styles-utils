@@ -463,8 +463,10 @@ begin
 end;
 
 function TSysControl.GetText: String;
+var
+  Buffer: array [0..1023] of Char;
 begin
-  Result := GetWindowText(Handle);
+  SetString(Result, Buffer, Winapi.Windows.GetWindowText(Handle, Buffer, Length(Buffer))) ;
 end;
 
 function TSysControl.GetTop: Integer;
@@ -1260,7 +1262,7 @@ begin
     WM_CTLCOLORMSGBOX .. WM_CTLCOLORSTATIC:
       begin
                                           //avoid use cuurent style colors on ignored controls
-        if (not StyleServicesEnabled) or (not TSysStyleManager.SysStyleHookList.ContainsKey(Message.lParam)) then
+        if (not StyleServicesEnabled) or  (not TSysStyleManager.UseStyleColorsChildControls and  (not TSysStyleManager.SysStyleHookList.ContainsKey(Message.lParam))) then
         //if (not StyleServicesEnabled) then
         begin
           Message.Result := CallDefaultProc(Message);
