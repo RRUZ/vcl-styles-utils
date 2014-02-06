@@ -125,6 +125,7 @@ end;
    if not StyleServices.Available then exit;
    InitA(hwndParent, string_size, variables, stacktop, extraparameters);
 
+   TSysStyleManager.UseStyleColorsChildControls:=False;
    sHandle:=PAnsiChar(PopStringA());
    //Addlog(Format('RemoveStyleControl (1) "%s"', [String(sHandle)]));
    if TryStrToInt(String(sHandle), Value) then
@@ -179,6 +180,7 @@ end;
    if not StyleServices.Available then exit;
    InitW(hwndParent, string_size, variables, stacktop, extraparameters);
 
+   TSysStyleManager.UseStyleColorsChildControls:=False;
    sHandle:=PChar(PopStringW());
    if TryStrToInt(String(sHandle), Value) then
    begin

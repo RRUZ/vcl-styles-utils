@@ -1,28 +1,29 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit Vcl.Styles.WebBrowser                                                                       }
-{ unit for the VCL Styles Utils                                                                    }
-{ http://code.google.com/p/vcl-styles-utils/                                                       }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{ The Original Code is Vcl.Styles.WebBrowser.pas.                                                  }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012 Rodrigo Ruz V.                         }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// Unit Vcl.Styles.WebBrowser
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is Vcl.Styles.WebBrowser.pas.
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 unit Vcl.Styles.WebBrowser;
 
 interface
-
+//Uncomment this option if you want which the TVclStylesWebBrowser hook the dialogs messages directly.
+{.$DEFINE HOOKDialogs}
 uses
   Vcl.Forms,
   WinApi.Windows,
@@ -35,6 +36,7 @@ uses
   Vcl.StdCtrls,
   SHDocVw;
 
+
 type
 
   TDocHostUIInfo = record
@@ -45,12 +47,14 @@ type
     pchHostNS: PWChar;
   end;
 
+  {$IFDEF HOOKDialogs}
   //http://msdn.microsoft.com/en-us/library/aa753269%28v=vs.85%29.aspx
   IDocHostShowUI = interface(IUnknown)
     ['{c4d244b0-d43e-11cf-893b-00aa00bdce1a}']
     function ShowMessage(hwnd: THandle;lpstrText: POLESTR;lpstrCaption: POLESTR; dwType: longint;lpstrHelpFile: POLESTR;dwHelpContext: longint; var plResult: LRESULT): HRESULT; stdcall;
     function ShowHelp(hwnd: THandle; pszHelpFile: POLESTR; uCommand: integer; dwData: longint; ptMouse: TPoint; var pDispachObjectHit: IDispatch): HRESULT; stdcall;
   end; // IDocHostShowUI
+  {$ENDIF}
 
   //http://msdn.microsoft.com/en-us/library/aa753260%28v=vs.85%29.aspx
   IDocHostUIHandler  = interface(IUnknown)
@@ -73,7 +77,7 @@ type
   end;
 
 
-  TVclStylesWebBrowser = class(SHDocVw.TWebBrowser, IDocHostUIHandler, IDocHostShowUI, IOleCommandTarget)
+  TVclStylesWebBrowser = class(SHDocVw.TWebBrowser, IDocHostUIHandler{$IFDEF HOOKDialogs},IDocHostShowUI{$ENDIF}, IOleCommandTarget)
   strict private
     type
       TWinContainer = class(TWinControl)
@@ -119,10 +123,12 @@ type
     function GetExternal(out ppDispatch: IDispatch): HRESULT; stdcall;
     function TranslateUrl(const dwTranslate: DWORD; const pchURLIn: POLESTR; var ppchURLOut: POLESTR): HRESULT; stdcall;
     function FilterDataObject(const pDO: IDataObject; out ppDORet: IDataObject): HRESULT; stdcall;
+    {$IFDEF HOOKDialogs}
     // IDocHostShowUI
     function ShowMessage(hwnd: THandle;lpstrText: POLESTR;lpstrCaption: POLESTR; dwType: longint;lpstrHelpFile: POLESTR;dwHelpContext: longint; var plResult: LRESULT): HRESULT; stdcall;
     function ShowHelp(hwnd: THandle; pszHelpFile: POLESTR; uCommand: integer; dwData: longint; ptMouse: TPoint; var pDispachObjectHit: IDispatch): HRESULT; stdcall;
     //IOleCommandTarget
+    {$ENDIF}
     function QueryStatus(CmdGroup: PGUID; cCmds: Cardinal; prgCmds: POleCmd; CmdText: POleCmdText): HResult; stdcall;
     function Exec(CmdGroup: PGUID; nCmdID, nCmdexecopt: DWORD; const vaIn: OleVariant; var vaOut: OleVariant): HResult; stdcall;
   protected
@@ -404,6 +410,7 @@ begin
   Result:=S_FALSE;
 end;
 
+{$IFDEF HOOKDialogs}
 function TVclStylesWebBrowser.ShowHelp(hwnd: THandle; pszHelpFile: POLESTR;
   uCommand, dwData: Integer; ptMouse: TPoint;
   var pDispachObjectHit: IDispatch): HRESULT;
@@ -449,6 +456,7 @@ begin
   plResult:= MessageDlg(lpstrText, DlgType, Buttons, dwHelpContext);
   Result := S_OK;
 end;
+{$ENDIF}
 
 function TVclStylesWebBrowser.GetHostInfo(var pInfo: TDocHostUIInfo): HRESULT;
 var
