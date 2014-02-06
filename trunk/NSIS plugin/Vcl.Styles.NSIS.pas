@@ -164,8 +164,8 @@ begin
 end;
 
 procedure TTransparentStaticNSIS.PaintBackground(Canvas: TCanvas);
-var
-  Details: TThemedElementDetails;
+//var
+//  Details: TThemedElementDetails;
 begin
   // if StyleServices.Available then
   // begin
