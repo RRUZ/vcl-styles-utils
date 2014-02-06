@@ -1185,7 +1185,6 @@ end;
 
 destructor TSysPopupStyleHook.TSysPopupItem.Destroy;
 begin
-
   inherited;
 end;
 
@@ -1317,7 +1316,8 @@ begin
   end;
   if Assigned(VisibleItems) then
   begin
-    Result := VisibleItems.Items[FIndex];
+    if (VisibleItems.Count > 0) and (FIndex < VisibleItems.Count) then
+      Result := VisibleItems.Items[FIndex];
     FreeAndNil(VisibleItems);
   end;
 end;
