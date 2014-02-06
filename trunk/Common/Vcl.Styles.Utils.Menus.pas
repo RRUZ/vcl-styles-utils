@@ -151,6 +151,108 @@ implementation
 uses
   Vcl.Styles.Utils.SysControls;
 
+function GetBmpInfo(hBmp: HBITMAP): BITMAP;
+begin
+  ZeroMemory(@Result, sizeof(BITMAP));
+  GetObject(hBmp, sizeof(Result), @Result);
+end;
+
+function GetBitmapHeight(hBmp: HBITMAP): Integer;
+begin
+  Result := GetBmpInfo(hBmp).bmHeight;
+end;
+
+function GetBitmapWidth(hBmp: HBITMAP): Integer;
+begin
+  Result := GetBmpInfo(hBmp).bmWidth;
+end;
+
+
+function BmpToIcon(hBmp: HBITMAP): HICON;
+var
+  Bmp: BITMAP;
+  hbmMask: HBITMAP;
+  DC: HDC;
+  ii: ICONINFO;
+  Icon: HICON;
+begin
+  FillChar(Bmp, sizeof(BITMAP), Char(0));
+  GetObject(hBmp, sizeof(BITMAP), @Bmp);
+  DC := GetDC(0);
+  hbmMask := CreateCompatibleBitmap(DC, Bmp.bmWidth, Bmp.bmHeight);
+  ii.fIcon := True;
+  ii.hbmColor := hBmp;
+  ii.hbmMask := hbmMask;
+  Icon := CreateIconIndirect(ii);
+  DeleteObject(hbmMask);
+  ReleaseDC(0, DC);
+  Result := Icon;
+end;
+
+procedure RotateBitmap(Bmp: TBitmap; Rads: Single; AdjustSize: Boolean;
+  BkColor: TColor = clNone);
+var
+  C: Single;
+  S: Single;
+  XForm: tagXFORM;
+  Tmp: TBitmap;
+begin
+  C := Cos(Rads);
+  S := Sin(Rads);
+  XForm.eM11 := C;
+  XForm.eM12 := S;
+  XForm.eM21 := -S;
+  XForm.eM22 := C;
+  Tmp := TBitmap.Create;
+  try
+    Tmp.TransparentColor := Bmp.TransparentColor;
+    Tmp.TransparentMode := Bmp.TransparentMode;
+    Tmp.Transparent := Bmp.Transparent;
+    Tmp.Canvas.Brush.Color := BkColor;
+    if AdjustSize then
+    begin
+      Tmp.Width := Round(Bmp.Width * Abs(C) + Bmp.Height * Abs(S));
+      Tmp.Height := Round(Bmp.Width * Abs(S) + Bmp.Height * Abs(C));
+      XForm.eDx := (Tmp.Width - Bmp.Width * C + Bmp.Height * S) / 2;
+      XForm.eDy := (Tmp.Height - Bmp.Width * S - Bmp.Height * C) / 2;
+    end
+    else
+    begin
+      Tmp.Width := Bmp.Width;
+      Tmp.Height := Bmp.Height;
+      XForm.eDx := (Bmp.Width - Bmp.Width * C + Bmp.Height * S) / 2;
+      XForm.eDy := (Bmp.Height - Bmp.Width * S - Bmp.Height * C) / 2;
+    end;
+    SetGraphicsMode(Tmp.Canvas.Handle, GM_ADVANCED);
+    SetWorldTransform(Tmp.Canvas.Handle, XForm);
+    BitBlt(Tmp.Canvas.Handle, 0, 0, Tmp.Width, Tmp.Height, Bmp.Canvas.Handle, 0,
+      0, SRCCOPY);
+    Bmp.Assign(Tmp);
+  finally
+    Tmp.Free;
+  end;
+end;
+
+function GetMenuItemPos(Menu: HMENU; ID: Integer): Integer;
+var
+  i: Integer;
+  mii: MENUITEMINFO;
+begin
+  Result := -1;
+  if Menu = 0 then
+    Exit;
+  for i := 0 to GetMenuItemCount(Menu) do
+  begin
+    FillChar(mii, sizeof(mii), Char(0));
+    mii.cbSize := sizeof(mii);
+    mii.fMask := MIIM_ID;
+    if (GetMenuItemInfo(Menu, i, True, mii)) then
+      if mii.wID = Cardinal(ID) then
+        Exit(i);
+  end;
+end;
+
+
 { TSysPopupStyleHook }
 
 constructor TSysPopupStyleHook.Create(AHandle: THandle);

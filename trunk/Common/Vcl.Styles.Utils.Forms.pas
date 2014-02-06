@@ -233,13 +233,50 @@ type
 implementation
 
 uses
-  //IOUTILS,
   Vcl.Styles.Utils.SysControls;
 
-//procedure Addlog(const Msg: string);
-//begin
-//   TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-//end;
+function IsItemDisabled(Menu: HMENU; Index: Integer): Boolean;
+var
+  Info: TMenuItemInfo;
+begin
+  Result := False;
+  if (Menu = 0) or (Index < 0) then
+    Exit;
+
+  FillChar(Info, sizeof(Info), Char(0));
+  Info.cbSize := sizeof(TMenuItemInfo);
+  Info.fMask := MIIM_STATE;
+  GetMenuItemInfo(Menu, Index, True, Info);
+  Result := (Info.fState and MFS_DISABLED = MFS_DISABLED) or
+    (Info.fState and MF_DISABLED = MF_DISABLED) or
+    (Info.fState and MF_GRAYED = MF_GRAYED);
+end;
+
+function GetMenuItemPos(Menu: HMENU; ID: Integer): Integer;
+var
+  i: Integer;
+  mii: MENUITEMINFO;
+begin
+  Result := -1;
+  if Menu = 0 then
+    Exit;
+  for i := 0 to GetMenuItemCount(Menu) do
+  begin
+    FillChar(mii, sizeof(mii), Char(0));
+    mii.cbSize := sizeof(mii);
+    mii.fMask := MIIM_ID;
+    if (GetMenuItemInfo(Menu, i, True, mii)) then
+      if mii.wID = Cardinal(ID) then
+        Exit(i);
+  end;
+end;
+
+function IsWindowMsgBox(Handle: HWND): Boolean;
+begin
+  Result := ((FindWindowEx(Handle, 0, 'Edit', nil) = 0) and
+    (GetDlgItem(Handle, $FFFF) <> 0)) and
+    (GetWindowLongPtr(Handle, GWL_USERDATA) <> 0);
+end;
 
 { TSysDialogStyleHook }
 
@@ -1401,6 +1438,16 @@ begin
     FDownPoint := Point(-1, -1);
   end;
 end;
+
+procedure FillDC(DC: HDC; R: TRect; Color: TColor);
+var
+  Brush: HBRUSH;
+begin
+  Brush := CreateSolidBrush(Color);
+  FillRect(DC, R, Brush);
+  DeleteObject(Brush);
+end;
+
 
 procedure TSysScrollingStyleHook.DrawHorzScroll(DC: HDC);
 var
