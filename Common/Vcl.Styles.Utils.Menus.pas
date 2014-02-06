@@ -22,6 +22,11 @@ unit Vcl.Styles.Utils.Menus;
 
 interface
 
+{ DEFINE HookSysOwnerDrawItems only if you are
+  using a non VCL PopupMenu and this menu is OwnerDraw .
+}
+{ .$DEFINE HookSysOwnerDrawItems }
+
 uses
   System.Classes,
   System.Types,
@@ -38,7 +43,10 @@ uses
   Vcl.Controls,
   Vcl.Menus,
   System.Math,
-  Vcl.Styles.Utils.SysStyleHook;
+  Vcl.Styles.Utils.SysStyleHook
+{$IFDEF HookSysOwnerDrawItems}
+    , Generics.Collections, KOLDetours
+{$ENDIF};
 
 const
   { The Undocumented Messages }
@@ -79,34 +87,38 @@ type
       FMenu: HMENU;
       FHandle: HWND;
       FSysParent: TSysControl;
+      FSysPopupStyleHook: TSysPopupStyleHook;
       function GetItemRect: TRect;
       function IsItemDisabled: Boolean;
       function IsItemContainsSubMenu: Boolean;
       function IsItemSeparator: Boolean;
-      function isItemChecked: Boolean;
-      function isItemDefault: Boolean;
+      function IsItemChecked: Boolean;
+      function IsItemDefault: Boolean;
       function GetItemText: String;
       function GetVCLMenuItems: TMenuItem;
+      function GetVCLMenuItemsFast: TMenuItem;
       function GetItemBitmap: HBITMAP;
       function IsItemRadioCheck: Boolean;
-      function isItemVisible: Boolean;
+      // function isItemVisible: Boolean;
+      function IsItemOwnerDraw: Boolean;
       function GetItemID: WORD;
       function GetVCLRealItem: TMenuItem;
     public
-      constructor Create(SysParent: TSysControl; Index: integer;
-        Menu: HMENU); virtual;
+      constructor Create(SysPopupStyleHook: TSysPopupStyleHook;
+        SysParent: TSysControl; Index: integer; Menu: HMENU); virtual;
       Destructor Destroy; override;
       property ID: WORD read GetItemID;
       property ItemRect: TRect read GetItemRect;
       property Disabled: Boolean read IsItemDisabled;
       property Separator: Boolean read IsItemSeparator;
       property HasSubMenu: Boolean read IsItemContainsSubMenu;
-      property Checked: Boolean read isItemChecked;
-      property Visible: Boolean read isItemVisible;
+      property Checked: Boolean read IsItemChecked;
+      // property Visible: Boolean read isItemVisible;
       property RadioCheck: Boolean read IsItemRadioCheck;
-      property DefaultItem: Boolean read isItemDefault;
+      property DefaultItem: Boolean read IsItemDefault;
       property Text: String read GetItemText;
-      property VCLMenuItems: TMenuItem read GetVCLMenuItems;
+      property OwnerDraw: Boolean read IsItemOwnerDraw;
+      property VCLMenuItems: TMenuItem read GetVCLMenuItemsFast;
       property VCLItem: TMenuItem read GetVCLRealItem;
       property Bitmap: HBITMAP read GetItemBitmap;
     end;
@@ -121,6 +133,7 @@ type
     FSysPopupItem: TSysPopupItem;
     FCount: integer;
     FMenu: HMENU;
+    FVCLMenuItems: TMenuItem;
     function GetMenuFromHandle(AHandle: HWND): HMENU;
     function GetItemsCount: integer;
     procedure MNSELECTITEM(var Message: TMessage); message MN_SELECTITEM;
@@ -148,36 +161,34 @@ type
 
 implementation
 
-uses
-  Vcl.Styles.Utils.SysControls;
+uses Vcl.Styles.Utils.SysControls;
 
-function GetBmpInfo(hBmp: HBITMAP): BITMAP;
+function GetBmpInfo(hBmp: HBITMAP): Bitmap;
 begin
-  ZeroMemory(@Result, sizeof(BITMAP));
+  ZeroMemory(@Result, sizeof(Bitmap));
   GetObject(hBmp, sizeof(Result), @Result);
 end;
 
-function GetBitmapHeight(hBmp: HBITMAP): Integer;
+function GetBitmapHeight(hBmp: HBITMAP): integer;
 begin
   Result := GetBmpInfo(hBmp).bmHeight;
 end;
 
-function GetBitmapWidth(hBmp: HBITMAP): Integer;
+function GetBitmapWidth(hBmp: HBITMAP): integer;
 begin
   Result := GetBmpInfo(hBmp).bmWidth;
 end;
 
-
 function BmpToIcon(hBmp: HBITMAP): HICON;
 var
-  Bmp: BITMAP;
+  Bmp: Bitmap;
   hbmMask: HBITMAP;
   DC: HDC;
   ii: ICONINFO;
   Icon: HICON;
 begin
-  FillChar(Bmp, sizeof(BITMAP), Char(0));
-  GetObject(hBmp, sizeof(BITMAP), @Bmp);
+  FillChar(Bmp, sizeof(Bitmap), Char(0));
+  GetObject(hBmp, sizeof(Bitmap), @Bmp);
   DC := GetDC(0);
   hbmMask := CreateCompatibleBitmap(DC, Bmp.bmWidth, Bmp.bmHeight);
   ii.fIcon := True;
@@ -233,9 +244,9 @@ begin
   end;
 end;
 
-function GetMenuItemPos(Menu: HMENU; ID: Integer): Integer;
+function GetMenuItemPos(Menu: HMENU; ID: integer): integer;
 var
-  i: Integer;
+  i: integer;
   mii: MENUITEMINFO;
 begin
   Result := -1;
@@ -252,9 +263,33 @@ begin
   end;
 end;
 
+{$IFDEF HookSysOwnerDrawItems}
 
-{ TSysPopupStyleHook }
+type
+  TOwnerDrawItemData = class(TObject)
+  private
+    FCaption: String;
+    FBitmap: HBITMAP;
+    property Caption: String read FCaption write FCaption;
+    property Bitmap: HBITMAP read FBitmap write FBitmap;
+  end;
 
+  TOwnerDrawItemsData = class(TList)
+
+  end;
+
+var
+  InsertMenuItemPointer: Pointer = 0;
+  DeleteMenuPointer: Pointer = 0;
+  TrampoLineInsertMenuItem: function(p1: HMENU; p2: UINT; p3: BOOL;
+    const p4: TMenuItemInfoW): BOOL; stdcall;
+  TrampoLineDeleteMenu: function(HMENU: HMENU; uPosition, uFlags: UINT)
+    : BOOL; stdcall;
+
+  OwnerDrawItemsList: TObjectDictionary<HMENU, TOwnerDrawItemsData>;
+{$ENDIF}
+
+  { TSysPopupStyleHook }
 constructor TSysPopupStyleHook.Create(AHandle: THandle);
 begin
   inherited;
@@ -269,6 +304,7 @@ begin
   FKeyIndex := -1;
   FItemsPainted := False;
   FSysPopupItem := nil;
+  FVCLMenuItems := nil;
   // Font := Screen.MenuFont;
 end;
 
@@ -607,22 +643,26 @@ begin
     else
     begin
       { Draw PopupMenu Bitmap }
-      DisplayCheckedGlyph := False;
       BmpWidth := GetBitmapWidth(hBmp);
       BmpHeight := GetBitmapHeight(hBmp);
-      LImageRect := Rect(0, 0, BmpWidth, BmpHeight);
-      RectVCenter(LImageRect, ItemRect);
-      if not RightToLeft then
-        OffsetRect(LImageRect, 4, 0)
-      else
+      if (BmpWidth > 0) and (BmpHeight > 0) then
       begin
-        LImageRect.Left := ItemRect.Right - BmpWidth - 4;
-        LImageRect.Right := ItemRect.Right;
+        DisplayCheckedGlyph := False;
+        LImageRect := Rect(0, 0, BmpWidth, BmpHeight);
+        RectVCenter(LImageRect, ItemRect);
+        if not RightToLeft then
+          OffsetRect(LImageRect, 4, 0)
+        else
+        begin
+          LImageRect.Left := ItemRect.Right - BmpWidth - 4;
+          LImageRect.Right := ItemRect.Right;
+        end;
+        Icon := BmpToIcon(hBmp);
+
+        DrawIconEX(DC, LImageRect.Left, LImageRect.Top, Icon, BmpWidth,
+          BmpHeight, 0, 0, DI_NORMAL);
+        DeleteObject(Icon);
       end;
-      Icon := BmpToIcon(hBmp);
-      DrawIconEX(DC, LImageRect.Left, LImageRect.Top, Icon, BmpWidth, BmpHeight,
-        0, 0, DI_NORMAL);
-      DeleteObject(Icon);
     end;
   end;
 
@@ -732,8 +772,8 @@ function TSysPopupStyleHook.GetRightToLeft: Boolean;
 var
   info: TMenuItemInfo;
 begin
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_TYPE;
   GetMenuItemInfo(FMenu, 0, True, info);
   Result := ((info.fType and MFT_RIGHTORDER) = MFT_RIGHTORDER) or
@@ -747,7 +787,7 @@ begin
   begin
     if Assigned(FSysPopupItem) then
       FreeAndNil(FSysPopupItem);
-    FSysPopupItem := TSysPopupItem.Create(SysControl, Index, FMenu);
+    FSysPopupItem := TSysPopupItem.Create(Self, SysControl, Index, FMenu);
     Result := FSysPopupItem;
   end;
 end;
@@ -955,8 +995,8 @@ begin
     Use this function instead of Items[Index].Separator .
     ==> Fast access in WM_KEYDOWN .
   }
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_FTYPE;
   GetMenuItemInfo(Menu, ItemIndex, True, info);
   Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
@@ -1121,6 +1161,7 @@ begin
 
     WM_DESTROY:
       begin
+        FVCLMenuItems := nil;
         SetLength(SubMenuItemInfoArray, 0);
         SubMenuItemInfoArray := nil;
         Handled := False;
@@ -1132,9 +1173,10 @@ end;
 
 { TSysPopupItem }
 
-constructor TSysPopupStyleHook.TSysPopupItem.Create(SysParent: TSysControl;
-  Index: integer; Menu: HMENU);
+constructor TSysPopupStyleHook.TSysPopupItem.Create(SysPopupStyleHook
+  : TSysPopupStyleHook; SysParent: TSysControl; Index: integer; Menu: HMENU);
 begin
+  FSysPopupStyleHook := SysPopupStyleHook;
   FMenu := Menu;
   FHandle := SysParent.Handle;
   FSysParent := SysParent;
@@ -1151,18 +1193,31 @@ function TSysPopupStyleHook.TSysPopupItem.GetItemBitmap: HBITMAP;
 var
   info: TMenuItemInfo;
 begin
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
-  info.fMask := MIIM_CHECKMARKS or MIIM_BITMAP;
-  GetMenuItemInfo(FMenu, FIndex, True, info);
-  Result := info.hbmpItem;
-  if Result = 0 then
-    Result := info.hbmpUnchecked;
+{$IFDEF HookSysOwnerDrawItems}
+  if OwnerDraw then
+  begin
+    if OwnerDrawItemsList.ContainsKey(FMenu) then
+      Result := TOwnerDrawItemData(OwnerDrawItemsList[FMenu].Items
+        [FIndex]).Bitmap;
+  end
+  else
+{$ENDIF}
+  begin
+    FillChar(info, sizeof(info), Char(0));
+    info.cbSize := sizeof(TMenuItemInfo);
+    info.fMask := MIIM_CHECKMARKS or MIIM_BITMAP;
+    GetMenuItemInfo(FMenu, FIndex, True, info);
+    Result := info.hbmpItem;
+    if Result = 0 then
+      Result := info.hbmpUnchecked;
+  end;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetItemID: WORD;
 begin
-  Result := GetMenuItemID(FMenu, FIndex);
+  Result := 0;
+  if (FMenu > 0) and (FIndex > -1) then
+    Result := GetMenuItemID(FMenu, FIndex);
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetItemRect: TRect;
@@ -1176,13 +1231,18 @@ function TSysPopupStyleHook.TSysPopupItem.GetItemText: String;
 var
   Buffer: PChar;
   StrSize: integer;
-  info: MenuItemInfo;
+  info: MENUITEMINFO;
+{$IFDEF HookSysOwnerDrawItems}
+  Item: TOwnerDrawItemData;
+{$ENDIF}
 begin
+
   if VCLItem <> nil then
   begin
     Result := VCLItem.Caption;
     Exit;
   end;
+
   { Note:
     The GetMenuString function has been superseded.
     Use the GetMenuItemInfo function to retrieve the menu item text.
@@ -1190,8 +1250,8 @@ begin
 
   Result := '';
 
-  FillChar(info, SizeOf(MenuItemInfo), Char(0));
-  info.cbSize := SizeOf(MenuItemInfo);
+  FillChar(info, sizeof(MENUITEMINFO), Char(0));
+  info.cbSize := sizeof(MENUITEMINFO);
   info.fMask := MIIM_STRING or MIIM_FTYPE;
   info.dwTypeData := nil;
   GetMenuItemInfo(FMenu, FIndex, True, info);
@@ -1211,13 +1271,18 @@ begin
     end;
     Exit;
   end
+{$IFDEF HookSysOwnerDrawItems}
+  else if OwnerDrawItemsList.ContainsKey(FMenu) then
+    Result := TOwnerDrawItemData(OwnerDrawItemsList[FMenu].Items
+      [FIndex]).Caption
+{$ENDIF}
   else
   begin
     { if the item is owner draw then we need another way to get
       the item text since , when setting an item to ownerdraw windows
       will destroy the dwTypeData that hold the text . }
-    FillChar(info, SizeOf(MenuItemInfo), Char(0));
-    info.cbSize := SizeOf(MenuItemInfo);
+    FillChar(info, sizeof(MENUITEMINFO), Char(0));
+    info.cbSize := sizeof(MENUITEMINFO);
     info.fMask := MIIM_DATA;
     GetMenuItemInfo(FMenu, FIndex, True, info);
     Result := String(PChar(info.dwItemData));
@@ -1259,48 +1324,87 @@ end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetVCLMenuItems: TMenuItem;
 var
-  i, j, k: integer;
+  i, j: integer;
   PopupMenu: TPopupMenu;
   Form: TCustomForm;
   MI: TMenuItem;
+  function GetChildPopup(Comp: TComponent): TMenuItem;
+  var
+    k: integer;
+  begin
+    { This is a CallBack function ==> Be careful !! }
+    Result := nil;
+    if Assigned(Comp) then
+    begin
+      for k := 0 to Comp.ComponentCount - 1 do
+      begin
+        if Comp.Components[k] is TPopupMenu then
+        begin
+          PopupMenu := TPopupMenu(Comp.Components[k]);
+          if PopupMenu.Handle = FMenu then
+            Exit(PopupMenu.Items);
+        end;
+        if Comp.Components[k].ComponentCount > 0 then
+          Result := GetChildPopup(Comp.Components[k]);
+        if Assigned(Result) then
+          Exit;
+      end;
+    end;
+  end;
+
 begin
   // MI := nil;
   Result := nil;
   for i := 0 to Application.ComponentCount - 1 do
   begin
-    //OutputDebugString(PChar(Application.Components[i].Name));
+    // OutputDebugString(PChar(Application.Components[i].Name));
 
     if Application.Components[i] is TCustomForm then
     begin
       Form := TCustomForm(Application.Components[i]);
       for j := 0 to Form.ComponentCount - 1 do
       begin
-         //OutputDebugString(PChar(Form.Components[j].Name));
+        // OutputDebugString(PChar(Form.Components[j].Name));
         if Form.Components[j] is TMenuItem then
         begin
           MI := TMenuItem(Form.Components[j]);
           if MI.Handle = FMenu then
             Exit(MI);
         end
-        else
-        if Form.Components[j] is TPopupMenu then
+        else if Form.Components[j] is TPopupMenu then
         begin
           PopupMenu := TPopupMenu(Form.Components[j]);
           if PopupMenu.Handle = FMenu then
             Exit(PopupMenu.Items);
         end
         else
-        //TODO : Add recursive implementation to detect any child TPopupMenu
-        for k := 0 to Form.Components[j].ComponentCount-1 do
-        if Form.Components[j].Components[k] is TPopupMenu then
-        begin
-           //OutputDebugString(PChar('K: '+Form.Components[j].Components[k].ClassName));
+        // TODO : Add recursive implementation to detect any child TPopupMenu
+        (* for k := 0 to Form.Components[j].ComponentCount-1 do
+          if Form.Components[j].Components[k] is TPopupMenu then
+          begin
+          //OutputDebugString(PChar('K: '+Form.Components[j].Components[k].ClassName));
           PopupMenu := TPopupMenu(Form.Components[j].Components[k]);
           if PopupMenu.Handle = FMenu then
-            Exit(PopupMenu.Items);
+          Exit(PopupMenu.Items);
+          end; *)
+        begin
+          Result := GetChildPopup(Form.Components[j]);
+          if Assigned(Result) then
+            Exit;
         end;
       end;
     end;
+  end;
+end;
+
+function TSysPopupStyleHook.TSysPopupItem.GetVCLMenuItemsFast: TMenuItem;
+begin
+  if Assigned(FSysPopupStyleHook.FVCLMenuItems) then
+    Result := FSysPopupStyleHook.FVCLMenuItems
+  else
+  begin
+    Result := GetVCLMenuItems;
+    FSysPopupStyleHook.FVCLMenuItems := Result;
   end;
 end;
 
@@ -1308,8 +1412,8 @@ function TSysPopupStyleHook.TSysPopupItem.IsItemDisabled: Boolean;
 var
   info: TMenuItemInfo;
 begin
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_STATE;
   GetMenuItemInfo(FMenu, FIndex, True, info);
   Result := (info.fState and MFS_DISABLED = MFS_DISABLED) or
@@ -1317,23 +1421,35 @@ begin
     (info.fState and MF_GRAYED = MF_GRAYED);
 end;
 
+function TSysPopupStyleHook.TSysPopupItem.IsItemOwnerDraw: Boolean;
+var
+  info: TMenuItemInfo;
+begin
+  FillChar(info, sizeof(MENUITEMINFO), Char(0));
+  info.cbSize := sizeof(MENUITEMINFO);
+  info.fMask := MIIM_FTYPE;
+  info.dwTypeData := nil;
+  GetMenuItemInfo(FMenu, FIndex, True, info);
+  Result := (info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW);
+end;
+
 function TSysPopupStyleHook.TSysPopupItem.IsItemRadioCheck: Boolean;
 var
   info: TMenuItemInfo;
 begin
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_FTYPE;
   GetMenuItemInfo(FMenu, FIndex, True, info);
   Result := (info.fType and MFT_RADIOCHECK) = MFT_RADIOCHECK;
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.isItemChecked: Boolean;
+function TSysPopupStyleHook.TSysPopupItem.IsItemChecked: Boolean;
 var
   info: TMenuItemInfo;
 begin
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_STATE;
   GetMenuItemInfo(FMenu, FIndex, True, info);
   Result := (info.fState and MFS_CHECKED) = MFS_CHECKED;
@@ -1344,12 +1460,12 @@ begin
   Result := (GetSubMenu(FMenu, FIndex) > 0);
 end;
 
-function TSysPopupStyleHook.TSysPopupItem.isItemDefault: Boolean;
+function TSysPopupStyleHook.TSysPopupItem.IsItemDefault: Boolean;
 var
   info: TMenuItemInfo;
 begin
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_STATE;
   GetMenuItemInfo(FMenu, FIndex, True, info);
   Result := (info.fState and MFS_DEFAULT) = MFS_DEFAULT;
@@ -1359,8 +1475,8 @@ function TSysPopupStyleHook.TSysPopupItem.IsItemSeparator: Boolean;
 var
   info: TMenuItemInfo;
 begin
-  FillChar(info, SizeOf(info), Char(0));
-  info.cbSize := SizeOf(TMenuItemInfo);
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
   info.fMask := MIIM_FTYPE;
   Result := False;
   if (FIndex > -1) and (FIndex < GetMenuItemCount(FMenu) - 1) then
@@ -1369,19 +1485,92 @@ begin
     Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
   end;
 end;
-
-function TSysPopupStyleHook.TSysPopupItem.isItemVisible: Boolean;
-begin
-  Result := True;
+(*
+  function TSysPopupStyleHook.TSysPopupItem.isItemVisible: Boolean;
+  begin
+  Result := True; { Default result for non VCL Menu . }
   if VCLMenuItems <> nil then
   begin
-    Result := VCLMenuItems[FIndex].Visible;
-    Exit;
+  Result := VCLMenuItems[FIndex].Visible;
+  Exit;
   end;
+  end;
+*)
+{$IFDEF HookSysOwnerDrawItems}
+
+var
+  hUser32Lib: THandle;
+
+function InsertMenuItemHooked(p1: HMENU; p2: UINT; p3: BOOL;
+  const p4: TMenuItemInfoW): BOOL; stdcall;
+var
+  Item: TOwnerDrawItemData;
+  Items: TOwnerDrawItemsData;
+begin
+  Item := TOwnerDrawItemData.Create;
+  Item.Caption := String(p4.dwTypeData);
+  Item.Bitmap := p4.hbmpItem;
+  if not OwnerDrawItemsList.ContainsKey(p1) then
+  begin
+    Items := TOwnerDrawItemsData.Create;
+    Items.Add(Item);
+    OwnerDrawItemsList.Add(p1, Items);
+  end
+  else
+  begin
+    Items := OwnerDrawItemsList[p1];
+    Items.Add(Item);
+  end;
+  Result := TrampoLineInsertMenuItem(p1, p2, p3, p4);
 end;
+
+function DeleteMenuHooked(HMENU: HMENU; uPosition, uFlags: UINT): BOOL; stdcall;
+var
+  Items: TOwnerDrawItemsData;
+  Item: TOwnerDrawItemData;
+begin
+  if OwnerDrawItemsList.ContainsKey(HMENU) then
+  begin
+    Items := OwnerDrawItemsList[HMENU];
+    Item := TOwnerDrawItemData(Items.Items[uPosition]);
+    Items.Remove(Item);
+    Item.Free;
+  end;
+  Result := TrampoLineDeleteMenu(HMENU, uPosition, uFlags);
+end;
+
+procedure FreeOwnerDrawItems;
+var
+  Value: TOwnerDrawItemsData;
+  i: integer;
+begin
+  for Value in OwnerDrawItemsList.Values do
+  begin
+    for i := 0 to Value.Count - 1 do
+      TOwnerDrawItemData(Value.Items[i]).Free;
+    Value.Free;
+  end;
+  OwnerDrawItemsList.Free;
+end;
+{$ENDIF }
 
 initialization
 
+{$IFDEF HookSysOwnerDrawItems}
+  OwnerDrawItemsList := TObjectDictionary<HMENU, TOwnerDrawItemsData>.Create;
+if StyleServices.Available then
+begin
+  hUser32Lib := GetModuleHandle(user32);
+  // --------- Hook InsertMenuItemW function ---------
+  InsertMenuItemPointer := GetProcAddress(hUser32Lib, 'InsertMenuItemW');
+  @TrampoLineInsertMenuItem := InterceptCreate(InsertMenuItemPointer,
+    @InsertMenuItemHooked);
+  // --------- Hook DeleteMenu function ---------
+  DeleteMenuPointer := GetProcAddress(hUser32Lib, 'DeleteMenu');
+  @TrampoLineDeleteMenu := InterceptCreate(DeleteMenuPointer,
+    @DeleteMenuHooked);
+end;
+{$ENDIF}
 SubMenuItemInfoArray := nil;
 
 if StyleServices.Available then
@@ -1389,6 +1578,13 @@ if StyleServices.Available then
 
 finalization
 
+{$IFDEF HookSysOwnerDrawItems}
+  FreeOwnerDrawItems;
+if Assigned(InsertMenuItemPointer) then
+  InterceptRemove(@TrampoLineInsertMenuItem, @InsertMenuItemHooked);
+if Assigned(DeleteMenuPointer) then
+  InterceptRemove(@TrampoLineDeleteMenu, @DeleteMenuHooked);
+{$ENDIF}
 TSysStyleManager.UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
 
 end.
