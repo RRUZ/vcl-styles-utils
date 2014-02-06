@@ -1259,7 +1259,7 @@ end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetVCLMenuItems: TMenuItem;
 var
-  i, j: integer;
+  i, j, k: integer;
   PopupMenu: TPopupMenu;
   Form: TCustomForm;
   MI: TMenuItem;
@@ -1268,20 +1268,34 @@ begin
   Result := nil;
   for i := 0 to Application.ComponentCount - 1 do
   begin
+    //OutputDebugString(PChar(Application.Components[i].Name));
+
     if Application.Components[i] is TCustomForm then
     begin
       Form := TCustomForm(Application.Components[i]);
       for j := 0 to Form.ComponentCount - 1 do
       begin
+         //OutputDebugString(PChar(Form.Components[j].Name));
         if Form.Components[j] is TMenuItem then
         begin
           MI := TMenuItem(Form.Components[j]);
           if MI.Handle = FMenu then
             Exit(MI);
         end
-        else if Form.Components[j] is TPopupMenu then
+        else
+        if Form.Components[j] is TPopupMenu then
         begin
           PopupMenu := TPopupMenu(Form.Components[j]);
+          if PopupMenu.Handle = FMenu then
+            Exit(PopupMenu.Items);
+        end
+        else
+        //TODO : Add recursive implementation to detect any child TPopupMenu
+        for k := 0 to Form.Components[j].ComponentCount-1 do
+        if Form.Components[j].Components[k] is TPopupMenu then
+        begin
+           //OutputDebugString(PChar('K: '+Form.Components[j].Components[k].ClassName));
+          PopupMenu := TPopupMenu(Form.Components[j].Components[k]);
           if PopupMenu.Handle = FMenu then
             Exit(PopupMenu.Items);
         end;
