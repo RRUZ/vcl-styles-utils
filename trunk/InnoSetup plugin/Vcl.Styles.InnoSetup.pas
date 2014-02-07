@@ -221,7 +221,7 @@ begin
         end
         else
 
-        if SameText(sClassName,'TWizardForm') or SameText(sClassName,'TSetupForm') or SameText(sClassName,'TSelectFolderForm') then
+        if SameText(sClassName,'TWizardForm') or SameText(sClassName,'TSetupForm') or SameText(sClassName,'TSelectFolderForm') or SameText(sClassName,'TSelectLanguageForm')  then
         begin
            if (PCWPStruct(lParam)^.message=WM_NCCALCSIZE) and not (InnoSetupControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
                InnoSetupControlsList.Add(PCWPStruct(lParam)^.hwnd, TWizardFormStyleHook.Create(PCWPStruct(lParam)^.hwnd));

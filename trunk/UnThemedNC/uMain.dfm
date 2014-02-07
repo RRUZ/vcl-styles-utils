@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 314
   BorderStyle = bsSingle
   Caption = 'Form1'
-  ClientHeight = 173
+  ClientHeight = 81
   ClientWidth = 292
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,12 +15,19 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 13
   object SpeedButton1: TSpeedButton
-    Left = 64
-    Top = 104
+    Left = 56
+    Top = 40
     Width = 169
     Height = 22
     Caption = 'Show OpenDialog'
     OnClick = SpeedButton1Click
+  end
+  object Label1: TLabel
+    Left = 32
+    Top = 8
+    Width = 238
+    Height = 13
+    Caption = 'This App  show a dialog without style the NC area'
   end
   object OpenDialog1: TOpenDialog
     Left = 120
