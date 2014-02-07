@@ -736,6 +736,17 @@ var
   R, CaptionRect: TRect;
   LDetails: TThemedElementDetails;
   SaveIndex: Integer;
+  procedure DoDrawParentBackground(DC: HDC; ARect: TRect);
+  begin
+    if SysControl.ParentHandle > 0 then
+      DrawParentBackground(DC, @ARect)
+    else
+    begin
+      Canvas.Brush.Color := StyleServices.GetStyleColor(scWindow);
+      Canvas.FillRect(ARect);
+    end;
+  end;
+
 begin
   CaptionRect := GetCaptionRect(Canvas);
   R := GetBoxRect;
@@ -745,7 +756,15 @@ begin
   else
     LDetails := StyleServices.GetElementDetails(tbGroupBoxDisabled);
 
+  { Clean caption area }
+  DoDrawParentBackground(Canvas.Handle, CaptionRect);
+  ExcludeClipRect(Canvas.Handle, R.Left + 4, CaptionRect.Height + 2,
+    R.Right - 4, R.Height - 2);
+  { Clean GroupBox corners area }
+  DoDrawParentBackground(Canvas.Handle, R);
+
   SaveIndex := SaveDC(Canvas.Handle);
+
   try
     ExcludeClipRect(Canvas.Handle, CaptionRect.Left, CaptionRect.Top,
       CaptionRect.Right, CaptionRect.Bottom);
@@ -753,7 +772,9 @@ begin
   finally
     RestoreDC(Canvas.Handle, SaveIndex);
   end;
+
   Inc(CaptionRect.Top, 3);
+  { Paint Text }
   StyleServices.DrawText(Canvas.Handle, LDetails, SysControl.Text, CaptionRect,
     [tfSingleLine, tfVerticalCenter, tfLeft, tfHidePrefix]);
 
@@ -2293,7 +2314,8 @@ end;
 
 procedure TSysStaticStyleHook.Paint(Canvas: TCanvas);
 const
-  States: array [Boolean] of TThemedTextLabel = (ttlTextLabelDisabled,  ttlTextLabelNormal);
+  States: array [Boolean] of TThemedTextLabel = (ttlTextLabelDisabled,
+    ttlTextLabelNormal);
 var
   LDetails: TThemedElementDetails;
   LRect: TRect;
@@ -2312,7 +2334,7 @@ begin
   end;
 
   LDetails := StyleServices.GetElementDetails(States[SysControl.Enabled]);
-  Canvas.Font:=SysControl.Font;
+  Canvas.Font := SysControl.Font;
   DrawText(Canvas.Handle, LDetails, SysControl.Text, LRect, TextFormat);
 end;
 
@@ -2668,7 +2690,6 @@ begin
 end;
 
 initialization
-
 
 if StyleServices.Available then
 begin
