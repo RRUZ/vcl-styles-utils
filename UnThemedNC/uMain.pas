@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons,
   Vcl.Styles.Utils.SysControls,
-  Vcl.Styles.Utils.Forms;
+  Vcl.Styles.Utils.Forms, Vcl.StdCtrls;
 
 type
   TNoNCSysDialogStyleHook = class(TSysDialogStyleHook)
@@ -19,6 +19,7 @@ type
   TForm1 = class(TForm)
     OpenDialog1: TOpenDialog;
     SpeedButton1: TSpeedButton;
+    Label1: TLabel;
     procedure SpeedButton1Click(Sender: TObject);
   private
     { Private declarations }
@@ -42,13 +43,8 @@ end;
 
 constructor TNoNCSysDialogStyleHook.Create(AHandle: THandle);
 begin
-  inherited;
-  {$IF CompilerVersion > 23}
-  StyleElements := [seFont, seClient];
-  {$ELSE}
-  OverrideFont:=True;
-  OverridePaint:=True;
-  {$IFEND}
+ inherited;
+ OverridePaintNC := False;
 end;
 
 initialization
