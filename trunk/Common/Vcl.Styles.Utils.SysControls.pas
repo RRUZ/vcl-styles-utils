@@ -19,7 +19,7 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
-{.$DEFINE EventLog }
+{$DEFINE EventLog }
 
 interface
 
@@ -1000,7 +1000,7 @@ begin
   Result := CallNextHookEx(FHook, nCode, wParam, lParam);
   if not FEnabled then
     Exit;
-  if (nCode = HCBT_CREATEWND) and not(StyleServices.IsSystemStyle) then
+  if (nCode = HCBT_CREATEWND) and not (StyleServices.IsSystemStyle) then
   begin
     CBTSturct := PCBTCreateWnd(lParam)^;
     sClassName := GetWindowClassName(wParam);
@@ -1074,21 +1074,20 @@ begin
         AddControl(wParam);
 
     end;
-
-    if nCode = HCBT_DESTROYWND then
-    begin
-      if FSysStyleHookList.ContainsKey(wParam) then
-      begin
-        ZeroMemory(@Info, sizeof(TControlInfo));
-        Info.Handle := wParam;
-        if Assigned(FSysHookNotificationProc) then
-          OnHookNotification(cRemoved, @Info);
-        FSysStyleHookList[wParam].Free;
-        FSysStyleHookList.Remove(wParam);
-      end;
-    end;
   end;
 
+  if nCode = HCBT_DESTROYWND then
+  begin
+    if FSysStyleHookList.ContainsKey(wParam) then
+    begin
+      ZeroMemory(@Info, sizeof(TControlInfo));
+      Info.Handle := wParam;
+      if Assigned(FSysHookNotificationProc) then
+        OnHookNotification(cRemoved, @Info);
+      FSysStyleHookList[wParam].Free;
+      FSysStyleHookList.Remove(wParam);
+    end;
+  end;
 end;
 
 class procedure TSysStyleManager.InstallHook;

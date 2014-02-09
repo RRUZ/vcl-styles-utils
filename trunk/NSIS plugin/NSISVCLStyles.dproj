@@ -123,6 +123,7 @@
 			<Manifest_File>None</Manifest_File>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_4_Win32)'!=''">
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<DCC_Define>NSIS_ANSI;$(DCC_Define)</DCC_Define>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<VerInfo_Build>6</VerInfo_Build>

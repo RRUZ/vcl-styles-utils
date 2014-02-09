@@ -117,7 +117,7 @@ var
 implementation
 
 uses
-//  IOUTILS,
+  //IOUTILS,
   Vcl.Styles.Utils.SysControls;
 
 //procedure Addlog(const Msg: string);
@@ -360,12 +360,80 @@ begin
   inherited;
 end;
 
+function FindWinFromRoot(Root: HWND; ClassName: PChar): HWND;
+var
+  Next, Child: HWND;
+  S: String;
+begin
+  Result := 0;
+  Next := GetWindow(Root, GW_CHILD or GW_HWNDFIRST);
+  while (Next > 0) do
+  begin
+    S := GetWindowClassName(Next);
+    //Addlog(S);
+    if SameText(S, String(ClassName)) then
+      Exit(Next);
+    Next := GetWindow(Next, GW_HWNDNEXT);
+    Child := GetWindow(Next, GW_CHILD or GW_HWNDFIRST);
+    if Child > 0 then
+      Result := FindWinFromRoot(Next, ClassName);
+    if Result > 0 then
+      Exit;
+  end;
+end;
+
+function WindowIsDirectUIHWND(hwndParent: HWND): Boolean;
+begin
+  Result := FindWinFromRoot(hwndParent,  'DUIViewWndClassName')>0;// (FindWindowEx(hwndParent, 0, 'DUIViewWndClassName', nil) <> 0);
+end;
+
 function BeforeNSISHookingControl(Info: PControlInfo): Boolean;
 var
   LInfo: TControlInfo;
+  Root, C: HWND;
 begin
-  //Addlog('BeforeNSISHookingControl '+IntToHex(LInfo.Handle, 8));
+  {
+    Return true to allow control hooking !
+    Return false to prevent control hooking !
+  }
+  { NB: The ClassName is always in lowercase . }
   LInfo := Info^;
+
+//  Addlog('Cheking '+ LInfo.ClassName);
+
+  if SameText('#32770', LInfo.ClassName) then
+  begin
+//    Addlog(IntToHex(LInfo.Handle, 8));
+//    if WindowIsDirectUIHWND( LInfo.Handle) then
+//    begin
+//     Addlog('true');
+//     Exit(False);
+//
+//    end
+//    else
+//     Addlog('false');
+  end
+  else
+  begin
+//      //Root := GetAncestor(LInfo.Parent, GA_ROOT);
+//      Root:=GetParent(LInfo.Handle);
+//      //if FindWinFromRoot(Root, 'DUIViewWndClassName') > 0 then
+//      if FindWindowEx(Root, 0, 'DUIViewWndClassName', nil) <> 0 then
+//      begin
+//        Result := False;
+//        Exit;
+//      end;
+  end;
+
+//  Result := True;
+//  Root := GetAncestor(LInfo.Parent, GA_ROOT);
+//  if FindWinFromRoot(Root, 'DirectUIHWND') > 0 then
+//  begin
+//    Result := False;
+//    Exit;
+//  end;
+
+  //Addlog('BeforeNSISHookingControl '+IntToHex(LInfo.Handle, 8));
   Result := NSIS_IgnoredControls.IndexOf(LInfo.Handle) < 0;
 //  if not Result then
 //    Addlog(IntToHex(LInfo.Handle, 8));

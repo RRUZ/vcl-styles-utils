@@ -48,6 +48,6 @@ SectionEnd
 
 Function .onInit
    InitPluginsDir
-   File /oname=$PLUGINSDIR\AmethystKamri.vsf "..\..\Styles\AmethystKamri.vsf"
-   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\AmethystKamri.vsf 
+   File /oname=$PLUGINSDIR\Amakrits.vsf "..\..\Styles\Amakrits.vsf"
+   NSISVCLStyles::LoadVCLStyle $PLUGINSDIR\Amakrits.vsf 
 FunctionEnd
