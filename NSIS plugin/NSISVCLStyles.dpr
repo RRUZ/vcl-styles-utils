@@ -76,6 +76,7 @@ begin
   Result := 0;
 end;
 
+
  //procedure LoadVCLStyleA(VCLStyleFile: PAnsiChar); cdecl;
 
 {$IFDEF NSIS_ANSI}

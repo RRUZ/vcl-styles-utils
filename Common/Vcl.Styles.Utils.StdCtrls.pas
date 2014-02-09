@@ -122,6 +122,7 @@ type
   protected
     function GetBorderSize: TRect; override;
     procedure WndProc(var Message: TMessage); override;
+    procedure UpdateColors; override;
   public
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
@@ -239,9 +240,17 @@ type
 implementation
 
 uses
+//  IOUtils,
   Vcl.ExtCtrls,
   System.UITypes,
   Vcl.Styles.Utils.SysControls;
+//
+//procedure Addlog(const Msg: string);
+//begin
+//  TFile.AppendAllText('C:\Test\log.txt',
+//    Format('%s %s %s', [FormatDateTime('hh:nn:ss.zzz', Now), Msg, sLineBreak]));
+//end;
+//
 
 { TSysEditStyleHook }
 
@@ -389,6 +398,18 @@ begin
       Exit;
     Result := Rect(0, 0, 0, 0);
   end;
+end;
+
+procedure TSysListBoxStyleHook.UpdateColors;
+const
+  ColorStates: array[Boolean] of TStyleColor = (scListBoxDisabled, scListBox);
+  FontColorStates: array[Boolean] of TStyleFont = (sfListItemTextDisabled, sfListItemTextNormal);
+var
+  LStyle: TCustomStyleServices;
+begin
+  LStyle := StyleServices;
+  Brush.Color := LStyle.GetStyleColor(ColorStates[SysControl.Enabled]);
+  FontColor := LStyle.GetStyleFontColor(FontColorStates[SysControl.Enabled]);
 end;
 
 procedure TSysListBoxStyleHook.WndProc(var Message: TMessage);
@@ -2121,7 +2142,7 @@ var
   PS: TPaintStruct;
   SaveIndex: Integer;
   DC: HDC;
-  LItemIndex: UINT;
+  //LItemIndex: UINT;
   LDetails: TThemedElementDetails;
 begin
   DC := Message.wParam;
@@ -2150,14 +2171,19 @@ begin
       SaveIndex := SaveDC(Canvas.Handle);
       try
         IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
-        LItemIndex := UINT(SendMessage(SysControl.Handle, CB_GETCURSEL, 0, 0));
+        //LItemIndex := UINT(SendMessage(SysControl.Handle, CB_GETCURSEL, 0, 0));
         Canvas.Brush.Color := StyleServices.GetSystemColor(clWindow);
         Canvas.FillRect(R);
         if (SysControl.Style and CBS_OWNERDRAWFIXED = CBS_OWNERDRAWFIXED) or
           (SysControl.Style and CBS_OWNERDRAWVARIABLE = CBS_OWNERDRAWVARIABLE)
         then
-
-          DrawItem(Canvas, LItemIndex, R, Focused)
+        begin
+          //DrawItem(Canvas, LItemIndex, R, Focused);
+          LDetails := StyleServices.GetElementDetails
+            (TThemedComboBox.tcComboBoxDontCare);
+          DrawText(Canvas.Handle, LDetails, SysControl.Text, R,
+            [tfLeft, tfVerticalCenter, tfSingleLine]);
+        end
         else
         begin
           LDetails := StyleServices.GetElementDetails
@@ -2165,7 +2191,6 @@ begin
           DrawText(Canvas.Handle, LDetails, SysControl.Text, R,
             [tfLeft, tfVerticalCenter, tfSingleLine]);
         end;
-        // open inno
       finally
         RestoreDC(Canvas.Handle, SaveIndex);
       end;
@@ -2177,7 +2202,6 @@ begin
     if DC = 0 then
       EndPaint(Handle, PS);
   end;
-
   Handled := True;
 end;
 
@@ -2369,12 +2393,22 @@ const
 begin
   Color := StyleServices.GetStyleColor(scWindow);
   FontColor := StyleServices.GetSystemColor(clWindowText);
+  //Addlog(Format('UpdateColors Handle %d Color %d FontColor %d ',[SysControl.Handle, Color, FontColor]));
 end;
 
 procedure TSysStaticStyleHook.WndProc(var Message: TMessage);
 begin
-  // Addlog(Format('TSysStaticStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
+   //Addlog(Format('TSysStaticStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
   case Message.Msg of
+
+    WM_SETTEXT:
+      begin
+        CallDefaultProc(Message);
+        if SysControl.Visible then
+          Invalidate;
+
+      end;
+
     WM_ENABLE:
       if SysControl.Visible then
         Invalidate;

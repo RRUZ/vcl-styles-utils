@@ -61,14 +61,6 @@ var
   //GetThemeSysColorOrgPointer : Pointer = nil;
   HThemeClassesList : TStrings = nil; //use a  TStrings to avoid the use of generics
 
-{.$IFDEF DEBUG}
-procedure Addlog(const msg : string);
-begin
-   //TFile.AppendAllText('C:\Delphi\google-code\vcl-styles-utils\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-end;
-{.$ENDIF}
-
-
 function InterceptOpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 var
   i : integer;
@@ -210,6 +202,8 @@ begin
   else
    Result:= DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
 end;
+
+
 
 //function InterceptGetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
 //begin

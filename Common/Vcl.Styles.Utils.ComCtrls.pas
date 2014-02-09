@@ -273,6 +273,7 @@ type
   TSysProgressBarStyleHook = class(TSysStyleHook)
   strict private
     FStep: Integer;
+    FLastPos : Integer;
     FOrientation: TProgressBarOrientation;
     FTimer: TTimer;
     procedure TimerAction(Sender: TObject);
@@ -285,6 +286,7 @@ type
     function GetPosition: Integer;
     procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
   strict protected
+    procedure PaintBackground(Canvas: TCanvas); override;
     procedure PaintBar(Canvas: TCanvas); virtual;
     procedure PaintFrame(Canvas: TCanvas); virtual;
     procedure Paint(Canvas: TCanvas); override;
@@ -1531,8 +1533,10 @@ begin
     FOrientation := pbVertical
   else
     FOrientation := pbHorizontal;
-
+  //DoubleBuffered := True;
   OverridePaint := True;
+  //OverrideEraseBkgnd :=True;
+  FLastPos:=-1;
   FStep := 0;
   FTimer := TTimer.Create(nil);
   FTimer.Interval := 100;
@@ -1597,16 +1601,26 @@ end;
 
 procedure TSysProgressBarStyleHook.Paint(Canvas: TCanvas);
 var
-  Details: TThemedElementDetails;
+  LDetails: TThemedElementDetails;
 begin
+
+// if ((SysControl.Style And PBS_MARQUEE) <> 0) or ((FLastPos=-1)  or (Position<FLastPos)) then
+// begin
   if StyleServices.Available then
   begin
-    Details.Element := teProgress;
-    if StyleServices.HasTransparentParts(Details) then
-      StyleServices.DrawParentBackground(Handle, Canvas.Handle, Details, False);
+    LDetails.Element := teProgress;
+    if StyleServices.HasTransparentParts(LDetails) then
+      StyleServices.DrawParentBackground(Handle, Canvas.Handle, LDetails, False);
   end;
+
   PaintFrame(Canvas);
+// end;
   PaintBar(Canvas);
+end;
+
+procedure TSysProgressBarStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+  inherited;
 end;
 
 procedure TSysProgressBarStyleHook.PaintBar(Canvas: TCanvas);
@@ -1652,6 +1666,7 @@ begin
     else
       LWidth := LRect.Height;
     LPos := Round(LWidth * GetPercent);
+    FLastPos := GetPosition;
     FillR := LRect;
     if Orientation = pbHorizontal then
     begin
