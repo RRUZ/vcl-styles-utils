@@ -137,8 +137,8 @@ type
   private
     FHandle: THandle;
     FProcInstance: Pointer;
-    FSysControl: TSysControl;
     FOrgWndProc: NativeInt;
+    FSysControl: TSysControl;
     FOverrideEraseBkgnd: Boolean;
     FOverridePaint: Boolean;
     FOverridePaintNC: Boolean;
@@ -267,16 +267,8 @@ function IsControlHooked(Handle: HWND): Boolean;
 implementation
 
 uses
-  //IOUTILS,
   System.UITypes,
   Vcl.Styles.Utils.SysControls;
-
-
-//procedure Addlog(const Msg: string);
-//begin
-//  TFile.AppendAllText('C:\Test\log.txt',
-//    Format('%s %s %s', [FormatDateTime('hh:nn:ss.zzz', Now), Msg, sLineBreak]));
-//end;
 
 
 function IsControlHooked(Handle: HWND): Boolean;
