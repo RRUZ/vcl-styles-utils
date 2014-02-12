@@ -1533,16 +1533,19 @@ begin
     FOrientation := pbVertical
   else
     FOrientation := pbHorizontal;
-  //DoubleBuffered := True;
+  DoubleBuffered := True;
   OverridePaint := True;
   //OverrideEraseBkgnd :=True;
   FLastPos:=-1;
   FStep := 0;
   FTimer := TTimer.Create(nil);
   FTimer.Interval := 100;
+  FTimer.Enabled  := False;
   if ((SysControl.Style And PBS_MARQUEE) <> 0) then
+  begin
     FTimer.OnTimer := TimerAction;
-  FTimer.Enabled := ((GetWindowLong(AHandle, GWL_STYLE) And PBS_MARQUEE) <> 0);
+    FTimer.Enabled := True;
+  end;
 end;
 
 destructor TSysProgressBarStyleHook.Destroy;
@@ -1703,6 +1706,7 @@ var
 begin
   if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
   begin
+
     LCanvas := TCanvas.Create;
     try
       LCanvas.Handle := GetWindowDC(Self.Handle);
@@ -1722,6 +1726,7 @@ begin
       LCanvas.Handle := 0;
       LCanvas.Free;
     end;
+
   end
   else
     FTimer.Enabled := False;

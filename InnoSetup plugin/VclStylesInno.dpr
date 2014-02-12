@@ -1,23 +1,23 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ VclStylesInno  VCL Styles Plugin for Inno Setup                                                  }
-{ http://code.google.com/p/vcl-styles-utils/                                                       }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{                                                                                                  }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// VclStylesInno  VCL Styles Plugin for Inno Setup
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+//
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 library VclStylesInno;
 
 {$IFNDEF DEBUG}
@@ -30,7 +30,7 @@ uses
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
-  Vcl.Dialogs,
+  WinApi.Windows,
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
   KOLDetours in '..\Common\KOLDetours.pas',
   Vcl.Styles.InnoSetup in 'Vcl.Styles.InnoSetup.pas',
@@ -52,7 +52,7 @@ uses
    if TStyleManager.IsValidStyle(VClStyleFile) then
      TStyleManager.SetStyle(TStyleManager.LoadFromFile(VClStyleFile))
    else
-   ShowMessage(Format('The Style File %s is not valid',[VClStyleFile]));
+   MessageBox(0, 'Error', PChar(Format('The Style File %s is not valid',[VCLStyleFile])), MB_OK);
  end;
 
  procedure LoadVCLStyleA(VCLStyleFile: PAnsiChar); stdcall;
@@ -62,7 +62,7 @@ uses
    if TStyleManager.IsValidStyle(String(VCLStyleFile)) then
      TStyleManager.SetStyle(TStyleManager.LoadFromFile(String(VCLStyleFile)))
    else
-   ShowMessage(Format('The Style File %s is not valid',[VCLStyleFile]));
+   MessageBox(0, 'Error', PChar(Format('The Style File %s is not valid',[VCLStyleFile])), MB_OK);
  end;
 
  procedure UnLoadVCLStyles; stdcall;
@@ -74,5 +74,4 @@ uses
 exports
   LoadVCLStyleW, LoadVCLStyleA, UnLoadVCLStyles;
 
-begin
 end.

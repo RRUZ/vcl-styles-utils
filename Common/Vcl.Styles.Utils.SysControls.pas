@@ -19,7 +19,7 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
-{$DEFINE EventLog }
+{.$DEFINE EventLog }
 
 interface
 
@@ -148,6 +148,7 @@ function WM_To_String(WM_Message: Integer): string;
 {$ENDIF}
 
 implementation
+
 
 {$IFDEF EventLog}
 
@@ -943,7 +944,7 @@ begin
   FUseStyleColorsChildControls := True;
   FEnabled := True;
   FHookVclControls := False;
-  FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create;
+  FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
   FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;
   FChildRegSysStylesList := TObjectDictionary<HWND, TChildControlInfo>.Create;
   InstallHook;
@@ -953,6 +954,7 @@ destructor TSysStyleManager.Destroy;
 begin
 
 end;
+
 
 class function TSysStyleManager.HookCBProc(nCode: Integer; wParam: wParam;
   lParam: lParam): LRESULT;
@@ -967,9 +969,6 @@ var
   var
     Info: TChildControlInfo;
   begin
-//    if SameText('Static', sClassName) then
-//      Addlog(Format('AddChildControl $0x%x %s', [Handle, sClassName]));
-
     { The child control will be hooked inside it's parent control. }
     ZeroMemory(@Info, sizeof(TChildControlInfo));
     Info.Parent := Parent;
@@ -984,9 +983,6 @@ var
 
   procedure AddControl(Handle: HWND);
   begin
-//    if SameText('Static', sClassName) then
-//      Addlog(Format('AddControl $0x%x %s', [Handle, sClassName]));
-
     { Hook the control directly ! }
     if FSysStyleHookList.ContainsKey(Handle) then
       FSysStyleHookList.Remove(Handle);
@@ -1002,6 +998,7 @@ begin
     Exit;
   if (nCode = HCBT_CREATEWND) and not (StyleServices.IsSystemStyle) then
   begin
+
     CBTSturct := PCBTCreateWnd(lParam)^;
     sClassName := GetWindowClassName(wParam);
     sClassName := LowerCase(sClassName);
@@ -1030,17 +1027,14 @@ begin
       Info.ClassName := PChar(Tmp);
       Tmp := LowerCase(GetWindowClassName(Parent));
       Info.ParentClassName := PChar(Tmp);
+
       if not HookVclControls then
-      begin
         if IsVCLControl(wParam) then
           Exit;
-      end;
 
       if Assigned(FBeforeHookingControlProc) then
-      begin
         if not FBeforeHookingControlProc(@Info) then
           Exit;
-      end;
 
       if (Style and DS_CONTROL = DS_CONTROL) then
       begin
@@ -1072,19 +1066,19 @@ begin
       else
         { Not (WS_CHILD or WS_POPUP) !! }
         AddControl(wParam);
-
     end;
   end;
 
-  if nCode = HCBT_DESTROYWND then
+  //if nCode = HCBT_DESTROYWND then
+  if (nCode = HCBT_DESTROYWND) and not (StyleServices.IsSystemStyle) then
   begin
     if FSysStyleHookList.ContainsKey(wParam) then
     begin
       ZeroMemory(@Info, sizeof(TControlInfo));
+      //sClassName := GetWindowClassName(wParam);
       Info.Handle := wParam;
       if Assigned(FSysHookNotificationProc) then
         OnHookNotification(cRemoved, @Info);
-      FSysStyleHookList[wParam].Free;
       FSysStyleHookList.Remove(wParam);
     end;
   end;

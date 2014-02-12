@@ -120,6 +120,28 @@ uses
   //IOUTILS,
   Vcl.Styles.Utils.SysControls;
 
+type
+  TThemedNSISControls = class
+  private
+  class var
+    FHook_WH_CALLWNDPROC: HHook;
+  protected
+    class function HookActionCallBackWndProc(nCode: Integer; wParam: wParam;
+      lParam: lParam): LRESULT; stdcall; static;
+    procedure InstallHook;
+    procedure RemoveHook;
+  public
+    constructor Create; overload;
+    destructor Destroy; override;
+  end;
+
+
+var
+  NSISControlsList      : TObjectDictionary<HWND, TSysStyleHook>;
+  ClassesList           : TStrings; //use a  TStrings to avoid the use of generics
+  ThemedNSISControls    : TThemedNSISControls;
+
+
 //procedure Addlog(const Msg: string);
 //begin
 //  TFile.AppendAllText('C:\Test\log.txt',
@@ -390,7 +412,7 @@ end;
 function BeforeNSISHookingControl(Info: PControlInfo): Boolean;
 var
   LInfo: TControlInfo;
-  Root, C: HWND;
+//  Root, C: HWND;
 begin
   {
     Return true to allow control hooking !
@@ -449,14 +471,99 @@ begin
       NSIS_IgnoredControls.Remove(LInfo.Handle);
 end;
 
+{ TThemedNppControls }
+constructor TThemedNSISControls.Create;
+begin
+  inherited;
+  FHook_WH_CALLWNDPROC := 0;
+  InstallHook;
+  NSISControlsList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
+  ClassesList := TStringList.Create;
+end;
+
+destructor TThemedNSISControls.Destroy;
+begin
+  RemoveHook;
+  NSISControlsList.Free;
+  ClassesList.Free;
+  inherited;
+end;
+
+
+class function TThemedNSISControls.HookActionCallBackWndProc(nCode: Integer;
+  wParam: wParam; lParam: lParam): LRESULT;
+var
+  C: array [0 .. 256] of Char;
+  sClassName : string;
+begin
+    Result := CallNextHookEx(FHook_WH_CALLWNDPROC, nCode, wParam, lParam);
+    if (nCode < 0) then
+     Exit;
+
+    if (StyleServices.Enabled) and not (StyleServices.IsSystemStyle) then
+    begin
+
+//       GetClassName(PCWPStruct(lParam)^.hwnd, C, 256);
+//       if SameText(C,'#32770') then
+//       begin
+//        Addlog(Format('Handle %x ',[PCWPStruct(lParam)^.hwnd]));
+//        Addlog('GetClassName ' + C);
+//       end;
+
+      if ClassesList.IndexOfName(IntToStr(PCWPStruct(lParam)^.hwnd))=-1 then
+      begin
+        GetClassName(PCWPStruct(lParam)^.hwnd, C, 256);
+        //Addlog('GetClassName ' + C);
+        ClassesList.Add(Format('%d=%s',[PCWPStruct(lParam)^.hwnd, C]));
+      end;
+
+      if ClassesList.IndexOfName(IntToStr(PCWPStruct(lParam)^.hwnd))>=0 then
+      begin
+        sClassName:=ClassesList.Values[IntToStr(PCWPStruct(lParam)^.hwnd)]; //ClassesList[PCWPStruct(lParam)^.hwnd];
+
+        if SameText(sClassName,'#32770') then
+        begin
+           if not TSysStyleManager.SysStyleHookList.ContainsKey(PCWPStruct(lParam)^.hwnd) then  // avoid double registration
+           if (PCWPStruct(lParam)^.message=WM_NCCALCSIZE) and not (NSISControlsList.ContainsKey(PCWPStruct(lParam)^.hwnd)) then
+               NSISControlsList.Add(PCWPStruct(lParam)^.hwnd, TSysDialogStyleHook.Create(PCWPStruct(lParam)^.hwnd));
+        end
+      end;
+    end;
+end;
+
+procedure TThemedNSISControls.InstallHook;
+begin
+  FHook_WH_CALLWNDPROC := SetWindowsHookEx(WH_CALLWNDPROC, @TThemedNSISControls.HookActionCallBackWndProc, 0, GetCurrentThreadId);
+end;
+
+procedure TThemedNSISControls.RemoveHook;
+begin
+  if FHook_WH_CALLWNDPROC <> 0 then
+    UnhookWindowsHookEx(FHook_WH_CALLWNDPROC);
+end;
+
+Procedure  Done;
+begin
+if Assigned(ThemedNSISControls) then
+  begin
+    ThemedNSISControls.Free;
+    ThemedNSISControls:=nil;
+  end;
+end;
+
+
 initialization
 
-NSIS_IgnoredControls := TList<HWND>.Create;
-TSysStyleManager.OnBeforeHookingControl := @BeforeNSISHookingControl;
-TSysStyleManager.OnHookNotification := @HookNotificationNSIS;
+  NSIS_IgnoredControls := TList<HWND>.Create;
+  TSysStyleManager.OnBeforeHookingControl := @BeforeNSISHookingControl;
+  TSysStyleManager.OnHookNotification := @HookNotificationNSIS;
+
+//  ThemedNSISControls:=nil;
+//  if StyleServices.Available then
+//   ThemedNSISControls := TThemedNSISControls.Create;
 
 finalization
-
-NSIS_IgnoredControls.Free;
+   //Done;
+   NSIS_IgnoredControls.Free;
 
 end.

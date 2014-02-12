@@ -1,6 +1,6 @@
 object FrmVCLStyleInfoDialog: TFrmVCLStyleInfoDialog
-  Left = 0
-  Top = 0
+  Left = 802
+  Top = 497
   BorderStyle = bsDialog
   Caption = 'VCL Style Info'
   ClientHeight = 187

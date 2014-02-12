@@ -25,7 +25,7 @@ interface
 { DEFINE HookSysOwnerDrawItems only if you are
   using a non VCL PopupMenu and this menu is OwnerDraw .
 }
-{ .$DEFINE HookSysOwnerDrawItems }
+{$DEFINE HookSysOwnerDrawItems }
 
 uses
   System.Classes,
@@ -43,10 +43,7 @@ uses
   Vcl.Controls,
   Vcl.Menus,
   System.Math,
-  Vcl.Styles.Utils.SysStyleHook
-{$IFDEF HookSysOwnerDrawItems}
-    , Generics.Collections, KOLDetours
-{$ENDIF};
+  Vcl.Styles.Utils.SysStyleHook;
 
 const
   { The Undocumented Messages }
@@ -262,32 +259,6 @@ begin
         Exit(i);
   end;
 end;
-
-{$IFDEF HookSysOwnerDrawItems}
-
-type
-  TOwnerDrawItemData = class(TObject)
-  private
-    FCaption: String;
-    FBitmap: HBITMAP;
-    property Caption: String read FCaption write FCaption;
-    property Bitmap: HBITMAP read FBitmap write FBitmap;
-  end;
-
-  TOwnerDrawItemsData = class(TList)
-
-  end;
-
-var
-  InsertMenuItemPointer: Pointer = 0;
-  DeleteMenuPointer: Pointer = 0;
-  TrampoLineInsertMenuItem: function(p1: HMENU; p2: UINT; p3: BOOL;
-    const p4: TMenuItemInfoW): BOOL; stdcall;
-  TrampoLineDeleteMenu: function(HMENU: HMENU; uPosition, uFlags: UINT)
-    : BOOL; stdcall;
-
-  OwnerDrawItemsList: TObjectDictionary<HMENU, TOwnerDrawItemsData>;
-{$ENDIF}
 
   { TSysPopupStyleHook }
 constructor TSysPopupStyleHook.Create(AHandle: THandle);
@@ -612,6 +583,7 @@ begin
       { Draw System PopupMenu Bitmap }
       DisplayCheckedGlyph := False;
       // DrawVisualSysBitmap(hBmp);
+
       case hBmp of
         HBMMENU_POPUP_RESTORE:
           Sign := MARLETT_RESTORE_CHAR;
@@ -1192,24 +1164,13 @@ function TSysPopupStyleHook.TSysPopupItem.GetItemBitmap: HBITMAP;
 var
   info: TMenuItemInfo;
 begin
-{$IFDEF HookSysOwnerDrawItems}
-  if OwnerDraw then
-  begin
-    if OwnerDrawItemsList.ContainsKey(FMenu) then
-      Result := TOwnerDrawItemData(OwnerDrawItemsList[FMenu].Items
-        [FIndex]).Bitmap;
-  end
-  else
-{$ENDIF}
-  begin
-    FillChar(info, sizeof(info), Char(0));
-    info.cbSize := sizeof(TMenuItemInfo);
-    info.fMask := MIIM_CHECKMARKS or MIIM_BITMAP;
-    GetMenuItemInfo(FMenu, FIndex, True, info);
-    Result := info.hbmpItem;
-    if Result = 0 then
-      Result := info.hbmpUnchecked;
-  end;
+  FillChar(info, sizeof(info), Char(0));
+  info.cbSize := sizeof(TMenuItemInfo);
+  info.fMask := MIIM_CHECKMARKS or MIIM_BITMAP;
+  GetMenuItemInfo(FMenu, FIndex, True, info);
+  Result := info.hbmpItem;
+  if Result = 0 then
+    Result := info.hbmpUnchecked;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetItemID: WORD;
@@ -1231,9 +1192,6 @@ var
   Buffer: PChar;
   StrSize: integer;
   info: MENUITEMINFO;
-{$IFDEF HookSysOwnerDrawItems}
-  Item: TOwnerDrawItemData;
-{$ENDIF}
 begin
 
   if VCLItem <> nil then
@@ -1270,11 +1228,6 @@ begin
     end;
     Exit;
   end
-{$IFDEF HookSysOwnerDrawItems}
-  else if OwnerDrawItemsList.ContainsKey(FMenu) then
-    Result := TOwnerDrawItemData(OwnerDrawItemsList[FMenu].Items
-      [FIndex]).Caption
-{$ENDIF}
   else
   begin
     { if the item is owner draw then we need another way to get
@@ -1485,92 +1438,9 @@ begin
     Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
   end;
 end;
-(*
-  function TSysPopupStyleHook.TSysPopupItem.isItemVisible: Boolean;
-  begin
-  Result := True; { Default result for non VCL Menu . }
-  if VCLMenuItems <> nil then
-  begin
-  Result := VCLMenuItems[FIndex].Visible;
-  Exit;
-  end;
-  end;
-*)
-{$IFDEF HookSysOwnerDrawItems}
-
-var
-  hUser32Lib: THandle;
-
-function InsertMenuItemHooked(p1: HMENU; p2: UINT; p3: BOOL;
-  const p4: TMenuItemInfoW): BOOL; stdcall;
-var
-  Item: TOwnerDrawItemData;
-  Items: TOwnerDrawItemsData;
-begin
-  Item := TOwnerDrawItemData.Create;
-  Item.Caption := String(p4.dwTypeData);
-  Item.Bitmap := p4.hbmpItem;
-  if not OwnerDrawItemsList.ContainsKey(p1) then
-  begin
-    Items := TOwnerDrawItemsData.Create;
-    Items.Add(Item);
-    OwnerDrawItemsList.Add(p1, Items);
-  end
-  else
-  begin
-    Items := OwnerDrawItemsList[p1];
-    Items.Add(Item);
-  end;
-  Result := TrampoLineInsertMenuItem(p1, p2, p3, p4);
-end;
-
-function DeleteMenuHooked(HMENU: HMENU; uPosition, uFlags: UINT): BOOL; stdcall;
-var
-  Items: TOwnerDrawItemsData;
-  Item: TOwnerDrawItemData;
-begin
-  if OwnerDrawItemsList.ContainsKey(HMENU) then
-  begin
-    Items := OwnerDrawItemsList[HMENU];
-    Item := TOwnerDrawItemData(Items.Items[uPosition]);
-    Items.Remove(Item);
-    Item.Free;
-  end;
-  Result := TrampoLineDeleteMenu(HMENU, uPosition, uFlags);
-end;
-
-procedure FreeOwnerDrawItems;
-var
-  Value: TOwnerDrawItemsData;
-  i: integer;
-begin
-  for Value in OwnerDrawItemsList.Values do
-  begin
-    for i := 0 to Value.Count - 1 do
-      TOwnerDrawItemData(Value.Items[i]).Free;
-    Value.Free;
-  end;
-  OwnerDrawItemsList.Free;
-end;
-{$ENDIF }
 
 initialization
 
-{$IFDEF HookSysOwnerDrawItems}
-  OwnerDrawItemsList := TObjectDictionary<HMENU, TOwnerDrawItemsData>.Create;
-if StyleServices.Available then
-begin
-  hUser32Lib := GetModuleHandle(user32);
-  // --------- Hook InsertMenuItemW function ---------
-  InsertMenuItemPointer := GetProcAddress(hUser32Lib, 'InsertMenuItemW');
-  @TrampoLineInsertMenuItem := InterceptCreate(InsertMenuItemPointer,
-    @InsertMenuItemHooked);
-  // --------- Hook DeleteMenu function ---------
-  DeleteMenuPointer := GetProcAddress(hUser32Lib, 'DeleteMenu');
-  @TrampoLineDeleteMenu := InterceptCreate(DeleteMenuPointer,
-    @DeleteMenuHooked);
-end;
-{$ENDIF}
 SubMenuItemInfoArray := nil;
 
 if StyleServices.Available then
@@ -1578,13 +1448,6 @@ if StyleServices.Available then
 
 finalization
 
-{$IFDEF HookSysOwnerDrawItems}
-  FreeOwnerDrawItems;
-if Assigned(InsertMenuItemPointer) then
-  InterceptRemove(@TrampoLineInsertMenuItem, @InsertMenuItemHooked);
-if Assigned(DeleteMenuPointer) then
-  InterceptRemove(@TrampoLineDeleteMenu, @DeleteMenuHooked);
-{$ENDIF}
 TSysStyleManager.UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
 
 end.
