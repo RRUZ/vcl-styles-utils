@@ -273,7 +273,7 @@ type
   TSysProgressBarStyleHook = class(TSysStyleHook)
   strict private
     FStep: Integer;
-    FLastPos : Integer;
+    //FLastPos : Integer;
     FOrientation: TProgressBarOrientation;
     FTimer: TTimer;
     procedure TimerAction(Sender: TObject);
@@ -305,7 +305,15 @@ type
 implementation
 
 uses
+  //IOUtils,
   Vcl.Styles.Utils.SysControls;
+
+//
+//procedure Addlog(const Msg: string);
+//begin
+//   TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+//end;
+
 
 { TSysListViewStyleHook }
 
@@ -1533,15 +1541,15 @@ begin
     FOrientation := pbVertical
   else
     FOrientation := pbHorizontal;
-  DoubleBuffered := True;
+  //DoubleBuffered := True;
   OverridePaint := True;
   //OverrideEraseBkgnd :=True;
-  FLastPos:=-1;
+  //FLastPos:=-1;
   FStep := 0;
   FTimer := TTimer.Create(nil);
   FTimer.Interval := 100;
   FTimer.Enabled  := False;
-  if ((SysControl.Style And PBS_MARQUEE) <> 0) then
+  //if ((SysControl.Style And PBS_MARQUEE) <> 0) then
   begin
     FTimer.OnTimer := TimerAction;
     FTimer.Enabled := True;
@@ -1669,7 +1677,7 @@ begin
     else
       LWidth := LRect.Height;
     LPos := Round(LWidth * GetPercent);
-    FLastPos := GetPosition;
+    //FLastPos := GetPosition;
     FillR := LRect;
     if Orientation = pbHorizontal then
     begin
@@ -1704,8 +1712,8 @@ procedure TSysProgressBarStyleHook.TimerAction(Sender: TObject);
 var
   LCanvas: TCanvas;
 begin
-  if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
-  begin
+//  if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
+//  begin
 
     LCanvas := TCanvas.Create;
     try
@@ -1727,9 +1735,9 @@ begin
       LCanvas.Free;
     end;
 
-  end
-  else
-    FTimer.Enabled := False;
+//  end
+//  else
+//    FTimer.Enabled := False;
 end;
 
 procedure TSysProgressBarStyleHook.WMNCCalcSize(var Message: TWMNCCalcSize);
@@ -1740,7 +1748,15 @@ end;
 
 procedure TSysProgressBarStyleHook.WndProc(var Message: TMessage);
 begin
-  inherited;
+  //Addlog(Format('TSysProgressBarStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
+//
+  case Message.Msg of
+     WM_TIMER : ; //avoid flicker in progress bar and memory increased;
+
+  else
+     inherited;
+  end;
+
 end;
 
 { TSysRichEditStyleHook }
