@@ -1,24 +1,24 @@
-{**************************************************************************************************}
-{                                                                                                  }
-{ Unit Vcl.Styles.Ext                                                                              }
-{ unit for the VCL Styles Utils                                                                    }
-{ http://code.google.com/p/vcl-styles-utils/                                                       }
-{                                                                                                  }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the    }
-{ License at http://www.mozilla.org/MPL/                                                           }
-{                                                                                                  }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights  }
-{ and limitations under the License.                                                               }
-{                                                                                                  }
-{ The Original Code is Vcl.Styles.Ext.pas.                                                         }
-{                                                                                                  }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V.                                     }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2013 Rodrigo Ruz V.                    }
-{ All Rights Reserved.                                                                             }
-{                                                                                                  }
-{**************************************************************************************************}
+//**************************************************************************************************
+//
+// Unit Vcl.Styles.Ext
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is Vcl.Styles.Ext.pas.
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+//**************************************************************************************************
 unit Vcl.Styles.Ext;
 
 interface
@@ -27,11 +27,11 @@ interface
 
 
 Uses
+  Winapi.Windows,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Forms,
-  Generics.Collections,
-  Winapi.Windows,
+  System.Generics.Collections,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.ExtCtrls,
@@ -247,7 +247,7 @@ uses
  Vcl.Imaging.pngimage,
  Winapi.Messages,
 {$ENDIF}
- Rtti,
+ System.Rtti,
  System.Types,
  Vcl.Dialogs,
  System.Sysutils;
