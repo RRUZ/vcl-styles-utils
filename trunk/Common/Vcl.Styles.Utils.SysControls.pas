@@ -19,7 +19,7 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
-{.$DEFINE EventLog }
+{$DEFINE EventLog }
 
 interface
 

@@ -11,7 +11,7 @@
   InstallDir "$PROGRAMFILES\The Road To Delphi\NSISVCLStyles"
   InstallDirRegKey HKCU "Software\NSISVCLStyles" ""
   RequestExecutionLevel admin
-  !define _VERSION "1.0.0.9"
+  !define _VERSION "1.0.1.0"
   VIProductVersion "${_VERSION}"
   VIAddVersionKey  "ProductName" "VCL Styles for NSIS"
   VIAddVersionKey  "CompanyName" "The Road To Delphi"
