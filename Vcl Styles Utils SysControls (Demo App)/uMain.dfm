@@ -24,23 +24,23 @@ object Form1: TForm1
     Caption = 'Styles : '
   end
   object SpeedButton1: TSpeedButton
-    Left = 234
-    Top = 140
+    Left = 330
+    Top = 112
     Width = 90
     Height = 22
     Caption = 'MsgBox'
     OnClick = SpeedButton1Click
   end
   object SpeedButton2: TSpeedButton
-    Left = 234
-    Top = 168
+    Left = 330
+    Top = 140
     Width = 90
     Height = 22
     Caption = 'Raise Exception'
     OnClick = SpeedButton2Click
   end
   object SpeedButton3: TSpeedButton
-    Left = 128
+    Left = 227
     Top = 168
     Width = 97
     Height = 22
@@ -48,15 +48,15 @@ object Form1: TForm1
     OnClick = SpeedButton3Click
   end
   object SpeedButton4: TSpeedButton
-    Left = 128
-    Top = 112
+    Left = 227
+    Top = 140
     Width = 97
     Height = 22
     Caption = 'ColorDialog'
     OnClick = SpeedButton4Click
   end
   object SpeedButton5: TSpeedButton
-    Left = 128
+    Left = 123
     Top = 140
     Width = 97
     Height = 22
@@ -64,7 +64,7 @@ object Form1: TForm1
     OnClick = SpeedButton5Click
   end
   object SpeedButton6: TSpeedButton
-    Left = 16
+    Left = 123
     Top = 112
     Width = 97
     Height = 22
@@ -88,12 +88,20 @@ object Form1: TForm1
     OnClick = SpeedButton8Click
   end
   object SpeedButton9: TSpeedButton
-    Left = 234
+    Left = 226
     Top = 112
-    Width = 90
+    Width = 98
     Height = 22
     Caption = 'OpenDialog'
     OnClick = SpeedButton9Click
+  end
+  object SpeedButton10: TSpeedButton
+    Left = 16
+    Top = 112
+    Width = 97
+    Height = 22
+    Caption = 'PrintDialog'
+    OnClick = SpeedButton10Click
   end
   object ComboBox1: TComboBox
     Left = 61
@@ -142,17 +150,17 @@ object Form1: TForm1
     TabOrder = 4
   end
   object Button1: TButton
-    Left = 330
-    Top = 109
-    Width = 87
-    Height = 25
+    Left = 123
+    Top = 168
+    Width = 98
+    Height = 22
     Caption = 'Select Folder'
     TabOrder = 5
     OnClick = Button1Click
   end
   object OpenDialog1: TOpenDialog
-    Left = 208
-    Top = 160
+    Left = 168
+    Top = 192
   end
   object ColorDialog1: TColorDialog
     Left = 112
@@ -195,10 +203,10 @@ object Form1: TForm1
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 200
-    Top = 80
+    Left = 176
+    Top = 64
     Bitmap = {
-      494C01010D002400240010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010D002400280010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000002300000033000000330000
       0033000000330000003300000033000000330000003300000033000000330000
@@ -735,8 +743,8 @@ object Form1: TForm1
   end
   object PopupMenu1: TPopupMenu
     Images = ImageList1
-    Left = 384
-    Top = 176
+    Left = 368
+    Top = 192
     object I1: TMenuItem
       Caption = 'Item 1'
       ImageIndex = 2
@@ -811,8 +819,8 @@ object Form1: TForm1
   end
   object MainMenu1: TMainMenu
     Images = ImageList1
-    Left = 224
-    Top = 184
+    Left = 200
+    Top = 216
     object File1: TMenuItem
       Caption = '&File'
       object New1: TMenuItem
@@ -917,11 +925,15 @@ object Form1: TForm1
     end
   end
   object OpenPictureDialog1: TOpenPictureDialog
-    Left = 376
-    Top = 144
+    Left = 408
+    Top = 216
   end
   object OpenTextFileDialog1: TOpenTextFileDialog
     Left = 384
     Top = 224
+  end
+  object PrintDialog1: TPrintDialog
+    Left = 336
+    Top = 208
   end
 end

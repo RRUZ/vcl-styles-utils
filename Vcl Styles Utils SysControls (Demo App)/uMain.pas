@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.StdCtrls, Vcl.Styles, Vcl.Themes, Vcl.Menus, Vcl.Buttons, Vcl.ImgList,
-  Vcl.ExtDlgs;
+  Vcl.ExtDlgs, Vcl.ComCtrls;
 
 type
   TForm1 = class(TForm)
@@ -73,6 +73,8 @@ type
     Button1: TButton;
     OpenPictureDialog1: TOpenPictureDialog;
     OpenTextFileDialog1: TOpenTextFileDialog;
+    PrintDialog1: TPrintDialog;
+    SpeedButton10: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure ComboBox1Select(Sender: TObject);
     procedure SpeedButton9Click(Sender: TObject);
@@ -88,6 +90,7 @@ type
     procedure C3Click(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure SpeedButton10Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -143,6 +146,11 @@ begin
     ComboBox1.Items.Add(s);
 
   ComboBox1.ItemIndex:=ComboBox1.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+end;
+
+procedure TForm1.SpeedButton10Click(Sender: TObject);
+begin
+PrintDialog1.Execute(Handle);
 end;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);
