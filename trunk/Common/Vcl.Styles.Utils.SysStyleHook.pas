@@ -562,14 +562,16 @@ end;
 
 destructor TSysStyleHook.Destroy;
 begin
+  //OutputDebugString(PChar('TSysStyleHook.Destroy Handle '+IntToHex(Handle, 8)));
+
+  if FOrgWndProc<>0 then
+    FSysControl.WndProc := FOrgWndProc;
+
   if Assigned(FProcInstance) then
     FreeObjectInstance(FProcInstance);
 
   if Assigned(FSysControl) then
-  begin
-    FSysControl.WndProc := FOrgWndProc;
     FreeAndNil(FSysControl);
-  end;
 
   if Assigned(FBrush) then
     FreeAndNil(FBrush);
@@ -582,6 +584,7 @@ end;
 
 function TSysStyleHook.CallDefaultProc(var Msg: TMessage): LRESULT;
 begin
+  //OutputDebugString(PChar('TSysStyleHook.CallDefaultProc Handle '+IntToHex(Handle, 8)));
   Result := CallWindowProc(Pointer(FOrgWndProc), Handle, Msg.Msg, Msg.wParam,
     Msg.lParam);
 end;
@@ -1278,6 +1281,15 @@ begin
         Exit;
       end;
 
+    WM_DESTROY :
+                 begin
+                  Message.Result := CallDefaultProc(Message);
+                  Dispatch(Message);
+                  //OutputDebugString(PChar('WM_DESTROY Handle '+IntToHex(Handle, 8)));
+                  if TSysStyleManager.SysStyleHookList.ContainsKey(Handle) then
+                    TSysStyleManager.SysStyleHookList.Remove(Handle);
+                  exit;
+                 end;
   end;
 
   Dispatch(Message);

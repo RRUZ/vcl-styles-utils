@@ -883,26 +883,6 @@ end;
 { -------------------------------------------------------------------------------------- }
 { TSysStyleManager }
 
-constructor TSysStyleManager.Create(AOwner: TComponent);
-begin
-  inherited;
-end;
-
-class destructor TSysStyleManager.Destroy;
-var
-  SysStyleHook: TSysStyleHook;
-begin
-  RemoveHook;
-  FRegSysStylesList.Free;
-
-  for SysStyleHook in FSysStyleHookList.Values do
-    if Assigned(SysStyleHook) then
-      SysStyleHook.Free;
-  FSysStyleHookList.Free;
-  FChildRegSysStylesList.Free;
-  inherited;
-end;
-
 function BeforeHookingControl(Info: PControlInfo): Boolean;
 var
   LInfo: TControlInfo;
@@ -950,10 +930,26 @@ begin
   InstallHook;
 end;
 
+class destructor TSysStyleManager.Destroy;
+begin
+  RemoveHook;
+  FRegSysStylesList.Free;
+  FSysStyleHookList.Free; //remove the childs too because doOwnsValues
+  FChildRegSysStylesList.Free;
+  inherited;
+end;
+
+constructor TSysStyleManager.Create(AOwner: TComponent);
+begin
+  inherited;
+end;
+
 destructor TSysStyleManager.Destroy;
 begin
 
 end;
+
+
 
 
 class function TSysStyleManager.HookCBProc(nCode: Integer; wParam: wParam;
@@ -1069,17 +1065,16 @@ begin
     end;
   end;
 
-  //if nCode = HCBT_DESTROYWND then
-  if (nCode = HCBT_DESTROYWND) and not (StyleServices.IsSystemStyle) then
+  if nCode = HCBT_DESTROYWND then
   begin
+     //OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
     if FSysStyleHookList.ContainsKey(wParam) then
     begin
       ZeroMemory(@Info, sizeof(TControlInfo));
-      //sClassName := GetWindowClassName(wParam);
       Info.Handle := wParam;
       if Assigned(FSysHookNotificationProc) then
         OnHookNotification(cRemoved, @Info);
-      FSysStyleHookList.Remove(wParam);
+      //FSysStyleHookList.Remove(wParam); -> removed in WM_DESTROY
     end;
   end;
 end;

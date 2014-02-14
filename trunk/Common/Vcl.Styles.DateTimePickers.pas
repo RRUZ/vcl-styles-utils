@@ -36,9 +36,9 @@ type
  private
     procedure CNNotify(var Message: TWMNotify); message CN_NOTIFY;
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
-    procedure PaintBackground(Canvas: TCanvas); override;
     procedure SetColorsCalendar;
  public
+    procedure PaintBackground(Canvas: TCanvas); override;
     constructor Create(AControl: TWinControl); override;
  end;
 
