@@ -19,7 +19,11 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
+<<<<<<< .mine
+{ .$DEFINE EventLog }
+=======
 {$DEFINE EventLog }
+>>>>>>> .r200
 
 interface
 
@@ -74,67 +78,71 @@ type
     FSysStyleHookList: TObjectDictionary<HWND, TSysStyleHook>;
     FChildRegSysStylesList: TObjectDictionary<HWND, TChildControlInfo>;
     FHookVclControls: Boolean;
-    FUseStyleColorsChildControls : Boolean;
+    FUseStyleColorsChildControls: Boolean;
   protected
-    ///	<summary>
-    ///	 Install the Hook
-    ///	</summary>
+    /// <summary>
+    /// Install the Hook
+    /// </summary>
     class procedure InstallHook;
-    ///	<summary>
-    ///	 Remove the Hook
-    ///	</summary>
+    /// <summary>
+    /// Remove the Hook
+    /// </summary>
     class procedure RemoveHook;
-    ///	<summary>
-    ///	 Hook Callback
-    ///	</summary>
+    /// <summary>
+    /// Hook Callback
+    /// </summary>
     class function HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam)
       : LRESULT; stdcall; static;
   public
-    ///	<summary>
-    ///	  Register a Sys Style Hook for an specified class.
-    ///	</summary>
+    /// <summary>
+    /// Register a Sys Style Hook for an specified class.
+    /// </summary>
     class procedure RegisterSysStyleHook(SysControlClass: String;
       SysStyleHookClass: TSysStyleHookClass);
-    ///	<summary>
-    ///	  UnRegister a Sys Style Hook for an specified class.
-    ///	</summary>
+    /// <summary>
+    /// UnRegister a Sys Style Hook for an specified class.
+    /// </summary>
     class procedure UnRegisterSysStyleHook(SysControlClass: String;
       SysStyleHookClass: TSysStyleHookClass);
     class constructor Create;
     class destructor Destroy;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    ///	<summary>
-    ///	  Event to preventvor allow hook a control.
-    ///	</summary>
+    /// <summary>
+    /// Event to preventvor allow hook a control.
+    /// </summary>
     class Property OnBeforeHookingControl: TBeforeHookingControl
       read FBeforeHookingControlProc write FBeforeHookingControlProc;
-    ///	<summary>
-    ///	  Notify when a hook foir control is added or removed
-    ///	</summary>
+    /// <summary>
+    /// Notify when a hook foir control is added or removed
+    /// </summary>
     class Property OnHookNotification: TSysHookNotification
       read FSysHookNotificationProc write FSysHookNotificationProc;
-    ///	<summary>
-    ///	  Enable or disable the style of the controls
-    ///	</summary>
+    /// <summary>
+    /// Enable or disable the style of the controls
+    /// </summary>
     class property Enabled: Boolean read FEnabled write FEnabled;
-    ///	<summary>
-    ///	  Allow set the current VCL Style font and background color in  child
-    ///	  controls.  
-    ///	</summary>
-    class property UseStyleColorsChildControls: Boolean read FUseStyleColorsChildControls write FUseStyleColorsChildControls;
-    ///	<summary>
-    ///	  Allow disable or enable the hook of VCL Controls
-    ///	</summary>
-    class property HookVclControls: Boolean read FHookVclControls write FHookVclControls;
-    ///	<summary>
-    ///	  Collection of Styled (Hooked) Controls
-    ///	</summary>
-    class property SysStyleHookList: TObjectDictionary<HWND, TSysStyleHook> read FSysStyleHookList;
-    ///	<summary>
-    ///	  Collection of Styled Child Controls
-    ///	</summary>
-    class property ChildRegSysStylesList : TObjectDictionary<HWND, TChildControlInfo> read FChildRegSysStylesList;
+    /// <summary>
+    /// Allow set the current VCL Style font and background color in  child
+    /// controls.
+    /// </summary>
+    class property UseStyleColorsChildControls: Boolean
+      read FUseStyleColorsChildControls write FUseStyleColorsChildControls;
+    /// <summary>
+    /// Allow disable or enable the hook of VCL Controls
+    /// </summary>
+    class property HookVclControls: Boolean read FHookVclControls
+      write FHookVclControls;
+    /// <summary>
+    /// Collection of Styled (Hooked) Controls
+    /// </summary>
+    class property SysStyleHookList: TObjectDictionary<HWND, TSysStyleHook>
+      read FSysStyleHookList;
+    /// <summary>
+    /// Collection of Styled Child Controls
+    /// </summary>
+    class property ChildRegSysStylesList
+      : TObjectDictionary<HWND, TChildControlInfo> read FChildRegSysStylesList;
   end;
 
 function GetWindowClassName(Window: HWND): String;
@@ -148,7 +156,6 @@ function WM_To_String(WM_Message: Integer): string;
 {$ENDIF}
 
 implementation
-
 
 {$IFDEF EventLog}
 
@@ -883,6 +890,29 @@ end;
 { -------------------------------------------------------------------------------------- }
 { TSysStyleManager }
 
+<<<<<<< .mine
+constructor TSysStyleManager.Create(AOwner: TComponent);
+begin
+  inherited;
+end;
+
+class destructor TSysStyleManager.Destroy;
+(* var
+  SysStyleHook: TSysStyleHook; *)
+begin
+  RemoveHook;
+  FRegSysStylesList.Free;
+  (* for SysStyleHook in FSysStyleHookList.Values do
+    if Assigned(SysStyleHook) then
+    SysStyleHook.Free;
+  *)
+  FSysStyleHookList.Free;
+  FChildRegSysStylesList.Free;
+  inherited;
+end;
+
+=======
+>>>>>>> .r200
 function BeforeHookingControl(Info: PControlInfo): Boolean;
 var
   LInfo: TControlInfo;
@@ -924,7 +954,8 @@ begin
   FUseStyleColorsChildControls := True;
   FEnabled := True;
   FHookVclControls := False;
-  FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
+  FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create
+    ([doOwnsValues]);
   FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;
   FChildRegSysStylesList := TObjectDictionary<HWND, TChildControlInfo>.Create;
   InstallHook;
@@ -948,7 +979,6 @@ destructor TSysStyleManager.Destroy;
 begin
 
 end;
-
 
 
 
@@ -992,7 +1022,7 @@ begin
   Result := CallNextHookEx(FHook, nCode, wParam, lParam);
   if not FEnabled then
     Exit;
-  if (nCode = HCBT_CREATEWND) and not (StyleServices.IsSystemStyle) then
+  if (nCode = HCBT_CREATEWND) and not(StyleServices.IsSystemStyle) then
   begin
 
     CBTSturct := PCBTCreateWnd(lParam)^;
@@ -1065,12 +1095,21 @@ begin
     end;
   end;
 
+<<<<<<< .mine
+  // if nCode = HCBT_DESTROYWND then
+  if (nCode = HCBT_DESTROYWND) and not(StyleServices.IsSystemStyle) then
+=======
   if nCode = HCBT_DESTROYWND then
+>>>>>>> .r200
   begin
      //OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
     if FSysStyleHookList.ContainsKey(wParam) then
     begin
       ZeroMemory(@Info, sizeof(TControlInfo));
+<<<<<<< .mine
+      // sClassName := GetWindowClassName(wParam);
+=======
+>>>>>>> .r200
       Info.Handle := wParam;
       if Assigned(FSysHookNotificationProc) then
         OnHookNotification(cRemoved, @Info);
@@ -1104,7 +1143,5 @@ begin
   if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
     FRegSysStylesList.Remove(LowerCase(SysControlClass));
 end;
-
-
 
 end.
