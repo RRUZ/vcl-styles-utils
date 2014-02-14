@@ -19,11 +19,7 @@
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
-<<<<<<< .mine
 { .$DEFINE EventLog }
-=======
-{$DEFINE EventLog }
->>>>>>> .r200
 
 interface
 
@@ -890,29 +886,6 @@ end;
 { -------------------------------------------------------------------------------------- }
 { TSysStyleManager }
 
-<<<<<<< .mine
-constructor TSysStyleManager.Create(AOwner: TComponent);
-begin
-  inherited;
-end;
-
-class destructor TSysStyleManager.Destroy;
-(* var
-  SysStyleHook: TSysStyleHook; *)
-begin
-  RemoveHook;
-  FRegSysStylesList.Free;
-  (* for SysStyleHook in FSysStyleHookList.Values do
-    if Assigned(SysStyleHook) then
-    SysStyleHook.Free;
-  *)
-  FSysStyleHookList.Free;
-  FChildRegSysStylesList.Free;
-  inherited;
-end;
-
-=======
->>>>>>> .r200
 function BeforeHookingControl(Info: PControlInfo): Boolean;
 var
   LInfo: TControlInfo;
@@ -965,7 +938,7 @@ class destructor TSysStyleManager.Destroy;
 begin
   RemoveHook;
   FRegSysStylesList.Free;
-  FSysStyleHookList.Free; //remove the childs too because doOwnsValues
+  FSysStyleHookList.Free; // remove the childs too because doOwnsValues
   FChildRegSysStylesList.Free;
   inherited;
 end;
@@ -979,8 +952,6 @@ destructor TSysStyleManager.Destroy;
 begin
 
 end;
-
-
 
 class function TSysStyleManager.HookCBProc(nCode: Integer; wParam: wParam;
   lParam: lParam): LRESULT;
@@ -1095,25 +1066,16 @@ begin
     end;
   end;
 
-<<<<<<< .mine
-  // if nCode = HCBT_DESTROYWND then
-  if (nCode = HCBT_DESTROYWND) and not(StyleServices.IsSystemStyle) then
-=======
   if nCode = HCBT_DESTROYWND then
->>>>>>> .r200
   begin
-     //OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
+    // OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
     if FSysStyleHookList.ContainsKey(wParam) then
     begin
       ZeroMemory(@Info, sizeof(TControlInfo));
-<<<<<<< .mine
-      // sClassName := GetWindowClassName(wParam);
-=======
->>>>>>> .r200
       Info.Handle := wParam;
       if Assigned(FSysHookNotificationProc) then
         OnHookNotification(cRemoved, @Info);
-      //FSysStyleHookList.Remove(wParam); -> removed in WM_DESTROY
+      // FSysStyleHookList.Remove(wParam); -> removed in WM_DESTROY
     end;
   end;
 end;
