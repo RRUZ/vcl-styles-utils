@@ -212,7 +212,6 @@ type
     constructor Create(AHandle: THandle); override;
   end;
 
-
   TSysToolbarStyleHook = class(TMouseTrackSysControlStyleHook)
   private type
 {$REGION 'TSysToolbarButton'}
@@ -273,7 +272,7 @@ type
   TSysProgressBarStyleHook = class(TSysStyleHook)
   strict private
     FStep: Integer;
-    //FLastPos : Integer;
+    // FLastPos : Integer;
     FOrientation: TProgressBarOrientation;
     FTimer: TTimer;
     procedure TimerAction(Sender: TObject);
@@ -302,18 +301,35 @@ type
     destructor Destroy; override;
   end;
 
+  TSysUpDownStyleHook = class(TMouseTrackSysControlStyleHook)
+  strict private
+    FLeftPressed, FRightPressed: Boolean;
+    FMouseOnLeft, FMouseOnRight: Boolean;
+    function GetOrientation: TUDOrientation;
+    procedure WMLButtonDblClk(var Message: TWMMouse); message WM_LBUTTONDBLCLK;
+    procedure WMLButtonDown(var Message: TWMMouse); message WM_LBUTTONDOWN;
+    procedure WMLButtonUp(var Message: TWMMouse); message WM_LBUTTONUP;
+    procedure WMMouseMove(var Message: TWMMouse); message WM_MOUSEMOVE;
+  protected
+    procedure Paint(Canvas: TCanvas); override;
+    procedure MouseLeave; override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    destructor Destroy; override;
+  end;
+
 implementation
 
 uses
-  //IOUtils,
+  // IOUtils,
   Vcl.Styles.Utils.SysControls;
 
 //
-//procedure Addlog(const Msg: string);
-//begin
-//   TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
-//end;
-
+// procedure Addlog(const Msg: string);
+// begin
+// TFile.AppendAllText('C:\Test\log.txt',Format('%s %s %s',[FormatDateTime('hh:nn:ss.zzz', Now),  msg, sLineBreak]));
+// end;
 
 { TSysListViewStyleHook }
 
@@ -795,7 +811,7 @@ begin
   OverridePaintNC := False;
   OverrideFont := True;
 {$IFEND}
-  //OverrideEraseBkgnd:=True;
+  // OverrideEraseBkgnd:=True;
   FHotTabIndex := -1;
 end;
 
@@ -1077,17 +1093,17 @@ end;
 
 procedure TSysTabControlStyleHook.WndProc(var Message: TMessage);
 begin
-  //Addlog(Format('TSysTabControlStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
+  // Addlog(Format('TSysTabControlStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
 
-//  case Message.Msg of
-//    WM_MOUSEMOVE:
-//      begin
-//
-//      end;
-//  else
-//    inherited;
-//  end;
-     inherited;
+  // case Message.Msg of
+  // WM_MOUSEMOVE:
+  // begin
+  //
+  // end;
+  // else
+  // inherited;
+  // end;
+  inherited;
 end;
 
 { TSysToolbarStyleHook }
@@ -1541,15 +1557,15 @@ begin
     FOrientation := pbVertical
   else
     FOrientation := pbHorizontal;
-  //DoubleBuffered := True;
+  // DoubleBuffered := True;
   OverridePaint := True;
-  //OverrideEraseBkgnd :=True;
-  //FLastPos:=-1;
+  // OverrideEraseBkgnd :=True;
+  // FLastPos:=-1;
   FStep := 0;
   FTimer := TTimer.Create(nil);
   FTimer.Interval := 100;
-  FTimer.Enabled  := False;
-  //if ((SysControl.Style And PBS_MARQUEE) <> 0) then
+  FTimer.Enabled := False;
+  // if ((SysControl.Style And PBS_MARQUEE) <> 0) then
   begin
     FTimer.OnTimer := TimerAction;
     FTimer.Enabled := True;
@@ -1615,17 +1631,18 @@ var
   LDetails: TThemedElementDetails;
 begin
 
-// if ((SysControl.Style And PBS_MARQUEE) <> 0) or ((FLastPos=-1)  or (Position<FLastPos)) then
-// begin
+  // if ((SysControl.Style And PBS_MARQUEE) <> 0) or ((FLastPos=-1)  or (Position<FLastPos)) then
+  // begin
   if StyleServices.Available then
   begin
     LDetails.Element := teProgress;
     if StyleServices.HasTransparentParts(LDetails) then
-      StyleServices.DrawParentBackground(Handle, Canvas.Handle, LDetails, False);
+      StyleServices.DrawParentBackground(Handle, Canvas.Handle,
+        LDetails, False);
   end;
 
   PaintFrame(Canvas);
-// end;
+  // end;
   PaintBar(Canvas);
 end;
 
@@ -1677,7 +1694,7 @@ begin
     else
       LWidth := LRect.Height;
     LPos := Round(LWidth * GetPercent);
-    //FLastPos := GetPosition;
+    // FLastPos := GetPosition;
     FillR := LRect;
     if Orientation = pbHorizontal then
     begin
@@ -1712,32 +1729,32 @@ procedure TSysProgressBarStyleHook.TimerAction(Sender: TObject);
 var
   LCanvas: TCanvas;
 begin
-//  if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
-//  begin
+  // if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
+  // begin
 
-    LCanvas := TCanvas.Create;
-    try
-      LCanvas.Handle := GetWindowDC(Self.Handle);
+  LCanvas := TCanvas.Create;
+  try
+    LCanvas.Handle := GetWindowDC(Self.Handle);
 
-      if SysControl.Visible then
-      begin
-        PaintFrame(LCanvas);
-        PaintBar(LCanvas);
-      end;
-
-      inc(FStep, 1);
-      if FStep mod 20 = 0 then
-        FStep := 0;
-
-    finally
-      ReleaseDC(Handle, LCanvas.Handle);
-      LCanvas.Handle := 0;
-      LCanvas.Free;
+    if SysControl.Visible then
+    begin
+      PaintFrame(LCanvas);
+      PaintBar(LCanvas);
     end;
 
-//  end
-//  else
-//    FTimer.Enabled := False;
+    inc(FStep, 1);
+    if FStep mod 20 = 0 then
+      FStep := 0;
+
+  finally
+    ReleaseDC(Handle, LCanvas.Handle);
+    LCanvas.Handle := 0;
+    LCanvas.Free;
+  end;
+
+  // end
+  // else
+  // FTimer.Enabled := False;
 end;
 
 procedure TSysProgressBarStyleHook.WMNCCalcSize(var Message: TWMNCCalcSize);
@@ -1748,13 +1765,14 @@ end;
 
 procedure TSysProgressBarStyleHook.WndProc(var Message: TMessage);
 begin
-  //Addlog(Format('TSysProgressBarStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
-//
+  // Addlog(Format('TSysProgressBarStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
+  //
   case Message.Msg of
-     WM_TIMER : ; //avoid flicker in progress bar and memory increased;
+    WM_TIMER:
+      ; // avoid flicker in progress bar and memory increased;
 
   else
-     inherited;
+    inherited;
   end;
 
 end;
@@ -1831,7 +1849,7 @@ end;
 constructor TSysReBarStyleHook.Create(AHandle: THandle);
 begin
   inherited;
-  OverrideEraseBkgnd:=True;
+  OverrideEraseBkgnd := True;
   OverridePaint := True;
   OverridePaintNC := True;
 end;
@@ -1856,24 +1874,25 @@ function SizeOfReBarBandInfo: Integer;
 var
   ReBarBandInfo: TReBarBandInfo;
 begin
-  ZeroMemory(@ReBarBandInfo, SizeOf(ReBarBandInfo));
+  ZeroMemory(@ReBarBandInfo, sizeof(ReBarBandInfo));
   if GetComCtlVersion >= $60001 then
-    Result := Sizeof(TReBarBandInfo)
+    Result := sizeof(TReBarBandInfo)
   else
     // Platforms prior to Vista do not support the fields rcChevronLocation & uChevronState
-    Result := SizeOf(ReBarBandInfo) - SizeOf(ReBarBandInfo.rcChevronLocation) -
-      SizeOf(ReBarBandInfo.uChevronState);
+    Result := sizeof(ReBarBandInfo) - sizeof(ReBarBandInfo.rcChevronLocation) -
+      sizeof(ReBarBandInfo.uChevronState);
 end;
 
 function TSysReBarStyleHook.GetBandText(Index: Integer): string;
 const
   BufSize = 255;
 var
-  Info: TRebarBandInfo;
-  Buffer: array [0..BufSize - 1] of Char;
+  Info: TReBarBandInfo;
+  Buffer: array [0 .. BufSize - 1] of Char;
 begin
-  FillChar(Info, SizeOf(Info), 0);
-  Info.cbSize := SizeOfReBarBandInfo; // Size differs depending on OS and ComCtl32.dll version
+  FillChar(Info, sizeof(Info), 0);
+  Info.cbSize := SizeOfReBarBandInfo;
+  // Size differs depending on OS and ComCtl32.dll version
   Info.fMask := RBBIM_TEXT;
   Info.lpText := @Buffer;
   Info.cch := BufSize;
@@ -1882,35 +1901,39 @@ begin
   else
     Result := '';
 end;
+
 procedure TSysReBarStyleHook.Paint(Canvas: TCanvas);
 var
-  I : integer;
+  i: Integer;
   R, Margin, LTextRect: TRect;
   S: string;
   Details: TThemedElementDetails;
 begin
-  for I := 0 to GetBandCount - 1 do
+  for i := 0 to GetBandCount - 1 do
   begin
-    R := GetBandRect(I);
-    Margin := GetBandBorder(I);
+    R := GetBandRect(i);
+    Margin := GetBandBorder(i);
     InflateRect(R, 1, 1);
-    if R.Top < 0 then R.Top := 0;
-    if R.Left < 0 then R.Left := 0;
+    if R.Top < 0 then
+      R.Top := 0;
+    if R.Left < 0 then
+      R.Left := 0;
     if R.Right > SysControl.ClientRect.Right then
       R.Right := SysControl.ClientRect.Right;
     if R.Bottom > SysControl.ClientRect.Bottom then
       R.Bottom := SysControl.ClientRect.Bottom;
-    {band}
+    { band }
     Details := StyleServices.GetElementDetails(trBand);
     StyleServices.DrawElement(Canvas.Handle, Details, R);
-    {text}
+    { text }
     LTextRect := Rect(R.Left + 10, R.Top, R.Left + Margin.Left, R.Bottom);
 
-    S := GetBandText(I);
+    S := GetBandText(i);
     if S <> '' then
-      DrawControlText(Canvas, Details, S, LTextRect, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
+      DrawControlText(Canvas, Details, S, LTextRect, DT_CENTER or DT_VCENTER or
+        DT_SINGLELINE);
 
-    {gripper}
+    { gripper }
     R := Rect(R.Left + 2, R.Top + 2, R.Left + 6, R.Bottom - 2);
     Details := StyleServices.GetElementDetails(trGripper);
     StyleServices.DrawElement(Canvas.Handle, Details, R);
@@ -1935,26 +1958,27 @@ procedure TSysReBarStyleHook.PaintNC(Canvas: TCanvas);
 var
   LDetails: TThemedElementDetails;
 begin
-  ExcludeClipRect(Canvas.Handle,  2, 2, SysControl.Width - 2, SysControl.Height - 2);
+  ExcludeClipRect(Canvas.Handle, 2, 2, SysControl.Width - 2,
+    SysControl.Height - 2);
   Canvas.Brush.Color := StyleServices.ColorToRGB(clBtnFace);
   Canvas.FillRect(Rect(0, 0, SysControl.Width, SysControl.Height));
   LDetails.Element := teToolBar;
   LDetails.Part := 0;
-  StyleServices.DrawElement(Canvas.Handle,
-    LDetails, Rect(0, 0, SysControl.Width, SysControl.Height));
+  StyleServices.DrawElement(Canvas.Handle, LDetails,
+    Rect(0, 0, SysControl.Width, SysControl.Height));
 end;
 
 procedure TSysReBarStyleHook.WndProc(var Message: TMessage);
 begin
   case Message.Msg of
-   WM_SIZE :
-             begin
-                CallDefaultProc(Message);
-                Invalidate;
-                Handled := True;
-             end;
+    WM_SIZE:
+      begin
+        CallDefaultProc(Message);
+        Invalidate;
+        Handled := True;
+      end;
   else
-       inherited;
+    inherited;
   end;
 end;
 
@@ -1964,28 +1988,28 @@ constructor TSysStatusBarStyleHook.Create(AHandle: THandle);
 begin
   inherited;
   OverridePaint := True;
-  //DoubleBuffered := True;
+  // DoubleBuffered := True;
 end;
-
 
 procedure TSysStatusBarStyleHook.Paint(Canvas: TCanvas);
 const
   AlignStyles: array [TAlignment] of Integer = (DT_LEFT, DT_RIGHT, DT_CENTER);
 var
   R, R1: TRect;
-  Res, Count, I: Integer;
+  Res, Count, i: Integer;
   Idx, Flags: Cardinal;
   Details: TThemedElementDetails;
   LText: string;
-  Borders: array [0..2] of Integer;
+  Borders: array [0 .. 2] of Integer;
 begin
   Details := StyleServices.GetElementDetails(tsStatusRoot);
-  StyleServices.DrawElement(Canvas.Handle, Details, Rect(0, 0, SysControl.Width, SysControl.Height));
+  StyleServices.DrawElement(Canvas.Handle, Details, Rect(0, 0, SysControl.Width,
+    SysControl.Height));
 
   if SendMessage(Handle, SB_ISSIMPLE, 0, 0) > 0 then
   begin
     R := SysControl.ClientRect;
-    FillChar(Borders, SizeOf(Borders), 0);
+    FillChar(Borders, sizeof(Borders), 0);
     SendMessage(Handle, SB_GETBORDERS, 0, IntPtr(@Borders));
     R.Left := Borders[0] + Borders[2];
     R.Top := Borders[1];
@@ -2003,23 +2027,23 @@ begin
     SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, 0, 0)));
     if Length(LText) > 0 then
     begin
-     SendMessage(Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
-     Flags := SysControl.DrawTextBiDiModeFlags(DT_LEFT);
-     DrawControlText(Canvas, Details, LText, R, Flags);
+      SendMessage(Handle, SB_GETTEXT, 0, IntPtr(@LText[1]));
+      Flags := SysControl.DrawTextBiDiModeFlags(DT_LEFT);
+      DrawControlText(Canvas, Details, LText, R, Flags);
     end;
   end
   else
   begin
-   Count := SendMessage(Handle, SB_GETPARTS, 0, 0);
-    for I := 0 to Count - 1 do
+    Count := SendMessage(Handle, SB_GETPARTS, 0, 0);
+    for i := 0 to Count - 1 do
     begin
       R := Rect(0, 0, 0, 0);
-      SendMessage(Handle, SB_GETRECT, I, IntPtr(@R));
+      SendMessage(Handle, SB_GETRECT, i, IntPtr(@R));
       if IsRectEmpty(R) then
         Exit;
       Details := StyleServices.GetElementDetails(tsPane);
       StyleServices.DrawElement(Canvas.Handle, Details, R);
-      if I = Count - 1 then
+      if i = Count - 1 then
       begin
         R1 := SysControl.ClientRect;
         R1.Left := R1.Right - R.Height;
@@ -2030,7 +2054,7 @@ begin
       InflateRect(R, -1, -1);
 
       Flags := SysControl.DrawTextBiDiModeFlags(DT_LEFT);
-      Idx := I;
+      Idx := i;
       SetLength(LText, Word(SendMessage(Handle, SB_GETTEXTLENGTH, Idx, 0)));
       if Length(LText) > 0 then
       begin
@@ -2045,7 +2069,6 @@ end;
 procedure TSysStatusBarStyleHook.WndProc(var Message: TMessage);
 begin
   inherited;
-
 end;
 
 { TSysTrackBarStyleHook }
@@ -2054,7 +2077,7 @@ constructor TSysTrackBarStyleHook.Create(AHandle: THandle);
 begin
   inherited;
   OverridePaint := True;
-  //OverrideEraseBkgnd :=True;
+  // OverrideEraseBkgnd :=True;
   DoubleBuffered := True;
   FThumbPressed := False;
 end;
@@ -2064,12 +2087,13 @@ var
   LDetails: TThemedElementDetails;
   TrackBarStyle: Cardinal;
   LThemedTrackBar: TThemedTrackBar;
-  I, TickCount, TickStart, TickEnd, TickPos: Integer;
-  LRect     : TRect;
-  LRect2    : TRect;
+  i, TickCount, TickStart, TickEnd, TickPos: Integer;
+  LRect: TRect;
+  LRect2: TRect;
   LThumbRect: TRect;
 begin
-  if not StyleServices.Available then Exit;
+  if not StyleServices.Available then
+    Exit;
 
   LThemedTrackBar := ttbTrackBarDontCare;
   { Track }
@@ -2105,12 +2129,14 @@ begin
     if TrackBarStyle and TBS_VERT = 0 then
     begin
       TickPos := LRect.Left + LThumbRect.Width div 2;
-      if (TrackBarStyle and TBS_TOP = TBS_TOP) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = TBS_TOP) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(TickPos, LRect.Top - 7);
         Canvas.LineTo(TickPos, LRect.Top - 3);
       end;
-      if (TrackBarStyle and TBS_TOP = 0) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = 0) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(TickPos, LRect.Bottom + 3);
         Canvas.LineTo(TickPos, LRect.Bottom + 7);
@@ -2120,12 +2146,14 @@ begin
     else
     begin
       TickPos := LRect.Left + LThumbRect.Height div 2;
-      if (TrackBarStyle and TBS_TOP = TBS_TOP) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = TBS_TOP) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(LRect.Top - 7, TickPos);
         Canvas.LineTo(LRect.Top - 3, TickPos);
       end;
-      if (TrackBarStyle and TBS_TOP = 0) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = 0) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(LRect.Bottom + 3, TickPos);
         Canvas.LineTo(LRect.Bottom + 7, TickPos);
@@ -2136,12 +2164,14 @@ begin
     if TrackBarStyle and TBS_VERT = 0 then
     begin
       TickPos := LRect.Right - LThumbRect.Width div 2;
-      if (TrackBarStyle and TBS_TOP = TBS_TOP) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = TBS_TOP) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(TickPos, LRect.Top - 7);
         Canvas.LineTo(TickPos, LRect.Top - 3);
       end;
-      if (TrackBarStyle and TBS_TOP = 0) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = 0) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(TickPos, LRect.Bottom + 3);
         Canvas.LineTo(TickPos, LRect.Bottom + 7);
@@ -2151,30 +2181,35 @@ begin
     else
     begin
       TickPos := LRect.Right - LThumbRect.Height div 2;
-      if (TrackBarStyle and TBS_TOP = TBS_TOP) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = TBS_TOP) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(LRect.Top - 7, TickPos);
         Canvas.LineTo(LRect.Top - 3, TickPos);
       end;
-      if (TrackBarStyle and TBS_TOP = 0) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+      if (TrackBarStyle and TBS_TOP = 0) or
+        (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
       begin
         Canvas.MoveTo(LRect.Bottom + 3, TickPos);
         Canvas.LineTo(LRect.Bottom + 7, TickPos);
       end;
       TickEnd := TickPos;
     end;
-    //ticks
-    for I := 1 to TickCount - 1 do
+    // ticks
+    for i := 1 to TickCount - 1 do
     begin
-      TickPos := TickStart + Round((TickEnd - TickStart) * (I/(TickCount-1)));
+      TickPos := TickStart + Round((TickEnd - TickStart) *
+        (i / (TickCount - 1)));
       if TrackBarStyle and TBS_VERT = 0 then
       begin
-        if (TrackBarStyle and TBS_TOP = TBS_TOP) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+        if (TrackBarStyle and TBS_TOP = TBS_TOP) or
+          (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
         begin
           Canvas.MoveTo(TickPos, LRect.Top - 6);
           Canvas.LineTo(TickPos, LRect.Top - 3);
         end;
-        if (TrackBarStyle and TBS_TOP = 0) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+        if (TrackBarStyle and TBS_TOP = 0) or
+          (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
         begin
           Canvas.MoveTo(TickPos, LRect.Bottom + 3);
           Canvas.LineTo(TickPos, LRect.Bottom + 6);
@@ -2182,12 +2217,14 @@ begin
       end
       else
       begin
-        if (TrackBarStyle and TBS_TOP = TBS_TOP) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+        if (TrackBarStyle and TBS_TOP = TBS_TOP) or
+          (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
         begin
           Canvas.MoveTo(LRect.Top - 6, TickPos);
           Canvas.LineTo(LRect.Top - 3, TickPos);
         end;
-        if (TrackBarStyle and TBS_TOP = 0) or (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
+        if (TrackBarStyle and TBS_TOP = 0) or
+          (TrackBarStyle and TBS_BOTH = TBS_BOTH) then
         begin
           Canvas.MoveTo(LRect.Bottom + 3, TickPos);
           Canvas.LineTo(LRect.Bottom + 6, TickPos);
@@ -2204,22 +2241,20 @@ begin
     begin
       if TrackBarStyle and TBS_VERT = 0 then
       begin
-       if TrackBarStyle and TBS_BOTH = TBS_BOTH then
+        if TrackBarStyle and TBS_BOTH = TBS_BOTH then
           LThemedTrackBar := ttbThumbDisabled
-        else
-        if TrackBarStyle and TBS_TOP = TBS_TOP then
+        else if TrackBarStyle and TBS_TOP = TBS_TOP then
           LThemedTrackBar := ttbThumbTopDisabled
-        else
-        if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
+        else if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
           LThemedTrackBar := ttbThumbBottomDisabled;
       end
       else
       begin
         LThemedTrackBar := ttbThumbRightDisabled;
         if TrackBarStyle and TBS_TOP = TBS_TOP then
-        LThemedTrackBar := ttbThumbLeftDisabled else
-        if TrackBarStyle and TBS_BOTH = TBS_BOTH then
-         LThemedTrackBar := ttbThumbVertDisabled;
+          LThemedTrackBar := ttbThumbLeftDisabled
+        else if TrackBarStyle and TBS_BOTH = TBS_BOTH then
+          LThemedTrackBar := ttbThumbVertDisabled;
       end;
     end
     else if FThumbPressed then
@@ -2228,20 +2263,18 @@ begin
       begin
         if TrackBarStyle and TBS_BOTH = TBS_BOTH then
           LThemedTrackBar := ttbThumbPressed
-        else
-        if TrackBarStyle and TBS_TOP = TBS_TOP then
+        else if TrackBarStyle and TBS_TOP = TBS_TOP then
           LThemedTrackBar := ttbThumbTopPressed
-        else
-        if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
+        else if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
           LThemedTrackBar := ttbThumbBottomPressed;
       end
       else
       begin
         LThemedTrackBar := ttbThumbRightPressed;
         if TrackBarStyle and TBS_TOP = TBS_TOP then
-        LThemedTrackBar := ttbThumbLeftPressed else
-        if TrackBarStyle and TBS_BOTH = TBS_BOTH then
-         LThemedTrackBar := ttbThumbVertPressed;
+          LThemedTrackBar := ttbThumbLeftPressed
+        else if TrackBarStyle and TBS_BOTH = TBS_BOTH then
+          LThemedTrackBar := ttbThumbVertPressed;
       end;
     end
     else if FMouseOnThumb then
@@ -2250,42 +2283,38 @@ begin
       begin
         if TrackBarStyle and TBS_BOTH = TBS_BOTH then
           LThemedTrackBar := ttbThumbHot
-        else
-        if TrackBarStyle and TBS_TOP = TBS_TOP then
+        else if TrackBarStyle and TBS_TOP = TBS_TOP then
           LThemedTrackBar := ttbThumbTopHot
-        else
-        if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
+        else if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
           LThemedTrackBar := ttbThumbBottomHot;
       end
       else
       begin
         LThemedTrackBar := ttbThumbRightHot;
         if TrackBarStyle and TBS_TOP = TBS_TOP then
-        LThemedTrackBar := ttbThumbLeftHot else
-        if TrackBarStyle and TBS_BOTH = TBS_BOTH then
-         LThemedTrackBar := ttbThumbVertHot;
+          LThemedTrackBar := ttbThumbLeftHot
+        else if TrackBarStyle and TBS_BOTH = TBS_BOTH then
+          LThemedTrackBar := ttbThumbVertHot;
       end;
     end
     else
     begin
       if TrackBarStyle and TBS_VERT = 0 then
       begin
-         if TrackBarStyle and TBS_BOTH = TBS_BOTH then
+        if TrackBarStyle and TBS_BOTH = TBS_BOTH then
           LThemedTrackBar := ttbThumbNormal
-        else
-        if TrackBarStyle and TBS_TOP = TBS_TOP then
+        else if TrackBarStyle and TBS_TOP = TBS_TOP then
           LThemedTrackBar := ttbThumbTopNormal
-        else
-        if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
+        else if TrackBarStyle and TBS_BOTTOM = TBS_BOTTOM then
           LThemedTrackBar := ttbThumbBottomNormal;
       end
       else
       begin
         LThemedTrackBar := ttbThumbRightNormal;
         if TrackBarStyle and TBS_TOP = TBS_TOP then
-        LThemedTrackBar := ttbThumbLeftNormal else
-        if TrackBarStyle and TBS_BOTH = TBS_BOTH then
-         LThemedTrackBar := ttbThumbVertNormal;
+          LThemedTrackBar := ttbThumbLeftNormal
+        else if TrackBarStyle and TBS_BOTH = TBS_BOTH then
+          LThemedTrackBar := ttbThumbVertNormal;
       end;
     end;
 
@@ -2299,7 +2328,7 @@ end;
 
 procedure TSysTrackBarStyleHook.PaintBackground(Canvas: TCanvas);
 var
-  LDetails:  TThemedElementDetails;
+  LDetails: TThemedElementDetails;
 begin
   LDetails.Element := teTrackBar;
   StyleServices.DrawParentBackground(Handle, Canvas.Handle, LDetails, False);
@@ -2307,49 +2336,300 @@ end;
 
 procedure TSysTrackBarStyleHook.WndProc(var Message: TMessage);
 var
-  LRect : TRect;
+  LRect: TRect;
   NewValue: Boolean;
 begin
-//  Addlog(Format('TSysTrackBarStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
+  // Addlog(Format('TSysTrackBarStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
 
-  case Message.Msg  of
-    //WM_KEYUP,
-    WM_VSCROLL,
-    WM_HSCROLL,
-    TBM_SETPOS:   begin
-                     Invalidate;
-                     //CallDefaultProc(Message);
-                  end;
+  case Message.Msg of
+    // WM_KEYUP,
+    WM_VSCROLL, WM_HSCROLL, TBM_SETPOS:
+      begin
+        Invalidate;
+        // CallDefaultProc(Message);
+      end;
 
-    WM_MOUSEMOVE      :
-                      if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
-                      begin
-                        SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@LRect));
-                        NewValue := PtInRect(LRect, Point(TWMMouse(Message).XPos, TWMMouse(Message).YPos));
-                        if NewValue <> FMouseOnThumb then
-                        begin
-                          FMouseOnThumb := NewValue;
-                          Invalidate;
-                        end;
-                      end;
-    WM_LBUTTONUP   :
-                      if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
-                      begin
-                        FThumbPressed := False;
-                        Invalidate;
-                      end;
-    WM_LBUTTONDOWN :
-                      if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
-                      begin
-                        SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@LRect));
-                        if PtInRect(LRect, Point(TWMMouse(Message).XPos, TWMMouse(Message).YPos)) then
-                          FThumbPressed := True;
-                        Invalidate;
-                      end;
+    WM_MOUSEMOVE:
+      if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
+      begin
+        SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@LRect));
+        NewValue := PtInRect(LRect, Point(TWMMouse(Message).XPos,
+          TWMMouse(Message).YPos));
+        if NewValue <> FMouseOnThumb then
+        begin
+          FMouseOnThumb := NewValue;
+          Invalidate;
+        end;
+      end;
+    WM_LBUTTONUP:
+      if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
+      begin
+        FThumbPressed := False;
+        Invalidate;
+      end;
+    WM_LBUTTONDOWN:
+      if GetWindowLong(Handle, GWL_STYLE) and TBS_NOTHUMB = 0 then
+      begin
+        SendMessage(Handle, TBM_GETTHUMBRECT, 0, IntPtr(@LRect));
+        if PtInRect(LRect, Point(TWMMouse(Message).XPos, TWMMouse(Message).YPos))
+        then
+          FThumbPressed := True;
+        Invalidate;
+      end;
 
   else
-       inherited;
+    inherited;
   end;
+end;
+
+{ TSysUpDownStyleHook }
+
+constructor TSysUpDownStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+  OverridePaint := True;
+  DoubleBuffered := True;
+end;
+
+destructor TSysUpDownStyleHook.Destroy;
+begin
+  inherited;
+end;
+
+function TSysUpDownStyleHook.GetOrientation: TUDOrientation;
+begin
+  if SysControl.Style and UDS_HORZ = UDS_HORZ then
+    Result := udHorizontal
+  else
+    Result := udVertical;
+end;
+
+procedure TSysUpDownStyleHook.MouseLeave;
+begin
+  FMouseOnLeft := False;
+  FMouseOnRight := False;
+  Invalidate;
+end;
+
+procedure TSysUpDownStyleHook.Paint(Canvas: TCanvas);
+var
+  R: TRect;
+  DrawState: TThemedScrollBar;
+  Details: TThemedElementDetails;
+begin
+  if not StyleServices.Available then
+    Exit;
+
+  StyleServices.DrawParentBackground(Handle, Canvas.Handle, Details, False);
+
+  if GetOrientation = udHorizontal then
+  begin
+    R := SysControl.ClientRect;
+    R.Right := R.Left + R.Width div 2;
+    if FLeftPressed then
+      DrawState := tsArrowBtnLeftPressed
+    else if FMouseOnLeft and MouseInControl then
+      DrawState := tsArrowBtnLeftHot
+    else
+      DrawState := tsArrowBtnLeftNormal;
+
+    Details := StyleServices.GetElementDetails(DrawState);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+
+    R := SysControl.ClientRect;
+    R.Left := R.Right - R.Width div 2;
+    if FRightPressed then
+      DrawState := tsArrowBtnRightPressed
+    else if FMouseOnRight and MouseInControl then
+      DrawState := tsArrowBtnRightHot
+    else
+      DrawState := tsArrowBtnRightNormal;
+
+    Details := StyleServices.GetElementDetails(DrawState);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+  end
+  else
+  begin
+    R := SysControl.ClientRect;
+    R.Bottom := R.Top + R.Height div 2;
+    if FLeftPressed then
+      DrawState := tsArrowBtnUpPressed
+    else if FMouseOnLeft and MouseInControl then
+      DrawState := tsArrowBtnUpHot
+    else
+      DrawState := tsArrowBtnUpNormal;
+
+    Details := StyleServices.GetElementDetails(DrawState);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+
+    R := SysControl.ClientRect;
+    R.Top := R.Bottom - R.Height div 2;
+
+    if FRightPressed then
+      DrawState := tsArrowBtnDownPressed
+    else if FMouseOnRight and MouseInControl then
+      DrawState := tsArrowBtnDownHot
+    else
+      DrawState := tsArrowBtnDownNormal;
+
+    Details := StyleServices.GetElementDetails(DrawState);
+    StyleServices.DrawElement(Canvas.Handle, Details, R);
+  end;
+end;
+
+procedure TSysUpDownStyleHook.WMLButtonDblClk(var Message: TWMMouse);
+var
+  R: TRect;
+begin
+  SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  SetRedraw(True);
+  if GetOrientation = udHorizontal then
+  begin
+    R := SysControl.ClientRect;
+    R.Right := R.Left + R.Width div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FLeftPressed := True
+    else
+      FLeftPressed := False;
+
+    R := SysControl.ClientRect;
+    R.Left := R.Right - R.Width div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FRightPressed := True
+    else
+      FRightPressed := False;
+  end
+  else
+  begin
+    R := SysControl.ClientRect;
+    R.Bottom := R.Top + R.Height div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FLeftPressed := True
+    else
+      FLeftPressed := False;
+
+    R := SysControl.ClientRect;
+    R.Top := R.Bottom - R.Height div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FRightPressed := True
+    else
+      FRightPressed := False;
+  end;
+  Invalidate;
+  Handled := True;
+end;
+
+procedure TSysUpDownStyleHook.WMLButtonDown(var Message: TWMMouse);
+var
+  R: TRect;
+begin
+  SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  SetRedraw(True);
+
+  if GetOrientation = udHorizontal then
+  begin
+    R := SysControl.ClientRect;
+    R.Right := R.Left + R.Width div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FLeftPressed := True
+    else
+      FLeftPressed := False;
+
+    R := SysControl.ClientRect;
+    R.Left := R.Right - R.Width div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FRightPressed := True
+    else
+      FRightPressed := False;
+  end
+  else
+  begin
+    R := SysControl.ClientRect;
+    R.Bottom := R.Top + R.Height div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FLeftPressed := True
+    else
+      FLeftPressed := False;
+
+    R := SysControl.ClientRect;
+    R.Top := R.Bottom - R.Height div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FRightPressed := True
+    else
+      FRightPressed := False;
+  end;
+
+  Invalidate;
+  Handled := True;
+end;
+
+procedure TSysUpDownStyleHook.WMLButtonUp(var Message: TWMMouse);
+begin
+  SetRedraw(False);
+  CallDefaultProc(TMessage(Message));
+  SetRedraw(True);
+  FLeftPressed := False;
+  FRightPressed := False;
+  Invalidate;
+  Handled := True;
+end;
+
+procedure TSysUpDownStyleHook.WMMouseMove(var Message: TWMMouse);
+var
+  R: TRect;
+  FOldMouseOnLeft, FOldMouseOnRight: Boolean;
+begin
+  inherited;
+  CallDefaultProc(TMessage(Message));
+
+  FOldMouseOnLeft := FMouseOnLeft;
+  FOldMouseOnRight := FMouseOnRight;
+
+  if GetOrientation = udHorizontal then
+  begin
+    R := SysControl.ClientRect;
+    R.Right := R.Left + R.Width div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FMouseOnLeft := True
+    else
+      FMouseOnLeft := False;
+
+    R := SysControl.ClientRect;
+    R.Left := R.Right - R.Width div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FMouseOnRight := True
+    else
+      FMouseOnRight := False;
+  end
+  else
+  begin
+    R := SysControl.ClientRect;
+    R.Bottom := R.Top + R.Height div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FMouseOnLeft := True
+    else
+      FMouseOnLeft := False;
+
+    R := SysControl.ClientRect;
+    R.Top := R.Bottom - R.Height div 2;
+    if R.Contains(Point(Message.XPos, Message.YPos)) then
+      FMouseOnRight := True
+    else
+      FMouseOnRight := False;
+  end;
+
+  if (FOldMouseOnLeft <> FMouseOnLeft) and (FOldMouseOnRight <> FMouseOnRight)
+  then
+    Invalidate;
+
+  Handled := True;
+end;
+
+procedure TSysUpDownStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
 end;
 
 initialization
@@ -2368,23 +2648,25 @@ begin
     RegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
     RegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
     RegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
+    RegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
   end;
 end;
 
 finalization
 
-  with TSysStyleManager do
-  begin
-    UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
-    UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
-    UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
-    UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
-    UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
-    UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
-    UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
-    UnRegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
-    UnRegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
-    UnRegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
-  end;
+with TSysStyleManager do
+begin
+  UnRegisterSysStyleHook('ToolbarWindow32', TSysToolbarStyleHook);
+  UnRegisterSysStyleHook('SysListView32', TSysListViewStyleHook);
+  UnRegisterSysStyleHook('SysTabControl32', TSysTabControlStyleHook);
+  UnRegisterSysStyleHook('SysTreeView32', TSysTreeViewStyleHook);
+  UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
+  UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
+  UnRegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
+  UnRegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
+  UnRegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
+end;
 
 end.
