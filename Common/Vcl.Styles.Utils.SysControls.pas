@@ -1013,7 +1013,6 @@ begin
 
     if FRegSysStylesList.ContainsKey(sClassName) then
     begin
-
       Info.Handle := wParam;
       Info.Parent := Parent;
       Info.Style := Style;
