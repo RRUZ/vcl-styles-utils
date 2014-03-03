@@ -505,9 +505,7 @@ end;
 procedure TSysControl.SetWndProc(Value: NativeInt);
 begin
   if Value <> WndProc then
-  begin
     SetWindowLongPtr(Handle, GWL_WNDPROC, Value);
-  end;
 end;
 
 function TSysControl.UseRightToLeftAlignment: Boolean;
@@ -1285,9 +1283,9 @@ begin
                  begin
                   Message.Result := CallDefaultProc(Message);
                   Dispatch(Message);
-                  //OutputDebugString(PChar('WM_DESTROY Handle '+IntToHex(Handle, 8)));
-                  if TSysStyleManager.SysStyleHookList.ContainsKey(Handle) then
-                    TSysStyleManager.SysStyleHookList.Remove(Handle);
+//                  OutputDebugString(PChar('WM_DESTROY Handle '+IntToHex(Handle, 8)));
+//                  if TSysStyleManager.SysStyleHookList.ContainsKey(Handle) then
+//                    TSysStyleManager.SysStyleHookList.Remove(Handle);
                   exit;
                  end;
   end;

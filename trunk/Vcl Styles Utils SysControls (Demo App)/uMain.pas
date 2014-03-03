@@ -198,7 +198,8 @@ end;
 
 procedure TForm1.SpeedButton9Click(Sender: TObject);
 begin
-  OpenDialog1.Execute();
+ if OpenDialog1.Execute then
+  ShowMessage(Format('%s', [OpenDialog1.FileName]));
 end;
 
 end.
