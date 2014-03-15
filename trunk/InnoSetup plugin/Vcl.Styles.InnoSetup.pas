@@ -204,13 +204,13 @@ begin
         sClassName:=ClassesList.Values[IntToStr(PCWPStruct(lParam)^.hwnd)]; //ClassesList[PCWPStruct(lParam)^.hwnd];
 
         {$IFDEF DEBUG}
-        if (SameText(sClassName,'TNewMemo')) then
-        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
-        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
-        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
-        ' hwnd : '+ IntToHex(PCWPStruct(lParam)^.hwnd, 8) +
-        ' WNDPROC : ' + IntToHex(GetWindowLongPtr(PCWPStruct(lParam)^.hwnd, GWL_WNDPROC), 8 )
-        );
+//        if (SameText(sClassName,'TNewMemo')) then
+//        Addlog(sClassName+' '+WM_To_String(PCWPStruct(lParam)^.message)+
+//        ' WParam '+IntToHex(PCWPStruct(lParam)^.wParam, 8) +
+//        ' lParam '+IntToHex(PCWPStruct(lParam)^.lParam, 8) +
+//        ' hwnd : '+ IntToHex(PCWPStruct(lParam)^.hwnd, 8) +
+//        ' WNDPROC : ' + IntToHex(GetWindowLongPtr(PCWPStruct(lParam)^.hwnd, GWL_WNDPROC), 8 )
+//        );
         {$ENDIF}
 
         if SameText(sClassName,'TNewButton') then
