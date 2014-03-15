@@ -303,7 +303,6 @@ begin
   FIconHandle := 0;
   FIcon := nil;
   FSysMenuButtonRect := Rect(0, 0, 0, 0);
-  //ShowMessage('ok');
 end;
 
 destructor TSysDialogStyleHook.Destroy;
@@ -774,6 +773,10 @@ begin
   TmpHandle := THandle(SendMessage(Handle, WM_GETICON, ICON_SMALL, 0));
   if TmpHandle = 0 then
     TmpHandle := THandle(SendMessage(Handle, WM_GETICON, ICON_BIG, 0));
+
+  if TmpHandle = 0 then
+    TmpHandle := THandle(SendMessage(Handle, WM_GETICON, ICON_SMALL2, 0));
+
   if TmpHandle = 0 then
   begin
     { Get instance }
@@ -871,6 +874,7 @@ begin
     R := Rect(0, 0, GetSystemMetrics(SM_CXSMICON),
       GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R, ButtonRect);
+
     if ButtonRect.Width > 0 then
       DrawIconEx(CaptionBmp.Canvas.Handle, R.Left, R.Top, GetIconFast.Handle, 0,
         0, 0, 0, DI_NORMAL);

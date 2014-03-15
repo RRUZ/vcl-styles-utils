@@ -117,7 +117,7 @@ var
 implementation
 
 uses
-  //IOUTILS,
+  IOUTILS,
   Vcl.Styles.Utils.SysControls;
 
 type
@@ -141,12 +141,12 @@ var
   ClassesList           : TStrings; //use a  TStrings to avoid the use of generics
   ThemedNSISControls    : TThemedNSISControls;
 
-
-//procedure Addlog(const Msg: string);
-//begin
-//  TFile.AppendAllText('C:\Test\log.txt',
-//    Format('%s %s %s', [FormatDateTime('hh:nn:ss.zzz', Now), Msg, sLineBreak]));
-//end;
+//
+procedure Addlog(const Msg: string);
+begin
+  TFile.AppendAllText('C:\Test\log.txt',
+    Format('%s %s %s', [FormatDateTime('hh:nn:ss.zzz', Now), Msg, sLineBreak]));
+end;
 
 { TTransparentStaticNSIS }
 
@@ -558,12 +558,12 @@ initialization
   TSysStyleManager.OnBeforeHookingControl := @BeforeNSISHookingControl;
   TSysStyleManager.OnHookNotification := @HookNotificationNSIS;
 
-//  ThemedNSISControls:=nil;
-//  if StyleServices.Available then
-//   ThemedNSISControls := TThemedNSISControls.Create;
+  ThemedNSISControls:=nil;
+  if StyleServices.Available then
+   ThemedNSISControls := TThemedNSISControls.Create;
 
 finalization
-   //Done;
+   Done;
    NSIS_IgnoredControls.Free;
 
 end.
