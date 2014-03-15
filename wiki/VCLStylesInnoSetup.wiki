@@ -79,4 +79,4 @@ end;
 
 = Installer =
 
- Download the installer of the plugin from <a href="http://goo.gl/Exkewk">here</a>. The current version of the plugin is 1.2.1.2
+ Download the installer of the plugin from <a href="http://goo.gl/Exkewk">here</a>. The current version of the plugin is 1.2.1.3
