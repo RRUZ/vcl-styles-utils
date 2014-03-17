@@ -1,28 +1,28 @@
-{ ************************************************************************************************** }
-{ }
-{ Unit Vcl.Styles.Fixes }
-{ unit for the VCL Styles Utils }
-{ http://code.google.com/p/vcl-styles-utils/ }
-{ }
-{ The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); }
-{ you may not use this file except in compliance with the License. You may obtain a copy of the }
-{ License at http://www.mozilla.org/MPL/ }
-{ }
-{ Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF }
-{ ANY KIND, either express or implied. See the License for the specific language governing rights }
-{ and limitations under the License. }
-{ }
-{ The Original Code is Vcl.Styles.Fixes }
-{ }
-{ The Initial Developer of the Original Code is Rodrigo Ruz V. }
-{ Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2013 Rodrigo Ruz V. }
-{ All Rights Reserved. }
-{ }
-{ Contributors }
-{ }
-{ Leonardo Cechet }
-{ }
-{ ************************************************************************************************** }
+// **************************************************************************************************
+//
+// Unit Vcl.Styles.Fixes
+// unit for the VCL Styles Utils
+// http://code.google.com/p/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is Vcl.Styles.Fixes
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2013 Rodrigo Ruz V.
+// All Rights Reserved.
+//
+// Contributors
+//
+// Leonardo Cechet
+//
+// **************************************************************************************************
 
 unit Vcl.Styles.Fixes;
 
@@ -213,32 +213,33 @@ begin
         TImageAlignment.iaLeft:
           begin
             ImageList_Draw(pbuttonImagelist.himl, LImageIndex, Canvas.Handle,
-              DrawRect.Left + 3, IY, ILD_NORMAL);
-            Inc(DrawRect.Left, IW + 3);
+              DrawRect.Left + 3 + TCustomButton(Control).ImageMargins.Left, IY, ILD_NORMAL);
+            Inc(DrawRect.Left, IW + 3 + TCustomButton(Control).ImageMargins.Left);
           end;
+
         TImageAlignment.iaRight:
           begin
             ImageList_Draw(pbuttonImagelist.himl, LImageIndex, Canvas.Handle,
-              DrawRect.Right - IW - 3, IY, ILD_NORMAL);
-            Dec(DrawRect.Right, IW - 3);
+              DrawRect.Right - IW - 3  - TCustomButton(Control).ImageMargins.Right, IY, ILD_NORMAL);
+            Dec(DrawRect.Right, IW - 3 + TCustomButton(Control).ImageMargins.Right);
           end;
 
         TImageAlignment.iaCenter:
           begin
             ImageList_Draw(pbuttonImagelist.himl, LImageIndex, Canvas.Handle,
-              (DrawRect.Right - IW) div 2, IY, ILD_NORMAL);
+              (DrawRect.Right - IW) div 2, IY + TCustomButton(Control).ImageMargins.Top - TCustomButton(Control).ImageMargins.Bottom, ILD_NORMAL);
           end;
 
         TImageAlignment.iaTop:
           begin
             ImageList_Draw(pbuttonImagelist.himl, LImageIndex, Canvas.Handle,
-              (DrawRect.Right - IW) div 2, 3, ILD_NORMAL);
+              (DrawRect.Right - IW) div 2, 3 + TCustomButton(Control).ImageMargins.Top - TCustomButton(Control).ImageMargins.Bottom, ILD_NORMAL);
           end;
 
         TImageAlignment.iaBottom:
           begin
             ImageList_Draw(pbuttonImagelist.himl, LImageIndex, Canvas.Handle,
-              (DrawRect.Right - IW) div 2, (DrawRect.Height - IH) - 3,
+              (DrawRect.Right - IW) div 2, (DrawRect.Height - IH) - 3 + TCustomButton(Control).ImageMargins.Top - TCustomButton(Control).ImageMargins.Bottom,
               ILD_NORMAL);
           end;
 
@@ -246,8 +247,7 @@ begin
 
     end;
 
-    if (GetWindowLong(Handle, GWL_STYLE) and BS_COMMANDLINK) = BS_COMMANDLINK
-    then
+    if (GetWindowLong(Handle, GWL_STYLE) and BS_COMMANDLINK) = BS_COMMANDLINK  then
     begin
       if pbuttonImagelist.himl = 0 then
         Inc(DrawRect.Left, 35);
