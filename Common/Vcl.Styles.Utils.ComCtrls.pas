@@ -433,14 +433,17 @@ begin
 
     WM_NOTIFY:
       begin
-        HeaderHandle := ListView_GetHeader(Handle);
-        // GetWindow(Handle, GW_CHILD);
-        if (HeaderHandle <> 0) and (not Assigned(FHeaderStyleHook)) then
+        if not Assigned(FHeaderStyleHook) then
         begin
-          FHeaderStyleHook := TSysHeaderStyleHook.Create(HeaderHandle);
-          FHeaderStyleHook.FListViewStyleHook := Self;
+          HeaderHandle := ListView_GetHeader(Handle);
+          if (HeaderHandle <> 0) then
+          begin
+            FHeaderStyleHook := TSysHeaderStyleHook.Create(HeaderHandle);
+            FHeaderStyleHook.FListViewStyleHook := Self;
+          end;
         end;
-        if (Message.WParam <> 0) and (Message.LParam <> 0) then
+
+        if (Message.WParam <> 0) or (Message.LParam <> 0) then
           Message.Result := CallDefaultProc(Message);
         Exit;
       end;
