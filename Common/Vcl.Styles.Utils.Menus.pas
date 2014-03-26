@@ -160,6 +160,9 @@ implementation
 
 uses Vcl.Styles.Utils.SysControls;
 
+type
+  TControlClass= Class(TControl);
+
 function GetBmpInfo(hBmp: HBITMAP): Bitmap;
 begin
   ZeroMemory(@Result, sizeof(Bitmap));
@@ -517,6 +520,13 @@ begin
   MI := SysItem.VCLMenuItems;
   if MI <> nil then
     MI := SysItem.VCLItem;
+
+//  if MI = nil then
+//  begin
+//   SysItem.VCLMenuItems;
+//   OutputDebugString(PChar('MI = nil'));
+//  end;
+
   if MI <> nil then
   begin
     { Draw Vcl PopupMenu Bitmap }
@@ -1212,7 +1222,7 @@ begin
   info.fMask := MIIM_STRING or MIIM_FTYPE;
   info.dwTypeData := nil;
   GetMenuItemInfo(FMenu, FIndex, True, info);
-  if not(info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
+  if not (info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
   begin
     { The Size needed for the Buffer . }
     StrSize := info.cch * 2 + 2;
@@ -1281,9 +1291,10 @@ var
   PopupMenu: TPopupMenu;
   Form: TCustomForm;
   MI: TMenuItem;
+
   function GetChildPopup(Comp: TComponent): TMenuItem;
   var
-    k: integer;
+    k : integer;
   begin
     { This is a CallBack function ==> Be careful !! }
     Result := nil;
@@ -1291,12 +1302,21 @@ var
     begin
       for k := 0 to Comp.ComponentCount - 1 do
       begin
+
         if Comp.Components[k] is TPopupMenu then
         begin
           PopupMenu := TPopupMenu(Comp.Components[k]);
           if PopupMenu.Handle = FMenu then
             Exit(PopupMenu.Items);
+        end
+        else
+        if Comp.Components[k] is TMenuItem then
+        begin
+          MI := TMenuItem(Comp.Components[k]);
+          if MI.Handle = FMenu then
+            Exit(MI);
         end;
+
         if Comp.Components[k].ComponentCount > 0 then
           Result := GetChildPopup(Comp.Components[k]);
         if Assigned(Result) then
@@ -1305,19 +1325,36 @@ var
     end;
   end;
 
+  function ProcessMenu(AMenu: TMenuItem): TMenuItem;
+  var
+    l: integer;
+  begin
+    Result:=nil;
+    for l := 0 to AMenu.Count - 1 do
+    begin
+      if AMenu[l].Handle=FMenu then
+         Exit(AMenu[l]);
+      ProcessMenu(AMenu[l]);
+    end;
+  end;
+
+
 begin
   // MI := nil;
   Result := nil;
+
+ for i := 0 to PopupList.Count - 1 do
+  if TPopupMenu(PopupList.Items[i]).Handle = FMenu then
+     Exit(TPopupMenu(PopupList.Items[i]).Items);
+
   for i := 0 to Application.ComponentCount - 1 do
   begin
-    // OutputDebugString(PChar(Application.Components[i].Name));
-
     if Application.Components[i] is TCustomForm then
     begin
       Form := TCustomForm(Application.Components[i]);
       for j := 0 to Form.ComponentCount - 1 do
       begin
-        // OutputDebugString(PChar(Form.Components[j].Name));
+
         if Form.Components[j] is TMenuItem then
         begin
           MI := TMenuItem(Form.Components[j]);
@@ -1329,8 +1366,18 @@ begin
           PopupMenu := TPopupMenu(Form.Components[j]);
           if PopupMenu.Handle = FMenu then
             Exit(PopupMenu.Items);
+
+          Result :=ProcessMenu(PopupMenu.Items);
+          if Assigned(Result) then
+            Exit;
         end
         else
+        begin
+          Result := GetChildPopup(Form.Components[j]);
+          if Assigned(Result) then
+            Exit;
+        end;
+
         // TODO : Add recursive implementation to detect any child TPopupMenu
         (* for k := 0 to Form.Components[j].ComponentCount-1 do
           if Form.Components[j].Components[k] is TPopupMenu then
@@ -1338,13 +1385,8 @@ begin
           //OutputDebugString(PChar('K: '+Form.Components[j].Components[k].ClassName));
           PopupMenu := TPopupMenu(Form.Components[j].Components[k]);
           if PopupMenu.Handle = FMenu then
-          Exit(PopupMenu.Items);
+            Exit(PopupMenu.Items);
           end; *)
-        begin
-          Result := GetChildPopup(Form.Components[j]);
-          if Assigned(Result) then
-            Exit;
-        end;
       end;
     end;
   end;

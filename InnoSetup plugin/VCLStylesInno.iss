@@ -90,7 +90,7 @@ begin
   ShellExec('open', 'http://code.google.com/p/vcl-styles-utils/', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
 end;
 
-procedure CreateTheWizardPages;
+procedure CreateWizardPages;
 var
   Page: TWizardPage;
   BitmapImage: TBitmapImage;
@@ -101,7 +101,7 @@ begin
 
   { TBitmapImage }
   Page := CreateCustomPage(wpInstalling, 'Contributions',
-  'If you want show your apreciation for this project. Go to the code google page, login with you google account and star the project');
+  'If you want show your appreciation for this project. Go to the code google page, login with you google account and star the project.');
 
   BitmapImage := TBitmapImage.Create(Page);
   BitmapImage.AutoSize := True;
@@ -117,7 +117,7 @@ end;
 
 procedure InitializeWizard();
 begin
-  CreateTheWizardPages;
+  CreateWizardPages;
 end;
 
 function InitializeSetup(): Boolean;
