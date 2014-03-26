@@ -73,12 +73,52 @@ Source: Images\WizModernSmallImage-IS_Orange.bmp; DestDir: {app}\Images\
 Source: Images\WizModernSmallImage-IS_Purple.bmp; DestDir: {app}\Images\
 Source: ..\..\..\..\Program Files (x86)\Embarcadero\RAD Studio\9.0\bin\VclStyleDesigner.exe; DestDir: {app}
 Source: ..\..\..\..\Program Files (x86)\Embarcadero\RAD Studio\9.0\bin\VclStyleTest.exe; DestDir: {app}
+Source: background.bmp; Flags: dontcopy
 
 [Code]
 // Import the LoadVCLStyle function from VclStylesInno.DLL
 procedure LoadVCLStyle(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall';
 // Import the UnLoadVCLStyles function from VclStylesInno.DLL
 procedure UnLoadVCLStyles; external 'UnLoadVCLStyles@files:VclStylesInno.dll stdcall';
+
+
+
+procedure BitmapImageOnClick(Sender: TObject);
+var
+  ErrorCode : Integer;
+begin
+  ShellExec('open', 'http://code.google.com/p/vcl-styles-utils/', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+end;
+
+procedure CreateTheWizardPages;
+var
+  Page: TWizardPage;
+  BitmapImage: TBitmapImage;
+  BitmapFileName: String;
+begin
+  BitmapFileName := ExpandConstant('{tmp}\background.bmp');
+  ExtractTemporaryFile(ExtractFileName(BitmapFileName));
+
+  { TBitmapImage }
+  Page := CreateCustomPage(wpInstalling, 'Contributions',
+  'If you want show your apreciation for this project. Go to the code google page, login with you google account and star the project');
+
+  BitmapImage := TBitmapImage.Create(Page);
+  BitmapImage.AutoSize := True;
+  BitmapImage.Left := 0;
+  BitmapImage.Top  := 0;
+  BitmapImage.Bitmap.LoadFromFile(BitmapFileName);
+  BitmapImage.Cursor := crHand;
+  BitmapImage.OnClick := @BitmapImageOnClick;
+  BitmapImage.Parent := Page.Surface;
+  BitmapImage.Align:=alCLient;
+  BitmapImage.Stretch:=True;
+end;
+
+procedure InitializeWizard();
+begin
+  CreateTheWizardPages;
+end;
 
 function InitializeSetup(): Boolean;
 begin
