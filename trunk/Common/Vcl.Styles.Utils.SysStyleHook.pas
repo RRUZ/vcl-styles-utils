@@ -10,11 +10,11 @@
 //
 // Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
 // ANY KIND, either express or implied. See the License for the specific language governing rights
-// and limitations under the License. }
+// and limitations under the License.
 //
 // The Original Code is uSysStyleHook.pas.
 //
-// Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR }
+// Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
 // All Rights Reserved.
 //

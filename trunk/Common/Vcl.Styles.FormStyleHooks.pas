@@ -169,6 +169,7 @@ Uses
   Winapi.UxTheme,
   System.SysUtils,
   System.Classes,
+  System.Types,
   Vcl.Imaging.Jpeg,
   Vcl.Imaging.pngimage,
   Vcl.Imaging.GIFImg,

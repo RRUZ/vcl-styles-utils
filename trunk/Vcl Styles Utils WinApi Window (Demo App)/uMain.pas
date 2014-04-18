@@ -37,8 +37,6 @@ var
 
 function MainWndProc(hWindow: HWND; Msg: UINT; wParam: wParam; lParam: lParam)
   : LRESULT; stdcall; export;
-var
-  ps: TPaintStruct;
 begin
   Result := 0;
   case Msg of
