@@ -26,7 +26,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, StdCtrls, Mask, ComCtrls, Generics.Defaults, uHSLUtils,
   Generics.Collections, Vcl.ImgList, Vcl.ActnList, Vcl.Styles.Ext,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, System.Actions;
 
 type
   TFrmHueSat = class(TForm)
@@ -157,7 +157,7 @@ type
   private
     OriginalBitMap : TBitmap;
     FStyleName     : string;
-    FPreview       : TVclStylesPreview;
+    //FPreview       : TVclStylesPreview;
     procedure DrawSeletedVCLStyle;
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
@@ -193,8 +193,9 @@ uses
   WinAPi.ShellAPI,
   System.IOUtils,
   System.StrUtils,
+  System.UITypes,
+  System.Types,
   Vcl.GraphUtil,
-
   Vcl.Styles.Utils,
   Vcl.Themes,
   Vcl.Styles,

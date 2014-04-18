@@ -9,8 +9,13 @@ uses
   System.Variants,
   System.Classes,
   Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons,
-  Vcl.Styles, Vcl.Themes, Vcl.Styles.Utils.SysControls,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.Dialogs,
+  Vcl.Buttons,
+  Vcl.Styles,
+  Vcl.Themes,
+  Vcl.Styles.Utils.SysControls,
   Vcl.Styles.Utils.StdCtrls;
 
 type
@@ -49,11 +54,11 @@ end;
 constructor TMySysButtonStyleHook.Create(AHandle: THandle);
 begin
   inherited;
-  {$IF CompilerVersion > 23}
-  StyleElements := [sefont];
-  {$ELSE}
-  OverrideFont:=True;
-  {$IFEND}
+//  {$IF CompilerVersion > 23}
+//  StyleElements := [sefont];
+//  {$ELSE}
+//  OverrideFont:=True;
+//  {$IFEND}
 end;
 
 procedure TMySysButtonStyleHook.UpdateColors;

@@ -25,7 +25,7 @@ interface
 { DEFINE HookSysOwnerDrawItems only if you are
   using a non VCL PopupMenu and this menu is OwnerDraw .
 }
-{$DEFINE HookSysOwnerDrawItems }
+{$DEFINE HookSysOwnerDrawItems}
 
 uses
   System.Classes,
@@ -1484,12 +1484,14 @@ end;
 initialization
 
 SubMenuItemInfoArray := nil;
-
-if StyleServices.Available then
-  TSysStyleManager.RegisterSysStyleHook('#32768', TSysPopupStyleHook);
+{$IF CompilerVersion < 27} //Use the XE6 menu syshooks
+  if StyleServices.Available then
+    TSysStyleManager.RegisterSysStyleHook('#32768', TSysPopupStyleHook);
+{$IFEND}
 
 finalization
-
-TSysStyleManager.UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
+{$IF CompilerVersion < 27}
+  TSysStyleManager.UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
+{$IFEND}
 
 end.

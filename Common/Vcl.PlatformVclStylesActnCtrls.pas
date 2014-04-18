@@ -46,6 +46,7 @@ uses
   Winapi.UxTheme,
   Winapi.Windows,
   System.SysUtils,
+  System.UITypes,
   Vcl.ActnMenus,
   Vcl.ActnCtrls,
   Vcl.ThemedActnCtrls,
@@ -109,7 +110,7 @@ end;
 
 function InternalDrawText(DC: HDC; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: TTextFormat; Color: TColor = clNone): Boolean;
 var
-  LColor: TColor;
+  //LColor: TColor;
   LOptions: TStyleTextOptions;
 begin
   if Color <> clNone then

@@ -51,6 +51,7 @@ implementation
 uses
  System.Classes,
  System.SysUtils,
+ System.Types,
  Generics.Collections,
  Vcl.Styles,
  Vcl.Themes,
