@@ -26,6 +26,11 @@ interface
   using a non VCL PopupMenu and this menu is OwnerDraw .
 }
 {$DEFINE HookSysOwnerDrawItems}
+{$DEFINE UseVCLStyleUtilsMenu}
+
+{$IF CompilerVersion >= 27}      //Use the XE6 menu syshooks by default
+   {$UNDEF UseVCLStyleUtilsMenu}  //comment this line if you want to use the VCL Styles Utils Menus Hooks
+{$IFEND}
 
 uses
   System.Classes,
@@ -1484,14 +1489,20 @@ end;
 initialization
 
 SubMenuItemInfoArray := nil;
-{$IF CompilerVersion < 27} //Use the XE6 menu syshooks
+
+{$IFDEF UseVCLStyleUtilsMenu}
+  {$IF CompilerVersion >= 27} //Disable XE6 menu syshooks
+    TStyleManager.SystemHooks := TStyleManager.SystemHooks - [shMenus];
+  {$IFEND}
+
   if StyleServices.Available then
     TSysStyleManager.RegisterSysStyleHook('#32768', TSysPopupStyleHook);
-{$IFEND}
+{$ENDIF}
 
 finalization
-{$IF CompilerVersion < 27}
+
+{$IFDEF UseVCLStyleUtilsMenu}
   TSysStyleManager.UnRegisterSysStyleHook('#32768', TSysPopupStyleHook);
-{$IFEND}
+{$ENDIF}
 
 end.
