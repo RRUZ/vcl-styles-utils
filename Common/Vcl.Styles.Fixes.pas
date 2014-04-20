@@ -437,24 +437,22 @@ begin
   Canvas.Font := Font;
   if TStyleManager.IsCustomStyleActive then
   begin
-{$IFDEF VER230}
+{$IF CompilerVersion<=23}  //XE2
     Canvas.Brush.Color := StyleServices.GetStyleColor(ColorStates[Enabled]);
     Canvas.Font.Color := StyleServices.GetStyleFontColor(FontStates[Enabled]);
-{$ENDIF}
-{$IFDEF VER240}
+{$ELSE}
     if seClient in StyleElements then
       Canvas.Brush.Color := StyleServices.GetStyleColor(ColorStates[Enabled])
     else
       Canvas.Brush := Brush;
     if seFont in StyleElements then
       Canvas.Font.Color := StyleServices.GetStyleFontColor(FontStates[Enabled]);
-{$ENDIF}
+{$IFEND}
   end
   else
     Canvas.Brush := Brush;
   if (Integer(Message.DrawItemStruct^.itemID) >= 0) and
-    (odSelected in LState){$IFDEF VER240} and (seClient in StyleElements)
-{$ENDIF} then
+    (odSelected in LState){$IF CompilerVersion>23}  and (seClient in StyleElements) {$IFEND} then
   begin
     if TStyleManager.IsCustomStyleActive then
     begin
