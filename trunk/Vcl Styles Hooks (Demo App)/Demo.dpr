@@ -6,7 +6,8 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
-  KOLDetours in '..\Common\KOLDetours.pas';
+  DDetours in '..\Common\delphi-detours-library\DDetours.pas',
+  InstDecode in '..\Common\delphi-detours-library\InstDecode.pas';
 
 {$R *.res}
 
