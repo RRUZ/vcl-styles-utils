@@ -570,7 +570,7 @@ end;
 
 function TSysStyleHook.CallDefaultProc(var Msg: TMessage): LRESULT;
 begin
-  // OutputDebugString(PChar('TSysStyleHook.CallDefaultProc Handle '+IntToHex(Handle, 8)));
+  //OutputDebugString(PChar('TSysStyleHook.CallDefaultProc FOrgWndProc '+IntToHex(FOrgWndProc, 8)+' Handle '+IntToHex(Handle, 8)+' Msg '+WM_To_String(Msg.Msg)));
   Result := CallWindowProc(Pointer(FOrgWndProc), Handle, Msg.Msg, Msg.wParam, Msg.lParam);
 end;
 
