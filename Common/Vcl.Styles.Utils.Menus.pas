@@ -361,6 +361,8 @@ var
   SysItem: TSysPopupItem;
   sShortCut: String;
   Bmp: TBitmap;
+  LParentMenu : TMenu;
+
 
   procedure DrawSubMenu(const ItemRect: TRect);
   var
@@ -507,6 +509,15 @@ begin
   // SysItem.VCLMenuItems;
   // OutputDebugString(PChar('MI = nil'));
   // end;
+  LParentMenu:=nil;
+  if (MI <> nil) then
+    LParentMenu:=MI.GetParentMenu;
+  if (LParentMenu<>nil) and (LParentMenu.OwnerDraw) and (@MI.OnDrawItem<>nil) then
+  begin
+    MI.OnDrawItem(MI, Canvas, ItemRect, (isHot in State));
+    exit;
+  end;
+
 
   if MI <> nil then
   begin
@@ -703,10 +714,13 @@ var
   Bmp: TBitmap;
 begin
   Bmp := TBitmap.Create;
-  Bmp.SetSize(SysControl.Width, SysControl.Height);
-  PaintBackground(Bmp.Canvas);
-  BitBlt(Canvas.Handle, ItemRect.Left, ItemRect.Top, ItemRect.Width, ItemRect.Height, Bmp.Canvas.Handle, ItemRect.Left, ItemRect.Top, SRCCOPY);
-  Bmp.Free;
+  try
+    Bmp.SetSize(SysControl.Width, SysControl.Height);
+    PaintBackground(Bmp.Canvas);
+    BitBlt(Canvas.Handle, ItemRect.Left, ItemRect.Top, ItemRect.Width, ItemRect.Height, Bmp.Canvas.Handle, ItemRect.Left, ItemRect.Top, SRCCOPY);
+  finally
+    Bmp.Free;
+  end;
 end;
 
 function TSysPopupStyleHook.GetItemsCount: integer;
