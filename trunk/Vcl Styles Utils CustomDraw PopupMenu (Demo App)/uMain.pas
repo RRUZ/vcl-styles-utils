@@ -12,11 +12,11 @@ type
   TMySysPopupStyleHook = class(TSysPopupStyleHook)
   protected
     procedure PaintBackground(Canvas: TCanvas); override;
-    procedure EraseItem(Canvas: TCanvas; Index: integer;
-      ItemRect: TRect); override;
-    procedure DrawItem(Canvas: TCanvas; Index: integer; ItemRect: TRect;
-      ItemText: String; State: TSysPopupItemState;
-      Style: TSysPopupItemStyle); override;
+    procedure EraseItem(Canvas: TCanvas; const Index: integer;
+      const ItemRect: TRect); override;
+    procedure DrawItem(Canvas: TCanvas; const Index: integer; const ItemRect: TRect;
+      const  ItemText: String; const  State: TSysPopupItemState;
+      const Style: TSysPopupItemStyle); override;
   end;
 
 type
@@ -51,9 +51,11 @@ end;
 
 { TMySysPopupStyleHook }
 
-procedure TMySysPopupStyleHook.DrawItem(Canvas: TCanvas; Index: integer;
-  ItemRect: TRect; ItemText: String; State: TSysPopupItemState;
-  Style: TSysPopupItemStyle);
+procedure TMySysPopupStyleHook.DrawItem(Canvas: TCanvas; const Index: integer;
+  const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState;
+  const Style: TSysPopupItemStyle);
+var
+ LItemRect : TRect;
 begin
   { Skip Some Menu if You want .. }
   if Menu = GetSystemMenu(Form1.Handle, False) then
@@ -78,13 +80,14 @@ begin
   // ...
   // ... BlaBla ...
   Canvas.FillRect(ItemRect);
-  Inc(ItemRect.Left, 30);
-  Winapi.Windows.DrawText(Canvas.Handle, ItemText, -1, ItemRect,
+  LItemRect:=ItemRect;
+  Inc(LItemRect.Left, 30);
+  Winapi.Windows.DrawText(Canvas.Handle, ItemText, -1, LItemRect,
     DT_LEFT or DT_VCENTER);
 end;
 
-procedure TMySysPopupStyleHook.EraseItem(Canvas: TCanvas; Index: integer;
-  ItemRect: TRect);
+procedure TMySysPopupStyleHook.EraseItem(Canvas: TCanvas; const Index: integer;
+  const ItemRect: TRect);
 begin
   Canvas.Brush.Color := clWebGray;
   Canvas.FillRect(ItemRect);
