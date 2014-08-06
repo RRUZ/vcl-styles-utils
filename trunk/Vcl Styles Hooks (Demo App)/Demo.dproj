@@ -76,6 +76,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<DCC_RangeChecking>true</DCC_RangeChecking>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Locale>1033</VerInfo_Locale>
@@ -146,6 +147,7 @@
 						<Source Name="MainSource">Demo.dpr</Source>
 					</Source>
 					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\fmidesigner160.bpl">FMI Form designer and property and component editors</Excluded_Packages>
 						<Excluded_Packages Name="C:\Users\Public\Documents\RAD Studio\9.0\Bpl\ChromeTabs_XE2_D.bpl">Chrome Tabs Design Time</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp160.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
