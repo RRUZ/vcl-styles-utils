@@ -14,7 +14,7 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  TStyleManager.TrySetStyle('Amakrits');
+  TStyleManager.TrySetStyle('Auric');
   Application.CreateForm(TFrmMain, FrmMain);
   Application.Run;
 end.

@@ -2,8 +2,8 @@ object FrmMain: TFrmMain
   Left = 730
   Top = 190
   Caption = 'Demo'
-  ClientHeight = 491
-  ClientWidth = 425
+  ClientHeight = 542
+  ClientWidth = 478
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,101 +15,175 @@ object FrmMain: TFrmMain
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object ListBox1: TListBox
-    Left = 8
-    Top = 8
-    Width = 153
-    Height = 145
-    ItemHeight = 13
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 478
+    Height = 542
+    Align = alClient
+    BorderWidth = 5
     TabOrder = 0
-  end
-  object Edit1: TEdit
-    Left = 8
-    Top = 159
-    Width = 153
-    Height = 21
-    HideSelection = False
-    TabOrder = 1
-    Text = 'Select part of this text'
-  end
-  object ComboBox1: TComboBox
-    Left = 8
-    Top = 186
-    Width = 153
-    Height = 21
-    TabOrder = 2
-    Text = 'ComboBox1'
-  end
-  object ComboBoxEx1: TComboBoxEx
-    Left = 167
-    Top = 159
-    Width = 250
-    Height = 22
-    ItemsEx = <>
-    TabOrder = 3
-    Text = 'ComboBoxEx1'
-    Images = ImageList1
-  end
-  object Memo1: TMemo
-    Left = 167
-    Top = 8
-    Width = 250
-    Height = 145
-    HideSelection = False
-    Lines.Strings = (
-      'The quick brown fox jumps over the lazy dog'
-      'The quick brown fox jumps over the lazy dog'
-      'The quick brown fox jumps over the lazy dog'
-      'The quick brown fox jumps over the lazy dog')
-    ScrollBars = ssBoth
-    TabOrder = 4
-  end
-  object MaskEdit1: TMaskEdit
-    Left = 8
-    Top = 213
-    Width = 149
-    Height = 21
-    EditMask = '!\(999\)000-0000;1;_'
-    MaxLength = 13
-    TabOrder = 5
-    Text = '(569)222-8421'
-  end
-  object ColorBox1: TColorBox
-    Left = 8
-    Top = 240
-    Width = 153
-    Height = 22
-    TabOrder = 6
-  end
-  object RichEdit1: TRichEdit
-    Left = 8
-    Top = 268
-    Width = 409
-    Height = 215
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    HideSelection = False
-    ParentFont = False
-    TabOrder = 7
-  end
-  object Button1: TButton
-    Left = 167
-    Top = 187
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
-    TabOrder = 8
-    OnClick = Button1Click
+    ExplicitWidth = 461
+    object PageControl1: TPageControl
+      Left = 6
+      Top = 6
+      Width = 466
+      Height = 530
+      ActivePage = TabSheet1
+      Align = alClient
+      TabOrder = 0
+      ExplicitWidth = 449
+      object TabSheet1: TTabSheet
+        Caption = 'Edits and Lists'
+        ExplicitWidth = 441
+        object Label1: TLabel
+          Left = 8
+          Top = 3
+          Width = 439
+          Height = 26
+          Caption = 
+            'This Application shows how the VCl.Styles.Hooks unit allow to us' +
+            'e the proper system colors '#13#10'for the current VCL Style on the Ed' +
+            'it and List controls.'
+        end
+        object ListBox1: TListBox
+          Left = 8
+          Top = 40
+          Width = 149
+          Height = 113
+          ItemHeight = 13
+          TabOrder = 0
+        end
+        object Edit1: TEdit
+          Left = 8
+          Top = 159
+          Width = 149
+          Height = 21
+          HideSelection = False
+          TabOrder = 1
+          Text = 'Select part of this text'
+        end
+        object ComboBox1: TComboBox
+          Left = 8
+          Top = 186
+          Width = 149
+          Height = 21
+          TabOrder = 2
+          Text = 'ComboBox1'
+        end
+        object ComboBoxEx1: TComboBoxEx
+          Left = 167
+          Top = 159
+          Width = 246
+          Height = 22
+          ItemsEx = <>
+          TabOrder = 3
+          Text = 'ComboBoxEx1'
+          Images = ImageList1
+        end
+        object Memo1: TMemo
+          Left = 167
+          Top = 40
+          Width = 246
+          Height = 113
+          HideSelection = False
+          Lines.Strings = (
+            'The quick brown fox jumps over the lazy dog'
+            'The quick brown fox jumps over the lazy dog'
+            'The quick brown fox jumps over the lazy dog'
+            'The quick brown fox jumps over the lazy dog')
+          ScrollBars = ssBoth
+          TabOrder = 4
+        end
+        object MaskEdit1: TMaskEdit
+          Left = 8
+          Top = 213
+          Width = 149
+          Height = 21
+          EditMask = '!\(999\)000-0000;1;_'
+          MaxLength = 13
+          TabOrder = 5
+          Text = '(569)222-8421'
+        end
+        object ColorBox1: TColorBox
+          Left = 8
+          Top = 240
+          Width = 153
+          Height = 22
+          TabOrder = 6
+        end
+        object RichEdit1: TRichEdit
+          Left = 8
+          Top = 268
+          Width = 409
+          Height = 215
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          HideSelection = False
+          ParentFont = False
+          TabOrder = 7
+        end
+      end
+      object TabSheet2: TTabSheet
+        Caption = 'ListView'
+        ImageIndex = 2
+        ExplicitWidth = 441
+        object ListView1: TListView
+          Left = 0
+          Top = 0
+          Width = 458
+          Height = 502
+          Align = alClient
+          Checkboxes = True
+          Columns = <
+            item
+              Caption = 'Column 1'
+              Width = 100
+            end
+            item
+              Caption = 'Column 2'
+              Width = 100
+            end
+            item
+              Caption = 'Column 3'
+              Width = 100
+            end
+            item
+              Caption = 'Column 4'
+              Width = 100
+            end>
+          RowSelect = True
+          TabOrder = 0
+          ViewStyle = vsReport
+          ExplicitWidth = 441
+        end
+      end
+      object TabSheet3: TTabSheet
+        Caption = 'TreeView'
+        ImageIndex = 2
+        ExplicitWidth = 441
+        object TreeView1: TTreeView
+          Left = 0
+          Top = 0
+          Width = 458
+          Height = 502
+          Align = alClient
+          Indent = 19
+          TabOrder = 0
+          ExplicitWidth = 441
+        end
+      end
+    end
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 48
-    Top = 45
+    Left = 248
+    Top = 237
     Bitmap = {
-      494C010107000800200010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800280010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       00000000000000000000000000000000000000000005000000150000001A0000
       001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000
