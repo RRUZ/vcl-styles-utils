@@ -376,11 +376,11 @@ var
  pOrgPointer : Pointer;
 
 initialization
+ THThemesClasses.Button  :=TList.Create;
+ THThemesClasses.TreeView:=TList.Create;
 
  if StyleServices.Available then
  begin
-   THThemesClasses.Button  :=TList.Create;
-   THThemesClasses.TreeView:=TList.Create;
    ThemeLibrary := GetModuleHandle('uxtheme.dll');
 
    pOrgPointer     := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
@@ -411,7 +411,6 @@ initialization
  end;
 
 finalization
-
  if Assigned(TrampolineGetSysColor) then
   InterceptRemove(@TrampolineGetSysColor);
 
@@ -430,6 +429,6 @@ finalization
  if Assigned(TrampolineDrawThemeBackgroundEx) then
   InterceptRemove(@TrampolineDrawThemeBackgroundEx);
 
-   THThemesClasses.Button.Free;
-   THThemesClasses.TreeView.Free;
+  THThemesClasses.Button.Free;
+  THThemesClasses.TreeView.Free;
 end.
