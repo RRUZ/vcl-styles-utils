@@ -1,8 +1,15 @@
 #summary Vcl.Styles.Hook.
 
-The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit, patch some !WinApi functions to fix the background and highlight color of some VCL components.
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit, patch some !WinApi functions to fix the background and system colors of some VCL components.
 
 = Screenshots =
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/full.png
 https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Full_Fix.png
+
+
+For more info check the articles
+
+http://theroadtodelphi.wordpress.com/2014/08/06/vcl-styles-utils-new-feature/
+
+http://theroadtodelphi.wordpress.com/2013/12/07/vcl-styles-utils-project-new-addition-patch-for-system-colors/
