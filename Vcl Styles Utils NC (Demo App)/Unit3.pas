@@ -4,12 +4,15 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles.NC, Vcl.ImgList;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles.NC, Vcl.ImgList, Vcl.StdCtrls;
 
 type
   TForm3 = class(TForm)
     ImageList1: TImageList;
+    ComboBox1: TComboBox;
+    Label1: TLabel;
     procedure FormCreate(Sender: TObject);
+    procedure ComboBox1Change(Sender: TObject);
   private
     { Private declarations }
     NCControls : TNCControls;
@@ -39,10 +42,23 @@ begin
 
 end;
 
-procedure TForm3.FormCreate(Sender: TObject);
+procedure TForm3.ComboBox1Change(Sender: TObject);
 begin
+  NCControls.StyleServices := TStyleManager.Style[ComboBox1.Text];
+  Perform(WM_NCPAINT, 0, 0);;
+end;
+
+procedure TForm3.FormCreate(Sender: TObject);
+var
+ s : string;
+begin
+  for s in TStyleManager.StyleNames do
+   if not SameText(s, 'Windows') then
+    ComboBox1.Items.Add(s);
+
+  ComboBox1.Text:='Auric';
   NCControls:=TNCControls.Create(Self);
-  NCControls.StyleServices := TStyleManager.Style['Auric'];
+  NCControls.StyleServices := TStyleManager.Style[ComboBox1.Text];
   NCControls.List.Add(TNCButton.Create(NCControls));
   NCControls.List[0].Style       := nsSplitButton;
   NCControls.List[0].ImageStyle  := isGrayHot;

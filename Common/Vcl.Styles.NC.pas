@@ -89,7 +89,7 @@ type
     procedure SetImageMargins(const Value: TImageMargins);
     procedure SetImages(const Value: TCustomImageList);
     procedure SetPressedImageIndex(const Value: TImageIndex);
-    procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: Cardinal);
+    procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: Cardinal; AColor : TColor = clNone);
     procedure SetImageStyle(const Value: TNCImageStyle);
   public
     property Style: TNCButtonStyle read FStyle write SetStyle;
@@ -228,7 +228,7 @@ begin
 end;
 
 
-procedure TNCButton.DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: Cardinal);
+procedure TNCButton.DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: Cardinal; AColor : TColor = clNone);
 var
   ThemeTextColor: TColor;
   TextFormat: TTextFormatFlags;
@@ -239,7 +239,10 @@ begin
   TextFormat := TTextFormatFlags(Flags);
   if LStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
   begin
-    Canvas.Font.Color := ThemeTextColor;
+    if AColor<>clNone then
+     Canvas.Font.Color := AColor
+    else
+     Canvas.Font.Color := ThemeTextColor;
     LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat, Canvas.Font.Color);
   end
   else
@@ -274,6 +277,7 @@ var
   X, Y, I, ImgIndex: Integer;
   BCaption: String;
   LStyleServices : TCustomStyleServices;
+  ThemeTextColor : TColor;
 begin
   LStyleServices:=NCControls.StyleServices;
   BCaption := Text;
@@ -366,11 +370,17 @@ begin
       DoDrawGrayImage(ACanvas.Handle, FImages.Handle, ImgIndex, IX, IY);
   end;
 
-    if (FStyle=nsSplitButton) or (FStyle=nsSplitTrans) then
+    if (FStyle in [nsSplitButton, nsSplitTrans]) then
     begin
       LRect:=DrawRect;
       Dec(DrawRect.Right, 15);
-      DrawControlText(ACanvas, Details, Text, DrawRect, DT_VCENTER or DT_CENTER);
+
+      if (FStyle=nsSplitTrans) and (not AMouseInControl)  then
+       //use font color of the caption
+       StyleServices.GetElementColor(StyleServices.GetElementDetails(twCaptionActive), ecTextColor, ThemeTextColor)
+      else
+       ThemeTextColor:=clNone;
+       DrawControlText(ACanvas, Details, Text, DrawRect, DT_VCENTER or DT_CENTER, ThemeTextColor);
 
       if FDropDown then
       begin
@@ -413,7 +423,14 @@ begin
       end;
     end
     else
-      DrawControlText(ACanvas, Details, BCaption, DrawRect, DT_VCENTER or DT_CENTER or DT_WORDBREAK);
+    begin
+      if (FStyle=nsTranparent) and (not AMouseInControl)  then
+       //use font color of the caption
+       StyleServices.GetElementColor(StyleServices.GetElementDetails(twCaptionActive), ecTextColor, ThemeTextColor)
+      else
+       ThemeTextColor:=clNone;
+      DrawControlText(ACanvas, Details, BCaption, DrawRect, DT_VCENTER or DT_CENTER or DT_WORDBREAK, ThemeTextColor);
+    end;
 end;
 
 
@@ -593,11 +610,13 @@ var
  P : TPoint;
 begin
   inherited;
+  {$IF CompilerVersion>23}
   if not ((TStyleManager.FormBorderStyle = fbsCurrentStyle) and (seBorder in Form.StyleElements)) then
   begin
     Handled := False;
     Exit;
   end;
+  {$IFEND}
 
   if (NCControls<>nil) and (NCControls.Visible) then
   begin
@@ -625,11 +644,13 @@ begin
 
   if (NCControls<>nil) and (NCControls.Visible) then
   begin
+   {$IF CompilerVersion>23}
     if not ((TStyleManager.FormBorderStyle = fbsCurrentStyle) and (seBorder in Form.StyleElements)) then
     begin
       Handled := False;
       Exit;
     end;
+   {$IFEND}
 
     OldIndex := FPressedNCBtnIndex;
 
@@ -680,11 +701,13 @@ begin
     P := _NormalizePoint(Point(Message.XCursor, Message.YCursor));
     //OutputDebugString(PChar(Format('Message.HitTest %d XCursor %d YCursor %d  P.X %d  P.Y %d',[Message.HitTest, Message.XCursor, Message.YCursor, P.X, P.Y])));
 
+    {$IF CompilerVersion>23}
     if not ((TStyleManager.FormBorderStyle = fbsCurrentStyle) and (seBorder in Form.StyleElements)) then
     begin
       Handled := False;
       Exit;
     end;
+    {$IFEND}
 
     if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and PointInButton(P) then
     begin
