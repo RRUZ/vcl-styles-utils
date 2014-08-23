@@ -4,14 +4,13 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles.Utils.SystemMenu;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs;
 
 type
   TForm25 = class(TForm)
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-    VclStyleOptions : TVclStylesSystemMenu;
   public
     { Public declarations }
   end;
@@ -21,11 +20,14 @@ var
 
 implementation
 
+uses
+ Vcl.Styles.Utils.SystemMenu;
+
 {$R *.dfm}
 
 procedure TForm25.FormCreate(Sender: TObject);
 begin
-  VclStyleOptions:=TVclStylesSystemMenu.Create(Self);
+  TVclStylesSystemMenu.Create(Self);
   ReportMemoryLeaksOnShutdown:=True;
 end;
 
