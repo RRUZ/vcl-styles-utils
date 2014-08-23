@@ -5,3 +5,15 @@ The TVclStylesSystemMenu component allow to select a Vcl Style from the system M
 http://theroadtodelphi.files.wordpress.com/2014/02/cobalt.png?w=820
 
 For more info check this article  http://theroadtodelphi.wordpress.com/2014/08/22/a-new-way-to-select-and-apply-a-vcl-style-in-runtime/
+
+
+To use this component, only you need create an new instance passing a reference to the form.
+
+{{{
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  TVclStylesSystemMenu.Create(Self);
+end;
+
+}}}
