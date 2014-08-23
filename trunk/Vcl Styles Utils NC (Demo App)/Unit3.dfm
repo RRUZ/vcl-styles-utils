@@ -15,6 +15,22 @@ object Form3: TForm3
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
+  object Label1: TLabel
+    Left = 8
+    Top = 24
+    Width = 263
+    Height = 13
+    Caption = 'Choose a VCL Style to be used to draw the NC buttons'
+  end
+  object ComboBox1: TComboBox
+    Left = 8
+    Top = 43
+    Width = 145
+    Height = 21
+    Style = csDropDownList
+    TabOrder = 0
+    OnChange = ComboBox1Change
+  end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 328

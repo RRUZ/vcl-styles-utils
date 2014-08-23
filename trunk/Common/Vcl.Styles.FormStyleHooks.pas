@@ -743,8 +743,9 @@ var
   LBitmapPos: TPoint;
   LBitmapSize: TSize;
   LExStyle  : DWORD;
+  {$IF CompilerVersion>23}
   TextTopOffset: Integer;
-
+  {$IFEND}
   function GetTopOffset: Integer;
   var
     P: TPoint;
@@ -851,7 +852,9 @@ begin
   {draw caption border}
   DrawRect := Rect(0, 0, LBitmap.Width, LBitmap.Height);
   LDetails := StyleServices.GetElementDetails(LDetail);  //used for draw text in the caption
+  {$IF CompilerVersion>23}
   TextTopOffset := 3;
+  {$IFEND}
 
   //check if a must use a custom color or a bitmap
   if FNCSettings.UseColor then
