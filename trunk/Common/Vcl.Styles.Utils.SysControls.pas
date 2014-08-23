@@ -506,7 +506,7 @@ var
   lpClassName : array [0..255] of Char;
 begin
   Result:='';
-  if GetClassName(Window, @lpClassName, SizeOf(lpClassName))<>0 then
+  if GetClassName(Window, @lpClassName, Length(lpClassName))>0 then
    Result := lpClassName;
 end;
 
