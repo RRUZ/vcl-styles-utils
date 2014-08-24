@@ -411,8 +411,13 @@ begin
           LineTo(LRect.Right - 14, LRect.Bottom - 3);
         end;
 
+
         // draw arrow
-        Pen.Color := Font.Color;
+        if (FStyle=nsSplitTrans) and (not AMouseInControl)  then
+         Pen.Color := ThemeTextColor
+        else
+         Pen.Color := Font.Color;
+
         X := LRect.Right - 8;
         Y := LRect.Top + (Height div 2) + 1;
         for i := 3 downto 0 do
@@ -579,11 +584,15 @@ end;
 procedure TFormStyleNCControls.PaintNCControls(Canvas: TCanvas; ARect : TRect);
 var
   i : Integer;
+  LNCButton : TNCButton;
 begin
   if (NCControls<>nil) and (NCControls.List.Count>0) and (NCControls.Visible) then
    for i:=0 to NCControls.List.Count-1 do
-    if NCControls.List[i].Visible and (NCControls.List[i].BoundsRect.Right<= ARect.Right) then
-     NCControls.List[i].DrawButton(Canvas, FHotNCBtnIndex=i, FPressedNCBtnIndex=i);
+   begin
+    LNCButton:=NCControls.List[i];
+    if LNCButton.Visible and (LNCButton.BoundsRect.Right<= ARect.Right) then
+     LNCButton.DrawButton(Canvas, FHotNCBtnIndex=i, FPressedNCBtnIndex=i);
+   end;
 end;
 
 //Avoid maximize or restore on DblClk

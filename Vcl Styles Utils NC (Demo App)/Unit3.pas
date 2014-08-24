@@ -56,7 +56,8 @@ begin
    if not SameText(s, 'Windows') then
     ComboBox1.Items.Add(s);
 
-  ComboBox1.Text:='Auric';
+  ComboBox1.ItemIndex:=ComboBox1.Items.IndexOf('Auric');
+
   NCControls:=TNCControls.Create(Self);
   NCControls.StyleServices := TStyleManager.Style[ComboBox1.Text];
   NCControls.List.Add(TNCButton.Create(NCControls));

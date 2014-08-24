@@ -1,10 +1,13 @@
+// JCL_DEBUG_EXPERT_INSERTJDBG OFF
+// JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
 program Demo;
 
 uses
   Vcl.Forms,
   uMain in 'uMain.pas' {FrmMain},
   System.IOUtils,
-  SysUtils,
+  System.SysUtils,
+  System.Types,
   Windows,
   Vcl.Themes,
   Vcl.Styles,
@@ -33,10 +36,19 @@ end;
 procedure LoadVCLStyles;
 var
   f, s : string;
+  LFiles : TStringDynArray;
 begin
-  s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
-  for f in TDirectory.GetFiles(s, '*.vsf') do
-    TStyleManager.LoadFromFile(f);
+  s:=ExtractFilePath(ParamStr(0));
+  LFiles:=TDirectory.GetFiles(s, '*.vsf');
+  if Length(LFiles)>0 then
+   for f in TDirectory.GetFiles(s, '*.vsf') do
+     TStyleManager.LoadFromFile(f)
+  else
+  begin
+    s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
+    for f in TDirectory.GetFiles(s, '*.vsf') do
+      TStyleManager.LoadFromFile(f);
+  end;
 end;
 
 begin
