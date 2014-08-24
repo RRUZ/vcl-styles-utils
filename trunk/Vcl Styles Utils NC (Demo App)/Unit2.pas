@@ -82,7 +82,6 @@ begin
   NCControls.List[3].Name        := 'nsSplitTrans';
   NCControls.List[3].OnClick     := ButtonNCClick;
   NCControls.List[3].OnDropDownClick := ButtonNCDropDownClick;
-
 end;
 
 end.
