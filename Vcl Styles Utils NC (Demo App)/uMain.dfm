@@ -21,7 +21,10 @@ object FrmMain: TFrmMain
     Top = 31
     Width = 217
     Height = 25
+    Hint = 'Sample Button with Dropdown menu'
     Caption = 'Sample Button with Dropdown menu'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 0
     OnClick = BtnSample1Click
   end
