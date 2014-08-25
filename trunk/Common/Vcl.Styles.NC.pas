@@ -79,6 +79,7 @@ type
     FImageStyle: TNCImageStyle;
     FOnClick: TNotifyEvent;
     FNCControls  :  TNCControls;
+    FHintWindow : THintWindow;
     procedure DrawButton(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
     procedure SetStyle(const Value: TNCButtonStyle);
     procedure SetDisabledImageIndex(const Value: TImageIndex);
@@ -91,6 +92,8 @@ type
     procedure SetPressedImageIndex(const Value: TImageIndex);
     procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; Flags: Cardinal; AColor : TColor = clNone);
     procedure SetImageStyle(const Value: TNCImageStyle);
+    procedure ShowHintWindow(X, Y : Integer);
+    procedure HideHintWindow;
   public
     property Style: TNCButtonStyle read FStyle write SetStyle;
     property ImageStyle: TNCImageStyle read FImageStyle write SetImageStyle;
@@ -149,6 +152,7 @@ uses
  Vcl.Styles.FormStyleHooks;
 
 type
+  THintWindowClass = class(THintWindow);
   TCustomFormClass = class(TCustomForm);
   TStyleHookList = TList<TStyleHookClass>;
 
@@ -251,10 +255,12 @@ begin
 
   FOnDropDownClick   :=nil;
   FOnClick           :=nil;
+  FHintWindow        :=THintWindow.Create(Self);
 end;
 
 destructor TNCButton.Destroy;
 begin
+  FHintWindow.Free;
   FImageMargins.Free;
   inherited;
 end;
@@ -283,6 +289,7 @@ begin
     LStyleServices.DrawText(Canvas.Handle, Details, S, R, TextFormat);
   end;
 end;
+
 
 
 procedure DoDrawGrayImage(hdcDst: HDC; himl: HIMAGELIST; ImageIndex, X, Y: Integer);
@@ -521,6 +528,26 @@ begin
   FStyle := Value;
 end;
 
+procedure TNCButton.ShowHintWindow(X, Y : Integer);
+begin
+  if THintWindowClass(FHintWindow).WindowHandle=0 then
+  begin
+    FHintWindow.Visible := False;
+    FHintWindow.Color   := StyleServices.GetSystemColor(clInfoBk);
+    FHintWindow.Caption := Hint;
+    FHintWindow.ParentWindow := Application.Handle;
+    FHintWindow.Left:=NCControls.FForm.Left + BoundsRect.Left;
+    FHintWindow.Top :=NCControls.FForm.Top +  BoundsRect.Bottom+5;
+    FHintWindow.Show;
+  end;
+end;
+
+procedure TNCButton.HideHintWindow;
+begin
+ if THintWindowClass(FHintWindow).WindowHandle<>0 then
+  FHintWindow.ReleaseHandle;
+end;
+
 
 { TFormStyleNCControls }
 constructor TFormStyleNCControls.Create(AControl: TWinControl);
@@ -734,6 +761,7 @@ end;
 
 procedure TFormStyleNCControls.WMNCMouseMove(var Message: TWMNCHitMessage);
 var
+ I : Integer;
  P : TPoint;
 begin
   inherited;
@@ -755,11 +783,23 @@ begin
       if FHotNCBtnIndex <> GetButtonIndex(P) then
       begin
         FHotNCBtnIndex := GetButtonIndex(P);
+
+        for I := 0 to NCControls.List.Count-1 do
+          if (FHotNCBtnIndex<>I) and NCControls.List[I].ShowHint then
+              NCControls.List[I].HideHintWindow();
+
+        if NCControls.List[FHotNCBtnIndex].ShowHint then
+          NCControls.List[FHotNCBtnIndex].ShowHintWindow(Message.XCursor, Message.YCursor);
+
         InvalidateNC;
       end;
     end
     else if FHotNCBtnIndex <> -1 then
     begin
+      for I := 0 to NCControls.List.Count-1 do
+        if NCControls.List[I].ShowHint then
+            NCControls.List[I].HideHintWindow();
+
       FHotNCBtnIndex := -1;
       InvalidateNC;
     end;
