@@ -19,8 +19,6 @@ type
     { Public declarations }
   end;
 
-var
-  Form2: TForm2;
 
 implementation
 

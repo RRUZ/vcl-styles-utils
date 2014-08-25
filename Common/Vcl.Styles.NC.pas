@@ -150,6 +150,38 @@ uses
 
 type
   TCustomFormClass = class(TCustomForm);
+  TStyleHookList = TList<TStyleHookClass>;
+
+  TStyleHookDictionary = TDictionary<TClass, TStyleHookList>;
+  TCustomStyleEngineHelper = Class Helper for TCustomStyleEngine
+  public
+    class function GetRegisteredStyleHooks : TStyleHookDictionary;
+  end;
+
+
+class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
+begin
+  Result:= Self.FRegisteredStyleHooks;
+end;
+
+function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
+var
+  List : TStyleHookList;
+begin
+ Result:=False;
+    if TCustomStyleEngine.GetRegisteredStyleHooks.ContainsKey(ControlClass) then
+    begin
+      List := TCustomStyleEngine.GetRegisteredStyleHooks[ControlClass];
+      Result:=List.IndexOf(StyleHookClass) <> -1;
+    end;
+end;
+
+function  GetRegisteredStylesHooks(ControlClass: TClass) : TStyleHookList;
+begin
+ Result:=nil;
+    if TCustomStyleEngine.GetRegisteredStyleHooks.ContainsKey(ControlClass) then
+      Result:=TCustomStyleEngine.GetRegisteredStyleHooks[ControlClass];
+end;
 
 { TNCControls }
 
@@ -161,8 +193,8 @@ begin
   FList  :=TListNCButtons.Create(True);
   FStyleServices:=nil;
   FVisible:=True;
-
-  TStyleManager.Engine.RegisterStyleHook(AOwner.ClassType, TFormStyleNCControls);
+  if not IsStyleHookRegistered(AOwner.ClassType, TFormStyleNCControls) then
+    TStyleManager.Engine.RegisterStyleHook(AOwner.ClassType, TFormStyleNCControls);
   FForm.Perform(CM_RECREATEWND, 0, 0);
 end;
 
