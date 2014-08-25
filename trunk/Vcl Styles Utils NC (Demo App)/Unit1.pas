@@ -48,9 +48,6 @@ type
     procedure ButtonNCClick(Sender: TObject);
   end;
 
-var
-  Form1: TForm1;
-
 implementation
 
 {$R *.dfm}

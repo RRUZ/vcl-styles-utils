@@ -76,18 +76,28 @@ uses
 
 
 procedure TFrmMain.BtnSample1Click(Sender: TObject);
+var
+ LForm : TForm1;
 begin
-   Form1.Show();
+   LForm:= TForm1.Create(Self);
+   LForm.Show();
 end;
 
 procedure TFrmMain.Button1Click(Sender: TObject);
+var
+ LForm : TForm2;
 begin
-   Form2.Show();
+   LForm:= TForm2.Create(Self);
+   LForm.Show();
 end;
 
+
 procedure TFrmMain.Button3Click(Sender: TObject);
+var
+ LForm : TForm3;
 begin
-   Form3.Show();
+   LForm:= TForm3.Create(Self);
+   LForm.Show();
 end;
 
 procedure TFrmMain.ButtonNCClick(Sender: TObject);

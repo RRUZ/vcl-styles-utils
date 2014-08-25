@@ -22,9 +22,6 @@ type
     { Public declarations }
   end;
 
-var
-  Form3: TForm3;
-
 implementation
 
 uses
