@@ -123,7 +123,7 @@ begin
    begin
       NCControls.List.Add(TNCButton.Create(NCControls));
       NCControls.List[i].Name      := Format('NCButton%d',[i+1]);
-      NCControls.List[i].Hint      := Format('NCButton%d',[i+1]);
+      NCControls.List[i].Hint      := Format('Hint for NCButton%d',[i+1]);
       NCControls.List[i].ShowHint  := True;
       NCControls.List[i].Caption   :='';
       NCControls.List[i].Style     :=nsTranparent;
