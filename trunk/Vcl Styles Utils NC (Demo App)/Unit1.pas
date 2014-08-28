@@ -60,12 +60,13 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   NCControls:=TNCControls.Create(Self);
+  NCControls.ShowSystemMenu:=False;
   NCControls.List.Add(TNCButton.Create(NCControls));
   NCControls.List[0].Style       := nsSplitButton;
   NCControls.List[0].ImageStyle  := isGrayHot;
   NCControls.List[0].Images      := ImageList1;
   NCControls.List[0].ImageIndex  := 3;
-  NCControls.List[0].BoundsRect  := Rect(30,5,100,25);
+  NCControls.List[0].BoundsRect  := Rect(5,0,85,25);
   NCControls.List[0].Caption     := 'Menu';
   NCControls.List[0].DropDownMenu:= PopupMenu1;
   NCControls.List[0].OnClick     := ButtonNCClick;
