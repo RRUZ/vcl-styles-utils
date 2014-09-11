@@ -23,7 +23,7 @@ unit Vcl.Styles.Utils.Menus;
 interface
 
 {$DEFINE UseVCLStyleUtilsMenu}
-{$IF CompilerVersion >= 27}      // Use the XE6 menu syshooks by default
+{$IF CompilerVersion >= 27}
 {$UNDEF UseVCLStyleUtilsMenu}  // comment this line if you want to use the VCL Styles Utils Menus Hooks
 {$IFEND}
 
@@ -348,7 +348,8 @@ var
   LTextFormat: TTextFormat;
   DC: HDC;
   LSize: TSize;
-  MI: TMenuItem;
+  LMenuItem: TMenuItem;
+  LOwnerDrawState : TOwnerDrawState;
   ImageIndex: integer;
   LImageRect, R: TRect;
   LImageWidth: integer;
@@ -500,34 +501,45 @@ begin
     DrawSubMenu(ItemRect);
 
   LImageWidth := 0;
-  MI := SysItem.VCLMenuItems;
-  if MI <> nil then
-    MI := SysItem.VCLItem;
+  LMenuItem := SysItem.VCLMenuItems;
+  if LMenuItem <> nil then
+    LMenuItem := SysItem.VCLItem;
 
-  // if MI = nil then
-  // begin
-  // SysItem.VCLMenuItems;
-  // OutputDebugString(PChar('MI = nil'));
-  // end;
   LParentMenu:=nil;
-  if (MI <> nil) then
-    LParentMenu:=MI.GetParentMenu;
-  if (LParentMenu<>nil) and (LParentMenu.OwnerDraw) and (@MI.OnDrawItem<>nil) then
+  if (LMenuItem <> nil) then
+    LParentMenu:=LMenuItem.GetParentMenu;
+  if (LParentMenu<>nil) and (LParentMenu.OwnerDraw) and (@LMenuItem.OnDrawItem<>nil) then
   begin
-    MI.OnDrawItem(MI, Canvas, ItemRect, (isHot in State));
+    LMenuItem.OnDrawItem(LMenuItem, Canvas, ItemRect, (isHot in State));
     exit;
   end;
 
+  if (LParentMenu<>nil) and (LParentMenu.OwnerDraw) and (LMenuItem <> nil) and (@LMenuItem.OnAdvancedDrawItem<>nil) then
+  begin
+    LOwnerDrawState := [];
 
-  if MI <> nil then
+    if isHot in State then
+      Include(LOwnerDrawState , odSelected);
+    if isDisabled in State then
+     Include(LOwnerDrawState , odDisabled);
+    if isChecked in State then
+     Include(LOwnerDrawState , odChecked);
+    if isDefault in State then
+     Include(LOwnerDrawState , odDefault);
+
+    LMenuItem.OnAdvancedDrawItem(LMenuItem, Canvas, ItemRect, LOwnerDrawState);
+    exit;
+  end;
+
+  if LMenuItem <> nil then
   begin
     { Draw Vcl PopupMenu Bitmap }
-    ImageIndex := MI.ImageIndex;
-    with MI.GetParentMenu do
+    ImageIndex := LMenuItem.ImageIndex;
+    with LMenuItem.GetParentMenu do
     begin
-      if (ImageIndex < 0) and (MI.Bitmap <> nil) then
+      if (ImageIndex < 0) and (LMenuItem.Bitmap <> nil) then
       begin
-        Bmp := MI.Bitmap;
+        Bmp := LMenuItem.Bitmap;
         if (Bmp.Width = 16) and (Bmp.Height = 16) then
         begin
           LImageWidth := Bmp.Width;
@@ -560,7 +572,7 @@ begin
         end;
 
       end
-      else if (MI.GetParentMenu.Images <> nil) and (ImageIndex > -1) then
+      else if (LMenuItem.GetParentMenu.Images <> nil) and (ImageIndex > -1) then
       begin
         LImageWidth := Images.Width;
         DisplayCheckedGlyph := False;
@@ -688,11 +700,11 @@ begin
   DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat);
 
   { Draw ShortCut Text . }
-  if MI <> nil then
+  if LMenuItem <> nil then
   begin
-    if MI.ShortCut <> 0 then
+    if LMenuItem.ShortCut <> 0 then
     begin
-      sShortCut := ShortCutToText(MI.ShortCut);
+      sShortCut := ShortCutToText(LMenuItem.ShortCut);
       LTextRect := ItemRect;
       if RightToLeft then
       begin
@@ -878,8 +890,12 @@ begin
     begin
       L := Length(SubMenuItemInfoArray);
       if L = 0 then
+      begin
         SetLength(SubMenuItemInfoArray, 1);
-      for i := 0 to L do
+        L:=1;
+      end;
+
+      for i := 0 to L-1 do
         { Avoid duplication }
         if SubMenuItemInfoArray[i].Menu <> GetMenuFromHandle(Handle) then
         begin
