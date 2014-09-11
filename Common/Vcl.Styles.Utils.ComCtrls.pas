@@ -1682,26 +1682,33 @@ end;
 procedure TSysProgressBarStyleHook.TimerAction(Sender: TObject);
 var
   LCanvas: TCanvas;
+  LHandle: THandle;
 begin
   // if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
   // begin
 
   LCanvas := TCanvas.Create;
   try
-    LCanvas.Handle := GetWindowDC(Self.Handle);
+    LHandle := GetWindowDC(Self.Handle);
 
-    if SysControl.Visible then
+    if LHandle<>0 then
     begin
-      PaintFrame(LCanvas);
-      PaintBar(LCanvas);
+      LCanvas.Handle := LHandle;
+
+      if SysControl.Visible then
+      begin
+        PaintFrame(LCanvas);
+        PaintBar(LCanvas);
+      end;
     end;
 
-    inc(FStep, 1);
-    if FStep mod 20 = 0 then
-      FStep := 0;
+      inc(FStep, 1);
+      if FStep mod 20 = 0 then
+        FStep := 0;
 
   finally
-    ReleaseDC(Handle, LCanvas.Handle);
+   if LHandle<>0 then
+    ReleaseDC(Handle, LHandle);
     LCanvas.Handle := 0;
     LCanvas.Free;
   end;
