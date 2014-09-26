@@ -1,7 +1,7 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{C68F667F-9A62-422C-B95B-74D3C3D6ED9A}</ProjectGuid>
-			<ProjectVersion>15.1</ProjectVersion>
+			<ProjectVersion>15.4</ProjectVersion>
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>ThemedSysControls.dpr</MainSource>
 			<Base>True</Base>
@@ -46,6 +46,7 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<SanitizedProjectName>ThemedSysControls</SanitizedProjectName>
 			<VCL_Custom_Styles>&quot;Amakrits|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\Amakrits.vsf&quot;;&quot;Amethyst Kamri|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\AmethystKamri.vsf&quot;;&quot;Aqua Graphite|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\AquaGraphite.vsf&quot;;&quot;Aqua Light Slate|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\AquaLightSlate.vsf&quot;;&quot;Auric|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\Auric.vsf&quot;;&quot;Carbon|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\Carbon.vsf&quot;;&quot;Charcoal Dark Slate|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\CharcoalDarkSlate.vsf&quot;;&quot;Cobalt XEMedia|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\CobaltXEMedia.vsf&quot;;&quot;Cyan Dusk|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\CyanDusk.vsf&quot;;&quot;Cyan Night|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\CyanNight.vsf&quot;;&quot;Emerald Light Slate|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\EmeraldLightSlate.vsf&quot;;&quot;Golden Graphite|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\GoldenGraphite.vsf&quot;;&quot;Iceberg Classico|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\IcebergClassico.vsf&quot;;&quot;Lavender Classico|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\LavenderClassico.vsf&quot;;&quot;Metro Black|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\MetroBlack.vsf&quot;;&quot;Metro Blue|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\MetroBlue.vsf&quot;;&quot;Metro Green|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\MetroGreen.vsf&quot;;&quot;Ruby Graphite|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\RubyGraphite.vsf&quot;;&quot;Sapphire Kamri|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\SapphireKamri.vsf&quot;;&quot;Slate Classico|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\SlateClassico.vsf&quot;;&quot;Smokey Quartz Kamri|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\SmokeyQuartzKamri.vsf&quot;;&quot;Turquoise Gray|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\TurquoiseGray.vsf&quot;</VCL_Custom_Styles>
 			<Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
@@ -109,9 +110,9 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.Forms.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.StdCtrls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ComCtrls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ScreenTips.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

@@ -68,6 +68,8 @@ type
     FFont: TFont;
     FParent: TSysControl;
     FHandle: THandle;
+    FWindowClassName : string;
+    FDestroyed  : Boolean;
     function GetParent: TSysControl;
     function GetParentHandle: THandle;
     function GetText: String;
@@ -123,6 +125,7 @@ type
     property ControlID: Integer read GetControlID;
     property BoundsRect: TRect read GetBoundsRect;
     property IsChild: Boolean read IsControlChild;
+    property Destroyed : Boolean read FDestroyed write FDestroyed;     //WM_DESTROY
     function DrawTextBiDiModeFlags(const Flags: Longint): Longint;
     function UseRightToLeftAlignment: Boolean; dynamic;
     function DrawTextBiDiModeFlagsReadingOnly: Longint;
@@ -135,7 +138,7 @@ type
 
   TSysStyleHook = class
   private
-    FHandle: THandle;
+    FHandle: HWND;
     FProcInstance: Pointer;
     FOrgWndProc: NativeInt;
     FSysControl: TSysControl;
@@ -201,7 +204,7 @@ type
     procedure DrawControlText(Canvas: TCanvas; Details: TThemedElementDetails; const S: string; var R: TRect; const Flags: Cardinal);
     function DrawTextCentered(DC: HDC; Details: TThemedElementDetails; const R: TRect; S: String; Const Flags: DWORD = 0): Integer;
     function DrawText(DC: HDC; Details: TThemedElementDetails; S: String; var R: TRect; Const Flags: TTextFormat = []): Integer;
-    property Handle: THandle read FHandle;
+    property Handle: HWND read FHandle;
     property ParentHandle: HWND read GetParentHandle;
     property Handled: Boolean read FHandled write FHandled;
     property SysControl: TSysControl read FSysControl write FSysControl;
@@ -282,6 +285,8 @@ begin
   FFont := nil;
   FParent := nil;
   Handle := AHandle;
+  FWindowClassName:='';
+  FDestroyed:=False;
 end;
 
 destructor TSysControl.Destroy;
@@ -362,7 +367,9 @@ end;
 
 function TSysControl.GetControlClassName: String;
 begin
-  Result := GetWindowClassName(Handle);
+  if FWindowClassName='' then
+    FWindowClassName := GetWindowClassName(Handle);
+  Result:=FWindowClassName;
 end;
 
 function TSysControl.GetControlID: Integer;
@@ -570,7 +577,7 @@ end;
 
 function TSysStyleHook.CallDefaultProc(var Msg: TMessage): LRESULT;
 begin
-  //OutputDebugString(PChar('TSysStyleHook.CallDefaultProc FOrgWndProc '+IntToHex(FOrgWndProc, 8)+' Handle '+IntToHex(Handle, 8)+' Msg '+WM_To_String(Msg.Msg)));
+  //OutputDebugString(PChar('TSysStyleHook.CallDefaultProc FOrgWndProc '+IntToHex(FOrgWndProc, 8)+' Handle '+IntToHex(Handle, 8)+' Msg '+WM_To_String(Msg.Msg)+' ClassName '+SysControl.ControlClassName));
   Result := CallWindowProc(Pointer(FOrgWndProc), Handle, Msg.Msg, Msg.wParam, Msg.lParam);
 end;
 
@@ -817,7 +824,7 @@ end;
 
 procedure TSysStyleHook.Paint(Canvas: TCanvas);
 begin
-
+ //
 end;
 
 procedure TSysStyleHook.PaintBackground(Canvas: TCanvas);
@@ -989,7 +996,7 @@ var
   PTest: PInteger;
   ParentHandle: HWND;
 begin
-
+  //Exit(True);
   Test := $93;
   PTest := @Test;
   Result := False;
@@ -1036,7 +1043,7 @@ end;
 
 procedure TSysStyleHook.WMPaint(var Message: TMessage);
 var
-  DC: HDC;
+  OrgDC, DC: HDC;
   Buffer: TBitmap;
   Canvas: TCanvas;
   PS: TPaintStruct;
@@ -1089,17 +1096,22 @@ begin
 
   if OverridePaint then
   begin
-    DC := HDC(Message.wParam);
+    OrgDC := HDC(Message.wParam);
     Canvas := TCanvas.Create;
     try
-      if DC <> 0 then
-        Canvas.Handle := DC
+
+      if OrgDC <> 0 then
+      begin
+        Canvas.Handle := OrgDC;
+        DC:= OrgDC;
+      end
       else
       begin
         DC := GetDC(Handle);
         BeginPaint(SysControl.Handle, PS);
         Canvas.Handle := DC;
       end;
+
       if Assigned(FFont) then
         Canvas.Font.Assign(FFont);
 
@@ -1124,7 +1136,8 @@ begin
           Paint(Canvas);
           // PaintControls(Handle,Canvas.Handle);
         end;
-      if DC = 0 then
+
+      if OrgDC = 0 then
       begin
         ReleaseDC(SysControl.Handle, DC);
         EndPaint(SysControl.Handle, PS);
@@ -1247,11 +1260,39 @@ begin
       begin
         Message.Result := CallDefaultProc(Message);
         Dispatch(Message);
-        // OutputDebugString(PChar('WM_DESTROY Handle '+IntToHex(Handle, 8)));
-        // if TSysStyleManager.SysStyleHookList.ContainsKey(Handle) then
-        // TSysStyleManager.SysStyleHookList.Remove(Handle);
+        //OutputDebugString(PChar('WM_DESTROY Handle '+IntToHex(Handle, 8)));
+        //if TSysStyleManager.SysStyleHookList.ContainsKey(Handle) then
+        //  TSysStyleManager.SysStyleHookList.Remove(Handle);
         Exit;
       end;
+
+    //The WM_NCDESTROY message is sent after the child windows have been destroyed.
+    //In contrast, WM_DESTROY is sent before the child windows are destroyed.
+    WM_NCDESTROY:
+      begin
+        Message.Result := CallDefaultProc(Message);
+
+        if TSysStyleManager.SysStyleHookList.ContainsKey(FHandle) then
+        begin
+          TSysStyleManager.SysStyleHookList.Remove(Handle);
+          //OutputDebugString(PChar('SysStyleHookList WM_NCDESTROY Removed '+IntToHex(Handle, 8)));
+        end;
+
+        if TSysStyleManager.ChildRegSysStylesList.ContainsKey(FHandle) then
+        begin
+          TSysStyleManager.ChildRegSysStylesList.Remove(Handle);
+          //OutputDebugString(PChar('ChildRegSysStylesList WM_NCDESTROY Removed '+IntToHex(Handle, 8)));
+        end;
+
+        for ChildHandle in TSysStyleManager.ChildRegSysStylesList.Keys do
+            if (TSysStyleManager.ChildRegSysStylesList[ChildHandle].Parent = FHandle)  then
+            begin
+               TSysStyleManager.ChildRegSysStylesList.Remove(ChildHandle);
+               //OutputDebugString(PChar('Sub ChildRegSysStylesList WM_NCDESTROY Removed '+IntToHex(ChildHandle, 8)));
+            end;
+        Exit;
+      end;
+
   end;
 
   Dispatch(Message);

@@ -25,6 +25,7 @@ interface
 uses
   Winapi.Windows,
   Winapi.Messages,
+  Winapi.CommCtrl,
   System.Classes,
   System.Types,
   Vcl.Styles,
@@ -59,6 +60,7 @@ type
     function IsGroupBox: Boolean;
     function IsPushButton: Boolean;
     function IsSplitButton: Boolean;
+    function IsCommandButton: Boolean;
     function GetTextAlign: TTextFormat;
     function GetShowText: Boolean;
     function GetCheckBoxState: TSysCheckBoxState;
@@ -84,6 +86,7 @@ type
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
     property CheckBox: Boolean read IsCheckBox;
+    property CommandButton: Boolean read IsCommandButton;
     property RadioButton: Boolean read IsRadioButton;
     property GroupBox: Boolean read IsGroupBox;
     property PushButton: Boolean read IsPushButton;
@@ -236,6 +239,7 @@ type
   public
     constructor Create(AHandle: THandle); override;
   end;
+
 
 implementation
 
@@ -491,6 +495,12 @@ begin
       (Style and BS_AUTOCHECKBOX = BS_AUTOCHECKBOX);
 end;
 
+function TSysButtonStyleHook.IsCommandButton: Boolean;
+begin
+  Result := (SysControl.Style and BS_COMMANDLINK = BS_COMMANDLINK) or
+    (SysControl.Style and BS_DEFCOMMANDLINK = BS_DEFCOMMANDLINK);
+end;
+
 function TSysButtonStyleHook.IsGroupBox: Boolean;
 begin
   Result := (SysControl.Style and BS_GROUPBOX = BS_GROUPBOX);
@@ -505,7 +515,7 @@ function TSysButtonStyleHook.IsPushButton: Boolean;
 begin
   with SysControl do
     Result := (Style and BS_PUSHBUTTON = BS_PUSHBUTTON) or
-      (not CheckBox and not RadioButton and not GroupBox);
+      (not CheckBox and not RadioButton and not GroupBox and not CommandButton);
 end;
 
 function TSysButtonStyleHook.IsRadioButton: Boolean;
@@ -534,17 +544,24 @@ end;
 
 procedure TSysButtonStyleHook.Paint(Canvas: TCanvas);
 begin
-  if not GroupBox then
+  //OutputDebugString(PChar('Paint '+IntToHex(SysControl.Handle, 8)));
+  if not GroupBox or CommandButton then
     PaintBackground(Canvas)
   else
     Exit;
 
+  if CommandButton then
+    PaintButton(Canvas)
+  else
   if CheckBox then
     PaintCheckBox(Canvas)
-  else if RadioButton then
+  else
+  if RadioButton then
     PaintRadioButton(Canvas)
-  else if PushButton then
+  else
+  if PushButton then
     PaintButton(Canvas);
+
 end;
 
 procedure TSysButtonStyleHook.PaintBackground(Canvas: TCanvas);
@@ -559,26 +576,91 @@ var
   LRect: TRect;
   Detail: TThemedButton;
   X, Y, i: Integer;
+  IW, IH, IY: Integer;
   TextFormat: TTextFormat;
+  IL: BUTTON_IMAGELIST;
   LText: string;
+  DrawRect: TRect;
+  ThemeTextColor: TColor;
+  Buffer: string;
+  BufferLength: Integer;
 begin
   LText := SysControl.Text;
   LRect := SysControl.ClientRect;
 
+    Detail := tbPushButtonNormal ;
   if SysControl.Enabled then
     Detail := tbPushButtonNormal
   else
     Detail := tbPushButtonDisabled;
   if MouseDown then
     Detail := tbPushButtonPressed
-  else if MouseInControl then
+  else
+  if MouseInControl then
     Detail := tbPushButtonHot
-  else if Focused then
+  else
+  if Focused then
     Detail := tbPushButtonDefaulted;
 
   LDetails := StyleServices.GetElementDetails(Detail);
+  DrawRect := SysControl.ClientRect;
   StyleServices.DrawElement(Canvas.Handle, LDetails, LRect);
 
+
+  if Button_GetImageList(handle, IL) and (IL.himl <> 0) and
+     ImageList_GetIconSize(IL.himl, IW, IH) then
+  begin
+    if (GetWindowLong(Handle, GWL_STYLE) and BS_COMMANDLINK) = BS_COMMANDLINK then
+      IY := DrawRect.Top + 15
+    else
+      IY := DrawRect.Top + (DrawRect.Height - IH) div 2;
+    ImageList_Draw(IL.himl, 0, Canvas.Handle, DrawRect.Left + 3, IY, ILD_NORMAL);
+    Inc(DrawRect.Left, IW + 3);
+  end;
+
+  if CommandButton then
+  begin
+      if IL.himl = 0 then
+        Inc(DrawRect.Left, 35);
+      Inc(DrawRect.Top, 15);
+      Inc(DrawRect.Left, 5);
+      Canvas.Font := SysControl.Font;
+      TextFormat := TTextFormatFlags(DT_LEFT);
+      if StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
+         Canvas.Font.Color := ThemeTextColor;
+      StyleServices.DrawText(Canvas.Handle, LDetails, LText, DrawRect, TextFormat, Canvas.Font.Color);
+      SetLength(Buffer, Button_GetNoteLength(Handle) + 1);
+      if Length(Buffer) <> 0 then
+      begin
+        BufferLength := Length(Buffer);
+        if Button_GetNote(Handle, PChar(Buffer), BufferLength) then
+        begin
+          TextFormat := TTextFormatFlags(DT_LEFT or DT_WORDBREAK);
+          Inc(DrawRect.Top, Canvas.TextHeight('Wq') + 2);
+          Canvas.Font.Size := 8;
+          StyleServices.DrawText(Canvas.Handle, LDetails, Buffer, DrawRect,
+            TextFormat, Canvas.Font.Color);
+        end;
+      end;
+      if IL.himl = 0 then
+      begin
+        if MouseDown then
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphPressed)
+        else if MouseInControl then
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphHot)
+        else if SysControl.Enabled then
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphNormal)
+        else
+          LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphDisabled);
+        DrawRect.Right := 35;
+        DrawRect.Left := 3;
+        DrawRect.Top := 10;
+        DrawRect.Bottom := DrawRect.Top + 32;
+        StyleServices.DrawElement(Canvas.Handle, LDetails, DrawRect);
+      end;
+
+  end
+  else
   if SplitButton then
     with Canvas, SysControl do
     begin
@@ -602,7 +684,8 @@ begin
         LineTo(X + i + 1, Y - i);
       end;
     end;
-  if ShowText then
+
+  if ShowText and not IsCommandButton then
   begin
     TextFormat := [tfCenter, tfVerticalCenter, tfSingleLine, tfHidePrefix];
     if (SysControl.Style and BS_MULTILINE = BS_MULTILINE) then
