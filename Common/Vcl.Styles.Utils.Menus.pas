@@ -1504,7 +1504,7 @@ initialization
 SubMenuItemInfoArray := nil;
 
 {$IFDEF UseVCLStyleUtilsMenu}
-{$IF CompilerVersion >= 27} // Disable XE6 menu syshooks
+{$IF CompilerVersion >= 27} // Disable XE6-XE7 menu syshooks
 TStyleManager.SystemHooks := TStyleManager.SystemHooks - [shMenus];
 {$IFEND}
 if StyleServices.Available then

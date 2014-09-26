@@ -144,6 +144,9 @@ function WM_To_String(const WM_Message: Integer): string;
 
 implementation
 
+uses
+  CommCtrl;
+
 {$IFDEF EventLog}
 
 { Useful functions when debugging }
@@ -495,7 +498,21 @@ begin
     $046A: Result := 'UDM_GETBUDDY';
     $102C: Result := 'LVM_GETITEMSTATE';
     $8000: Result := 'WM_APP';
-  else Result := 'Unknown(' + IntToHex(WM_Message, 4) + ')';
+
+    LM_HITTEST         : Result:= 'LM_HITTEST';
+    LM_GETIDEALHEIGHT  : Result:= 'LM_GETIDEALHEIGHT';
+    LM_SETITEM         : Result:= 'LM_SETITEM';
+    LM_GETITEM         : Result:= 'LM_GETITEM';
+    //LM_GETIDEALSIZE    : Result:= 'LM_GETIDEALSIZE';
+
+  else
+       begin
+        if WM_Message>WM_USER then
+         Result := 'WM_USER + (' + IntToHex(WM_Message-WM_USER, 4) + ')'
+
+        else
+        Result := 'Unknown(' + IntToHex(WM_Message, 4) + ')';
+       end;
   end; { Case }
 end;
 
@@ -549,7 +566,6 @@ end;
 
 { -------------------------------------------------------------------------------------- }
 { TSysStyleManager }
-
 function BeforeHookingControl(Info: PControlInfo): Boolean;
 var
   LInfo: TControlInfo;
@@ -662,6 +678,9 @@ begin
     sClassName := GetWindowClassName(wParam);
     sClassName := LowerCase(sClassName);
 
+  //  if SameText(sClassName, 'button') then
+      //OutputDebugString(PChar('Class '+sclassName+' '+IntToHex(wParam, 8)));
+
     Parent := CBTSturct.lpcs.hwndParent;
     Style := CBTSturct.lpcs.Style;
     ExStyle := CBTSturct.lpcs.dwExStyle;
@@ -726,18 +745,23 @@ begin
         { Not (WS_CHILD or WS_POPUP) !! }
         AddControl(wParam);
     end;
+
+   // if FSysStyleHookList.ContainsKey(wParam) or  FChildRegSysStylesList.ContainsKey(wParam) then
+   //  OutputDebugString(PChar('Hooked '+IntToHex(wParam, 8)));
+
   end;
+
 
   if nCode = HCBT_DESTROYWND then
   begin
-    // OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
+    //OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
     if FSysStyleHookList.ContainsKey(wParam) then
     begin
       ZeroMemory(@Info, sizeof(TControlInfo));
       Info.Handle := wParam;
       if Assigned(FSysHookNotificationProc) then
         OnHookNotification(cRemoved, @Info);
-      // FSysStyleHookList.Remove(wParam); -> removed in WM_DESTROY
+      // FSysStyleHookList.Remove(wParam); -> removed in WM_NCDESTROY
     end;
   end;
 end;

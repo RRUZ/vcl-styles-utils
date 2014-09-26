@@ -34,6 +34,7 @@ uses
   Vcl.Graphics,
   System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
+  Vcl.Styles.Utils.StdCtrls,
   Vcl.Forms,
   Vcl.ImgList,
   Vcl.ComCtrls,
@@ -316,6 +317,57 @@ type
     destructor Destroy; override;
   end;
 
+
+  TDirectUIHWNDStyleHook = class(TMouseTrackSysControlStyleHook)
+  protected
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintNC(Canvas: TCanvas); override;
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure UpdateColors; override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    Destructor Destroy; override;
+  end;
+
+
+  TCtrlNotifySinkStyleHook = class(TMouseTrackSysControlStyleHook)
+  protected
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintNC(Canvas: TCanvas); override;
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure UpdateColors; override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    Destructor Destroy; override;
+  end;
+
+  TTravelBandStyleHook = class(TMouseTrackSysControlStyleHook)
+  protected
+    procedure Paint(Canvas: TCanvas); override;
+    procedure PaintNC(Canvas: TCanvas); override;
+    procedure PaintBackground(Canvas: TCanvas); override;
+    procedure UpdateColors; override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    Destructor Destroy; override;
+  end;
+
+
+  TSysLinkStyleHook = class(TSysStaticStyleHook)
+  private
+    procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
+  protected
+    procedure PaintNC(Canvas: TCanvas); override;
+    procedure Paint(Canvas: TCanvas); override;
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AHandle: THandle); override;
+    Destructor Destroy; override;
+  end;
+
 implementation
 
 uses
@@ -509,97 +561,100 @@ var
   P: TPoint;
 begin
   Bmp := TBitmap.Create;
-  Bmp.SetSize(SysControl.Width, SysControl.Height);
-  Bmp.Canvas.Brush.Color := Color;
-  R := Rect(0, 0, Bmp.Width, Bmp.Height);
-  Bmp.Canvas.FillRect(R);
-  DC := Bmp.Canvas.Handle;
-
-  LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
-  StyleServices.DrawElement(DC, LDetails, R);
-
-  for i := 0 to ButtonsCount - 1 do
-  begin
-    with Items[i] do
-    begin
-      LSectionRect := SectionRect;
-      LTextFormat := TextFormat;
-      LText := Text;
-      LDropDownRect := DropDownRect;
-    end;
-    SectionHot := False;
-    if (MouseInControl) and (not FMouseDown) then
-    begin
-      GetCursorPos(P);
-      ScreenToClient(Handle, P);
-      if LSectionRect.Contains(P) then
-        SectionHot := True;
-    end;
+  try
+    Bmp.SetSize(SysControl.Width, SysControl.Height);
+    Bmp.Canvas.Brush.Color := Color;
+    R := Rect(0, 0, Bmp.Width, Bmp.Height);
+    Bmp.Canvas.FillRect(R);
+    DC := Bmp.Canvas.Handle;
 
     LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
-    if SectionHot then
-      LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
-    if FPressedSection = i then
-      LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
-    StyleServices.DrawElement(DC, LDetails, LSectionRect);
+    StyleServices.DrawElement(DC, LDetails, R);
 
-    TxtRect := LSectionRect;
-    inc(TxtRect.Left, 4);
-
-    if Items[i].HasSplitButton then
+    for i := 0 to ButtonsCount - 1 do
     begin
-      LSplitDetails := StyleServices.GetElementDetails(ttbDropDownButtonGlyphHot);;
-      R := LDropDownRect;
-      if SectionHot then
+      with Items[i] do
       begin
-        StyleServices.DrawElement(DC, LSplitDetails, R);
-        with Bmp.Canvas do
+        LSectionRect := SectionRect;
+        LTextFormat := TextFormat;
+        LText := Text;
+        LDropDownRect := DropDownRect;
+      end;
+      SectionHot := False;
+      if (MouseInControl) and (not FMouseDown) then
+      begin
+        GetCursorPos(P);
+        ScreenToClient(Handle, P);
+        if LSectionRect.Contains(P) then
+          SectionHot := True;
+      end;
+
+      LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
+      if SectionHot then
+        LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
+      if FPressedSection = i then
+        LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
+      StyleServices.DrawElement(DC, LDetails, LSectionRect);
+
+      TxtRect := LSectionRect;
+      inc(TxtRect.Left, 4);
+
+      if Items[i].HasSplitButton then
+      begin
+        LSplitDetails := StyleServices.GetElementDetails(ttbDropDownButtonGlyphHot);;
+        R := LDropDownRect;
+        if SectionHot then
         begin
-          Pen.Color := StyleServices.GetSystemColor(clBtnShadow);
-          MoveTo(R.Left, 3);
-          LineTo(R.Left, R.Height - 3);
-          Pen.Color := StyleServices.GetSystemColor(clBtnHighLight);
-          MoveTo(R.Left - 1, 3);
-          LineTo(R.Left - 1, R.Height - 3);
+          StyleServices.DrawElement(DC, LSplitDetails, R);
+          with Bmp.Canvas do
+          begin
+            Pen.Color := StyleServices.GetSystemColor(clBtnShadow);
+            MoveTo(R.Left, 3);
+            LineTo(R.Left, R.Height - 3);
+            Pen.Color := StyleServices.GetSystemColor(clBtnHighLight);
+            MoveTo(R.Left - 1, 3);
+            LineTo(R.Left - 1, R.Height - 3);
+          end;
+        end;
+        dec(TxtRect.Right, R.Width);
+      end;
+
+      if (Items[i].ShowImage) and (Items[i].ImageListHandle > 0) then
+      begin
+        LImageList := TImageList.Create(nil);
+        try
+          LImageList.Handle := Items[i].ImageListHandle;
+          LImageList.Masked := True;
+          LImageList.BkColor := clNone; { Transparent bitmap }
+          R := LSectionRect;
+          ImgRect := Rect(0, 0, LImageList.Width, LImageList.Height);
+          ImgRect := RectCenter(ImgRect, R);
+          if not Items[i].BitmapOnRight then
+          begin
+            ImgRect.Left := R.Left + 2;
+            ImgRect.Right := ImgRect.Left + 2 + LImageList.Width;
+            inc(TxtRect.Left, ImgRect.Width + 2);
+          end
+          else
+          begin
+            ImgRect.Left := LSectionRect.Right - LImageList.Width - 2;
+            ImgRect.Right := LSectionRect.Right;
+            TxtRect.Right := TxtRect.Right - ImgRect.Width - 2;
+          end;
+          LImageList.Draw(Bmp.Canvas, ImgRect.Left, ImgRect.Top, Items[i].ImageIndex);
+        finally
+          LImageList.Free;
         end;
       end;
-      dec(TxtRect.Right, R.Width);
-    end;
 
-    if (Items[i].ShowImage) and (Items[i].ImageListHandle > 0) then
-    begin
-      LImageList := TImageList.Create(nil);
-      try
-        LImageList.Handle := Items[i].ImageListHandle;
-        LImageList.Masked := True;
-        LImageList.BkColor := clNone; { Transparent bitmap }
-        R := LSectionRect;
-        ImgRect := Rect(0, 0, LImageList.Width, LImageList.Height);
-        ImgRect := RectCenter(ImgRect, R);
-        if not Items[i].BitmapOnRight then
-        begin
-          ImgRect.Left := R.Left + 2;
-          ImgRect.Right := ImgRect.Left + 2 + LImageList.Width;
-          inc(TxtRect.Left, ImgRect.Width + 2);
-        end
-        else
-        begin
-          ImgRect.Left := LSectionRect.Right - LImageList.Width - 2;
-          ImgRect.Right := LSectionRect.Right;
-          TxtRect.Right := TxtRect.Right - ImgRect.Width - 2;
-        end;
-        LImageList.Draw(Bmp.Canvas, ImgRect.Left, ImgRect.Top, Items[i].ImageIndex);
-      finally
-        LImageList.Free;
-      end;
+      include(LTextFormat, tfSingleLine);
+      include(LTextFormat, tfVerticalCenter);
+      StyleServices.DrawText(DC, LDetails, LText, TxtRect, LTextFormat);
     end;
-
-    include(LTextFormat, tfSingleLine);
-    include(LTextFormat, tfVerticalCenter);
-    StyleServices.DrawText(DC, LDetails, LText, TxtRect, LTextFormat);
+    Canvas.Draw(0, 0, Bmp);
+  finally
+    Bmp.Free;
   end;
-  Canvas.Draw(0, 0, Bmp);
-  Bmp.Free;
 end;
 
 procedure TSysListViewStyleHook.TSysHeaderStyleHook.PaintBackground(Canvas: TCanvas);
@@ -1686,7 +1741,7 @@ var
 begin
   // if StyleServices.Available and ((SysControl.Style And PBS_MARQUEE) <> 0) then
   // begin
-
+  LHandle := 0;
   LCanvas := TCanvas.Create;
   try
     LHandle := GetWindowDC(Self.Handle);
@@ -2565,6 +2620,288 @@ begin
   inherited;
 end;
 
+{ TDirectUIHWNDStyleHook }
+{
+Debug Output: TDirectUIHWNDStyleHook WM_NCPAINT Process ThemedSysControls.exe (3940)
+Debug Output: TDirectUIHWNDStyleHook WM_ERASEBKGND Process ThemedSysControls.exe (3940)
+Debug Output: TDirectUIHWNDStyleHook WM_PAINT Process ThemedSysControls.exe (3940)
+}
+constructor TDirectUIHWNDStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+
+{$IF CompilerVersion > 23}
+  StyleElements := [ seBorder, seClient];
+{$ELSE}
+  OverridePaint := True;
+  OverrideEraseBkgnd := True;
+  OverridePaintNC := True;
+{$IFEND}
+  UpdateColors;
+end;
+
+destructor TDirectUIHWNDStyleHook.Destroy;
+begin
+  inherited;
+end;
+
+procedure TDirectUIHWNDStyleHook.Paint(Canvas: TCanvas);
+begin
+end;
+
+procedure TDirectUIHWNDStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+ inherited;
+end;
+
+procedure TDirectUIHWNDStyleHook.PaintNC(Canvas: TCanvas);
+begin
+  inherited;
+end;
+
+procedure TDirectUIHWNDStyleHook.UpdateColors;
+begin
+ inherited;
+end;
+
+procedure TDirectUIHWNDStyleHook.WndProc(var Message: TMessage);
+begin
+  //OutputDebugString(PChar('TDirectUIHWNDStyleHook '+WM_To_String(Message.Msg)));
+  inherited;
+end;
+
+{ TCtrlNotifySinkStyleHook }
+
+constructor TCtrlNotifySinkStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+
+{$IF CompilerVersion > 23}
+  StyleElements := [ seBorder, seClient];
+{$ELSE}
+  OverridePaint := True;
+  //OverrideEraseBkgnd := True;
+  //OverridePaintNC := True;
+{$IFEND}
+  UpdateColors;
+end;
+
+destructor TCtrlNotifySinkStyleHook.Destroy;
+begin
+  inherited;
+end;
+
+procedure TCtrlNotifySinkStyleHook.Paint(Canvas: TCanvas);
+begin
+end;
+
+procedure TCtrlNotifySinkStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+end;
+
+
+procedure TCtrlNotifySinkStyleHook.PaintNC(Canvas: TCanvas);
+begin
+  inherited;
+end;
+
+procedure TCtrlNotifySinkStyleHook.UpdateColors;
+begin
+  inherited;
+end;
+
+procedure TCtrlNotifySinkStyleHook.WndProc(var Message: TMessage);
+begin
+  //OutputDebugString(PChar('TCtrlNotifySinkStyleHook '+WM_To_String(Message.Msg)));
+  inherited;
+end;
+
+{ TSysLinkStyleHook }
+{
+Debug Output: TSysLinkStyleHook WM_WINDOWPOSCHANGING Process ThemedSysControls.exe (1800)
+Debug Output: TSysLinkStyleHook WM_NCCALCSIZE Process ThemedSysControls.exe (1800)
+Debug Output: TSysLinkStyleHook WM_CHILDACTIVATE Process ThemedSysControls.exe (1800)
+Debug Output: TSysLinkStyleHook WM_WINDOWPOSCHANGED Process ThemedSysControls.exe (1800)
+Debug Output: TSysLinkStyleHook Unknown(067C) Process ThemedSysControls.exe (1800)
+}
+constructor TSysLinkStyleHook.Create(AHandle: THandle);
+var
+  Style: DWORD;
+begin
+  Style := GetWindowLongPtr(AHandle, GWL_STYLE);
+  if (Style and SS_ICON <> SS_ICON) and (Style and SS_BITMAP <> SS_BITMAP) then
+
+    inherited;
+
+{$IF CompilerVersion > 23}
+  StyleElements := [seFont, seBorder, seClient];
+{$ELSE}
+  OverridePaint := True;
+  OverridePaintNC := True;
+  OverrideFont := True;
+{$IFEND}
+  UpdateColors;
+end;
+
+destructor TSysLinkStyleHook.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TSysLinkStyleHook.Paint(Canvas: TCanvas);
+const
+  States: array [Boolean] of TThemedTextLabel = (ttlTextLabelDisabled,
+    ttlTextLabelNormal);
+var
+  LDetails: TThemedElementDetails;
+  LRect: TRect;
+  s : string;
+begin
+  LRect := SysControl.ClientRect;
+  if GetBkMode(Canvas.Handle) = TRANSPARENT then
+  begin
+    LDetails := StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
+    StyleServices.DrawParentBackground(Handle, Canvas.Handle, LDetails, False);
+    Canvas.Brush.Style := bsClear;
+  end
+  else
+  begin
+    Canvas.Brush.Color := StyleServices.GetStyleColor(scWindow);
+    Canvas.FillRect(LRect);
+  end;
+
+  LDetails := StyleServices.GetElementDetails(States[SysControl.Enabled]);
+  Canvas.Font := SysControl.Font;
+  s:=SysControl.Text;
+  //OutputDebugString(PChar('Text  '+s));
+  DrawText(Canvas.Handle, LDetails, s, LRect, TextFormat);
+end;
+
+
+procedure TSysLinkStyleHook.PaintNC(Canvas: TCanvas);
+var
+  LRect: TRect;
+  LBitMap: TBitmap;
+begin
+  if IsFrameOrLine then
+  begin
+    LRect := Rect(0, 0, SysControl.Width, SysControl.Height);
+    LBitMap := TBitmap.Create;
+    try
+      LBitMap.Width := LRect.Width;
+      LBitMap.Height := LRect.Height;
+      Frame3D(LBitMap.Canvas, LRect, StyleServices.ColorToRGB(clBtnShadow),
+        StyleServices.ColorToRGB(clBtnHighLight), 1);
+      ExcludeClipRect(Canvas.Handle, 1, 1, SysControl.Width - 1,
+        SysControl.Height - 1);
+      Canvas.Draw(0, 0, LBitMap);
+    finally
+      LBitMap.Free;
+    end;
+  end;
+end;
+
+procedure TSysLinkStyleHook.WMNCCalcSize(var Message: TWMNCCalcSize);
+begin
+
+end;
+
+procedure TSysLinkStyleHook.WndProc(var Message: TMessage);
+begin
+  //OutputDebugString(PChar('TSysLinkStyleHook '+WM_To_String(Message.Msg)+' Handle '+IntToHex(SysControl.Handle, 8)));
+
+  case Message.Msg of
+
+//   $067C :
+//      begin
+//        CallDefaultProc(Message);
+//        if SysControl.Visible then
+//          Invalidate;
+//      end;
+
+    WM_SETTEXT:
+      begin
+        CallDefaultProc(Message);
+        if SysControl.Visible then
+          Invalidate;
+      end;
+
+    WM_ENABLE:
+      if SysControl.Visible then
+        Invalidate;
+
+    WM_PAINT:
+      begin
+        if OverridePaint and StyleServicesEnabled then
+        begin
+          if (IsText and (Length(SysControl.Text) > 0)) then
+            inherited
+          else
+            CallDefaultProc(Message);
+        end
+        else
+          CallDefaultProc(Message);
+      end;
+
+  else
+    inherited;
+  end;
+end;
+
+{ TTravelBandStyleHook }
+
+constructor TTravelBandStyleHook.Create(AHandle: THandle);
+begin
+  inherited;
+  {$IF CompilerVersion > 23}
+  StyleElements := [ seBorder, seClient];
+  {$ELSE}
+  OverridePaint := True;
+  OverrideEraseBkgnd := True;
+  OverridePaintNC := True;
+  {$IFEND}
+  UpdateColors;
+end;
+
+destructor TTravelBandStyleHook.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TTravelBandStyleHook.Paint(Canvas: TCanvas);
+begin
+  inherited;
+//  Canvas.Brush.Color := Color;
+//  Canvas.FillRect(SysControl.ClientRect);
+
+end;
+
+procedure TTravelBandStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+  inherited;
+
+end;
+
+procedure TTravelBandStyleHook.PaintNC(Canvas: TCanvas);
+begin
+  inherited;
+
+end;
+
+procedure TTravelBandStyleHook.UpdateColors;
+begin
+  inherited;
+
+end;
+
+procedure TTravelBandStyleHook.WndProc(var Message: TMessage);
+begin
+  inherited;
+
+end;
+
 initialization
 
 if StyleServices.Available then
@@ -2578,10 +2915,22 @@ begin
     RegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
     RegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
     RegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RichEdit30A', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RichEdit30W', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RichEdit41A', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RichEdit41W', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RichEdit50A', TSysRichEditStyleHook);
+    RegisterSysStyleHook('RichEdit50W', TSysRichEditStyleHook);
     RegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
     RegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
     RegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
     RegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
+
+    RegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
+    RegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
+    RegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
+    RegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
+    //RegisterSysStyleHook('syslink', TSysLinkStyleHook);
   end;
 end;
 
@@ -2596,10 +2945,22 @@ begin
   UnRegisterSysStyleHook('msctls_progress32', TSysProgressBarStyleHook);
   UnRegisterSysStyleHook('RichEdit20A', TSysRichEditStyleHook);
   UnRegisterSysStyleHook('RichEdit20W', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit30A', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit30W', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit41A', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit41W', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit50A', TSysRichEditStyleHook);
+  UnRegisterSysStyleHook('RichEdit50W', TSysRichEditStyleHook);
   UnRegisterSysStyleHook('RebarWindow32', TSysReBarStyleHook);
   UnRegisterSysStyleHook('msctls_statusbar32', TSysStatusBarStyleHook);
   UnRegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
   UnRegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
+
+  UnRegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
+  UnRegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
+  UnRegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
+  UnRegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
+  //UnRegisterSysStyleHook('syslink', TSysLinkStyleHook);
 end;
 
 end.

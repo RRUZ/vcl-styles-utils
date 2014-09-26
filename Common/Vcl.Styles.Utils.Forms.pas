@@ -1259,12 +1259,19 @@ begin
 
     WM_DESTROY:
       begin
-        { In some situation ..we can not get the ParentHandle
-          after processing the default WM_DESTROY message .
-          => Save the parent before calling the default message .
+        { In some situations ..we can not get the ParentHandle
+          after processing the default WM_DESTROY message.
+          => Save the parent before calling the default message.
         }
+        SysControl.Destroyed:=True;
+        //OutputDebugString(PChar(Format('TSysDialogStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)])));
         LParentHandle := ParentHandle;
-        Message.Result := CallDefaultProc(Message);
+
+        if  (LParentHandle>0) and (TSysStyleManager.SysStyleHookList.ContainsKey(LParentHandle)) and  TSysStyleManager.SysStyleHookList.Items[ParentHandle].SysControl.Destroyed  then
+         Message.Result :=0
+        else
+         Message.Result := CallDefaultProc(Message);
+
         if LParentHandle > 0 then
         begin
           { When destroying the child window ..
@@ -2625,21 +2632,15 @@ initialization
 
 UseLatestCommonDialogs := False;
 
-if StyleServices.Available then
-begin
-  with TSysStyleManager do
+  if StyleServices.Available then
   begin
-    RegisterSysStyleHook('#32770', TSysDialogStyleHook);
-    RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
+    TSysStyleManager.RegisterSysStyleHook('#32770', TSysDialogStyleHook);
+    TSysStyleManager.RegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
   end;
-end;
 
 finalization
 
-with TSysStyleManager do
-begin
-  UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
-  UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
-end;
+  TSysStyleManager.UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
+  TSysStyleManager.UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
 
 end.
