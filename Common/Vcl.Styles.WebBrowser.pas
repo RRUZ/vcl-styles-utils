@@ -131,6 +131,7 @@ type
     {$ENDIF}
     function QueryStatus(CmdGroup: PGUID; cCmds: Cardinal; prgCmds: POleCmd; CmdText: POleCmdText): HResult; stdcall;
     function Exec(CmdGroup: PGUID; nCmdID, nCmdexecopt: DWORD; const vaIn: OleVariant; var vaOut: OleVariant): HResult; stdcall;
+    //procedure SetZOrder(TopMost: Boolean); override;
   protected
     procedure InvokeEvent(DispID: TDispID; var Params: TDispParams);override;
     procedure SetParent(AParent: TWinControl); override;
@@ -514,6 +515,12 @@ begin
   end;
 end;
 
+//procedure TVclStylesWebBrowser.SetZOrder(TopMost: Boolean);
+//begin
+//  inherited;
+//  ResizeScrollBars;
+//end;
+
 procedure TVclStylesWebBrowser.ResizeScrollBars;
 var
   StateVisible   : Boolean;
@@ -531,6 +538,7 @@ var
     if VScrollBarContainer.Visible then
     begin
       LRect := BoundsRect;
+      //OutputDebugString(PChar(Format('Original VScrollBarContainer Left %d Top %d Width %d Height %d',[LRect.Left, LRect.Top, LRect.Width, LRect.Height]) ));
       LRect.Left := LRect.Right - LSM_CXHTHUMB;
       if HScrollBarContainer.Visible then
         LRect.Bottom := LRect.Bottom - LSM_CYVTHUMB;
@@ -542,7 +550,7 @@ var
     if HScrollBarContainer.Visible then
     begin
       LRect := BoundsRect;
-      //OutputDebugString(PChar(Format('Orginal Left %d Top %d Width %d Height %d',[LRect.Left, LRect.Top, LRect.Width, LRect.Height]) ));
+      //OutputDebugString(PChar(Format('Original HScrollBarContainer Left %d Top %d Width %d Height %d',[LRect.Left, LRect.Top, LRect.Width, LRect.Height]) ));
       LRect.Top := LRect.Bottom - LSM_CYVTHUMB;
       if VScrollBarContainer.Visible then
         LRect.Right := LRect.Right - LSM_CXHTHUMB;
@@ -623,6 +631,8 @@ begin
 
      if not StateVisible and HScrollBarContainer.Visible then
        HScrollBarContainer.BringToFront;
+
+     VScrollBarContainer.BringToFront;
    end;
 
    UpdateContainers;
