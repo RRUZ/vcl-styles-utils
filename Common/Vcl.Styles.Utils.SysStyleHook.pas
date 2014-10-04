@@ -158,7 +158,7 @@ type
     FColor: TColor;
     FFont: TFont;
     FText: string;
-    FHookedDirectly: Boolean;
+    FHookedDirectly, FMustRemove: Boolean;
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
     procedure WMNCPaint(var Message: TMessage); message WM_NCPAINT;
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
@@ -194,7 +194,7 @@ type
     procedure UpdateColors; virtual;
     function PaintControls(AControl: HWND; DC: HDC): Boolean;
     property HookedDirectly: Boolean read FHookedDirectly write FHookedDirectly;
-
+    property MustRemove : Boolean read FMustRemove;
   public
     constructor Create(AHandle: THandle); virtual;
     Destructor Destroy; override;
@@ -531,6 +531,7 @@ begin
 {$IF CompilerVersion > 23}
   StyleElements := [];
 {$IFEND}
+  FMustRemove := False;
   FParentColor := False;
   FDoubleBuffered := False;
   FPaintOnEraseBkgnd := False;
@@ -556,6 +557,7 @@ end;
 destructor TSysStyleHook.Destroy;
 begin
   // OutputDebugString(PChar('TSysStyleHook.Destroy Handle '+IntToHex(Handle, 8)));
+
 
   if FOrgWndProc <> 0 then
     FSysControl.WndProc := FOrgWndProc;
@@ -1152,13 +1154,12 @@ begin
 
 end;
 
-type
-  TSysStyleManagerClass = type TSysStyleManager;
 
 procedure TSysStyleHook.WndProc(var Message: TMessage);
 var
   TempResult: LRESULT;
   ChildHandle: HWND;
+  ItemRemoved : Boolean;
 begin
   case Message.Msg of
 
@@ -1172,14 +1173,14 @@ begin
     CM_INITCHILDS:
       begin
         Message.Result := 0;
-        with TSysStyleManagerClass(TSysStyleManager) do
+        with TSysStyleManager do
         begin
-          for ChildHandle in FChildRegSysStylesList.Keys do
-            if (not IsControlHooked(ChildHandle)) and (FChildRegSysStylesList[ChildHandle].Parent = Handle) then
+          for ChildHandle in ChildRegSysStylesList.Keys do
+            if (not IsControlHooked(ChildHandle)) and (ChildRegSysStylesList[ChildHandle].Parent = Handle) then
             begin
-              if not FSysStyleHookList.ContainsKey(ChildHandle) then
+              if not SysStyleHookList.ContainsKey(ChildHandle) then
               begin
-                FSysStyleHookList.Add(ChildHandle, FChildRegSysStylesList[ChildHandle].StyleHookClass.Create(ChildHandle));
+                SysStyleHookList.Add(ChildHandle, ChildRegSysStylesList[ChildHandle].StyleHookClass.Create(ChildHandle));
                 { Child control need to be repainted . }
                 RedrawWindow(ChildHandle, nil, 0, RDW_ERASE or RDW_FRAME or RDW_INTERNALPAINT or RDW_INVALIDATE);
                 { Send WM_NCCALCSIZE message to the child control . }
@@ -1260,9 +1261,6 @@ begin
       begin
         Message.Result := CallDefaultProc(Message);
         Dispatch(Message);
-        //OutputDebugString(PChar('WM_DESTROY Handle '+IntToHex(Handle, 8)));
-        //if TSysStyleManager.SysStyleHookList.ContainsKey(Handle) then
-        //  TSysStyleManager.SysStyleHookList.Remove(Handle);
         Exit;
       end;
 
@@ -1271,14 +1269,16 @@ begin
     WM_NCDESTROY:
       begin
         Message.Result := CallDefaultProc(Message);
-
+        ItemRemoved:=False;
         if TSysStyleManager.SysStyleHookList.ContainsKey(FHandle) then
         begin
-          TSysStyleManager.SysStyleHookList.Remove(Handle);
-          //OutputDebugString(PChar('SysStyleHookList WM_NCDESTROY Removed '+IntToHex(Handle, 8)));
+//          OutputDebugString(PChar('SysStyleHookList WM_NCDESTROY Removed '+IntToHex(Handle, 8)));
+//          TSysStyleManager.SysStyleHookList.Remove(FHandle);
+          FMustRemove:=True;
+          ItemRemoved:=True;
         end;
 
-        if TSysStyleManager.ChildRegSysStylesList.ContainsKey(FHandle) then
+        if not ItemRemoved and TSysStyleManager.ChildRegSysStylesList.ContainsKey(FHandle) then
         begin
           TSysStyleManager.ChildRegSysStylesList.Remove(Handle);
           //OutputDebugString(PChar('ChildRegSysStylesList WM_NCDESTROY Removed '+IntToHex(Handle, 8)));

@@ -2926,10 +2926,10 @@ begin
     RegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
     RegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
 
-    RegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
-    RegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
-    RegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
-    RegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
+    //RegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
+    //RegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
+    //RegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
+    //RegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
     //RegisterSysStyleHook('syslink', TSysLinkStyleHook);
   end;
 end;
@@ -2956,10 +2956,10 @@ begin
   UnRegisterSysStyleHook('msctls_trackbar32', TSysTrackBarStyleHook);
   UnRegisterSysStyleHook('msctls_updown32', TSysUpDownStyleHook);
 
-  UnRegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
-  UnRegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
-  UnRegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
-  UnRegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
+  //UnRegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
+  //UnRegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
+  //UnRegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
+  //UnRegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
   //UnRegisterSysStyleHook('syslink', TSysLinkStyleHook);
 end;
 

@@ -792,7 +792,7 @@ type
   end;
 
 var
-  SubMenuItemInfoArray: array of TSubMenuItemInfo;
+  SubMenuItemInfoArray : array of TSubMenuItemInfo;
 
 procedure TSysPopupStyleHook.MNSELECTITEM(var Message: TMessage);
 var
@@ -812,14 +812,14 @@ begin
     wParam=Current Item Index .
     lparam= may be it's unused (not sure).
   }
-
+//
   Handled := False;
+  DC:=0;
   Canvas := TCanvas.Create;
-  ParentPopup := 0;
-  ParentItem := -1;
-
-  DC := GetDC(Handle);
   try
+    ParentPopup := 0;
+    ParentItem := -1;
+    DC := GetDC(Handle);
     Canvas.Handle := DC;
     Index := integer(Message.WParam);
     if Assigned(Font) then
@@ -895,9 +895,10 @@ begin
         L:=1;
       end;
 
+      LMenu := GetMenuFromHandle(Handle);
       for i := 0 to L-1 do
         { Avoid duplication }
-        if SubMenuItemInfoArray[i].Menu <> GetMenuFromHandle(Handle) then
+        if SubMenuItemInfoArray[i].Menu <> LMenu then
         begin
           inc(L);
           SetLength(SubMenuItemInfoArray, L);
@@ -928,8 +929,10 @@ begin
     end;
 
   finally
+    Canvas.Handle := 0;
     Canvas.Free;
-    ReleaseDC(Handle, DC);
+    if DC<>0 then
+     ReleaseDC(Handle, DC);
   end;
   Handled := True;
 end;
@@ -954,6 +957,7 @@ begin
     Canvas.Handle := DC;
     PaintBackground(Canvas);
   finally
+    Canvas.Handle:=0;
     Canvas.Free;
     if DC <> HDC(Message.WParam) then
       ReleaseDC(Handle, DC);
@@ -1059,6 +1063,7 @@ begin
         if FPreviousHotItemIndex <> -1 then
           FKeyIndex := FPreviousHotItemIndex;
         case Message.WParam of
+
           VK_DOWN:
             if FPaintFirstItemFromMenu then
             begin
@@ -1078,6 +1083,7 @@ begin
               SendMessage(Handle, MN_SELECTITEM, FKeyIndex, 0);
               Message.Result := 0;
             end;
+
           VK_UP:
             begin
               if FKeyIndex <= 0 then
@@ -1097,6 +1103,7 @@ begin
               SendMessage(Handle, MN_SELECTITEM, FKeyIndex, 0);
               Message.Result := 0;
             end;
+
         else
           { Calling the Default Message will cause
             the WM_PAINT Message to be Sent to the PopupMenu Window }
@@ -1153,6 +1160,7 @@ begin
           begin
             // AddToLog(IntToStr(TopWin));
             InvalidateRect(TopWin, nil, False);
+
             UpdateWindow(TopWin);
           end;
         end;
@@ -1161,6 +1169,10 @@ begin
         SubMenuItemInfoArray := nil;
         Handled := False;
       end;
+//
+//    WM_NCDESTROY :
+//    begin
+//    end;
 
   end;
   inherited;
@@ -1250,6 +1262,7 @@ begin
         if GetMenuItemInfo(FMenu, FIndex, True, info) then
           Result := String(Buffer);
       finally
+        //OutputDebugString(PChar('StrSize '+IntToStr(StrSize)));
         FreeMem(Buffer, StrSize);
       end;
       Exit;
