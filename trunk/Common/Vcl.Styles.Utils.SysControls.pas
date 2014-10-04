@@ -610,6 +610,7 @@ begin
   FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
   FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;
   FChildRegSysStylesList := TObjectDictionary<HWND, TChildControlInfo>.Create;
+  //FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([]);
   InstallHook;
 end;
 
@@ -632,6 +633,9 @@ begin
 
 end;
 
+type
+ TSysStyleClass = class(TSysStyleHook);
+
 class function TSysStyleManager.HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;
 var
   CBTSturct: TCBTCreateWnd;
@@ -639,6 +643,15 @@ var
   Parent: HWND;
   Style, ParentStyle, ExStyle, ParentExStyle: NativeInt;
   Info: TControlInfo;
+
+  procedure RemoveUnusedHooks;
+  var
+    LHandle : THandle;
+  begin
+   for LHandle in TSysStyleManager.SysStyleHookList.Keys do
+    if TSysStyleClass(TSysStyleManager.SysStyleHookList.Items[LHandle]).MustRemove then
+      TSysStyleManager.SysStyleHookList.Remove(LHandle);
+  end;
 
   procedure AddChildControl(Handle: HWND);
   var
@@ -657,11 +670,15 @@ var
   end;
 
   procedure AddControl(Handle: HWND);
+  var
+   LStyleHook : TSysStyleHook;
   begin
     { Hook the control directly ! }
+    RemoveUnusedHooks;
     if FSysStyleHookList.ContainsKey(Handle) then
       FSysStyleHookList.Remove(Handle);
-    FSysStyleHookList.Add(Handle, FRegSysStylesList[sClassName].Create(Handle));
+    LStyleHook:=FRegSysStylesList[sClassName].Create(Handle);
+    FSysStyleHookList.Add(Handle, LStyleHook);
     SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
     if Assigned(FSysHookNotificationProc) then
       FSysHookNotificationProc(cAdded, @Info);
