@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary allow to select a VCL Style from the system Menu.
 
 The TVclStylesSystemMenu component allow to select a Vcl Style from the system Menu.
 
