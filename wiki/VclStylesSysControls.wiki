@@ -1,8 +1,8 @@
 #summary Vcl.Styles.SysControls.
 
-The <a href="https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.SysControls.pas">Vcl.Styles.!SysControls</a>  unit add support for the VCL Styles to the Standard Windows dialogs.
+The [https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.Forms.pas Vcl.Styles.Utils.Forms] unit add support for the VCL Styles to the Standard Windows dialogs.
 
-
+===Screenshots===
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Jet.gif
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Diamond_Open.png
@@ -14,3 +14,9 @@ https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20s
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Sterling_open.png
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Tabla_Dark_Open.png
+
+===Related articles===
+
+[http://theroadtodelphi.wordpress.com/2013/11/11/the-vcl-styles-utils-project-now-supports-dialogs-and-popup-menus/ The VCL Styles Utils Project now supports dialogs and popup menus]
+
+[http://theroadtodelphi.wordpress.com/2014/04/21/vcl-styles-utils-embarcadero-agreement-and-delphi-xe6/ VCL Styles Utils, Embarcadero Agreement and Delphi XE6]
