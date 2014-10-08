@@ -1,7 +1,6 @@
 #summary Vcl.Styles.SysControls.
 
-The <a href="https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.SysControls.pas">Vcl.Styles.!SysControls</a>  unit add support for the VCL Styles to the Standard Windows dialogs and Menus.
-
+The <a href="https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.SysControls.pas">Vcl.Styles.!SysControls</a>  unit add support for the VCL Styles to the Standard Windows dialogs.
 
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Jet.gif
