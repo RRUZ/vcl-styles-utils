@@ -1,7 +1,7 @@
 #summary Vcl.Styles.Ext.
 
 
-  The [https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Ext.pas Vcl.Styles.Ext] unit extends the [http://docwiki.embarcadero.com/VCL/en/Themes.TStyleManager TStyleManager] Delphi class adding new properties and methods to list, remove and reload VCL Styles.
+The [https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Ext.pas Vcl.Styles.Ext] unit extends the [http://docwiki.embarcadero.com/VCL/en/Themes.TStyleManager TStyleManager] Delphi class adding new properties and methods to list, remove and reload VCL Styles.
 
 
 Example to remove a vcl style
