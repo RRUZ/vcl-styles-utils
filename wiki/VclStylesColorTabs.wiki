@@ -1,4 +1,4 @@
-#summary Vcl.Styles.!ColorTabs.
+#summary Vcl.Styles.ColorTabs.
 
 The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.ColorTabs.pas">Vcl.Styles.!ColorTabs</a> unit includes a new style hook for the TTabSheet component.
 
