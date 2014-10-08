@@ -2,7 +2,7 @@
 
 The *TVclStylesPreview* Component included in the <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Ext.pas">Vcl.Styles.Ext</a> unit allow you preview a VCL Style from a file or resource. 
 
-sample of use
+Check the next sample code
 
 {{{
 
@@ -30,3 +30,5 @@ sample of use
 }}}
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/VCLStyles_Previewer.png
+
+Check out a sample application [https://code.google.com/p/vcl-styles-utils/source/browse/#svn%2Ftrunk%2FVcl%20Styles%20Preview%20(Demo%20App) here].
