@@ -1,11 +1,34 @@
 #summary Vcl.Styles.Hook.
 
-The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit, patch some !WinApi functions to fix the background and system colors of some VCL components.
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit,  patch some !WinApi and !UxTheme methods in order to fix the system colors used by some VCL components and also replace some elements of the Windows Native Theme patching the DrawThemeBackground and DrawThemeBackgroundEx methods.
 
 = Screenshots =
 
+As you can see some controls uses the native windows theme to draw the highlight colors.
+
 https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/full.png
+
+
+Including the Vcl.Styles.Hook unit in your project replace the system colors by the proper VCL Style colors.
+
 https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Full_Fix.png
+
+
+When you uses a TListView setting the CheckBoxes property to True and with the VCL Styles enabled the control will look like so
+
+https://theroadtodelphi.files.wordpress.com/2014/08/listview_nohook.png
+
+ Now including the VCL.Styles.Hooks unit to your project the checkbox control is properly drawn using the current active VCL Style.
+
+https://theroadtodelphi.files.wordpress.com/2014/08/listview_hook.png
+
+ The same improvement goes for the TTreeview controls. by default the opened and closed glyphs are draw using the native look and feel
+
+https://theroadtodelphi.files.wordpress.com/2014/08/treeview_nohook.png
+
+And now using the VCL.Styles.Hooks unit
+
+https://theroadtodelphi.files.wordpress.com/2014/08/treeview_hook.png
 
 
 For more info check the articles
