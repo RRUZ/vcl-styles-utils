@@ -1,6 +1,29 @@
 #summary Vcl.Styles.Utils.
 
-The _Vcl.Styles.Utils_ unit contain classes to modify existing styles using color operations like Blend, HSL and RGB.
+The [https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.pas Vcl.Styles.Utils] unit contain a set classes to modify the VCL Styles in run-time manipulating the visual elements and fonts. 
+
+ Currently all these operations are supported.
+
+===HSL===
+
+ Modify the Hue, Saturation and Lightness for the visual elements and fonts of the VCL Styles.
+ 
+ http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerHSL.png
+
+===RGB===
+
+ Change the values of the RGB components for the visual elements and fonts of the VCL Styles.
+
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerRGB.png
+
+
+
+===Blend===
+ 
+  Use any color and available blend effect (Burn, Additive, Dodge, Overlay, Difference, Lighten, Darken, Screen) to customize the visual elements and fonts colors of the VCL Styles.
+
+
+http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerBlend.png
 
 Check this form with the _Carbon_ style applied.
 
@@ -42,12 +65,7 @@ And this is the result after of apply the above code
 
 http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/CarbonSimple_After.png
 
-=Additional Screenshots=
 
-
-http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerBlend.png
-http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerHSL.png
-http://dl.dropbox.com/u/12733424/Blog/Vcl%20Utils/EqualizerRGB.png
 
 =Videos=
 
