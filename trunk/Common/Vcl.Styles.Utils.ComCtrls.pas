@@ -2702,12 +2702,12 @@ end;
 
 procedure TCtrlNotifySinkStyleHook.PaintNC(Canvas: TCanvas);
 begin
-  inherited;
+  //inherited;
 end;
 
 procedure TCtrlNotifySinkStyleHook.UpdateColors;
 begin
-  inherited;
+  //inherited;
 end;
 
 procedure TCtrlNotifySinkStyleHook.WndProc(var Message: TMessage);
@@ -2928,9 +2928,9 @@ begin
 
     //RegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
     //RegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
-    //RegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
-    //RegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
-    //RegisterSysStyleHook('syslink', TSysLinkStyleHook);
+//    RegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
+//    RegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
+//    RegisterSysStyleHook('syslink', TSysLinkStyleHook);
   end;
 end;
 
@@ -2958,9 +2958,9 @@ begin
 
   //UnRegisterSysStyleHook('SHELLDLL_DefView', TSysListViewStyleHook);
   //UnRegisterSysStyleHook('TravelBand', TTravelBandStyleHook);
-  //UnRegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
-  //UnRegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
-  //UnRegisterSysStyleHook('syslink', TSysLinkStyleHook);
+//  UnRegisterSysStyleHook('DirectUIHWND', TDirectUIHWNDStyleHook);
+//  UnRegisterSysStyleHook('ctrlnotifysink', TCtrlNotifySinkStyleHook);
+//  UnRegisterSysStyleHook('syslink', TSysLinkStyleHook);
 end;
 
 end.
