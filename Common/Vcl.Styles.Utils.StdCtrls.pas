@@ -588,11 +588,11 @@ begin
   LText := SysControl.Text;
   LRect := SysControl.ClientRect;
 
-    Detail := tbPushButtonNormal ;
   if SysControl.Enabled then
     Detail := tbPushButtonNormal
   else
     Detail := tbPushButtonDisabled;
+
   if MouseDown then
     Detail := tbPushButtonPressed
   else

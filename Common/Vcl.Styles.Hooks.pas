@@ -25,55 +25,97 @@ interface
 
 implementation
 
+{$DEFINE HOOK_UXTHEME}
 uses
   DDetours,
   System.SysUtils,
   System.Types,
   System.Classes,
-  Winapi.UxTheme,
   WinApi.Windows,
-  Vcl.Styles,
   Vcl.Graphics,
+  Vcl.Styles.Utils.SysControls,
+{$IFDEF HOOK_UXTHEME}
+  System.UITypes,
+  System.Generics.Collections,
+  Winapi.UxTheme,
+  Winapi.Messages,
   Vcl.GraphUtil,
+{$ENDIF}
+  Vcl.Styles,
   Vcl.Themes;
 
+{$IFDEF HOOK_UXTHEME}
+type
+ TDrawThemeBackground  = function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; Foo: Pointer): HRESULT; stdcall;
+const
+  VSCLASS_PROGRESS_INDERTERMINATE        = 'Indeterminate::Progress';
+{$ENDIF}
+
 var
+{$IFDEF HOOK_UXTHEME}
   ThemeLibrary: THandle;
   TrampolineOpenThemeData         : function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall =  nil;
-  TrampolineCloseThemeDaa         : function(hTheme: HTHEME): HRESULT; stdcall =  nil;
-  TrampolineDrawThemeBackground   : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall =  nil;
-  TrampolineDrawThemeBackgroundEx : function(hTheme: HTHEME; hdc: HDC; iPartId: Integer; iStateId: Integer; const pRect: TRect; pOptions: PDTBGOPTS): HResult; stdcall =  nil;
+  TrampolineCloseThemeData        : function(hTheme: HTHEME): HRESULT; stdcall =  nil;
+  TrampolineDrawThemeBackground   : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall =  nil;
+  TrampolineDrawThemeBackgroundEx : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pOptions: Pointer): HResult; stdcall =  nil;
   TrampolineGetThemeColor         : function(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT; stdcall = nil;
+  TrampolineGetThemeSysColor      : function(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall =  nil;
+  TrampolineDrawThemeText         : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
+  TrampolineDrawThemeTextEx       : function(hTheme: HTHEME; hdc: HDC; iPartId: Integer; iStateId: Integer; pszText: LPCWSTR; cchText: Integer; dwTextFlags: DWORD; pRect: PRect; var pOptions: TDTTOpts): HResult; stdcall = nil;
+  THThemesClasses  : TDictionary<HTHEME, string>;
+  THThemesHWND     : TDictionary<HTHEME, HWND>;
+{$ENDIF}
+
   TrampolineGetSysColor           : function (nIndex: Integer): DWORD; stdcall =  nil;
-  TrampolineGetThemeSysColor      :  function(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall =  nil;
+//  TrampolineGetSysColorBrush      : function (nIndex: Integer): HBRUSH; stdcall;
+//  TrampolineCreateSolidBrush      : function (p1: COLORREF): HBRUSH; stdcall;
+//
+//  Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
+//  Trampoline_DrawTextEx                    : function (DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall = nil;
+//  Trampoline_ExtTextOutW                   : function (DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall = nil;
 
-  type
-    THThemesClasses = class
-    public
-     class var Button   : TList;
-     class var TreeView : TList;
-    end;
-
+{$IFDEF HOOK_UXTHEME}
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 begin
   Result:=TrampolineOpenThemeData(hwnd, pszClassList);
-  if SameText(pszClassList, VSCLASS_BUTTON) then
-  begin
-    if THThemesClasses.Button.IndexOf(Pointer(Result))=-1 then
-      THThemesClasses.Button.Add(Pointer(Result));
-  end
-  else
-  if SameText(pszClassList, VSCLASS_TREEVIEW) then
-  begin
-    if THThemesClasses.TreeView.IndexOf(Pointer(Result))=-1 then
-      THThemesClasses.TreeView.Add(Pointer(Result));
-  end;
+  if THThemesClasses.ContainsKey(Result) then
+    THThemesClasses.Remove(Result);
+  THThemesClasses.Add(Result, pszClassList);
 
-  //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList+' hTheme '+IntToStr(Result)));
+  if THThemesHWND.ContainsKey(Result) then
+    THThemesHWND.Remove(Result);
+  THThemesHWND.Add(Result, hwnd);
+
+  //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList+' hTheme '+IntToStr(Result)+' Handle '+IntToHex(hwnd, 8)));
 end;
 
 
-function Detour_UxTheme_DrawThemeBackgroundEx(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pOptions: PDTBGOPTS): HRESULT; stdcall;
+procedure DrawParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
+var
+  Bmp: TBitmap;
+  P: TPoint;
+  ParentHandle : THandle;
+begin
+  if Handle=0 then exit;
+  P := Point(ARect.Left, ARect.Top);
+  Bmp := TBitmap.Create;
+  try
+    ParentHandle:=GetParent(Handle);
+    if ParentHandle<>0 then
+    begin
+      Bmp.SetSize(ARect.Width, ARect.Height);
+      SendMessage(ParentHandle , WM_ERASEBKGND, Bmp.Canvas.Handle, 0);
+      ClientToScreen(Handle, P);
+      ScreenToClient(ParentHandle, P);
+      //BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, Bmp.Canvas.Handle, P.X, P.Y, SRCCOPY)
+    end;
+  finally
+    Bmp.Free;
+  end;
+end;
+
+
+function Detour_UxTheme_DrawThemeMain(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground): HRESULT; stdcall;
 var
   LBuffer   : TBitmap;
   SaveIndex : integer;
@@ -85,12 +127,243 @@ var
 begin
   //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
 
-  if StyleServices.IsSystemStyle then
-    Exit(TrampolineDrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions));
+//  if THThemesClasses.ContainsKey(hTheme) then
+//      OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
 
-   if THThemesClasses.Button.IndexOf(Pointer(hTheme))>=0 then
+  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+
+   if  THThemesClasses.ContainsKey(hTheme) and (SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS) or SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS_INDERTERMINATE)) then
    begin
         case iPartId of
+         PP_BAR         :   LDetails:=StyleServices.GetElementDetails(tpBar);
+         PP_BARVERT     :   LDetails:=StyleServices.GetElementDetails(tpBarVert);
+         PP_CHUNK       :   LDetails:=StyleServices.GetElementDetails(tpChunk);
+         PP_CHUNKVERT   :   LDetails:=StyleServices.GetElementDetails(tpChunkVert);
+
+         PP_FILL        :   if SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS) then
+                             LDetails:=StyleServices.GetElementDetails(tpChunk)//GetElementDetails(tpChunk);//GetElementDetails(tpFill);   not defined
+                            else
+                             LDetails:=StyleServices.GetElementDetails(tpBar);
+         PP_FILLVERT    :    LDetails:=StyleServices.GetElementDetails(tpChunkVert);//GetElementDetails(tpFillVert); not defined
+
+//   Use the Native PP_PULSEOVERLAY to get better results.
+//      PP_PULSEOVERLAY : if SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS) then
+//                         LDetails:=StyleServices.GetElementDetails(tpChunk)//GetElementDetails(tpPulseOverlay);
+//                        else
+//                         LDetails:=StyleServices.GetElementDetails(tpBar);
+
+         PP_MOVEOVERLAY      : if SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS) then
+                                LDetails:=StyleServices.GetElementDetails(tpMoveOverlay)
+                               else
+                                LDetails:=StyleServices.GetElementDetails(tpChunk);
+
+//       PP_PULSEOVERLAYVERT :   LDetails:=StyleServices.GetElementDetails(tpPulseOverlayVert);
+//       PP_MOVEOVERLAYVERT  :   LDetails:=StyleServices.GetElementDetails(tpMoveOverlayVert);
+
+         PP_TRANSPARENTBAR       :   LDetails:=StyleServices.GetElementDetails(tpBar);//GetElementDetails(tpTransparentBarNormal); not defined
+         PP_TRANSPARENTBARVERT   :   LDetails:=StyleServices.GetElementDetails(tpBarVert);//GetElementDetails(tpTransparentBarVertNormal); not defined
+        else
+        begin
+          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+          Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+        end;
+        end;
+
+        SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+        try
+           if THThemesHWND.ContainsKey(hTheme)  then
+             DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
+           StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+        finally
+          RestoreDC(hdc, SaveIndex);
+        end;
+
+        Result:=S_OK;
+
+   end
+   else
+   if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_TASKDIALOG) then
+   begin
+
+        case iPartId of
+
+            TDLG_PRIMARYPANEL  :
+            begin
+              //LDetails:=StyleServices.GetElementDetails(ttdPrimaryPanel);   //ttdPrimaryPanel  this element is not included in the VCL Styles yet
+              LColor:=StyleServices.GetStyleColor(scEdit);
+              LCanvas:=TCanvas.Create;
+              SaveIndex := SaveDC(hdc);
+              try
+                LCanvas.Handle:=hdc;
+                LCanvas.Brush.Color:=LColor;
+                LCanvas.FillRect(pRect);
+              finally
+                LCanvas.Handle:=0;
+                LCanvas.Free;
+                RestoreDC(hdc, SaveIndex);
+              end;
+              Result:=S_OK;
+            end;
+
+            TDLG_FOOTNOTEPANE,
+            TDLG_SECONDARYPANEL  :
+            begin
+              LDetails:=StyleServices.GetElementDetails(tpPanelBackground);   //ttdSecondaryPanel  this element is not included in the VCL Styles yet
+              StyleServices.GetElementColor(LDetails, ecFillColor, LColor);
+              LCanvas:=TCanvas.Create;
+              SaveIndex := SaveDC(hdc);
+              try
+                LCanvas.Handle:=hdc;
+                LCanvas.Brush.Color:=LColor;
+                LCanvas.FillRect(pRect);
+              finally
+                LCanvas.Handle:=0;
+                LCanvas.Free;
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+
+              Result:=S_OK;
+            end;
+
+            TDLG_EXPANDOBUTTON :
+            begin
+              case iStateId of
+                  TDLGEBS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronClosedNormal);
+                  TDLGEBS_HOVER      : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronClosedHot);
+                  TDLGEBS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronClosedPressed);
+                  TDLGEBS_EXPANDEDNORMAL : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronOpenedNormal);
+                  TDLGEBS_EXPANDEDHOVER     : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronOpenedHot);
+                  TDLGEBS_EXPANDEDPRESSED        : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronOpenedPressed);
+              end;
+
+              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+              try
+                 if THThemesHWND.ContainsKey(hTheme)  then
+                   DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
+                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+              finally
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+              Result:=S_OK;
+            end;
+
+            TDLG_FOOTNOTESEPARATOR :
+            begin
+              LStartColor := StyleServices.GetSystemColor(clBtnShadow);
+              LEndColor   := StyleServices.GetSystemColor(clBtnHighlight);
+
+              LCanvas:=TCanvas.Create;
+              SaveIndex := SaveDC(hdc);
+              try
+                LCanvas.Handle:=hdc;
+                LCanvas.Pen.Color:=LStartColor;
+                LCanvas.MoveTo(pRect.Left, pRect.Top);
+                LCanvas.LineTo(pRect.Right, pRect.Top);
+                LCanvas.Pen.Color:=LEndColor;
+                LCanvas.MoveTo(pRect.Left, pRect.Top+1);
+                LCanvas.LineTo(pRect.Right, pRect.Top+1);
+              finally
+                LCanvas.Handle:=0;
+                LCanvas.Free;
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+              Result:=S_OK;
+            end
+        else
+          begin
+           Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+           //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+          end;
+        end;
+
+   end
+  else
+   if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_BUTTON) then
+   begin
+        case iPartId of
+
+            BP_PUSHBUTTON  :
+            begin
+              case iStateId of
+                  PBS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbPushButtonNormal);
+                  PBS_HOT      : LDetails:=StyleServices.GetElementDetails(tbPushButtonHot);
+                  PBS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbPushButtonPressed);
+                  PBS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbPushButtonDisabled);
+                  PBS_DEFAULTED     : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaulted);
+                  PBS_DEFAULTED_ANIMATING        : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
+              end;
+
+              SaveIndex := SaveDC(hdc);
+              try
+                 if THThemesHWND.ContainsKey(hTheme)  then
+                   DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
+                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+              finally
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+              Result:=S_OK;
+            end;
+
+            BP_COMMANDLINK  :
+            begin
+
+              case iStateId of
+                  CMDLS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbPushButtonNormal);
+                  CMDLS_HOT      : LDetails:=StyleServices.GetElementDetails(tbPushButtonHot);
+                  CMDLS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbPushButtonPressed);
+                  CMDLS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbPushButtonDisabled);
+                  CMDLS_DEFAULTED     : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaulted);
+                  CMDLS_DEFAULTED_ANIMATING        : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
+              end;
+
+//              case iStateId of
+//                  CMDLS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbCommandLinkNormal);
+//                  CMDLS_HOT      : LDetails:=StyleServices.GetElementDetails(tbCommandLinkHot);
+//                  CMDLS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbCommandLinkPressed);
+//                  CMDLS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbCommandLinkDisabled);
+//                  CMDLS_DEFAULTED     : LDetails:=StyleServices.GetElementDetails(tbCommandLinkDefaulted);
+//                  CMDLS_DEFAULTED_ANIMATING        : LDetails:=StyleServices.GetElementDetails(tbCommandLinkDefaultedAnimating);
+//              end;
+
+              SaveIndex := SaveDC(hdc);
+              try
+                 if THThemesHWND.ContainsKey(hTheme)  then
+                   DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
+                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+              finally
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+              Result:=S_OK;
+            end;
+
+            BP_COMMANDLINKGLYPH  :
+            begin
+              case iStateId of
+                  CMDLGS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbCommandLinkGlyphNormal);
+                  CMDLGS_HOT      : LDetails:=StyleServices.GetElementDetails(tbCommandLinkGlyphHot);
+                  CMDLGS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbCommandLinkGlyphPressed);
+                  CMDLGS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbCommandLinkGlyphDisabled);
+                  CMDLGS_DEFAULTED: LDetails:=StyleServices.GetElementDetails(tbCommandLinkGlyphDefaulted);
+              end;
+
+              SaveIndex := SaveDC(hdc);
+              try
+                 if THThemesHWND.ContainsKey(hTheme)  then
+                   DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
+                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+              finally
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+              Result:=S_OK;
+            end;
+
             BP_RADIOBUTTON  :
             begin
               case iStateId of
@@ -104,7 +377,7 @@ begin
                   RBS_CHECKEDDISABLED   : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedDisabled);
               end;
 
-              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+              SaveIndex := SaveDC(hdc);
               try
                  StyleServices.DrawElement(hdc, LDetails, pRect, nil);
               finally
@@ -140,7 +413,7 @@ begin
                   CBS_EXCLUDEDDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedDisabled);
               end;
 
-              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+              SaveIndex := SaveDC(hdc);
               try
                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
               finally
@@ -149,11 +422,14 @@ begin
               Result:=S_OK;
             end
         else
-          Result:= TrampolineDrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions);
+         begin
+          Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+         end;
         end;
    end
   else
-  if THThemesClasses.TreeView.IndexOf(Pointer(hTheme))>=0 then
+  if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_TREEVIEW) then
   begin
     if ((iPartId = TVP_GLYPH) and ((iStateId=GLPS_OPENED) or (iStateId=GLPS_CLOSED))) or
        ((iPartId = TVP_HOTGLYPH) and ((iStateId=HGLPS_OPENED) or (iStateId=HGLPS_CLOSED))) then
@@ -187,8 +463,7 @@ begin
          LStartColor := LColor;
        if StyleServices.GetElementColor(LDetails, ecGradientColor2, LColor) and (LColor <> clNone) then
          LEndColor := LColor;
-//        if StyleServices.GetElementColor(LDetails, ecTextColor, LColor) and (LColor <> clNone) then
-//          Canvas.Font.Color := LColor;
+
       LCanvas:=TCanvas.Create;
       SaveIndex := SaveDC(hdc);
       try
@@ -199,221 +474,439 @@ begin
         LCanvas.Free;
         RestoreDC(hdc, SaveIndex);
       end;
-
-       Exit(S_OK);
-    end
-    else
-    Result:= TrampolineDrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions);
-  end
-  else
-    Result:= TrampolineDrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions);
-end;
-
-
-function Detour_UxTheme_DrawThemeBackground(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pClipRect: PRECT): HRESULT; stdcall;
-var
-  LBuffer   : TBitmap;
-  SaveIndex : integer;
-  LDetails  : TThemedElementDetails;
-  LRect     : TRect;
-  LSize     : TSize;
-  LColor, LStartColor, LEndColor  : TColor;
-  LCanvas   : TCanvas;
-begin
-  //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackground hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
-
-  if StyleServices.IsSystemStyle then
-    Exit(TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect));
-
-   if THThemesClasses.Button.IndexOf(Pointer(hTheme))>=0 then
-   begin
-        case iPartId of
-            BP_RADIOBUTTON  :
-            begin
-              case iStateId of
-                  RBS_UNCHECKEDNORMAL   : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedNormal);
-                  RBS_UNCHECKEDHOT      : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedHot);
-                  RBS_UNCHECKEDPRESSED  : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedPressed);
-                  RBS_UNCHECKEDDISABLED : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedDisabled);
-                  RBS_CHECKEDNORMAL     : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedNormal);
-                  RBS_CHECKEDHOT        : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedHot);
-                  RBS_CHECKEDPRESSED    : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedPressed);
-                  RBS_CHECKEDDISABLED   : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedDisabled);
-              end;
-
-              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
-              try
-                 StyleServices.DrawElement(hdc, LDetails, pRect, pClipRect^);
-              finally
-                RestoreDC(hdc, SaveIndex);
-              end;
-
-              Result:=S_OK;
-            end;
-
-            BP_CHECKBOX  :
-            begin
-              case iStateId of
-                  CBS_UNCHECKEDNORMAL     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedNormal);
-                  CBS_UNCHECKEDHOT        : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedHot);
-                  CBS_UNCHECKEDPRESSED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedPressed);
-                  CBS_UNCHECKEDDISABLED   : LDetails:=StyleServices.GetElementDetails(tbCheckBoxUncheckedDisabled);
-                  CBS_CHECKEDNORMAL       : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedNormal);
-                  CBS_CHECKEDHOT          : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedHot);
-                  CBS_CHECKEDPRESSED      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedPressed);
-                  CBS_CHECKEDDISABLED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxCheckedDisabled);
-                  CBS_MIXEDNORMAL         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedNormal);
-                  CBS_MIXEDHOT            : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedHot);
-                  CBS_MIXEDPRESSED        : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedPressed);
-                  CBS_MIXEDDISABLED       : LDetails:=StyleServices.GetElementDetails(tbCheckBoxMixedDisabled);
-                  { For Windows >= Vista }
-                  CBS_IMPLICITNORMAL      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitNormal);
-                  CBS_IMPLICITHOT         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitHot);
-                  CBS_IMPLICITPRESSED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitPressed);
-                  CBS_IMPLICITDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxImplicitDisabled);
-                  CBS_EXCLUDEDNORMAL      : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedNormal);
-                  CBS_EXCLUDEDHOT         : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedHot);
-                  CBS_EXCLUDEDPRESSED     : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedPressed);
-                  CBS_EXCLUDEDDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedDisabled);
-              end;
-
-              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
-              try
-                StyleServices.DrawElement(hdc, LDetails, pRect, pClipRect^);
-              finally
-                RestoreDC(hdc, SaveIndex);
-              end;
-              Result:=S_OK;
-            end
-        else
-          Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-        end;
-   end
-  else
-  if THThemesClasses.TreeView.IndexOf(Pointer(hTheme))>=0 then
-  begin
-    if ((iPartId = TVP_GLYPH) and ((iStateId=GLPS_OPENED) or (iStateId=GLPS_CLOSED))) or
-       ((iPartId = TVP_HOTGLYPH) and ((iStateId=HGLPS_OPENED) or (iStateId=HGLPS_CLOSED))) then
-    begin
-      if (iStateId=GLPS_OPENED) or (iStateId=HGLPS_OPENED) then
-       LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphOpened)
-      else
-       LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphClosed);
-
-       LBuffer:=TBitmap.Create;
-       try
-         LSize.cx:=10;
-         LSize.cy:=10;
-         LRect := Rect(0, 0, LSize.Width, LSize.Height);
-         LBuffer.SetSize(LRect.Width, LRect.Height);
-         StyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
-         BitBlt(hdc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
-       finally
-         LBuffer.Free;
-       end;
-       Exit(S_OK);
-    end
-    else
-    if (iPartId = TVP_TREEITEM) and (iStateId=TREIS_SELECTED) then
-    begin
-       LDetails := StyleServices.GetElementDetails(tgGradientCellSelected);
-       LStartColor:=GetSysColor(COLOR_HIGHLIGHT);
-       LEndColor  :=GetSysColor(COLOR_HIGHLIGHT);
-
-       if StyleServices.GetElementColor(LDetails, ecGradientColor1, LColor) and (LColor <> clNone) then
-         LStartColor := LColor;
-       if StyleServices.GetElementColor(LDetails, ecGradientColor2, LColor) and (LColor <> clNone) then
-         LEndColor := LColor;
-//        if StyleServices.GetElementColor(LDetails, ecTextColor, LColor) and (LColor <> clNone) then
-//          Canvas.Font.Color := LColor;
-      LCanvas:=TCanvas.Create;
-      SaveIndex := SaveDC(hdc);
-      try
-        LCanvas.Handle:=hdc;
-        GradientFillCanvas(LCanvas, LStartColor, LEndColor, pRect, gdVertical);
-      finally
-        LCanvas.Handle:=0;
-        LCanvas.Free;
-        RestoreDC(hdc, SaveIndex);
-      end;
-
        Exit(S_OK);
     end
     else
     begin
-      //OutputDebugString(PChar(Format('TreeView iPartId %d iStateId %d', [iPartId, iStateId])));
-      Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+     Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+     //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
     end;
   end
   else
-    Result:= TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+  begin
+    Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+    //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+  end;
 end;
 
-
-function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
+function Detour_UxTheme_DrawThemeBackgroundEx(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pOptions: Pointer): HRESULT; stdcall;
 begin
-  if StyleServices.IsSystemStyle  then
-   Result:= TrampolineGetSysColor(nIndex)
+  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+    Exit(TrampolineDrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions))
   else
-   Result:= DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
+    Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pOptions, TrampolineDrawThemeBackgroundEx));
+end;
+
+function Detour_UxTheme_DrawThemeBackground(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall;
+begin
+  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+    Exit(TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect))
+  else
+    Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pClipRect, TrampolineDrawThemeBackground));
 end;
 
 function Detour_GetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
 begin
-  if StyleServices.IsSystemStyle then
+  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
    Result:= TrampolineGetThemeSysColor(hTheme, iColorId)
   else
    Result:= StyleServices.GetSystemColor(iColorId or Integer($FF000000));
 end;
 
-function Detour_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;
+function Detour_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;  stdcall;
 begin
-  //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
-  Exit(TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
+  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+   Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor)
+  else
+  begin
+    if THThemesClasses.ContainsKey(hTheme) then
+    begin
+      if SameText(THThemesClasses.Items[hTheme], VSCLASS_TASKDIALOGSTYLE) then
+      begin
+         case iPartId of
+           TDLG_MAININSTRUCTIONPANE : begin
+                                       pColor:= StyleServices.GetSystemColor(clHighlight);
+                                       Result:= S_OK;
+                                      end;
+
+           TDLG_CONTENTPANE         : begin
+                                       pColor:= StyleServices.GetSystemColor(clWindowText);
+                                       Result:= S_OK;
+                                      end;
+          TDLG_EXPANDOTEXT,
+          TDLG_EXPANDEDFOOTERAREA,
+          TDLG_FOOTNOTEPANE,
+          TDLG_VERIFICATIONTEXT,
+          //TDLG_RADIOBUTTONPANE,
+          TDLG_EXPANDEDCONTENT      : begin
+                                       pColor:= StyleServices.GetSystemColor(clWindowText);
+                                       Result:= S_OK;
+                                      end;
+         else
+          begin
+           Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //pColor:=clRed;
+           //Result:=S_OK;
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
+          end;
+         end;
+      end
+      else
+      begin
+       Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+       //pColor:=clGreen;
+       //Result:=S_OK;
+       //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
+      end;
+    end
+    else
+    begin
+     Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+     //pColor:=clFuchsia;
+     //Result:=S_OK;
+     //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
+    end;
+  end;
 end;
+
+function Detour_UxTheme_DrawThemeText(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall;
+var
+  LDetails: TThemedElementDetails;
+  ThemeTextColor : TColor;
+  SaveIndex : Integer;
+  LCanvas : TCanvas;
+  plf: LOGFONTW;
+begin
+ if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or (dwTextFlags and DT_CALCRECT <> 0) then
+  Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+
+ if THThemesClasses.ContainsKey(hTheme) then
+ begin
+   if SameText(THThemesClasses.Items[hTheme], VSCLASS_BUTTON) then
+   begin
+        case iPartId of
+            BP_PUSHBUTTON  :
+                              begin
+                                case iStateId of
+                                    PBS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbPushButtonNormal);
+                                    PBS_HOT      : LDetails:=StyleServices.GetElementDetails(tbPushButtonHot);
+                                    PBS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbPushButtonPressed);
+                                    PBS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbPushButtonDisabled);
+                                    PBS_DEFAULTED            : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaulted);
+                                    PBS_DEFAULTED_ANIMATING  : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
+                                end;
+
+                                //StyleServices.DrawText(hdc,  LDetails, string(pszText), pRect, dwTextFlags, dwTextFlags2);
+
+                                if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
+                                 ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
+                                StyleServices.DrawText(hdc, LDetails, string(pszText), pRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+                                Result:=S_OK;
+                              end;
+
+            BP_RADIOBUTTON  : begin
+                                case iStateId of
+                                    RBS_UNCHECKEDNORMAL   : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedNormal);
+                                    RBS_UNCHECKEDHOT      : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedHot);
+                                    RBS_UNCHECKEDPRESSED  : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedPressed);
+                                    RBS_UNCHECKEDDISABLED : LDetails:=StyleServices.GetElementDetails(tbRadioButtonUncheckedDisabled);
+                                    RBS_CHECKEDNORMAL     : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedNormal);
+                                    RBS_CHECKEDHOT        : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedHot);
+                                    RBS_CHECKEDPRESSED    : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedPressed);
+                                    RBS_CHECKEDDISABLED   : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedDisabled);
+                                end;
+
+                                if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
+                                 ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
+                                StyleServices.DrawText(hdc, LDetails, string(pszText), pRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+                                Result:=S_OK;
+                              end;
+
+            BP_COMMANDLINK :
+                              begin
+
+                                case iStateId of
+                                    CMDLS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbPushButtonNormal);
+                                    CMDLS_HOT      : LDetails:=StyleServices.GetElementDetails(tbPushButtonHot);
+                                    CMDLS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbPushButtonPressed);
+                                    CMDLS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbPushButtonDisabled);
+                                    CMDLS_DEFAULTED     : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaulted);
+                                    CMDLS_DEFAULTED_ANIMATING        : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
+                                end;
+
+                                LCanvas:=TCanvas.Create;
+                                SaveIndex := SaveDC(hdc);
+                                try
+                                  LCanvas.Handle:=hdc;
+                                  ZeroMemory(@plf, SizeOf(plf));
+                                  plf.lfHeight := 14;
+                                  plf.lfCharSet := DEFAULT_CHARSET;
+                                  StrCopy(plf.lfFaceName, 'Tahoma');
+                                  LCanvas.Font.Handle := CreateFontIndirect(plf);
+                                  if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
+                                   ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
+                                  StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), pRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+                                finally
+                                  DeleteObject(LCanvas.Font.Handle);
+                                  LCanvas.Handle:=0;
+                                  LCanvas.Free;
+                                  RestoreDC(hdc, SaveIndex);
+                                end;
+
+                                Result:=S_OK;
+                              end
+            else
+            begin
+               Result:=TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect);
+               //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+            end;
+        end;
+   end
+   else
+   begin
+    Result:=TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect);
+    //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+   end;
+ end
+ else
+   Result:=TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect);
+end;
+
+
+function  Detour_UxTheme_DrawThemeTextEx(hTheme: HTHEME; hdc: HDC; iPartId: Integer; iStateId: Integer; pszText: LPCWSTR; cchText: Integer; dwTextFlags: DWORD; pRect: PRect; var pOptions: TDTTOpts): HResult; stdcall;
+var
+  LDetails: TThemedElementDetails;
+  ThemeTextColor : TColor;
+  SaveIndex : Integer;
+  LCanvas : TCanvas;
+  plf: LOGFONTW;
+begin
+ //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+ //Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+ if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or (dwTextFlags and DT_CALCRECT <> 0)  then
+  Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+
+ if THThemesClasses.ContainsKey(hTheme) then
+ begin
+   if SameText(THThemesClasses.Items[hTheme], VSCLASS_BUTTON) then
+   begin
+        case iPartId of
+            BP_COMMANDLINK  :
+            begin
+              case iStateId of
+                  CMDLS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbPushButtonNormal);
+                  CMDLS_HOT      : LDetails:=StyleServices.GetElementDetails(tbPushButtonHot);
+                  CMDLS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbPushButtonPressed);
+                  CMDLS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbPushButtonDisabled);
+                  CMDLS_DEFAULTED     : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaulted);
+                  CMDLS_DEFAULTED_ANIMATING        : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
+              end;
+
+//              Options.Flags       := [];
+//              if pOptions.dwFlags AND DTT_TEXTCOLOR <>0  then
+//                Include(Options.Flags, TStyleTextFlag.stfTextColor);
+//              if pOptions.dwFlags AND DTT_BORDERCOLOR <>0  then
+//                Include(Options.Flags, TStyleTextFlag.stfBorderColor);
+//              if pOptions.dwFlags AND DTT_BORDERSIZE <>0  then
+//                Include(Options.Flags, TStyleTextFlag.stfBorderSize);
+//              if pOptions.dwFlags AND DTT_SHADOWCOLOR <>0  then
+//                Include(Options.Flags, TStyleTextFlag.stfShadowColor);
+//              if pOptions.dwFlags AND DTT_SHADOWOFFSET <>0  then
+//                Include(Options.Flags, TStyleTextFlag.stfShadowOffset);
+//              if pOptions.dwFlags AND DTT_GLOWSIZE <>0  then
+//                Include(Options.Flags, TStyleTextFlag.stfGlowSize);
+//
+//              Options.TextColor   := pOptions.crText;
+//              Options.BorderColor := pOptions.crBorder;
+//              Options.BorderSize  := pOptions.iBorderSize;
+//              Options.ShadowColor := pOptions.crShadow;
+//              Options.ShadowOffset:= pOptions.ptShadowOffset;
+//              Options.GlowSize    := pOptions.iGlowSize;
+
+              //StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), Options);
+              if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
+                ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
+              //pOptions.crText:=ColorToRGB(ThemeTextColor);
+              //Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+
+//              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+//              try
+//                StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+//              finally
+//                RestoreDC(hdc, SaveIndex);
+//              end;
+
+//                LColorRef := SetTextColor(hdc, Vcl.Graphics.ColorToRGB(ThemeTextColor));
+//                try
+//                  Winapi.Windows.DrawText(hdc, pszText, Length(pszText), pRect^, dwTextFlags);
+//                finally
+//                  SetTextColor(hdc, LColorRef);
+//                end;
+
+              LCanvas:=TCanvas.Create;
+              SaveIndex := SaveDC(hdc);
+              try
+                LCanvas.Handle:=hdc;
+                if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
+                begin
+                  //GetThemeSysFont(hTheme, pOptions.iFontPropId, plf);  // is not working
+                  ZeroMemory(@plf, SizeOf(plf));
+                  plf.lfHeight := 13;
+                  plf.lfCharSet := DEFAULT_CHARSET;
+                  StrCopy(plf.lfFaceName, 'Tahoma');
+                  LCanvas.Font.Handle := CreateFontIndirect(plf);
+                end;
+                StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+              finally
+                if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
+                  DeleteObject(LCanvas.Font.Handle);
+                LCanvas.Handle:=0;
+                LCanvas.Free;
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+              Result:=S_OK;
+            end
+            else
+               Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+        end;
+   end
+   else
+    Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+ end
+ else
+   Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+
+end;
+{$ENDIF}
+
+function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
+begin
+  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled  then
+   Result:= TrampolineGetSysColor(nIndex)
+  else
+   Result:= DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
+end;
+
+
+//function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
+//begin
+//   Result:= TrampolineGetSysColorBrush(nIndex);
+//end;
+//
+//function Detour_CreateSolidBrush(p1: COLORREF): HBRUSH; stdcall;
+//begin
+// Result:=TrampolineCreateSolidBrush(p1);
+//end;
+
+//function Detour_WinApi_DrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
+//begin
+// //OutputDebugString(PChar('Detour_WinApi_DrawText Color'+IntToHex(OrgColor, 8)+' Window '+IntToHex(LWin,8)+' '+lpString));
+// Result:=Trampoline_DrawText(hDC, lpString, nCount, lpRect, uFormat);
+//end;
+
+
+//function _ColorToRGB(Color: TColor): Longint;
+//begin
+//  if Color < 0 then
+//    Result := TrampolineGetSysColor(Color and $000000FF) else
+//    Result := Color;
+//end;
+
+
+//function Detour_WinApi_DrawTextEx(DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall;
+//begin
+// Result:=Trampoline_DrawTextEx(DC, lpchText, cchText, p4, dwDTFormat, DTParams);
+//end;
+//
+//function Detour_WinApi_ExtTextOutW(DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect; Str: LPCWSTR; Count: Longint; Dx: PInteger): BOOL; stdcall;
+//begin
+// Result:=Trampoline_ExtTextOutW(DC, x, y, Options, Rect, Str, Count, Dx);
+//end;
 
 var
  pOrgPointer : Pointer;
 
 initialization
- THThemesClasses.Button  :=TList.Create;
- THThemesClasses.TreeView:=TList.Create;
-
+{$IFDEF HOOK_UXTHEME}
+ THThemesClasses  := TDictionary<HTHEME, string>.Create;
+ THThemesHWND     := TDictionary<HTHEME, HWND>.Create;
+{$ENDIF}
  if StyleServices.Available then
  begin
-   ThemeLibrary := GetModuleHandle('uxtheme.dll');
-
-   pOrgPointer     := GetProcAddress(GetModuleHandle('user32.dll'), 'GetSysColor');
+   pOrgPointer     := GetProcAddress(GetModuleHandle(user32), 'GetSysColor');
    if Assigned(pOrgPointer) then
-   @TrampolineGetSysColor    :=  InterceptCreate(pOrgPointer, @Detour_GetSysColor);
+    @TrampolineGetSysColor    :=  InterceptCreate(pOrgPointer, @Detour_GetSysColor);
 
+//   pOrgPointer     := GetProcAddress(GetModuleHandle(user32), 'GetSysColorBrush');
+//   if Assigned(pOrgPointer) then
+//    @TrampolineGetSysColorBrush    :=  InterceptCreate(pOrgPointer, @Detour_GetSysColorBrush);
+//
+//   pOrgPointer     := GetProcAddress(GetModuleHandle(gdi32), 'CreateSolidBrush');
+//   if Assigned(pOrgPointer) then
+//    @TrampolineCreateSolidBrush    :=  InterceptCreate(pOrgPointer, @Detour_CreateSolidBrush);
+//
+//   Trampoline_DrawText                       := InterceptCreate(@WinApi.Windows.DrawTextW, @Detour_WinApi_DrawText);
+//   Trampoline_DrawTextEx                     := InterceptCreate(@WinApi.Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
+//   Trampoline_ExtTextOutW                    := InterceptCreate(@WinApi.Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);
+
+   {$IFDEF HOOK_UXTHEME}
+   ThemeLibrary := GetModuleHandle('uxtheme.dll');
    pOrgPointer   := GetProcAddress(ThemeLibrary, 'OpenThemeData');
    if Assigned(pOrgPointer) then
-   @TrampolineOpenThemeData  := InterceptCreate(pOrgPointer, @Detour_UxTheme_OpenThemeData);
+    @TrampolineOpenThemeData  := InterceptCreate(pOrgPointer, @Detour_UxTheme_OpenThemeData);
 
 //   CloseThemeDataOrgPointer  := GetProcAddress(ThemeLibrary, 'CloseThemeData');
 //   @TrampolineCloseThemeData := InterceptCreate(CloseThemeDataOrgPointer, @InterceptCloseThemeData);
 
    pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeBackground');
    if Assigned(pOrgPointer) then
-   @TrampolineDrawThemeBackground := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackground);
+    @TrampolineDrawThemeBackground := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackground);
+
+   pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeText');
+   if Assigned(pOrgPointer) then
+    @TrampolineDrawThemeText := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeText);
+
+   pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeTextEx');
+   if Assigned(pOrgPointer) then
+    @TrampolineDrawThemeTextEx := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeTextEx);
 
    pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeBackgroundEx');
    if Assigned(pOrgPointer) then
-   @TrampolineDrawThemeBackgroundEx := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackgroundEx);
+    @TrampolineDrawThemeBackgroundEx := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackgroundEx);
+
 
    pOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColor');
    if Assigned(pOrgPointer) then
-   @TrampolineGetThemeSysColor := InterceptCreate(pOrgPointer, @Detour_GetThemeSysColor);
+    @TrampolineGetThemeSysColor := InterceptCreate(pOrgPointer, @Detour_GetThemeSysColor);
 
-//   pOrgPointer     := GetProcAddress(ThemeLibrary, 'GetThemeColor');
-//   @TrampolineGetThemeColor    := InterceptCreate(GetThemeColorOrgPointer, @Detour_GetThemeColor);
+   pOrgPointer     := GetProcAddress(ThemeLibrary, 'GetThemeColor');
+   if Assigned(pOrgPointer) then
+    @TrampolineGetThemeColor    := InterceptCreate(pOrgPointer, @Detour_GetThemeColor);
+   {$ENDIF}
  end;
 
 finalization
  if Assigned(TrampolineGetSysColor) then
   InterceptRemove(@TrampolineGetSysColor);
 
+// if Assigned(TrampolineGetSysColorBrush) then
+//  InterceptRemove(@TrampolineGetSysColorBrush);
+//
+// if Assigned(TrampolineCreateSolidBrush) then
+//  InterceptRemove(@TrampolineCreateSolidBrush);
+//
+//  if Assigned(Trampoline_DrawText) then
+//    InterceptRemove(@Trampoline_DrawText);
+//
+//  if Assigned(Trampoline_DrawTextEx) then
+//    InterceptRemove(@Trampoline_DrawTextEx);
+//
+//  if Assigned(Trampoline_ExtTextOutW) then
+//    InterceptRemove(@Trampoline_ExtTextOutW);
+//
+
+  {$IFDEF HOOK_UXTHEME}
  if Assigned(TrampolineGetThemeSysColor) then
   InterceptRemove(@TrampolineGetThemeSysColor);
 
@@ -426,9 +919,16 @@ finalization
  if Assigned(TrampolineDrawThemeBackground) then
   InterceptRemove(@TrampolineDrawThemeBackground);
 
+ if Assigned(TrampolineDrawThemeText) then
+  InterceptRemove(@TrampolineDrawThemeText);
+
+ if Assigned(TrampolineDrawThemeTextEx) then
+  InterceptRemove(@TrampolineDrawThemeTextEx);
+
  if Assigned(TrampolineDrawThemeBackgroundEx) then
   InterceptRemove(@TrampolineDrawThemeBackgroundEx);
 
-  THThemesClasses.Button.Free;
-  THThemesClasses.TreeView.Free;
+  THThemesClasses.Free;
+  THThemesHWND.Free;
+  {$ENDIF}
 end.
