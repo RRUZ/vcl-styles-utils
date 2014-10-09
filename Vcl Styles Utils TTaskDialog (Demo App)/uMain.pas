@@ -235,9 +235,9 @@ begin
 with TTaskDialog.Create(self) do
   try
     Caption := 'VCL Styles Utils - TTaskDialogs Demo';
-    Title := 'Rejbrand BookBase';
+    Title := 'Custom Icon';
     CommonButtons := [tcbClose];
-    Text := 'File Version: ' + #13#10#13#10'Copyright © 2011 Andreas Rejbrand'#13#10#13#10'http://english.rejbrand.se';
+    Text := 'This dialog display a custom icon';
     Flags := [tfUseHiconMain, tfAllowDialogCancellation];
     CustomMainIcon := Application.Icon;
     Execute;
@@ -251,7 +251,7 @@ begin
 with TTaskDialog.Create(Self) do
   try
     Caption := 'VCL Styles Utils - TTaskDialogs Demo';
-    Title := 'The Process';
+    Title := 'Question';
     Text := 'Do you want to continue even though [...]?';
     CommonButtons := [tcbYes, tcbNo];
     MainIcon := tdiWarning; // There is no tdiQuestion
