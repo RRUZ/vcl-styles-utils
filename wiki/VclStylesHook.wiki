@@ -1,6 +1,6 @@
 #summary Vcl.Styles.Hook.
 
-The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit,  patch some !WinApi and !UxTheme methods in order to fix the system colors used by some VCL components and also replace some elements of the Windows Native Theme patching the DrawThemeBackground and DrawThemeBackgroundEx methods.
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit,  patch a set of !WinApi and !UxTheme methods in order to fix the system colors used by some VCL components and also replace some elements of the Windows Native Theme patching the DrawThemeBackground and DrawThemeBackgroundEx methods.
 
 = Screenshots =
 
