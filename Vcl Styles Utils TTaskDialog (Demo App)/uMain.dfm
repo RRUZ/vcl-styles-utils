@@ -4,7 +4,7 @@ object FrmTaskDlgMain: TFrmTaskDlgMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Main'
-  ClientHeight = 154
+  ClientHeight = 151
   ClientWidth = 429
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET

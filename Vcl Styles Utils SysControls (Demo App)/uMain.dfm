@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 497
   Top = 181
   Caption = 'Main'
-  ClientHeight = 261
-  ClientWidth = 463
+  ClientHeight = 229
+  ClientWidth = 423
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,95 +17,95 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 13
   object LblStyles: TLabel
-    Left = 16
-    Top = 37
+    Left = 8
+    Top = 11
     Width = 39
     Height = 13
     Caption = 'Styles : '
   end
-  object SpeedButton1: TSpeedButton
-    Left = 330
-    Top = 112
+  object BtnMsgBox: TSpeedButton
+    Left = 322
+    Top = 86
     Width = 90
     Height = 22
     Caption = 'MsgBox'
-    OnClick = SpeedButton1Click
+    OnClick = BtnMsgBoxClick
   end
-  object SpeedButton2: TSpeedButton
-    Left = 330
-    Top = 140
+  object BtnRaiseException: TSpeedButton
+    Left = 322
+    Top = 114
     Width = 90
     Height = 22
     Caption = 'Raise Exception'
-    OnClick = SpeedButton2Click
+    OnClick = BtnRaiseExceptionClick
   end
-  object SpeedButton3: TSpeedButton
-    Left = 227
-    Top = 168
+  object BtnFontDialog: TSpeedButton
+    Left = 219
+    Top = 142
     Width = 97
     Height = 22
     Caption = 'FontDialog'
-    OnClick = SpeedButton3Click
+    OnClick = BtnFontDialogClick
   end
-  object SpeedButton4: TSpeedButton
-    Left = 227
-    Top = 140
+  object BtnColorDialog: TSpeedButton
+    Left = 219
+    Top = 114
     Width = 97
     Height = 22
     Caption = 'ColorDialog'
-    OnClick = SpeedButton4Click
+    OnClick = BtnColorDialogClick
   end
-  object SpeedButton5: TSpeedButton
-    Left = 123
-    Top = 140
+  object BtnReplaceDialog: TSpeedButton
+    Left = 115
+    Top = 114
     Width = 97
     Height = 22
     Caption = 'ReplaceDialog'
-    OnClick = SpeedButton5Click
+    OnClick = BtnReplaceDialogClick
   end
-  object SpeedButton6: TSpeedButton
-    Left = 123
-    Top = 112
+  object BtnFindDialog: TSpeedButton
+    Left = 115
+    Top = 86
     Width = 97
     Height = 22
     Caption = ' FindDialog'
-    OnClick = SpeedButton6Click
+    OnClick = BtnFindDialogClick
   end
-  object SpeedButton7: TSpeedButton
-    Left = 16
-    Top = 140
+  object BtnPageSetup: TSpeedButton
+    Left = 8
+    Top = 114
     Width = 97
     Height = 22
     Caption = 'PageSetupDialog'
-    OnClick = SpeedButton7Click
+    OnClick = BtnPageSetupClick
   end
-  object SpeedButton8: TSpeedButton
-    Left = 16
-    Top = 168
+  object BtnPrinterSetup: TSpeedButton
+    Left = 8
+    Top = 142
     Width = 97
     Height = 22
     Caption = 'PrinterSetupDialog'
-    OnClick = SpeedButton8Click
+    OnClick = BtnPrinterSetupClick
   end
-  object SpeedButton9: TSpeedButton
-    Left = 226
-    Top = 112
+  object BtnOpenDialog: TSpeedButton
+    Left = 218
+    Top = 86
     Width = 98
     Height = 22
     Caption = 'OpenDialog'
-    OnClick = SpeedButton9Click
+    OnClick = BtnOpenDialogClick
   end
-  object SpeedButton10: TSpeedButton
-    Left = 16
-    Top = 112
+  object BtnPrintDialog: TSpeedButton
+    Left = 8
+    Top = 86
     Width = 97
     Height = 22
     Caption = 'PrintDialog'
-    OnClick = SpeedButton10Click
+    OnClick = BtnPrintDialogClick
   end
   object ComboBox1: TComboBox
-    Left = 61
-    Top = 34
+    Left = 53
+    Top = 8
     Width = 244
     Height = 21
     Style = csDropDownList
@@ -113,16 +113,16 @@ object Form1: TForm1
     OnSelect = ComboBox1Select
   end
   object Edit1: TEdit
-    Left = 59
-    Top = 61
-    Width = 246
+    Left = 54
+    Top = 35
+    Width = 243
     Height = 21
     TabOrder = 1
     Text = 'Right Click ..'
   end
   object StaticText1: TStaticText
     Left = 8
-    Top = 207
+    Top = 181
     Width = 187
     Height = 17
     Caption = 'Right Click to Show Break Popup Menu'
@@ -130,8 +130,8 @@ object Form1: TForm1
     TabOrder = 2
   end
   object CheckBox1: TCheckBox
-    Left = 16
-    Top = 86
+    Left = 8
+    Top = 60
     Width = 112
     Height = 17
     Caption = 'Enable SysControls'
@@ -142,29 +142,29 @@ object Form1: TForm1
   end
   object StaticText2: TStaticText
     Left = 8
-    Top = 230
+    Top = 204
     Width = 219
     Height = 17
     Caption = 'Right Click to Show Right To Left PopupMenu'
     PopupMenu = PopupMenu2
     TabOrder = 4
   end
-  object Button1: TButton
-    Left = 123
-    Top = 168
+  object BtnSelectFolder: TButton
+    Left = 115
+    Top = 142
     Width = 98
     Height = 22
     Caption = 'Select Folder'
     TabOrder = 5
-    OnClick = Button1Click
+    OnClick = BtnSelectFolderClick
   end
   object OpenDialog1: TOpenDialog
-    Left = 168
-    Top = 192
+    Left = 160
+    Top = 166
   end
   object ColorDialog1: TColorDialog
-    Left = 112
-    Top = 184
+    Left = 104
+    Top = 158
   end
   object FontDialog1: TFontDialog
     Font.Charset = DEFAULT_CHARSET
@@ -172,20 +172,20 @@ object Form1: TForm1
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
-    Left = 312
-    Top = 40
+    Left = 360
+    Top = 38
   end
   object ReplaceDialog1: TReplaceDialog
-    Left = 272
-    Top = 200
+    Left = 240
+    Top = 166
   end
   object FindDialog1: TFindDialog
-    Left = 304
-    Top = 200
+    Left = 288
+    Top = 166
   end
   object PrinterSetupDialog1: TPrinterSetupDialog
     Left = 232
-    Top = 65528
+    Top = 65496
   end
   object PageSetupDialog1: TPageSetupDialog
     MinMarginLeft = 0
@@ -199,14 +199,14 @@ object Form1: TForm1
     PageWidth = 21000
     PageHeight = 29700
     Left = 288
-    Top = 65528
+    Top = 65496
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 176
-    Top = 64
+    Left = 168
+    Top = 38
     Bitmap = {
-      494C01010D002400440010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010D0024004C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000002300000033000000330000
       0033000000330000003300000033000000330000003300000033000000330000
@@ -743,8 +743,8 @@ object Form1: TForm1
   end
   object PopupMenu1: TPopupMenu
     Images = ImageList1
-    Left = 368
-    Top = 192
+    Left = 360
+    Top = 174
     object I1: TMenuItem
       Caption = 'Item 1'
       ImageIndex = 2
@@ -797,8 +797,8 @@ object Form1: TForm1
     BiDiMode = bdRightToLeft
     Images = ImageList1
     ParentBiDiMode = False
-    Left = 392
-    Top = 32
+    Left = 384
+    Top = 6
     object R2: TMenuItem
       Caption = 'Right To Left Item 1'
       ImageIndex = 4
@@ -819,8 +819,8 @@ object Form1: TForm1
   end
   object MainMenu1: TMainMenu
     Images = ImageList1
-    Left = 200
-    Top = 216
+    Left = 192
+    Top = 142
     object File1: TMenuItem
       Caption = '&File'
       object New1: TMenuItem
@@ -925,15 +925,15 @@ object Form1: TForm1
     end
   end
   object OpenPictureDialog1: TOpenPictureDialog
-    Left = 408
-    Top = 216
+    Left = 344
+    Top = 142
   end
   object OpenTextFileDialog1: TOpenTextFileDialog
-    Left = 384
-    Top = 224
+    Left = 280
+    Top = 190
   end
   object PrintDialog1: TPrintDialog
-    Left = 336
-    Top = 208
+    Left = 352
+    Top = 150
   end
 end
