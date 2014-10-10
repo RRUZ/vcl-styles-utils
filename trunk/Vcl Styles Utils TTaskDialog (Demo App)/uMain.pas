@@ -204,8 +204,8 @@ with TTaskDialog.Create(self) do
     Text := 'This is a really tough one...';
     CommonButtons := [tcbYes, tcbNo];
     MainIcon := tdiNone;
-    FooterText := 'If you do this, then ...';
-    FooterIcon := tdiWarning;
+    FooterText := 'This text appears on the footer of the task dialog.';
+    FooterIcon := tdiInformation;
     Execute;
   finally
     Free;
