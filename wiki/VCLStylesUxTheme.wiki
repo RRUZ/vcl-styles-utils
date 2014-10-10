@@ -1,0 +1,27 @@
+#summary UxTheme detours.
+
+
+The VCL Styles Utils allows style the [http://msdn.microsoft.com/en-us/library/windows/desktop/bb787471%28v=vs.85%29.aspx Task Dialogs]. In order to activate this feature those units must be included in the VCL Application.
+
+
+    <li>[https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.Forms.pas Vcl.Styles.Utils.Forms]</li> 
+    <li>[https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.SysStyleHook.pas Vcl.Styles.Utils.SysStyleHook]</li>
+    <li>[https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.SysControls.pas Vcl.Styles.Utils.SysControls]</li>
+    <li>[https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas Vcl.Styles.Hooks]</li>
+
+
+Note : the Task Dialogs are available since Windows Vista.
+
+===Screenshots===
+
+ Native Task Dialog
+  
+ https://theroadtodelphi.files.wordpress.com/2014/10/2014-10-09-09_48_43-vcl-styles-utils-ttaskdialogs-demo.png?w=820
+
+ Task Dialog with VCL Styles enabled
+
+ https://theroadtodelphi.files.wordpress.com/2014/10/2014-10-09-09_58_55-vcl-styles-utils-ttaskdialogs-demo.png
+
+
+===Related articles===
+[http://theroadtodelphi.wordpress.com/2014/10/09/vcl-styles-utils-now-supports-the-ttaskdialog-component/ VCL Styles Utils – Now supports the TTaskDialog component]
