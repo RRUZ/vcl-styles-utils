@@ -1,7 +1,7 @@
 #summary UxTheme detours.
 
 
-The VCL Styles Utils allows style the [http://msdn.microsoft.com/en-us/library/windows/desktop/bb787471%28v=vs.85%29.aspx Task Dialogs]. In order to activate this feature those units must be included in the VCL Application.
+The VCL Styles Utils allows style the [http://msdn.microsoft.com/en-us/library/windows/desktop/bb787471%28v=vs.85%29.aspx Task Dialogs] and all the [http://docwiki.embarcadero.com/Libraries/XE7/en/Vcl.Dialogs.TaskMessageDlg TaskDialog based Message dialogs]. In order to activate this feature those units must be included in the VCL Application.
 
 
     <li>[https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Utils.Forms.pas Vcl.Styles.Utils.Forms]</li> 
@@ -10,7 +10,7 @@ The VCL Styles Utils allows style the [http://msdn.microsoft.com/en-us/library/w
     <li>[https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas Vcl.Styles.Hooks]</li>
 
 
-Note : the Task Dialogs are available since Windows Vista.
+*Note : the Task Dialogs only are available since Windows Vista.*
 
 ===Screenshots===
 
