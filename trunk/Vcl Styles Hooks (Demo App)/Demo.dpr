@@ -6,6 +6,8 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
+  Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas';
 

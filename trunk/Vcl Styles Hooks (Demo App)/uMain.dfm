@@ -1,6 +1,6 @@
 object FrmMain: TFrmMain
-  Left = 730
-  Top = 190
+  Left = 488
+  Top = 183
   Caption = 'Demo'
   ClientHeight = 542
   ClientWidth = 478
@@ -35,7 +35,10 @@ object FrmMain: TFrmMain
       ExplicitWidth = 449
       object TabSheet1: TTabSheet
         Caption = 'Edits and Lists'
+        ExplicitLeft = 0
+        ExplicitTop = 0
         ExplicitWidth = 441
+        ExplicitHeight = 0
         object Label1: TLabel
           Left = 8
           Top = 3
@@ -48,9 +51,9 @@ object FrmMain: TFrmMain
         end
         object ListBox1: TListBox
           Left = 8
-          Top = 40
+          Top = 58
           Width = 149
-          Height = 113
+          Height = 95
           ItemHeight = 13
           TabOrder = 0
         end
@@ -83,9 +86,9 @@ object FrmMain: TFrmMain
         end
         object Memo1: TMemo
           Left = 167
-          Top = 40
+          Top = 58
           Width = 246
-          Height = 113
+          Height = 95
           HideSelection = False
           Lines.Strings = (
             'The quick brown fox jumps over the lazy dog'
@@ -126,11 +129,21 @@ object FrmMain: TFrmMain
           ParentFont = False
           TabOrder = 7
         end
+        object CheckBox1: TCheckBox
+          Left = 8
+          Top = 35
+          Width = 149
+          Height = 17
+          Caption = 'Enable VCL Styles Hooks'
+          Checked = True
+          State = cbChecked
+          TabOrder = 8
+          OnClick = CheckBox1Click
+        end
       end
       object TabSheet2: TTabSheet
         Caption = 'ListView'
         ImageIndex = 2
-        ExplicitWidth = 441
         object ListView1: TListView
           Left = 0
           Top = 0
@@ -158,13 +171,15 @@ object FrmMain: TFrmMain
           RowSelect = True
           TabOrder = 0
           ViewStyle = vsReport
-          ExplicitWidth = 441
         end
       end
       object TabSheet3: TTabSheet
         Caption = 'TreeView'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
         ExplicitWidth = 441
+        ExplicitHeight = 0
         object TreeView1: TTreeView
           Left = 0
           Top = 0
@@ -183,7 +198,7 @@ object FrmMain: TFrmMain
     Left = 248
     Top = 237
     Bitmap = {
-      494C010107000800280010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       00000000000000000000000000000000000000000005000000150000001A0000
       001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000
