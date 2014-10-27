@@ -120,6 +120,7 @@ var
   LBuffer   : TBitmap;
   SaveIndex : integer;
   LDetails  : TThemedElementDetails;
+  LScrollDetails: TThemedScrollBar;
   LRect     : TRect;
   LSize     : TSize;
   LColor, LStartColor, LEndColor  : TColor;
@@ -132,7 +133,158 @@ begin
 
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+   if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_SCROLLBAR) then
+   begin
 
+      LScrollDetails := tsScrollBarRoot;
+      LDetails.Element := TThemedElement.teScrollBar;
+      LDetails.Part := iPartId;
+      LDetails.State := iStateId;
+      LDetails := StyleServices.GetElementDetails(TThemedScrollBar.tsThumbBtnHorzNormal);
+
+      case iPartId  of
+        SBP_ARROWBTN :
+        begin
+          case iStateId of
+            ABS_UPNORMAL      : LScrollDetails := tsArrowBtnUpNormal;
+            ABS_UPHOT         : LScrollDetails := tsArrowBtnUpHot;
+            ABS_UPPRESSED     : LScrollDetails := tsArrowBtnUpPressed;
+            ABS_UPDISABLED    : LScrollDetails := tsArrowBtnUpDisabled;
+            ABS_DOWNNORMAL    : LScrollDetails := tsArrowBtnDownNormal;
+            ABS_DOWNHOT       : LScrollDetails := tsArrowBtnDownHot;
+            ABS_DOWNPRESSED   : LScrollDetails := tsArrowBtnDownPressed;
+            ABS_DOWNDISABLED  : LScrollDetails := tsArrowBtnDownDisabled;
+            ABS_LEFTNORMAL    : LScrollDetails := tsArrowBtnLeftNormal;
+            ABS_LEFTHOT       : LScrollDetails := tsArrowBtnLeftHot;
+            ABS_LEFTPRESSED   : LScrollDetails := tsArrowBtnLeftPressed;
+            ABS_LEFTDISABLED  : LScrollDetails := tsArrowBtnLeftDisabled;
+            ABS_RIGHTNORMAL   : LScrollDetails := tsArrowBtnRightNormal;
+            ABS_RIGHTHOT      : LScrollDetails := tsArrowBtnRightHot;
+            ABS_RIGHTPRESSED  : LScrollDetails := tsArrowBtnRightPressed;
+            ABS_RIGHTDISABLED : LScrollDetails := tsArrowBtnRightDisabled;
+            ABS_UPHOVER       : LScrollDetails := tsArrowBtnUpNormal;//tsArrowBtnUpHover;
+            ABS_DOWNHOVER     : LScrollDetails := tsArrowBtnDownNormal;//tsArrowBtnDownHover;
+            ABS_LEFTHOVER     : LScrollDetails := tsArrowBtnLeftNormal;//tsArrowBtnLeftHover;
+            ABS_RIGHTHOVER    : LScrollDetails := tsArrowBtnRightNormal;//tsArrowBtnRightHover;
+          end;
+        end;
+
+        SBP_THUMBBTNHORZ:
+        begin
+          case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsThumbBtnHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsThumbBtnHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsThumbBtnHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsThumbBtnHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsThumbBtnHorzNormal;
+          end;
+        end;
+
+        SBP_THUMBBTNVERT:
+        begin
+          case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsThumbBtnVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsThumbBtnVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsThumbBtnVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsThumbBtnVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsThumbBtnVertNormal;
+          end;
+        end;
+
+        SBP_LOWERTRACKHORZ:
+        begin
+          case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsLowerTrackHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsLowerTrackHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsLowerTrackHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsLowerTrackHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsLowerTrackHorzNormal;//tsLowerTrackHorzHover; //no support for hover
+          end;
+        end;
+
+        SBP_UPPERTRACKHORZ :
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsUpperTrackHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsUpperTrackHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsUpperTrackHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsUpperTrackHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsUpperTrackHorzNormal;//tsUpperTrackHorzHover; //no support for hover
+         end;
+        end;
+
+        SBP_LOWERTRACKVERT:
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsLowerTrackVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsLowerTrackVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsLowerTrackVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsLowerTrackVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsLowerTrackVertNormal;//tsLowerTrackVertHover; //no support for hover
+         end;
+        end;
+
+        SBP_UPPERTRACKVERT:
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsUpperTrackVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsUpperTrackVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsUpperTrackVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsUpperTrackVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsUpperTrackVertNormal;//tsUpperTrackVertHover; //no support for hover
+         end;
+        end;
+
+        SBP_SIZEBOX :
+        begin
+         case iStateId of
+          SZB_RIGHTALIGN            : LScrollDetails := tsSizeBoxRightAlign;
+          SZB_LEFTALIGN             : LScrollDetails := tsSizeBoxLeftAlign;
+          SZB_TOPRIGHTALIGN         : LScrollDetails := tsSizeBoxTopRightAlign;
+          SZB_TOPLEFTALIGN          : LScrollDetails := tsSizeBoxTopLeftAlign;
+          SZB_HALFBOTTOMRIGHTALIGN  : LScrollDetails := tsSizeBoxHalfBottomRightAlign;
+          SZB_HALFBOTTOMLEFTALIGN   : LScrollDetails := tsSizeBoxHalfBottomLeftAlign;
+          SZB_HALFTOPRIGHTALIGN     : LScrollDetails := tsSizeBoxHalfTopRightAlign;
+          SZB_HALFTOPLEFTALIGN      : LScrollDetails := tsSizeBoxHalfTopLeftAlign;
+         end;
+        end;
+
+        SBP_GRIPPERHORZ :
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsGripperHorzNormal;
+           SCRBS_HOT      : LScrollDetails := tsGripperHorzHot;
+           SCRBS_PRESSED  : LScrollDetails := tsGripperHorzPressed;
+           SCRBS_DISABLED : LScrollDetails := tsGripperHorzDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsGripperHorzHover;//tsGripperHorzHover; //no support for hover
+         end;
+        end;
+
+        SBP_GRIPPERVERT :
+        begin
+         case iStateId of
+           SCRBS_NORMAL   : LScrollDetails := tsGripperVertNormal;
+           SCRBS_HOT      : LScrollDetails := tsGripperVertHot;
+           SCRBS_PRESSED  : LScrollDetails := tsGripperVertPressed;
+           SCRBS_DISABLED : LScrollDetails := tsGripperVertDisabled;
+           SCRBS_HOVER    : LScrollDetails := tsGripperVertNormal;//tsGripperVertHover; //no support for hover
+         end;
+        end;
+
+      end;
+      LDetails := StyleServices.GetElementDetails(LScrollDetails);
+
+      if (iPartId=SBP_THUMBBTNHORZ) then
+        StyleServices.DrawElement(hdc, StyleServices.GetElementDetails(tsUpperTrackHorzNormal), pRect, nil)
+      else
+      if (iPartId=SBP_THUMBBTNVERT) then
+        StyleServices.DrawElement(hdc, StyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect, nil);
+
+      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+      Exit(S_OK);
+
+   end
+   else
    if  THThemesClasses.ContainsKey(hTheme) and (SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS) or SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS_INDERTERMINATE)) then
    begin
         case iPartId of

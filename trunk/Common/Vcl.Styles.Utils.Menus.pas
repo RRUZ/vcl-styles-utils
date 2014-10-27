@@ -459,9 +459,16 @@ var
     LogFont.lfFaceName := 'Marlett';
     AFont := CreateFontIndirect(LogFont);
 
-    oldColor := 0;
     if Disabled then
-      oldColor := GetSysColor(COLOR_GRAYTEXT);
+      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled)
+    else
+    begin
+      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
+      if isHot in State then
+        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextHot);
+      if isDisabled in State then
+        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled);
+    end;
 
     oldColor := SetTextColor(DC, oldColor);
     pOldFont := SelectObject(DC, AFont);
@@ -1318,15 +1325,14 @@ end;
 function TSysPopupStyleHook.TSysPopupItem.GetVCLMenuItems: TMenuItem;
 var
   i, j: integer;
-  PopupMenu: TPopupMenu;
-  Form: TCustomForm;
-  MI: TMenuItem;
+  LPopupMenu: TPopupMenu;
+  LForm: TCustomForm;
+  LMenuItem: TMenuItem;
 
   function GetChildPopup(Comp: TComponent): TMenuItem;
   var
     k: integer;
   begin
-    { This is a CallBack function ==> Be careful !! }
     Result := nil;
     if Assigned(Comp) then
     begin
@@ -1335,15 +1341,15 @@ var
 
         if Comp.Components[k] is TPopupMenu then
         begin
-          PopupMenu := TPopupMenu(Comp.Components[k]);
-          if PopupMenu.Handle = FMenu then
-            Exit(PopupMenu.Items);
+          LPopupMenu := TPopupMenu(Comp.Components[k]);
+          if LPopupMenu.Handle = FMenu then
+            Exit(LPopupMenu.Items);
         end
         else if Comp.Components[k] is TMenuItem then
         begin
-          MI := TMenuItem(Comp.Components[k]);
-          if MI.Handle = FMenu then
-            Exit(MI);
+          LMenuItem := TMenuItem(Comp.Components[k]);
+          if LMenuItem.Handle = FMenu then
+            Exit(LMenuItem);
         end;
 
         if Comp.Components[k].ComponentCount > 0 then
@@ -1368,53 +1374,39 @@ var
   end;
 
 begin
-  // MI := nil;
   Result := nil;
 
   for i := 0 to PopupList.Count - 1 do
     if TPopupMenu(PopupList.Items[i]).Handle = FMenu then
       Exit(TPopupMenu(PopupList.Items[i]).Items);
 
-  for i := 0 to Application.ComponentCount - 1 do
+  for i := 0 to Screen.FormCount - 1 do
   begin
-    if Application.Components[i] is TCustomForm then
+    LForm := Screen.Forms[i];
+    for j := 0 to LForm.ComponentCount - 1 do
     begin
-      Form := TCustomForm(Application.Components[i]);
-      for j := 0 to Form.ComponentCount - 1 do
+
+      if LForm.Components[j] is TMenuItem then
       begin
+        LMenuItem := TMenuItem(LForm.Components[j]);
+        if LMenuItem.Handle = FMenu then
+          Exit(LMenuItem);
+      end
+      else if LForm.Components[j] is TPopupMenu then
+      begin
+        LPopupMenu := TPopupMenu(LForm.Components[j]);
+        if LPopupMenu.Handle = FMenu then
+          Exit(LPopupMenu.Items);
 
-        if Form.Components[j] is TMenuItem then
-        begin
-          MI := TMenuItem(Form.Components[j]);
-          if MI.Handle = FMenu then
-            Exit(MI);
-        end
-        else if Form.Components[j] is TPopupMenu then
-        begin
-          PopupMenu := TPopupMenu(Form.Components[j]);
-          if PopupMenu.Handle = FMenu then
-            Exit(PopupMenu.Items);
-
-          Result := ProcessMenu(PopupMenu.Items);
-          if Assigned(Result) then
-            Exit;
-        end
-        else
-        begin
-          Result := GetChildPopup(Form.Components[j]);
-          if Assigned(Result) then
-            Exit;
-        end;
-
-        // TODO : Add recursive implementation to detect any child TPopupMenu
-        (* for k := 0 to Form.Components[j].ComponentCount-1 do
-          if Form.Components[j].Components[k] is TPopupMenu then
-          begin
-          //OutputDebugString(PChar('K: '+Form.Components[j].Components[k].ClassName));
-          PopupMenu := TPopupMenu(Form.Components[j].Components[k]);
-          if PopupMenu.Handle = FMenu then
-          Exit(PopupMenu.Items);
-          end; *)
+        Result := ProcessMenu(LPopupMenu.Items);
+        if Assigned(Result) then
+          Exit;
+      end
+      else
+      begin
+        Result := GetChildPopup(LForm.Components[j]);
+        if Assigned(Result) then
+          Exit;
       end;
     end;
   end;
