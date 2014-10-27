@@ -26,7 +26,9 @@ type
     ListView1: TListView;
     TreeView1: TTreeView;
     Label1: TLabel;
+    CheckBox1: TCheckBox;
     procedure FormCreate(Sender: TObject);
+    procedure CheckBox1Click(Sender: TObject);
   private
   public
     { Public declarations }
@@ -38,11 +40,21 @@ var
 implementation
 
 uses
-  uxTheme,
+  Vcl.Styles.Utils.SysControls,
   Vcl.Themes,
   Vcl.Styles;
 
 {$R *.dfm}
+
+type
+  TListViewClass= class(TListView);
+
+procedure TFrmMain.CheckBox1Click(Sender: TObject);
+begin
+  TSysStyleManager.Enabled := TCheckBox(Sender).Checked;
+  TListViewClass(ListView1).RecreateWnd;
+end;
+
 procedure TFrmMain.FormCreate(Sender: TObject);
 var
   i, j     : Integer;
@@ -117,8 +129,6 @@ begin
       for j := 0 to 5 do
        TreeView1.Items.AddChild(MyTreeNode2,Format('ChildNode %d',[j+1]));
     end;
-
-  //SetWindowTheme(TreeView1.Handle, 'Explorer', nil);
 end;
 
 end.

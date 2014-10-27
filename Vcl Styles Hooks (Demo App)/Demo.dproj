@@ -97,6 +97,8 @@
 				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
 			<DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
 			<DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
 			<BuildConfiguration Include="Release">
@@ -166,3 +168,11 @@
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
 		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
 	</Project>
+
+<!-- EurekaLog First Line
+[Exception Log]
+EurekaLog Version=7001
+Activate=0
+DeleteMapAfterCompile=1
+Encrypt Password=""
+EurekaLog Last Line -->
