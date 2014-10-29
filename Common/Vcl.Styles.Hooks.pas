@@ -126,7 +126,7 @@ var
   LColor, LStartColor, LEndColor  : TColor;
   LCanvas   : TCanvas;
 begin
-  //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+//  OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
 
 //  if THThemesClasses.ContainsKey(hTheme) then
 //      OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
@@ -937,7 +937,7 @@ begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled  then
    Result:= TrampolineGetSysColor(nIndex)
   else
-   Result:= DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
+    Result:= DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
 end;
 
 
@@ -1015,6 +1015,10 @@ initialization
    if Assigned(pOrgPointer) then
     @TrampolineDrawThemeBackground := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackground);
 
+   pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeBackgroundEx');
+   if Assigned(pOrgPointer) then
+    @TrampolineDrawThemeBackgroundEx := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackgroundEx);
+
    pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeText');
    if Assigned(pOrgPointer) then
     @TrampolineDrawThemeText := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeText);
@@ -1022,11 +1026,6 @@ initialization
    pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeTextEx');
    if Assigned(pOrgPointer) then
     @TrampolineDrawThemeTextEx := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeTextEx);
-
-   pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeBackgroundEx');
-   if Assigned(pOrgPointer) then
-    @TrampolineDrawThemeBackgroundEx := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackgroundEx);
-
 
    pOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColor');
    if Assigned(pOrgPointer) then
