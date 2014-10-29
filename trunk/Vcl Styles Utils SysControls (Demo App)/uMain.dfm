@@ -184,8 +184,8 @@ object Form1: TForm1
     Top = 166
   end
   object PrinterSetupDialog1: TPrinterSetupDialog
-    Left = 232
-    Top = 65496
+    Left = 248
+    Top = 32
   end
   object PageSetupDialog1: TPageSetupDialog
     MinMarginLeft = 0
@@ -198,15 +198,15 @@ object Form1: TForm1
     MarginBottom = 2500
     PageWidth = 21000
     PageHeight = 29700
-    Left = 288
-    Top = 65496
+    Left = 320
+    Top = 32
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 168
     Top = 38
     Bitmap = {
-      494C01010D0024004C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010D002400500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000002300000033000000330000
       0033000000330000003300000033000000330000003300000033000000330000

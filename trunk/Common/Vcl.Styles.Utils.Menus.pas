@@ -889,7 +889,7 @@ begin
         FParentSubItemPainted := True;
       end;
       { Don't Redraw the parent of the Current PopupMenu }
-      SetRedraw(ParentPopup, False);
+      //SetRedraw(ParentPopup, False);  //issue #81
     end;
 
     { if Item can drop a sub Popup Menu }
@@ -899,6 +899,7 @@ begin
       if L = 0 then
       begin
         SetLength(SubMenuItemInfoArray, 1);
+        SubMenuItemInfoArray[0].Menu := 0;
         L:=1;
       end;
 
@@ -1360,16 +1361,23 @@ var
     end;
   end;
 
-  function ProcessMenu(AMenu: TMenuItem): TMenuItem;
+  function GetMenuItem(AMenu: TMenuItem): TMenuItem;
   var
-    L: integer;
+    LMenuItem  :TMenuItem;
+    i :integer;
   begin
-    Result := nil;
-    for L := 0 to AMenu.Count - 1 do
+    if (AMenu.Handle = FMenu) then
+      Result := aMenu
+    else
     begin
-      if AMenu[L].Handle = FMenu then
-        Exit(AMenu[L]);
-      ProcessMenu(AMenu[L]);
+      Result := nil;
+      i := 0;
+      while (Result = nil) and (i < AMenu.Count) do
+      begin
+        LMenuItem := AMenu.Items[i];
+        Result := GetMenuItem(LMenuItem);
+        Inc (i);
+      end;
     end;
   end;
 
@@ -1389,16 +1397,18 @@ begin
       if LForm.Components[j] is TMenuItem then
       begin
         LMenuItem := TMenuItem(LForm.Components[j]);
-        if LMenuItem.Handle = FMenu then
-          Exit(LMenuItem);
+        Result := GetMenuItem(LMenuItem);
+        if Assigned(Result) then
+          Exit;
       end
-      else if LForm.Components[j] is TPopupMenu then
+      else
+      if LForm.Components[j] is TPopupMenu then
       begin
         LPopupMenu := TPopupMenu(LForm.Components[j]);
         if LPopupMenu.Handle = FMenu then
           Exit(LPopupMenu.Items);
 
-        Result := ProcessMenu(LPopupMenu.Items);
+        Result := GetMenuItem(LPopupMenu.Items);
         if Assigned(Result) then
           Exit;
       end
