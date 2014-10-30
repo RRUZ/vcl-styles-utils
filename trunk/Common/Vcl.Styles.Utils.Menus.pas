@@ -180,19 +180,31 @@ var
   Bmp: Bitmap;
   hbmMask: HBITMAP;
   DC: HDC;
-  ii: ICONINFO;
+  piconinfo: TIconInfo;
   Icon: HICON;
 begin
+  Icon:=0;
   FillChar(Bmp, sizeof(Bitmap), Char(0));
-  GetObject(hBmp, sizeof(Bitmap), @Bmp);
-  DC := GetDC(0);
-  hbmMask := CreateCompatibleBitmap(DC, Bmp.bmWidth, Bmp.bmHeight);
-  ii.fIcon := True;
-  ii.hbmColor := hBmp;
-  ii.hbmMask := hbmMask;
-  Icon := CreateIconIndirect(ii);
-  DeleteObject(hbmMask);
-  ReleaseDC(0, DC);
+  if GetObject(hBmp, sizeof(Bitmap), @Bmp)>0 then
+  begin
+    DC := GetDC(0);
+    if DC<>0 then
+    try
+      hbmMask := CreateCompatibleBitmap(DC, Bmp.bmWidth, Bmp.bmHeight);
+      if hbmMask<>0 then
+      try
+        ZeroMemory(@piconinfo, SizeOf(piconinfo));
+        piconinfo.fIcon := True;
+        piconinfo.hbmColor := hBmp;
+        piconinfo.hbmMask := hbmMask;
+        Icon := CreateIconIndirect(piconinfo);
+      finally
+         DeleteObject(hbmMask);
+      end;
+    finally
+      ReleaseDC(0, DC);
+    end;
+  end;
   Result := Icon;
 end;
 
@@ -241,18 +253,18 @@ end;
 function GetMenuItemPos(Menu: HMENU; ID: integer): integer;
 var
   i: integer;
-  mii: MENUITEMINFO;
+  pMenuItemInfo: TMenuItemInfo;
 begin
   Result := -1;
   if Menu = 0 then
     Exit;
   for i := 0 to GetMenuItemCount(Menu) do
   begin
-    FillChar(mii, sizeof(mii), Char(0));
-    mii.cbSize := sizeof(mii);
-    mii.fMask := MIIM_ID;
-    if (GetMenuItemInfo(Menu, i, True, mii)) then
-      if mii.wID = Cardinal(ID) then
+    FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+    pMenuItemInfo.cbSize := sizeof(pMenuItemInfo);
+    pMenuItemInfo.fMask := MIIM_ID;
+    if (GetMenuItemInfo(Menu, i, True, pMenuItemInfo)) then
+      if pMenuItemInfo.wID = Cardinal(ID) then
         Exit(i);
   end;
 end;
@@ -350,7 +362,7 @@ var
   LSize: TSize;
   LMenuItem: TMenuItem;
   LOwnerDrawState : TOwnerDrawState;
-  ImageIndex: integer;
+  p, ImageIndex: integer;
   LImageRect, R: TRect;
   LImageWidth: integer;
   LTextRect: TRect;
@@ -405,32 +417,6 @@ var
     Dec(LTextRect.Right, LSubMenuRect.Width);
   end;
 
-  procedure DrawVisualSysBitmap(Bmp: HBITMAP);
-  var
-    Theme: HTHEME;
-    LRect, R: TRect;
-    iPart, iState: integer;
-    LSize: TSize;
-  begin
-    Theme := OpenThemeData(0, 'Menu');
-    iPart := MENU_SYSTEMCLOSE;
-    case hBmp of
-      HBMMENU_POPUP_RESTORE: iPart := MENU_SYSTEMRESTORE;
-      HBMMENU_POPUP_MINIMIZE: iPart := MENU_SYSTEMMINIMIZE;
-      HBMMENU_POPUP_MAXIMIZE: iPart := MENU_SYSTEMMAXIMIZE;
-      HBMMENU_POPUP_CLOSE: iPart := MENU_SYSTEMCLOSE;
-
-    end;
-    iState := integer(isDisabled in State) + 1;
-
-    Winapi.UxTheme.GetThemePartSize(Theme, DC, iPart, iState, nil, TS_TRUE, LSize);
-    LRect := Rect(0, 0, LSize.Width, LSize.Height);
-    R := Rect(ItemRect.Left, ItemRect.Top, ItemRect.Left + 30, ItemRect.Bottom);
-    RectCenter(LRect, R);
-    Winapi.UxTheme.DrawThemeBackground(Theme, DC, iPart, iState, LRect, nil);
-    CloseThemeData(Theme);
-  end;
-
   procedure DrawSpecialChar(DC: HDC; const Sign: Char; DestRect: TRect; const Bold: Boolean = False; const Disabled: Boolean = False);
   var
     LogFont: TLogFont;
@@ -439,7 +425,6 @@ var
     oldColor: COLORREF;
     OldMode: integer;
   begin
-
     LogFont.lfHeight := DestRect.Height;
     LogFont.lfWidth := 0;
     LogFont.lfEscapement := 0;
@@ -457,7 +442,6 @@ var
     LogFont.lfQuality := DEFAULT_QUALITY;
     LogFont.lfPitchAndFamily := DEFAULT_PITCH;
     LogFont.lfFaceName := 'Marlett';
-    AFont := CreateFontIndirect(LogFont);
 
     if Disabled then
       oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled)
@@ -470,15 +454,23 @@ var
         oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled);
     end;
 
-    oldColor := SetTextColor(DC, oldColor);
-    pOldFont := SelectObject(DC, AFont);
-    OldMode := SetBkMode(DC, Transparent);
-
-    Winapi.Windows.DrawText(DC, Sign, 1, DestRect, DT_LEFT or DT_SINGLELINE);
-    SetBkMode(DC, OldMode);
-    SelectObject(DC, pOldFont);
-    SelectObject(DC, oldColor);
-    DeleteObject(AFont);
+    AFont := CreateFontIndirect(LogFont);
+    if AFont<>0 then
+    try
+      oldColor := SetTextColor(DC, oldColor);
+      pOldFont := SelectObject(DC, AFont);
+      try
+        OldMode := SetBkMode(DC, Transparent);
+        Winapi.Windows.DrawText(DC, Sign, 1, DestRect, DT_LEFT or DT_SINGLELINE);
+        SetBkMode(DC, OldMode);
+        SelectObject(DC, oldColor);
+      finally
+       if pOldFont<>0 then
+         SelectObject(DC, pOldFont);
+      end;
+    finally
+      DeleteObject(AFont);
+    end;
   end;
 
 begin
@@ -603,7 +595,6 @@ begin
     begin
       { Draw System PopupMenu Bitmap }
       DisplayCheckedGlyph := False;
-      // DrawVisualSysBitmap(hBmp);
 
       case hBmp of
         HBMMENU_POPUP_RESTORE: Sign := MARLETT_RESTORE_CHAR;
@@ -645,9 +636,11 @@ begin
           LImageRect.Right := ItemRect.Right;
         end;
         Icon := BmpToIcon(hBmp);
-
-        DrawIconEX(DC, LImageRect.Left, LImageRect.Top, Icon, BmpWidth, BmpHeight, 0, 0, DI_NORMAL);
-        DeleteObject(Icon);
+        if Icon<>0 then
+        begin
+          DrawIconEX(DC, LImageRect.Left, LImageRect.Top, Icon, BmpWidth, BmpHeight, 0, 0, DI_NORMAL);
+          DeleteObject(Icon);
+        end;
       end;
     end;
   end;
@@ -704,7 +697,21 @@ begin
   if SysItem.DefaultItem then
     Canvas.Font.Style := [fsBold];
 
-  DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat);
+  if LMenuItem <> nil then
+    DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat)
+  else
+  begin
+    sShortCut:='';
+    //http://msdn.microsoft.com/en-us/library/ms647553%28v=VS.85%29.aspx#_win32_Menu_Shortcut_Keys
+    p:=Pos(#9, ItemText);
+    if p>1 then
+    begin
+      sShortCut:=Copy(ItemText, p+1, length(ItemText)-p);
+      DrawText(Canvas.Handle, LDetails, Copy(ItemText, 1, p), LTextRect, LTextFormat)
+    end
+    else
+      DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat)
+  end;
 
   { Draw ShortCut Text . }
   if LMenuItem <> nil then
@@ -725,6 +732,22 @@ begin
       end;
       DrawText(Canvas.Handle, LDetails, sShortCut, LTextRect, LTextFormat);
     end;
+  end
+  else
+  if sShortCut<>'' then
+  begin
+    LTextRect := ItemRect;
+    if RightToLeft then
+    begin
+      LTextRect.Left := ItemRect.Left + 14;
+      LTextRect.Right := LTextRect.Left + Canvas.TextWidth(sShortCut);
+    end
+    else
+    begin
+      LTextRect.Left := ItemRect.Right - 14 - Canvas.TextWidth(sShortCut);
+      LTextRect.Right := ItemRect.Right;
+    end;
+    DrawText(Canvas.Handle, LDetails, sShortCut, LTextRect, LTextFormat);
   end;
 end;
 
@@ -754,14 +777,14 @@ end;
 
 function TSysPopupStyleHook.GetRightToLeft: Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo: TMenuItemInfo;
 begin
   Result:=False;
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_TYPE;
-  if GetMenuItemInfo(FMenu, 0, True, info) then
-    Result := ((info.fType and MFT_RIGHTORDER) = MFT_RIGHTORDER) or ((info.fType and MFT_RIGHTJUSTIFY) = MFT_RIGHTJUSTIFY);
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_TYPE;
+  if GetMenuItemInfo(FMenu, 0, True, pMenuItemInfo) then
+    Result := ((pMenuItemInfo.fType and MFT_RIGHTORDER) = MFT_RIGHTORDER) or ((pMenuItemInfo.fType and MFT_RIGHTJUSTIFY) = MFT_RIGHTJUSTIFY);
 end;
 
 function TSysPopupStyleHook.GetSysPopupItem(Index: integer): TSysPopupItem;
@@ -979,23 +1002,21 @@ begin
   Handled := True;
 end;
 
-// ------------------------------------------------------------------------------
 function IsItemSeparator(Menu: HMENU; const ItemIndex: integer): Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo : TMenuItemInfo;
 begin
   {
     Use this function instead of Items[Index].Separator .
     ==> Fast access in WM_KEYDOWN .
   }
   Result:=False;
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_FTYPE;
-  if GetMenuItemInfo(Menu, ItemIndex, True, info) then
-    Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_FTYPE;
+  if GetMenuItemInfo(Menu, ItemIndex, True, pMenuItemInfo) then
+    Result := (pMenuItemInfo.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
 end;
-// ------------------------------------------------------------------------------
 
 procedure TSysPopupStyleHook.WndProc(var Message: TMessage);
 var
@@ -1204,17 +1225,17 @@ end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetItemBitmap: HBITMAP;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo: TMenuItemInfo;
 begin
   Result:=0;
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_CHECKMARKS or MIIM_BITMAP;
-  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_CHECKMARKS or MIIM_BITMAP;
+  if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
   begin
-    Result := info.hbmpItem;
+    Result := pMenuItemInfo.hbmpItem;
     if Result = 0 then
-      Result := info.hbmpUnchecked;
+      Result := pMenuItemInfo.hbmpUnchecked;
   end;
 end;
 
@@ -1234,9 +1255,9 @@ end;
 
 function TSysPopupStyleHook.TSysPopupItem.GetItemText: String;
 var
-  Buffer: PChar;
-  StrSize: integer;
-  info: MENUITEMINFO;
+  Buffer : PChar;
+  StrSize : integer;
+  pMenuItemInfo : MENUITEMINFO;
 begin
 
   if VCLItem <> nil then
@@ -1252,22 +1273,22 @@ begin
 
   Result := '';
 
-  FillChar(info, sizeof(MENUITEMINFO), Char(0));
-  info.cbSize := sizeof(MENUITEMINFO);
-  info.fMask := MIIM_STRING or MIIM_FTYPE;
-  info.dwTypeData := nil;
-  if GetMenuItemInfo(FMenu, FIndex, True, info) then
+  FillChar(pMenuItemInfo, sizeof(MENUITEMINFO), Char(0));
+  pMenuItemInfo.cbSize := sizeof(MENUITEMINFO);
+  pMenuItemInfo.fMask := MIIM_STRING or MIIM_FTYPE;
+  pMenuItemInfo.dwTypeData := nil;
+  if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
   begin
-    if not(info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
+    if not(pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
     begin
       { The Size needed for the Buffer . }
-      StrSize := info.cch * 2 + 2;
+      StrSize := pMenuItemInfo.cch * 2 + 2;
       GetMem(Buffer, StrSize);
       try
-        info.dwTypeData := Buffer;
+        pMenuItemInfo.dwTypeData := Buffer;
         { inc cch to get the last char . }
-        inc(info.cch);
-        if GetMenuItemInfo(FMenu, FIndex, True, info) then
+        inc(pMenuItemInfo.cch);
+        if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
           Result := String(Buffer);
       finally
         //OutputDebugString(PChar('StrSize '+IntToStr(StrSize)));
@@ -1280,11 +1301,11 @@ begin
       { if the item is owner draw then we need another way to get
         the item text since , when setting an item to ownerdraw windows
         will destroy the dwTypeData that hold the text . }
-      FillChar(info, sizeof(MENUITEMINFO), Char(0));
-      info.cbSize := sizeof(MENUITEMINFO);
-      info.fMask := MIIM_DATA;
-      if GetMenuItemInfo(FMenu, FIndex, True, info) then
-        Result := String(PChar(info.dwItemData));
+      FillChar(pMenuItemInfo, sizeof(MENUITEMINFO), Char(0));
+      pMenuItemInfo.cbSize := sizeof(MENUITEMINFO);
+      pMenuItemInfo.fMask := MIIM_DATA;
+      if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
+        Result := String(PChar(pMenuItemInfo.dwItemData));
     end;
   end;
 end;
@@ -1435,51 +1456,51 @@ end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemDisabled: Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo : TMenuItemInfo;
 begin
   Result:=False;
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_STATE;
-  if GetMenuItemInfo(FMenu, FIndex, True, info) then
-    Result := (info.fState and MFS_DISABLED = MFS_DISABLED) or (info.fState and MF_DISABLED = MF_DISABLED) or (info.fState and MF_GRAYED = MF_GRAYED);
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_STATE;
+  if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
+    Result := (pMenuItemInfo.fState and MFS_DISABLED = MFS_DISABLED) or (pMenuItemInfo.fState and MF_DISABLED = MF_DISABLED) or (pMenuItemInfo.fState and MF_GRAYED = MF_GRAYED);
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemOwnerDraw: Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo: TMenuItemInfo;
 begin
   Result:=False;
-  FillChar(info, sizeof(MENUITEMINFO), Char(0));
-  info.cbSize := sizeof(MENUITEMINFO);
-  info.fMask := MIIM_FTYPE;
-  info.dwTypeData := nil;
-  if GetMenuItemInfo(FMenu, FIndex, True, info) then
-    Result := (info.fType and MFT_OWNERDRAW = MFT_OWNERDRAW);
+  FillChar(pMenuItemInfo, sizeof(MENUITEMINFO), Char(0));
+  pMenuItemInfo.cbSize := sizeof(MENUITEMINFO);
+  pMenuItemInfo.fMask := MIIM_FTYPE;
+  pMenuItemInfo.dwTypeData := nil;
+  if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
+    Result := (pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW);
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemRadioCheck: Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo: TMenuItemInfo;
 begin
   Result:=False;
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_FTYPE;
-  if GetMenuItemInfo(FMenu, FIndex, True, info) then
-    Result := (info.fType and MFT_RADIOCHECK) = MFT_RADIOCHECK;
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_FTYPE;
+  if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
+    Result := (pMenuItemInfo.fType and MFT_RADIOCHECK) = MFT_RADIOCHECK;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemChecked: Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo: TMenuItemInfo;
 begin
   Result:=False;
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_STATE;
-  if GetMenuItemInfo(FMenu, FIndex, True, info) then
-    Result := (info.fState and MFS_CHECKED) = MFS_CHECKED;
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_STATE;
+  if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
+    Result := (pMenuItemInfo.fState and MFS_CHECKED) = MFS_CHECKED;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemContainsSubMenu: Boolean;
@@ -1489,28 +1510,28 @@ end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemDefault: Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo: TMenuItemInfo;
 begin
   Result:=False;
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_STATE;
-  if GetMenuItemInfo(FMenu, FIndex, True, info) then
-    Result := (info.fState and MFS_DEFAULT) = MFS_DEFAULT;
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_STATE;
+  if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
+    Result := (pMenuItemInfo.fState and MFS_DEFAULT) = MFS_DEFAULT;
 end;
 
 function TSysPopupStyleHook.TSysPopupItem.IsItemSeparator: Boolean;
 var
-  info: TMenuItemInfo;
+  pMenuItemInfo: TMenuItemInfo;
 begin
-  FillChar(info, sizeof(info), Char(0));
-  info.cbSize := sizeof(TMenuItemInfo);
-  info.fMask := MIIM_FTYPE;
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_FTYPE;
   Result := False;
   if (FIndex > -1) and (FIndex < GetMenuItemCount(FMenu) - 1) then
   begin
-    if GetMenuItemInfo(FMenu, FIndex, True, info) then
-      Result := (info.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
+    if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
+      Result := (pMenuItemInfo.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
   end;
 end;
 
