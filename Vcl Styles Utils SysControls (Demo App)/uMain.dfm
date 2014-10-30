@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 497
-  Top = 181
+  Left = 499
+  Top = 418
   Caption = 'Main'
   ClientHeight = 229
   ClientWidth = 423
@@ -18,7 +18,7 @@ object Form1: TForm1
   TextHeight = 13
   object LblStyles: TLabel
     Left = 8
-    Top = 11
+    Top = 8
     Width = 39
     Height = 13
     Caption = 'Styles : '
@@ -206,7 +206,7 @@ object Form1: TForm1
     Left = 168
     Top = 38
     Bitmap = {
-      494C01010D002400500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010D002400540010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000002300000033000000330000
       0033000000330000003300000033000000330000003300000033000000330000
@@ -871,6 +871,58 @@ object Form1: TForm1
       end
       object SaveAs1: TMenuItem
         Caption = 'Save &As...'
+      end
+      object N6: TMenuItem
+        Caption = '-'
+      end
+      object Edit2: TMenuItem
+        Caption = '&Edit'
+        object Undo1: TMenuItem
+          Caption = '&Undo'
+          ShortCut = 16474
+        end
+        object Repeat1: TMenuItem
+          Caption = '&Repeat <command>'
+        end
+        object N5: TMenuItem
+          Caption = '-'
+        end
+        object Cut1: TMenuItem
+          Caption = 'Cu&t'
+          ShortCut = 16472
+        end
+        object Copy1: TMenuItem
+          Caption = '&Copy'
+          ShortCut = 16451
+        end
+        object Paste1: TMenuItem
+          Caption = '&Paste'
+          ShortCut = 16470
+        end
+        object PasteSpecial1: TMenuItem
+          Caption = 'Paste &Special...'
+        end
+        object N4: TMenuItem
+          Caption = '-'
+        end
+        object Find1: TMenuItem
+          Caption = '&Find...'
+        end
+        object Replace1: TMenuItem
+          Caption = 'R&eplace...'
+        end
+        object GoTo1: TMenuItem
+          Caption = '&Go To...'
+        end
+        object N3: TMenuItem
+          Caption = '-'
+        end
+        object Links1: TMenuItem
+          Caption = 'Lin&ks...'
+        end
+        object Object1: TMenuItem
+          Caption = '&Object'
+        end
       end
       object N2: TMenuItem
         Caption = '-'

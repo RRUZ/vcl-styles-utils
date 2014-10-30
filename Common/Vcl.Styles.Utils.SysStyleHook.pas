@@ -741,11 +741,10 @@ end;
 
 procedure TSysStyleHook.SetColor(const Value: TColor);
 begin
-  if (Value <> FColor) or ((FBrush <> nil) and (Value <> FBrush.Color)) then
+  if (FBrush <> nil) and ((Value <> FColor) or (Value <> FBrush.Color)) then
   begin
     FColor := Value;
-    if Assigned(FBrush) then
-      FBrush.Color := Value;
+    FBrush.Color := Value;
   end;
 end;
 
