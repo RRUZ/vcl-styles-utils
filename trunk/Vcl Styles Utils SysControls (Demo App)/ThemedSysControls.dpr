@@ -1,10 +1,17 @@
 program ThemedSysControls;
 
+
+{$DEFINE USEVCLSTYLESHOOKS}
 uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Forms,
   uMain in 'uMain.pas' {Form1},
+  {$IFDEF USEVCLSTYLESHOOKS}
+  DDetours in '..\Common\delphi-detours-library\DDetours.pas',
+  InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
+  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  {$ENDIF}
   Vcl.Styles.Utils.Menus in '..\Common\Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Utils.Forms in '..\Common\Vcl.Styles.Utils.Forms.pas',
   Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas',

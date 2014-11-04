@@ -5,6 +5,7 @@ uses
   uMain in 'uMain.pas' {FrmMain},
   Vcl.Themes,
   Vcl.Styles,
+  Vcl.Styles.Utils.Menus in '..\Common\Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
