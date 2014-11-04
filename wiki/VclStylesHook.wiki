@@ -1,6 +1,6 @@
 #summary Vcl.Styles.Hook.
 
-The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit,  patch a set of !WinApi and !UxTheme methods in order to fix the system colors used by some VCL components and also replace some elements of the Windows Native Theme patching the DrawThemeBackground and DrawThemeBackgroundEx methods.
+The <a href="http://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.Hooks.pas">Vcl.Styles.Hook</a> unit,  patch a set of !WinApi and !UxTheme methods in order to fix the system colors used by some VCL components and also replace some elements of the Windows Native Theme patching the !DrawThemeBackground and !DrawThemeBackgroundEx methods.
 
 = Screenshots =
 
@@ -12,7 +12,7 @@ Including the Vcl.Styles.Hook unit in your project the system colors are replace
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Hooks%20Images/Full_Fix.png
 
-When you uses a TListView setting the CheckBoxes property to True and with the VCL Styles enabled the control will look like so
+When you uses a TListView setting the !CheckBoxes property to True and with the VCL Styles enabled the control will look like so
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Hooks%20Images/listview_nohook.png
 
