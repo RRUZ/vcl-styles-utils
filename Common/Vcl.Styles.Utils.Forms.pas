@@ -2317,6 +2317,10 @@ begin
     FDownDis := P.Y - VertSliderRect.Top;
     { The old ScrollBar Position }
     FPrevPos := VertScrollInfo.nPos;
+
+//    OutputDebugString(PChar(Format('TSysScrollingStyleHook.WMNCLButtonDown P.X %d P.Y %d VertSliderRect.Left %d VertSliderRect.Top %d VertSliderRect.Width %d VertSliderRect.Height %d',
+//    [P.X, P.Y, VertSliderRect.Left, VertSliderRect.Top, VertSliderRect.Width, VertSliderRect.Height])));
+
     if VertSliderRect.Contains(P) then
     begin
       { VertSliderButton pressed . }

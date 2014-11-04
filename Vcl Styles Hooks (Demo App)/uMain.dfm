@@ -1,6 +1,6 @@
 object FrmMain: TFrmMain
-  Left = 488
-  Top = 183
+  Left = 552
+  Top = 215
   Caption = 'Demo'
   ClientHeight = 542
   ClientWidth = 478
@@ -32,28 +32,36 @@ object FrmMain: TFrmMain
       ActivePage = TabSheet1
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 449
+      ExplicitLeft = 12
+      ExplicitTop = 12
       object TabSheet1: TTabSheet
         Caption = 'Edits and Lists'
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 441
+        ExplicitWidth = 0
         ExplicitHeight = 0
         object Label1: TLabel
           Left = 8
           Top = 3
-          Width = 439
+          Width = 380
           Height = 26
           Caption = 
-            'This Application shows how the VCl.Styles.Hooks unit allow to us' +
-            'e the proper system colors '#13#10'for the current VCL Style on the Ed' +
-            'it and List controls.'
+            'Check out how the VCl.Styles.Hooks unit allow to use the proper ' +
+            'system colors '#13#10'for the current VCL Style on the Edit and List c' +
+            'ontrols.'
+        end
+        object LblStyles: TLabel
+          Left = 8
+          Top = 35
+          Width = 39
+          Height = 13
+          Caption = 'Styles : '
         end
         object ListBox1: TListBox
-          Left = 8
-          Top = 58
+          Left = 12
+          Top = 80
           Width = 149
-          Height = 95
+          Height = 73
           ItemHeight = 13
           TabOrder = 0
         end
@@ -86,9 +94,9 @@ object FrmMain: TFrmMain
         end
         object Memo1: TMemo
           Left = 167
-          Top = 58
+          Top = 80
           Width = 246
-          Height = 95
+          Height = 73
           HideSelection = False
           Lines.Strings = (
             'The quick brown fox jumps over the lazy dog'
@@ -130,8 +138,8 @@ object FrmMain: TFrmMain
           TabOrder = 7
         end
         object CheckBox1: TCheckBox
-          Left = 8
-          Top = 35
+          Left = 12
+          Top = 57
           Width = 149
           Height = 17
           Caption = 'Enable VCL Styles Hooks'
@@ -140,37 +148,155 @@ object FrmMain: TFrmMain
           TabOrder = 8
           OnClick = CheckBox1Click
         end
+        object ComboBoxStyles: TComboBox
+          Left = 53
+          Top = 35
+          Width = 244
+          Height = 21
+          Style = csDropDownList
+          TabOrder = 9
+          OnSelect = ComboBoxStylesSelect
+        end
       end
       object TabSheet2: TTabSheet
         Caption = 'ListView'
         ImageIndex = 2
-        object ListView1: TListView
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+        object Panel2: TPanel
+          Left = 0
+          Top = 49
+          Width = 458
+          Height = 453
+          Align = alClient
+          BorderWidth = 5
+          TabOrder = 0
+          ExplicitLeft = 64
+          ExplicitTop = 80
+          ExplicitWidth = 305
+          ExplicitHeight = 209
+          object PageControl2: TPageControl
+            Left = 6
+            Top = 6
+            Width = 446
+            Height = 441
+            ActivePage = TabSheet6
+            Align = alClient
+            TabOrder = 0
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitHeight = 490
+            object TabSheet6: TTabSheet
+              Caption = 'Report View'
+              ExplicitHeight = 462
+              object ListView1: TListView
+                Left = 0
+                Top = 0
+                Width = 438
+                Height = 413
+                Align = alClient
+                Checkboxes = True
+                Columns = <
+                  item
+                    Caption = 'Column 1'
+                    Width = 100
+                  end
+                  item
+                    Caption = 'Column 2'
+                    Width = 100
+                  end
+                  item
+                    Caption = 'Column 3'
+                    Width = 100
+                  end
+                  item
+                    Caption = 'Column 4'
+                    Width = 100
+                  end>
+                MultiSelect = True
+                RowSelect = True
+                TabOrder = 0
+                ViewStyle = vsReport
+                ExplicitHeight = 462
+              end
+            end
+            object TabSheet7: TTabSheet
+              Caption = 'Groups'
+              ImageIndex = 1
+              ExplicitHeight = 462
+              object ListView2: TListView
+                Left = 0
+                Top = 0
+                Width = 438
+                Height = 413
+                Align = alClient
+                Checkboxes = True
+                Columns = <
+                  item
+                    Caption = 'Column 1'
+                    Width = 100
+                  end
+                  item
+                    Caption = 'Column 2'
+                    Width = 100
+                  end
+                  item
+                    Caption = 'Column 3'
+                    Width = 100
+                  end
+                  item
+                    Caption = 'Column 4'
+                    Width = 100
+                  end>
+                Groups = <
+                  item
+                    Header = 'Group 1'
+                    Footer = 'Footer Group 1'
+                    GroupID = 0
+                    State = [lgsNormal, lgsCollapsible]
+                    HeaderAlign = taLeftJustify
+                    FooterAlign = taLeftJustify
+                    Subtitle = 'Subtitle'
+                    TitleImage = -1
+                  end
+                  item
+                    Header = 'Group 2'
+                    Footer = 'Footer Group 2'
+                    GroupID = 1
+                    State = [lgsNormal, lgsCollapsible]
+                    HeaderAlign = taLeftJustify
+                    FooterAlign = taLeftJustify
+                    Subtitle = 'Subtitle'
+                    TitleImage = -1
+                  end>
+                GroupView = True
+                RowSelect = True
+                TabOrder = 0
+                ViewStyle = vsReport
+                ExplicitHeight = 462
+              end
+            end
+          end
+        end
+        object Panel3: TPanel
           Left = 0
           Top = 0
           Width = 458
-          Height = 502
-          Align = alClient
-          Checkboxes = True
-          Columns = <
-            item
-              Caption = 'Column 1'
-              Width = 100
-            end
-            item
-              Caption = 'Column 2'
-              Width = 100
-            end
-            item
-              Caption = 'Column 3'
-              Width = 100
-            end
-            item
-              Caption = 'Column 4'
-              Width = 100
-            end>
-          RowSelect = True
-          TabOrder = 0
-          ViewStyle = vsReport
+          Height = 49
+          Align = alTop
+          TabOrder = 1
+          object Label4: TLabel
+            Left = 10
+            Top = 4
+            Width = 429
+            Height = 39
+            Caption = 
+              'The VCl.Styles.Hooks unit allow to use the proper system colors ' +
+              #13#10'for the current VCL Style, add support for style the groups an' +
+              'd checkbox on the Listview '#13#10'controls.'
+          end
         end
       end
       object TabSheet3: TTabSheet
@@ -182,13 +308,123 @@ object FrmMain: TFrmMain
         ExplicitHeight = 0
         object TreeView1: TTreeView
           Left = 0
-          Top = 0
+          Top = 49
           Width = 458
-          Height = 502
+          Height = 453
           Align = alClient
           Indent = 19
           TabOrder = 0
+          ExplicitTop = 0
           ExplicitWidth = 441
+          ExplicitHeight = 502
+        end
+        object Panel4: TPanel
+          Left = 0
+          Top = 0
+          Width = 458
+          Height = 49
+          Align = alTop
+          TabOrder = 1
+          object Label5: TLabel
+            Left = 10
+            Top = 4
+            Width = 381
+            Height = 39
+            Caption = 
+              'The VCl.Styles.Hooks unit allow to use the proper system colors ' +
+              #13#10'for the current VCL Style, replaces the glyph open and glyph c' +
+              'losed images  on '#13#10'the TreeView controls.'
+          end
+        end
+      end
+      object TabSheet4: TTabSheet
+        Caption = 'DateTime Controls'
+        ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+        object Label2: TLabel
+          Left = 215
+          Top = 32
+          Width = 76
+          Height = 13
+          Caption = 'Month Calendar'
+        end
+        object Label3: TLabel
+          Left = 10
+          Top = 29
+          Width = 76
+          Height = 13
+          Caption = 'DateTime Picker'
+        end
+        object Label6: TLabel
+          Left = 10
+          Top = 4
+          Width = 341
+          Height = 13
+          Caption = 
+            'The VCl.Styles.Hooks Improve the style of the DatePicker compone' +
+            'nts.'
+        end
+        object DateTimePicker1: TDateTimePicker
+          Left = 10
+          Top = 48
+          Width = 186
+          Height = 21
+          Date = 41947.248469074070000000
+          Time = 41947.248469074070000000
+          TabOrder = 0
+        end
+        object MonthCalendar1: TMonthCalendar
+          Left = 215
+          Top = 51
+          Width = 225
+          Height = 160
+          MultiSelect = True
+          Date = 41947.437662245370000000
+          EndDate = 41947.437662245370000000
+          TabOrder = 1
+        end
+        object DateTimePicker2: TDateTimePicker
+          Left = 10
+          Top = 75
+          Width = 186
+          Height = 21
+          Date = 41947.248469074070000000
+          Time = 41947.248469074070000000
+          DateFormat = dfLong
+          TabOrder = 2
+        end
+      end
+      object TabSheet5: TTabSheet
+        Caption = 'ProgressBar'
+        ImageIndex = 4
+        object Label7: TLabel
+          Left = 3
+          Top = 3
+          Width = 343
+          Height = 13
+          Caption = 
+            'The VCl.Styles.Hooks Improve the style of the progressbar compon' +
+            'ent.'
+        end
+        object ProgressBar1: TProgressBar
+          Left = 3
+          Top = 32
+          Width = 358
+          Height = 17
+          Position = 50
+          TabOrder = 0
+        end
+        object ProgressBar2: TProgressBar
+          Left = 3
+          Top = 55
+          Width = 358
+          Height = 17
+          Style = pbstMarquee
+          MarqueeInterval = 50
+          TabOrder = 1
         end
       end
     end
@@ -198,7 +434,7 @@ object FrmMain: TFrmMain
     Left = 248
     Top = 237
     Bitmap = {
-      494C010107000800340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000800500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       00000000000000000000000000000000000000000005000000150000001A0000
       001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000
