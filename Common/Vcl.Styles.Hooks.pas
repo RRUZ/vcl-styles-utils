@@ -222,7 +222,6 @@ begin
    {$IFDEF HOOK_SPIN}
    if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_SPIN) then
    begin
-
      case iPartId of
         SPNP_UP :
                         begin
@@ -585,19 +584,18 @@ begin
    if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_MONTHCAL) then
    begin
      case iPartId of
-
-       MC_GRIDBACKGROUND,
+       MC_BACKGROUND,
        MC_BORDERS,
-       MC_BACKGROUND : begin
-                          SaveIndex := SaveDC(hdc);
-                          try
-                           LDetails:=StyleServices.GetElementDetails(teBackgroundNormal);
-                           StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                          finally
-                            RestoreDC(hdc, SaveIndex);
-                          end;
-                          Result:=S_OK;
-                       end;
+       MC_GRIDBACKGROUND : begin
+                            SaveIndex := SaveDC(hdc);
+                            try
+                             LDetails:=StyleServices.GetElementDetails(teBackgroundNormal);
+                             StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+                            finally
+                              RestoreDC(hdc, SaveIndex);
+                            end;
+                            Result:=S_OK;
+                           end;
 
        MC_COLHEADERSPLITTER  : begin
                                   LStartColor := StyleServices.GetSystemColor(clBtnShadow);
@@ -623,14 +621,17 @@ begin
                                end;
 
        MC_GRIDCELLBACKGROUND : begin
+
 //                                   case iStateId of
 //                                    MCGCB_SELECTED : LDetails:=StyleServices.GetElementDetails(tgCellSelected);
 //                                    MCGCB_HOT :LDetails:=StyleServices.GetElementDetails(tgFixedCellHot);
 //                                    MCGCB_SELECTEDHOT :LDetails:=StyleServices.GetElementDetails(tgCellSelected);
 //                                    MCGCB_SELECTEDNOTFOCUSED :LDetails:=StyleServices.GetElementDetails(tgCellSelected);
 //                                    MCGCB_TODAY :LDetails:=StyleServices.GetElementDetails(tgFixedCellHot);
+//                                    else
+//                                      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 //                                   end;
-
+//
 //                                    SaveIndex := SaveDC(hdc);
 //                                    try
 //                                       StyleServices.DrawElement(hdc, LDetails, pRect, nil);
@@ -1819,7 +1820,7 @@ initialization
    pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeBackgroundEx');
    if Assigned(pOrgPointer) then
     @TrampolineDrawThemeBackgroundEx := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeBackgroundEx);
-//
+
    pOrgPointer := GetProcAddress(ThemeLibrary, 'DrawThemeText');
    if Assigned(pOrgPointer) then
     @TrampolineDrawThemeText := InterceptCreate(pOrgPointer, @Detour_UxTheme_DrawThemeText);
@@ -1835,7 +1836,7 @@ initialization
    pOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColorBrush');
    if Assigned(pOrgPointer) then
     @TrampolineGetThemeSysColorBrush := InterceptCreate(pOrgPointer, @Detour_GetThemeSysColorBrush);
-
+//
 
    pOrgPointer     := GetProcAddress(ThemeLibrary, 'GetThemeColor');
    if Assigned(pOrgPointer) then

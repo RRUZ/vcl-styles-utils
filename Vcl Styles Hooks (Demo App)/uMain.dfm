@@ -1,8 +1,8 @@
 object FrmMain: TFrmMain
-  Left = 552
-  Top = 215
+  Left = 488
+  Top = 175
   Caption = 'Demo'
-  ClientHeight = 542
+  ClientHeight = 536
   ClientWidth = 478
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,21 +19,20 @@ object FrmMain: TFrmMain
     Left = 0
     Top = 0
     Width = 478
-    Height = 542
+    Height = 536
     Align = alClient
     BorderWidth = 5
     TabOrder = 0
-    ExplicitWidth = 461
+    ExplicitHeight = 542
     object PageControl1: TPageControl
       Left = 6
       Top = 6
       Width = 466
-      Height = 530
+      Height = 524
       ActivePage = TabSheet1
       Align = alClient
       TabOrder = 0
-      ExplicitLeft = 12
-      ExplicitTop = 12
+      ExplicitHeight = 530
       object TabSheet1: TTabSheet
         Caption = 'Edits and Lists'
         ExplicitLeft = 0
@@ -169,7 +168,7 @@ object FrmMain: TFrmMain
           Left = 0
           Top = 49
           Width = 458
-          Height = 453
+          Height = 447
           Align = alClient
           BorderWidth = 5
           TabOrder = 0
@@ -181,7 +180,7 @@ object FrmMain: TFrmMain
             Left = 6
             Top = 6
             Width = 446
-            Height = 441
+            Height = 435
             ActivePage = TabSheet6
             Align = alClient
             TabOrder = 0
@@ -190,12 +189,12 @@ object FrmMain: TFrmMain
             ExplicitHeight = 490
             object TabSheet6: TTabSheet
               Caption = 'Report View'
-              ExplicitHeight = 462
+              ExplicitHeight = 413
               object ListView1: TListView
                 Left = 0
                 Top = 0
                 Width = 438
-                Height = 413
+                Height = 407
                 Align = alClient
                 Checkboxes = True
                 Columns = <
@@ -219,18 +218,18 @@ object FrmMain: TFrmMain
                 RowSelect = True
                 TabOrder = 0
                 ViewStyle = vsReport
-                ExplicitHeight = 462
+                ExplicitHeight = 413
               end
             end
             object TabSheet7: TTabSheet
               Caption = 'Groups'
               ImageIndex = 1
-              ExplicitHeight = 462
+              ExplicitHeight = 413
               object ListView2: TListView
                 Left = 0
                 Top = 0
                 Width = 438
-                Height = 413
+                Height = 407
                 Align = alClient
                 Checkboxes = True
                 Columns = <
@@ -275,7 +274,7 @@ object FrmMain: TFrmMain
                 RowSelect = True
                 TabOrder = 0
                 ViewStyle = vsReport
-                ExplicitHeight = 462
+                ExplicitHeight = 413
               end
             end
           end
@@ -304,19 +303,17 @@ object FrmMain: TFrmMain
         ImageIndex = 2
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 441
+        ExplicitWidth = 0
         ExplicitHeight = 0
         object TreeView1: TTreeView
           Left = 0
           Top = 49
           Width = 458
-          Height = 453
+          Height = 447
           Align = alClient
           Indent = 19
           TabOrder = 0
-          ExplicitTop = 0
-          ExplicitWidth = 441
-          ExplicitHeight = 502
+          ExplicitHeight = 453
         end
         object Panel4: TPanel
           Left = 0
@@ -346,14 +343,14 @@ object FrmMain: TFrmMain
         ExplicitHeight = 0
         object Label2: TLabel
           Left = 215
-          Top = 32
+          Top = 45
           Width = 76
           Height = 13
           Caption = 'Month Calendar'
         end
         object Label3: TLabel
           Left = 10
-          Top = 29
+          Top = 45
           Width = 76
           Height = 13
           Caption = 'DateTime Picker'
@@ -361,15 +358,15 @@ object FrmMain: TFrmMain
         object Label6: TLabel
           Left = 10
           Top = 4
-          Width = 341
-          Height = 13
+          Width = 406
+          Height = 26
           Caption = 
-            'The VCl.Styles.Hooks Improve the style of the DatePicker compone' +
-            'nts.'
+            'The VCl.Styles.Hooks Improve the styling of the DateTimePicker a' +
+            'nd MonthCalendar '#13#10'components.'
         end
         object DateTimePicker1: TDateTimePicker
           Left = 10
-          Top = 48
+          Top = 64
           Width = 186
           Height = 21
           Date = 41947.248469074070000000
@@ -378,17 +375,17 @@ object FrmMain: TFrmMain
         end
         object MonthCalendar1: TMonthCalendar
           Left = 215
-          Top = 51
+          Top = 64
           Width = 225
           Height = 160
           MultiSelect = True
-          Date = 41947.437662245370000000
-          EndDate = 41947.437662245370000000
+          Date = 41947.615869351850000000
+          EndDate = 41947.615869351850000000
           TabOrder = 1
         end
         object DateTimePicker2: TDateTimePicker
           Left = 10
-          Top = 75
+          Top = 91
           Width = 186
           Height = 21
           Date = 41947.248469074070000000
@@ -400,18 +397,34 @@ object FrmMain: TFrmMain
       object TabSheet5: TTabSheet
         Caption = 'ProgressBar'
         ImageIndex = 4
+        ExplicitLeft = 0
+        ExplicitHeight = 131
         object Label7: TLabel
           Left = 3
-          Top = 3
-          Width = 343
+          Top = 2
+          Width = 351
           Height = 13
           Caption = 
-            'The VCl.Styles.Hooks Improve the style of the progressbar compon' +
-            'ent.'
+            'The VCl.Styles.Hooks Improve the styling of the progressbar comp' +
+            'onent.'
+        end
+        object Label8: TLabel
+          Left = 3
+          Top = 21
+          Width = 88
+          Height = 13
+          Caption = 'Style - pbstNormal'
+        end
+        object Label9: TLabel
+          Left = 3
+          Top = 63
+          Width = 97
+          Height = 13
+          Caption = 'Style - pbstMarquee'
         end
         object ProgressBar1: TProgressBar
           Left = 3
-          Top = 32
+          Top = 40
           Width = 358
           Height = 17
           Position = 50
@@ -419,7 +432,7 @@ object FrmMain: TFrmMain
         end
         object ProgressBar2: TProgressBar
           Left = 3
-          Top = 55
+          Top = 82
           Width = 358
           Height = 17
           Style = pbstMarquee
@@ -431,10 +444,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 248
-    Top = 237
+    Left = 408
+    Top = 45
     Bitmap = {
-      494C010107000800500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000900100010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       00000000000000000000000000000000000000000005000000150000001A0000
       001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000
