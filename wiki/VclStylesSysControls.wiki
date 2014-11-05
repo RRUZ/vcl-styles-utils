@@ -5,6 +5,13 @@ The [https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.S
 ===Screenshots===
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Jet.gif
 
+https://theroadtodelphi.files.wordpress.com/2014/11/2014-11-04-15_14_27-open.png
+
+https://theroadtodelphi.files.wordpress.com/2014/11/2014-11-04-15_21_25-open.png
+
+https://theroadtodelphi.files.wordpress.com/2014/11/2014-11-04-15_25_16-edit-post-e280b9-the-road-to-delphi-a-blog-about-programming-e28094-wordpress.png
+
+
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Diamond_Open.png
 
 https://dl.dropboxusercontent.com/u/12733424/Blog/Vcl%20Styles/XE6%20Premium%20styles/Glossy_Open.png
