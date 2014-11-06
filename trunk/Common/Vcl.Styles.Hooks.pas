@@ -73,6 +73,12 @@ const
   VSCLASS_PROGRESS_INDERTERMINATE        = 'Indeterminate::Progress';
 {$ENDIF}
 
+{$IFDEF HOOK_ListView}
+const
+  VSCLASS_ITEMSVIEW_LISTVIEW             = 'ItemsView::ListView';
+{$ENDIF}
+
+
 var
 {$IFDEF HOOK_UXTHEME}
   ThemeLibrary: THandle;
@@ -94,7 +100,10 @@ var
 
   TrampolineGetSysColor           : function (nIndex: Integer): DWORD; stdcall =  nil;
   TrampolineGetSysColorBrush      : function (nIndex: Integer): HBRUSH; stdcall=  nil;
-//  TrampolineCreateSolidBrush      : function (p1: COLORREF): HBRUSH; stdcall;
+  TrampolineCreateSolidBrush      : function (p1: COLORREF): HBRUSH; stdcall;
+  TrampolineCreateBrushIndirect   : function (const p1: TLogBrush): HBRUSH; stdcall = nil;
+  TrampolineGetStockObject        : function (Index: Integer): HGDIOBJ; stdcall = nil;
+
 //
 //  Trampoline_DrawText                      : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall = nil;
 //  Trampoline_DrawTextEx                    : function (DC: HDC; lpchText: LPCWSTR; cchText: Integer; var p4: TRect;  dwDTFormat: UINT; DTParams: PDrawTextParams): Integer; stdcall = nil;
@@ -116,7 +125,6 @@ begin
     LBuffer.Height:=ARect.Height;
     LRect.Create(0, 0, 1, ARect.Height);
     GradientFillCanvas(LBuffer.Canvas, AStartColor, AEndColor, LRect, Direction);
-    //LRect.Empty;
 
     LRgn := CreateRoundRectRgn(ARect.Left, ARect.Top, ARect.Left +  ARect.Width,  ARect.Top + ARect.Height, Radius, Radius);
     if LRgn>0 then
@@ -176,25 +184,25 @@ end;
 
 procedure DrawParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
 var
-  Bmp: TBitmap;
-  P: TPoint;
+  LBuffer: TBitmap;
+  LPoint: TPoint;
   ParentHandle : THandle;
 begin
   if Handle=0 then exit;
-  P := Point(ARect.Left, ARect.Top);
-  Bmp := TBitmap.Create;
+  LPoint := Point(ARect.Left, ARect.Top);
+  LBuffer := TBitmap.Create;
   try
     ParentHandle:=GetParent(Handle);
     if ParentHandle<>0 then
     begin
-      Bmp.SetSize(ARect.Width, ARect.Height);
-      SendMessage(ParentHandle , WM_ERASEBKGND, Bmp.Canvas.Handle, 0);
-      ClientToScreen(Handle, P);
-      ScreenToClient(ParentHandle, P);
+      LBuffer.SetSize(ARect.Width, ARect.Height);
+      SendMessage(ParentHandle , WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
+      ClientToScreen(Handle, LPoint);
+      ScreenToClient(ParentHandle, LPoint);
       //BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, Bmp.Canvas.Handle, P.X, P.Y, SRCCOPY)
     end;
   finally
-    Bmp.Free;
+    LBuffer.Free;
   end;
 end;
 
@@ -212,7 +220,7 @@ var
 begin
 //  OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
 //
-//  if THThemesClasses.ContainsKey(hTheme) then
+//  if THThemesClasses.ContainsKey(hTheme)  then
 //    OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])))
 //  else
 //    OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
@@ -307,13 +315,12 @@ begin
    else
    {$ENDIF}
    {$IFDEF HOOK_ListView}
-   if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_LISTVIEW) then
+   if  THThemesClasses.ContainsKey(hTheme) and (SameText(THThemesClasses.Items[hTheme], VSCLASS_LISTVIEW) or SameText(THThemesClasses.Items[hTheme], VSCLASS_ITEMSVIEW_LISTVIEW)) then
    begin
         case iPartId of
           LVP_LISTITEM       :
                               begin
                                   case iStateId of
-                                      //LIS_NORMAL            : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronOpenedNormal);
                                       LIS_HOT,
                                       LISS_HOTSELECTED,
                                       LIS_SELECTEDNOTFOCUS,
@@ -338,8 +345,6 @@ begin
                                                                 end;
                                                                 Result:=S_OK;
                                                               end;
-                                      //LIS_DISABLED          : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronOpenedPressed);
-                                      //LIS_SELECTEDNOTFOCUS  : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronOpenedPressed);
                                   else
                                   begin
                                       //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
@@ -372,7 +377,6 @@ begin
                                   end;
 
                                   Result:=S_OK;
-
                               end;
 
           LVP_COLLAPSEBUTTON  :
@@ -396,12 +400,12 @@ begin
                                   end;
 
                                   Result:=S_OK;
-
                               end;
           LVP_GROUPHEADER     :
                                begin
                                   case iStateId of
                                    LVGH_OPENMIXEDSELECTIONHOT,
+                                   LVGH_OPENSELECTED,
                                    LVGH_OPENSELECTEDNOTFOCUSEDHOT,
                                    LVGH_OPENSELECTEDHOT,
                                    LVGH_CLOSEHOT,
@@ -418,15 +422,10 @@ begin
                                                             SaveIndex := SaveDC(hdc);
                                                             try
                                                               LCanvas.Handle:=hdc;
-                                                              LStartColor:= StyleServices.GetSystemColor(clHighlight);
-                                                              //LEndColor:= StyleServices.GetStyleColor(scListView);
-                                                              //GradientRoundedFillCanvas(LCanvas, LStartColor, LEndColor, pRect, gdVertical, 4);
-                                                              AlphaBlendFillCanvas(LCanvas, LStartColor, pRect, 96);
-
-                                                              LCanvas.Pen.Color:=LStartColor;
+                                                              AlphaBlendFillCanvas(LCanvas, LColor, pRect, 96);
+                                                              LCanvas.Pen.Color:=LColor;
                                                               LCanvas.Brush.Style:=bsClear;
                                                               LRect:=pRect;
-                                                              //LCanvas.RoundRect(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height, 6, 6);
                                                               LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
                                                             finally
                                                               LCanvas.Handle:=0;
@@ -584,14 +583,33 @@ begin
    if  THThemesClasses.ContainsKey(hTheme) and SameText(THThemesClasses.Items[hTheme], VSCLASS_MONTHCAL) then
    begin
      case iPartId of
+       MC_BORDERS        :
+                           begin
+                              LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
+                              SaveIndex := SaveDC(hdc);
+                              try
+                                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+                              finally
+                                RestoreDC(hdc, SaveIndex);
+                              end;
+                              Result:=S_OK;
+                           end;
+
        MC_BACKGROUND,
-       MC_BORDERS,
-       MC_GRIDBACKGROUND : begin
+       MC_GRIDBACKGROUND :
+                           begin
                             SaveIndex := SaveDC(hdc);
+                            LCanvas := TCanvas.Create;
                             try
-                             LDetails:=StyleServices.GetElementDetails(teBackgroundNormal);
-                             StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+                             LCanvas.Handle := hdc;
+                             LCanvas.Brush.Color := StyleServices.GetStyleColor(scGrid);
+                             LCanvas.FillRect(pRect);
+
+                             //LDetails:=StyleServices.GetElementDetails(teBackgroundNormal);
+                             //StyleServices.DrawElement(hdc, LDetails, pRect, nil);
                             finally
+                              LCanvas.Handle := 0;
+                              LCanvas.Free;
                               RestoreDC(hdc, SaveIndex);
                             end;
                             Result:=S_OK;
@@ -876,7 +894,7 @@ begin
                              LDetails:=StyleServices.GetElementDetails(tpBar);
          PP_FILLVERT    :    LDetails:=StyleServices.GetElementDetails(tpChunkVert);//GetElementDetails(tpFillVert); not defined
 
-//   Use the Native PP_PULSEOVERLAY to get better results.
+//      Use the Native PP_PULSEOVERLAY part to get better results.
 //      PP_PULSEOVERLAY : if SameText(THThemesClasses.Items[hTheme], VSCLASS_PROGRESS) then
 //                         LDetails:=StyleServices.GetElementDetails(tpChunk)//GetElementDetails(tpPulseOverlay);
 //                        else
@@ -899,7 +917,7 @@ begin
         end;
         end;
 
-        SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+        SaveIndex := SaveDC(hdc);
         try
            if THThemesHWND.ContainsKey(hTheme)  then
              DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
@@ -968,7 +986,7 @@ begin
                   TDLGEBS_EXPANDEDPRESSED        : LDetails:=StyleServices.GetElementDetails(tcpThemedChevronOpenedPressed);
               end;
 
-              SaveIndex := SaveDC(hdc); //avoid canvas issue caused by the StyleServices.DrawElement method
+              SaveIndex := SaveDC(hdc);
               try
                  if THThemesHWND.ContainsKey(hTheme)  then
                    DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
@@ -1006,7 +1024,7 @@ begin
         else
           begin
            Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
-           //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+           //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
           end;
         end;
 
@@ -1156,7 +1174,7 @@ begin
         else
          begin
           Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
-          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
          end;
         end;
   end
@@ -1216,41 +1234,18 @@ begin
           else
               Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
           end;
-
-
-//       LDetails := StyleServices.GetElementDetails(tgGradientCellSelected);
-//       LStartColor:=GetSysColor(COLOR_HIGHLIGHT);
-//       LEndColor  :=GetSysColor(COLOR_HIGHLIGHT);
-//
-//       if StyleServices.GetElementColor(LDetails, ecGradientColor1, LColor) and (LColor <> clNone) then
-//         LStartColor := LColor;
-//       if StyleServices.GetElementColor(LDetails, ecGradientColor2, LColor) and (LColor <> clNone) then
-//         LEndColor := LColor;
-//
-//      LCanvas:=TCanvas.Create;
-//      SaveIndex := SaveDC(hdc);
-//      try
-//        LCanvas.Handle:=hdc;
-//        GradientFillCanvas(LCanvas, LStartColor, LEndColor, pRect, gdVertical);
-//        //GradientRoundedFillCanvas(LCanvas, LStartColor, LEndColor, pRect, gdVertical, 4);
-//      finally
-//        LCanvas.Handle:=0;
-//        LCanvas.Free;
-//        RestoreDC(hdc, SaveIndex);
-//      end;
-//       Exit(S_OK);
     end
     else
     begin
      Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
-     //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+     //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
     end;
   end
   else
   {$ENDIF}
   begin
     Result:= Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
-    //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+    //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
   end;
 end;
 
@@ -1597,7 +1592,7 @@ begin
  if THThemesClasses.ContainsKey(hTheme) then
  begin
    {$IFDEF HOOK_ListView}
-   if SameText(THThemesClasses.Items[hTheme], VSCLASS_LISTVIEW) then
+   if SameText(THThemesClasses.Items[hTheme], VSCLASS_LISTVIEW) or SameText(THThemesClasses.Items[hTheme], VSCLASS_ITEMSVIEW_LISTVIEW) then
    begin
         case iPartId of
           LVP_GROUPHEADER :
@@ -1728,21 +1723,40 @@ begin
    end;
 
    if LCurrentStyleBrush.ContainsKey(nIndex) then
-    Result:=LCurrentStyleBrush.Items[nIndex].Handle
+    Exit(LCurrentStyleBrush.Items[nIndex].Handle)
    else
    begin
      LCurrentStyleBrush.Add(nIndex, TBrush.Create);
-     LCurrentStyleBrush.Items[nIndex].Color:=StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
-    Result:=LCurrentStyleBrush.Items[nIndex].Handle
+     LCurrentStyleBrush.Items[nIndex].Color:= StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
+     //OutputDebugString(PChar(Format('nIndex %d Color %x RGB %x', [nIndex, LCurrentStyleBrush.Items[nIndex].Color, ColorToRGB(LCurrentStyleBrush.Items[nIndex].Color)])));
+     Exit(LCurrentStyleBrush.Items[nIndex].Handle);
    end;
   end;
 end;
 
-//
-//function Detour_CreateSolidBrush(p1: COLORREF): HBRUSH; stdcall;
-//begin
-// Result:=TrampolineCreateSolidBrush(p1);
-//end;
+
+function Detour_CreateSolidBrush(p1: COLORREF): HBRUSH; stdcall;
+begin
+ Result:=TrampolineCreateSolidBrush(p1);
+end;
+
+
+function Detour_CreateBrushIndirect(const p1: TLogBrush): HBRUSH; stdcall;
+//var
+//  l : TLogBrush;
+begin
+// l:=p1;
+// l.lbColor:=clRed;
+// OutputDebugString(PChar('Detour_CreateBrushIndirect Color '+IntToHex(p1.lbColor, 8)));
+// Result:=TrampolineCreateBrushIndirect(l);
+Result:=TrampolineCreateBrushIndirect(p1);
+end;
+
+function Detour_GetStockObject(Index: Integer): HGDIOBJ; stdcall;
+begin
+ //OutputDebugString(PChar('Detour_GetStockObject Index '+IntToStr(Index)));
+ Result:= TrampolineGetStockObject(Index);
+end;
 
 //function Detour_WinApi_DrawText(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
 //begin
@@ -1803,6 +1817,17 @@ initialization
 //   if Assigned(pOrgPointer) then
 //    @TrampolineCreateSolidBrush    :=  InterceptCreate(pOrgPointer, @Detour_CreateSolidBrush);
 //
+//
+//   pOrgPointer     := GetProcAddress(GetModuleHandle(gdi32), 'CreateBrushIndirect');
+//   if Assigned(pOrgPointer) then
+//    @TrampolineCreateBrushIndirect    :=  InterceptCreate(pOrgPointer, @Detour_CreateBrushIndirect);
+//
+//
+//   pOrgPointer     := GetProcAddress(GetModuleHandle(gdi32), 'GetStockObject');
+//   if Assigned(pOrgPointer) then
+//    @TrampolineGetStockObject    :=  InterceptCreate(pOrgPointer, @Detour_GetStockObject);
+
+
 //   Trampoline_DrawText                       := InterceptCreate(@WinApi.Windows.DrawTextW, @Detour_WinApi_DrawText);
 //   Trampoline_DrawTextEx                     := InterceptCreate(@WinApi.Windows.DrawTextEx, @Detour_WinApi_DrawTextEx);
 //   Trampoline_ExtTextOutW                    := InterceptCreate(@WinApi.Windows.ExtTextOutW, @Detour_WinApi_ExtTextOutW);
@@ -1836,7 +1861,7 @@ initialization
    pOrgPointer  := GetProcAddress(ThemeLibrary, 'GetThemeSysColorBrush');
    if Assigned(pOrgPointer) then
     @TrampolineGetThemeSysColorBrush := InterceptCreate(pOrgPointer, @Detour_GetThemeSysColorBrush);
-//
+
 
    pOrgPointer     := GetProcAddress(ThemeLibrary, 'GetThemeColor');
    if Assigned(pOrgPointer) then
@@ -1851,9 +1876,16 @@ finalization
  if Assigned(TrampolineGetSysColorBrush) then
   InterceptRemove(@TrampolineGetSysColorBrush);
 
-// if Assigned(TrampolineCreateSolidBrush) then
-//  InterceptRemove(@TrampolineCreateSolidBrush);
-//
+ if Assigned(TrampolineCreateSolidBrush) then
+  InterceptRemove(@TrampolineCreateSolidBrush);
+
+ if Assigned(TrampolineCreateBrushIndirect) then
+  InterceptRemove(@TrampolineCreateBrushIndirect);
+
+ if Assigned(TrampolineGetStockObject) then
+  InterceptRemove(@TrampolineGetStockObject);
+
+
 //  if Assigned(Trampoline_DrawText) then
 //    InterceptRemove(@Trampoline_DrawText);
 //
