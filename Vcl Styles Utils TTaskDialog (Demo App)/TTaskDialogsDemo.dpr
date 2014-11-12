@@ -11,6 +11,7 @@ uses
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
+  Vcl.Styles.UxTheme in '..\Common\Vcl.Styles.UxTheme.pas',
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas';
 
 {$R *.res}

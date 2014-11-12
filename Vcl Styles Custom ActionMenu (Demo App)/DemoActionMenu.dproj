@@ -176,6 +176,7 @@ CompatibilityMode=1
 csoAllowedRenderMethods=64
 csoDisabledRenderMethods=-2
 csoShowWindowsThreads=1
+DeleteMapAfterCompile=1
 Email Address=""
 Email Object=""
 Encrypt Password=""

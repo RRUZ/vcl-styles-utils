@@ -26,7 +26,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, StdCtrls, Mask, ComCtrls, Generics.Defaults, uHSLUtils,
   Generics.Collections, Vcl.ImgList, Vcl.ActnList, Vcl.Styles.Ext,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, System.Actions;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan;
 
 type
   TFrmHueSat = class(TForm)

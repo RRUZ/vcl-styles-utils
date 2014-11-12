@@ -22,10 +22,10 @@ unit Vcl.Styles.Utils.Menus;
 
 interface
 
-{$DEFINE UseVCLStyleUtilsMenu}
-{$IF CompilerVersion >= 27}
-{$UNDEF UseVCLStyleUtilsMenu}  // comment this line if you want to use the VCL Styles Utils Menus Hooks
-{$IFEND}
+//{$DEFINE UseVCLStyleUtilsMenu}
+//{$IF CompilerVersion >= 27}    // uncomment these lines if you want to use the VCL Styles Menus Hooks
+//{$UNDEF UseVCLStyleUtilsMenu}  // included on XE6 and XE7  (Embarcadero Version)
+//{$IFEND}                       //
 
 uses
   System.Classes,
