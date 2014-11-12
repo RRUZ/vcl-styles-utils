@@ -11,7 +11,11 @@ uses
   Vcl.Styles.Utils.ScreenTips in '..\Common\Vcl.Styles.Utils.ScreenTips.pas',
   Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
-  Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas';
+  Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
+  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  Vcl.Styles.UxTheme in '..\Common\Vcl.Styles.UxTheme.pas',
+  DDetours in '..\Common\delphi-detours-library\DDetours.pas',
+  InstDecode in '..\Common\delphi-detours-library\InstDecode.pas';
 
 {$R *.res}
 

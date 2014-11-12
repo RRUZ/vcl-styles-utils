@@ -57,8 +57,9 @@ uses
 {$WARN COMPARISON_TRUE OFF}
 {$ENDIF}
 // ---------------------------------------------------------------------------------
-function InterceptCreate(const TargetProc, InterceptProc: Pointer)
-  : Pointer; stdcall;
+function InterceptCreate(const TargetProc, InterceptProc: Pointer): Pointer; stdcall; overload;
+function InterceptCreate(const Module, Method : string; const InterceptProc: Pointer; ForceLoadModule : Boolean = False): Pointer; stdcall;  overload;
+
 function InterceptRemove(var Trampoline: Pointer): Boolean; stdcall;
 function MakeProcObj(var Proc; const Obj: Pointer): Boolean; stdcall;
 
@@ -789,6 +790,29 @@ begin
   end;
 end;
 {$ENDIF FPC}
+
+
+
+function InterceptCreate(const Module, Method : string; const InterceptProc: Pointer; ForceLoadModule : Boolean = False): Pointer; stdcall;
+var
+ pOrgPointer : Pointer;
+ LModule     : THandle;
+begin
+  Result:=nil;
+  LModule := GetModuleHandle(PChar(Module));
+  if (LModule=0) and ForceLoadModule then
+    LModule:=LoadLibrary(PChar(Module));
+
+  if LModule<>0 then
+  begin
+   pOrgPointer   := GetProcAddress(LModule, PChar(Method));
+   if Assigned(pOrgPointer) then
+    Result  := InterceptCreate(pOrgPointer, InterceptProc);
+  end;
+end;
+
+
+
 
 function InterceptCreate(const TargetProc, InterceptProc: Pointer): Pointer;
 var

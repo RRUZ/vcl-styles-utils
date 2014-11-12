@@ -15,4 +15,11 @@ object Form25: TForm25
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
+  object Label1: TLabel
+    Left = 16
+    Top = 24
+    Width = 276
+    Height = 13
+    Caption = 'Click oin the system menu and  try the  VCL Styles option.'
+  end
 end

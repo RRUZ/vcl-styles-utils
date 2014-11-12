@@ -112,6 +112,7 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
 			<DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
 			<DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.UxTheme.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

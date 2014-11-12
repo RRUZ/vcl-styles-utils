@@ -11,6 +11,7 @@ uses
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  Vcl.Styles.UxTheme in '..\Common\Vcl.Styles.UxTheme.pas',
   {$ENDIF}
   Vcl.Styles.Utils.Menus in '..\Common\Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Utils.Forms in '..\Common\Vcl.Styles.Utils.Forms.pas',

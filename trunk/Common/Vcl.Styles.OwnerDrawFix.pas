@@ -41,7 +41,7 @@ type
     procedure ListBoxDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure ListViewDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
     procedure ListViewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-  end;
+  end deprecated 'Use the Vcl.Styles.Hooks unit Instead';
 
 var
   VclStylesOwnerDrawFix : TVclStylesOwnerDrawFix;
