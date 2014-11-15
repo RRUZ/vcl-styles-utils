@@ -26,10 +26,11 @@ unit Vcl.Styles.Utils.Graphics;
 interface
 
 uses
-  Windows,
-  Graphics,
-  Classes,
-  SysUtils;
+  System.Classes,
+  System.SysUtils,
+  Winapi.Windows,
+  Vcl.GraphUtil,
+  Vcl.Graphics;
 
 const
   MaxHue = 180;
@@ -238,6 +239,11 @@ Type
    function  ProcessColor(AColor: TColor):TColor;override;
   end;
 
+  procedure GradientRoundedFillCanvas(const ACanvas: TCanvas;
+  const AStartColor, AEndColor: TColor; const ARect: TRect;
+  const Direction: TGradientDirection; Radius : Integer);
+
+  procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte);
 
 implementation
 
@@ -253,6 +259,61 @@ type
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
 
+
+procedure GradientRoundedFillCanvas(const ACanvas: TCanvas;
+  const AStartColor, AEndColor: TColor; const ARect: TRect;
+  const Direction: TGradientDirection; Radius : Integer);
+var
+  LBuffer : TBitmap;
+  LRect : TRect;
+  LRgn : THandle;
+  LPoint : TPoint;
+begin
+  LBuffer:=TBitmap.Create;
+  try
+    LBuffer.Width:=1;
+    LBuffer.Height:=ARect.Height;
+    LRect.Create(0, 0, 1, ARect.Height);
+    GradientFillCanvas(LBuffer.Canvas, AStartColor, AEndColor, LRect, Direction);
+
+    LRgn := CreateRoundRectRgn(ARect.Left, ARect.Top, ARect.Left +  ARect.Width,  ARect.Top + ARect.Height, Radius, Radius);
+    if LRgn>0 then
+    try
+      GetWindowOrgEx(ACanvas.Handle, LPoint);
+      OffsetRgn(LRgn, -LPoint.X, -LPoint.Y);
+      SelectClipRgn(ACanvas.Handle, LRgn);
+      ACanvas.StretchDraw(Rect(ARect.Left,  ARect.Top, ARect.Left + ARect.Width,  ARect.Top + ARect.Height), LBuffer);
+      SelectClipRgn(ACanvas.Handle, 0);
+    finally
+      DeleteObject(LRgn);
+    end;
+  finally
+   LBuffer.Free;
+  end;
+end;
+
+
+procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte);
+var
+ LBuffer   : TBitmap;
+ LBlendFunc: TBlendFunction;
+begin
+  LBuffer := TBitmap.Create;
+  try
+    LBuffer.Width := ARect.Width;
+    LBuffer.Height := ARect.Height;
+    LBuffer.Canvas.Brush.Color := AColor;
+    LBuffer.Canvas.FillRect(Rect(0, 0, ARect.Width, ARect.Height));
+    ZeroMemory(@LBlendFunc, SizeOf(LBlendFunc));
+    LBlendFunc.BlendOp := AC_SRC_OVER;
+    LBlendFunc.BlendFlags := 0;
+    LBlendFunc.SourceConstantAlpha := SourceConstantAlpha;
+    LBlendFunc.AlphaFormat := 0;
+    AlphaBlend(ACanvas.Handle, ARect.Left, ARect.Top, LBuffer.Width, LBuffer.Height, LBuffer.Canvas.Handle, 0, 0, LBuffer.Width, LBuffer.Height, LBlendFunc);
+  finally
+    LBuffer.Free;
+  end;
+end;
 
 function RoundIntToByte(i: integer): byte;
 begin
