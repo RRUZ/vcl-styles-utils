@@ -52,6 +52,7 @@ uses
   Vcl.Graphics,
   Vcl.GraphUtil,
   Vcl.Themes,
+  Vcl.Styles.Utils.Graphics,
   Vcl.Styles.Utils.SysControls;
 
 type
@@ -88,62 +89,6 @@ var
   THThemesClasses  : TDictionary<HTHEME, string>;
   THThemesHWND     : TDictionary<HTHEME, HWND>;
   VCLStylesLock    : TCriticalSection = nil;
-
-
-procedure GradientRoundedFillCanvas(const ACanvas: TCanvas;
-  const AStartColor, AEndColor: TColor; const ARect: TRect;
-  const Direction: TGradientDirection; Radius : Integer);
-var
-  LBuffer : TBitmap;
-  LRect : TRect;
-  LRgn : THandle;
-  LPoint : TPoint;
-begin
-  LBuffer:=TBitmap.Create;
-  try
-    LBuffer.Width:=1;
-    LBuffer.Height:=ARect.Height;
-    LRect.Create(0, 0, 1, ARect.Height);
-    GradientFillCanvas(LBuffer.Canvas, AStartColor, AEndColor, LRect, Direction);
-
-    LRgn := CreateRoundRectRgn(ARect.Left, ARect.Top, ARect.Left +  ARect.Width,  ARect.Top + ARect.Height, Radius, Radius);
-    if LRgn>0 then
-    try
-      GetWindowOrgEx(ACanvas.Handle, LPoint);
-      OffsetRgn(LRgn, -LPoint.X, -LPoint.Y);
-      SelectClipRgn(ACanvas.Handle, LRgn);
-      ACanvas.StretchDraw(Rect(ARect.Left,  ARect.Top, ARect.Left + ARect.Width,  ARect.Top + ARect.Height), LBuffer);
-      SelectClipRgn(ACanvas.Handle, 0);
-    finally
-      DeleteObject(LRgn);
-    end;
-  finally
-   LBuffer.Free;
-  end;
-end;
-
-
-procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte);
-var
- LBuffer   : TBitmap;
- LBlendFunc: TBlendFunction;
-begin
-  LBuffer := TBitmap.Create;
-  try
-    LBuffer.Width := ARect.Width;
-    LBuffer.Height := ARect.Height;
-    LBuffer.Canvas.Brush.Color := AColor;
-    LBuffer.Canvas.FillRect(Rect(0, 0, ARect.Width, ARect.Height));
-    ZeroMemory(@LBlendFunc, SizeOf(LBlendFunc));
-    LBlendFunc.BlendOp := AC_SRC_OVER;
-    LBlendFunc.BlendFlags := 0;
-    LBlendFunc.SourceConstantAlpha := SourceConstantAlpha;
-    LBlendFunc.AlphaFormat := 0;
-    AlphaBlend(ACanvas.Handle, ARect.Left, ARect.Top, LBuffer.Width, LBuffer.Height, LBuffer.Canvas.Handle, 0, 0, LBuffer.Width, LBuffer.Height, LBlendFunc);
-  finally
-    LBuffer.Free;
-  end;
-end;
 
 
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
@@ -325,10 +270,10 @@ begin
       end;
     end;
 
-      if THThemesClasses.ContainsKey(hTheme)  then
-        OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])))
-      else
-        OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+//      if THThemesClasses.ContainsKey(hTheme)  then
+//        OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])))
+//      else
+//        OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
 
     if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not THThemesClasses.ContainsKey(hTheme) then
       Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
@@ -466,7 +411,7 @@ begin
    if SameText(LThemeClass, VSCLASS_LISTBOX) then
    begin
       case iPartId of
-       LBCP_BORDER_NOSCROLL :       
+       LBCP_BORDER_NOSCROLL :
                               begin
                                       
                                     case iStateId of
@@ -475,7 +420,8 @@ begin
                                       LBPSN_HOT      : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollHot);
                                       LBPSN_DISABLED : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
                                     end;
-                                      
+
+
                                     SaveIndex := SaveDC(hdc);
                                     try
                                      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
@@ -679,8 +625,8 @@ begin
         else
            begin
              //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
-             Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));                      
-           end;          
+             Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+           end;
         end;
 
    end
@@ -694,7 +640,8 @@ begin
                                       LIS_HOT,
                                       LISS_HOTSELECTED,
                                       LIS_SELECTEDNOTFOCUS,
-                                      LIS_SELECTED          : begin
+                                      LIS_SELECTED          :
+                                                              begin
                                                                 LColor :=StyleServices.GetSystemColor(clHighlight);
                                                                 LCanvas:=TCanvas.Create;
                                                                 SaveIndex := SaveDC(hdc);
@@ -741,7 +688,6 @@ begin
                                   finally
                                     RestoreDC(hdc, SaveIndex);
                                   end;
-
                                   Exit(S_OK);
                               end;
 
@@ -763,7 +709,6 @@ begin
                                   finally
                                     RestoreDC(hdc, SaveIndex);
                                   end;
-
                                   Exit(S_OK);
                               end;
           LVP_GROUPHEADER     :
@@ -838,7 +783,7 @@ begin
                                                                 RestoreDC(hdc, SaveIndex);
                                                               end;
 
-                                                              Result:=S_OK;
+                                                            Exit(S_OK);
                                                           end;
 
                                    LVGHL_CLOSE,
@@ -860,7 +805,7 @@ begin
                                                                 RestoreDC(hdc, SaveIndex);
                                                               end;
 
-                                                              Result:=S_OK;
+                                                            Exit(S_OK);
                                                           end;
                                   else
                                    begin
@@ -900,7 +845,7 @@ begin
                           finally
                             RestoreDC(hdc, SaveIndex);
                           end;
-                          Result:=S_OK;
+                          Exit(S_OK);
                         end;
 
         DP_SHOWCALENDARBUTTONRIGHT :
@@ -935,7 +880,7 @@ begin
                           finally
                             RestoreDC(hdc, SaveIndex);
                           end;
-                          Result:=S_OK;
+                          Exit(S_OK);
                         end;
      else
        begin
@@ -957,7 +902,7 @@ begin
                               finally
                                 RestoreDC(hdc, SaveIndex);
                               end;
-                              Result:=S_OK;
+                              Exit(S_OK);
                            end;
 
        MC_BACKGROUND,
@@ -977,7 +922,7 @@ begin
                               LCanvas.Free;
                               RestoreDC(hdc, SaveIndex);
                             end;
-                            Result:=S_OK;
+                            Exit(S_OK);
                            end;
 
        MC_COLHEADERSPLITTER  : begin
@@ -1000,7 +945,7 @@ begin
                                     RestoreDC(hdc, SaveIndex);
                                   end;
 
-                                  Result:=S_OK;
+                                  Exit(S_OK);
                                end;
 
        MC_GRIDCELLBACKGROUND : begin
@@ -1044,7 +989,7 @@ begin
                                         RestoreDC(hdc, SaveIndex);
                                       end;
 
-                                    Result:=S_OK;
+                                    Exit(S_OK);
                                end;
 
         MC_NAVNEXT             : begin
@@ -1061,7 +1006,7 @@ begin
                                     finally
                                       RestoreDC(hdc, SaveIndex);
                                     end;
-                                    Result:=S_OK;
+                                    Exit(S_OK);
                                  end;
 
         MC_NAVPREV             : begin
@@ -1078,7 +1023,7 @@ begin
                                     finally
                                       RestoreDC(hdc, SaveIndex);
                                     end;
-                                    Result:=S_OK;
+                                    Exit(S_OK);
                                  end;
 
      else
@@ -1240,7 +1185,6 @@ begin
 
       StyleServices.DrawElement(hdc, LDetails, pRect, nil);
       Exit(S_OK);
-
    end
    else
    {$ENDIF}

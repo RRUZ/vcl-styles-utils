@@ -10,6 +10,7 @@ uses
   {$IFDEF USEVCLSTYLESHOOKS}
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
   InstDecode in '..\Common\delphi-detours-library\InstDecode.pas',
+  Vcl.Styles.Utils.Graphics in '..\Common\Vcl.Styles.Utils.Graphics.pas',
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
   Vcl.Styles.UxTheme in '..\Common\Vcl.Styles.UxTheme.pas',
   {$ENDIF}
