@@ -87,7 +87,7 @@
 			<DCCReference Include="uVclStylesEQU.pas">
 				<Form>FrmHueSat</Form>
 			</DCCReference>
-			<DCCReference Include="..\Common\uHSLUtils.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Ext.pas"/>
 			<DCCReference Include="uVCLStylesInfo.pas">

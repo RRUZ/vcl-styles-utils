@@ -1,6 +1,6 @@
 object FrmMain: TFrmMain
-  Left = 0
-  Top = 0
+  Left = 574
+  Top = 344
   BorderStyle = bsSingle
   Caption = 'Demo'
   ClientHeight = 480

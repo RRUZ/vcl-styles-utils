@@ -27,15 +27,15 @@ interface
 
 
 Uses
+  System.Classes,
+  System.Generics.Collections,
   Winapi.Windows,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Forms,
-  System.Generics.Collections,
   Vcl.Graphics,
   Vcl.Controls,
-  Vcl.ExtCtrls,
-  System.Classes;
+  Vcl.ExtCtrls;
 
 type
   TStyleHookList = TList<TStyleHookClass>;
@@ -237,6 +237,9 @@ implementation
 
 
 uses
+ System.Rtti,
+ System.Types,
+ System.Sysutils,
 {$IFDEF USE_VCL_STYLESAPI}
  System.ZLib,
  System.UITypes,
@@ -247,10 +250,7 @@ uses
  Vcl.Imaging.pngimage,
  Winapi.Messages,
 {$ENDIF}
- System.Rtti,
- System.Types,
- Vcl.Dialogs,
- System.Sysutils;
+ Vcl.Dialogs;
 
 
 {$IF (DEFINED (USE_VCL_STYLESAPI) and (CompilerVersion >=23))}

@@ -42,11 +42,11 @@ var
 implementation
 
 uses
-  Vcl.Menus,
-  Winapi.UxTheme,
-  Winapi.Windows,
   System.SysUtils,
   System.UITypes,
+  Winapi.UxTheme,
+  Winapi.Windows,
+  Vcl.Menus,
   Vcl.ActnMenus,
   Vcl.ActnCtrls,
   Vcl.ThemedActnCtrls,

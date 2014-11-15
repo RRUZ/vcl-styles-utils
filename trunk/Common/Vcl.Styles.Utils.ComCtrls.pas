@@ -23,16 +23,16 @@ unit Vcl.Styles.Utils.ComCtrls;
 interface
 
 uses
+  System.Classes,
+  System.Types,
+  System.SysUtils,
   Winapi.Windows,
   Winapi.Messages,
   Winapi.CommCtrl,
   Winapi.RichEdit,
-  System.Classes,
-  System.Types,
   Vcl.Styles,
   Vcl.Themes,
   Vcl.Graphics,
-  System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Styles.Utils.StdCtrls,
   Vcl.Forms,

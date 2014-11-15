@@ -5,7 +5,7 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   uVclStylesEQU in 'uVclStylesEQU.pas' {FrmHueSat},
-  uHSLUtils in '..\Common\uHSLUtils.pas',
+  Vcl.Styles.Utils.Graphics in '..\Common\Vcl.Styles.Utils.Graphics.pas',
   Vcl.Styles.Utils in '..\Common\Vcl.Styles.Utils.pas',
   Vcl.Styles.Ext in '..\Common\Vcl.Styles.Ext.pas',
   uVCLStylesInfo in 'uVCLStylesInfo.pas' {FrmVCLStyleInfoDialog},

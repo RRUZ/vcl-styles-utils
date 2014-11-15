@@ -24,17 +24,16 @@ unit Vcl.Styles.Utils.SysControls;
 interface
 
 uses
-  Winapi.Windows,
-  Winapi.Messages,
   System.Classes,
-  Vcl.Controls,
-  Vcl.Graphics,
-  Vcl.Styles,
-  Vcl.Themes,
   System.Types,
   System.SysUtils,
-  Vcl.Styles.Utils.SysStyleHook,
-  Generics.Collections;
+  System.Generics.Collections,
+  Winapi.Windows,
+  Winapi.Messages,
+  Vcl.Controls,
+  Vcl.Graphics,
+  Vcl.Themes,
+  Vcl.Styles.Utils.SysStyleHook;
 
 type
   PChildControlInfo = ^TChildControlInfo;

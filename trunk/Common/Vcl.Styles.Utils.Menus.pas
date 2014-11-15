@@ -31,10 +31,10 @@ uses
   System.Classes,
   System.Types,
   System.SysUtils,
+  System.Math,
   Winapi.Windows,
   Winapi.Messages,
   Winapi.UxTheme,
-  Vcl.Styles,
   Vcl.Themes,
   Vcl.Graphics,
   Vcl.Forms,
@@ -42,7 +42,6 @@ uses
   Vcl.GraphUtil,
   Vcl.Controls,
   Vcl.Menus,
-  System.Math,
   Vcl.Styles.Utils.SysStyleHook;
 
 const

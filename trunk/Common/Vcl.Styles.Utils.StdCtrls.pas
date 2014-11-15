@@ -23,15 +23,14 @@ unit Vcl.Styles.Utils.StdCtrls;
 interface
 
 uses
+  System.Classes,
+  System.SysUtils,
+  System.Types,
   Winapi.Windows,
   Winapi.Messages,
   Winapi.CommCtrl,
-  System.Classes,
-  System.Types,
-  Vcl.Styles,
   Vcl.Themes,
   Vcl.Graphics,
-  System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Forms,
   Vcl.StdCtrls,

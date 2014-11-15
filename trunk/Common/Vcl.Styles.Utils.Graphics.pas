@@ -1,6 +1,6 @@
 //**************************************************************************************************
 //
-// Unit uHSLUtils
+// Unit Vcl.Styles.Utils.Graphics
 // unit for the VCL Styles Utils
 // http://code.google.com/p/vcl-styles-utils/
 //
@@ -12,7 +12,7 @@
 // ANY KIND, either express or implied. See the License for the specific language governing rights
 // and limitations under the License.
 //
-// The Original Code is uHSLUtils.pas.
+// The Original Code is Vcl.Styles.Utils.Graphics.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
@@ -21,7 +21,7 @@
 //**************************************************************************************************
 
 
-unit uHSLUtils;
+unit Vcl.Styles.Utils.Graphics;
 
 interface
 

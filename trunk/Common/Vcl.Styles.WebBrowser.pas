@@ -25,12 +25,12 @@ interface
 //Uncomment this option if you want which the TVclStylesWebBrowser hook the dialogs messages directly.
 {.$DEFINE HOOKDialogs}
 uses
-  Vcl.Forms,
+  System.Classes,
   WinApi.Windows,
   WinApi.Messages,
   WinApi.Activex,
+  Vcl.Forms,
   Vcl.OleServer,
-  System.Classes,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.StdCtrls,

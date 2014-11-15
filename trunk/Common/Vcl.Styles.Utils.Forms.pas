@@ -23,15 +23,15 @@ unit Vcl.Styles.Utils.Forms;
 interface
 
 uses
-  Winapi.Windows,
-  Winapi.Messages,
   System.Classes,
   System.Types,
+  System.SysUtils,
+  Winapi.Windows,
+  Winapi.Messages,
   Vcl.Styles,
   Vcl.Themes,
   Vcl.Dialogs,
   Vcl.Graphics,
-  System.SysUtils,
   Vcl.Styles.Utils.SysStyleHook,
   Vcl.Forms,
   Vcl.GraphUtil,

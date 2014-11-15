@@ -68,8 +68,8 @@ type
 implementation
 
 Uses
-  Winapi.Windows,
   System.UITypes,
+  Winapi.Windows,
   Vcl.Graphics,
   Vcl.Themes,
   Vcl.Styles;
