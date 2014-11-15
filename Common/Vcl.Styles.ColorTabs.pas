@@ -24,8 +24,8 @@ unit Vcl.Styles.ColorTabs;
 interface
 
 uses
-  Vcl.Graphics,
   Winapi.Messages,
+  Vcl.Graphics,
   Vcl.ComCtrls;
 
 type
@@ -52,11 +52,11 @@ uses
  System.Classes,
  System.SysUtils,
  System.Types,
- Generics.Collections,
+ System.Generics.Collections,
+ Winapi.Windows,
  Vcl.Styles,
  Vcl.Themes,
- Vcl.Controls,
- Winapi.Windows;
+ Vcl.Controls;
 
 type
   TStyleHookList = TList<TStyleHookClass>;

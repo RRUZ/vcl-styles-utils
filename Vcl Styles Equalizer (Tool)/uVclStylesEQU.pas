@@ -24,7 +24,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, Mask, ComCtrls, Generics.Defaults, uHSLUtils,
+  Dialogs, ExtCtrls, StdCtrls, Mask, ComCtrls, Generics.Defaults, Vcl.Styles.Utils.Graphics,
   Generics.Collections, Vcl.ImgList, Vcl.ActnList, Vcl.Styles.Ext,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan;
 

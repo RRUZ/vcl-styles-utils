@@ -35,6 +35,8 @@ uses
   System.SysUtils,
   System.Types,
   System.Classes,
+  System.Generics.Collections,
+  System.StrUtils,
   WinApi.Windows,
   WinApi.Messages,
   Vcl.Graphics,
@@ -42,12 +44,9 @@ uses
   Vcl.Styles.UxTheme,
 {$ENDIF}
   Vcl.Styles.Utils.SysControls,
-  System.Generics.Collections,
-  System.StrUtils,
   Vcl.Forms,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
-  Vcl.Styles,
   Vcl.Themes;
 
 type

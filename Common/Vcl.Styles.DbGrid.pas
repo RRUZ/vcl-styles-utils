@@ -24,8 +24,8 @@ unit Vcl.Styles.DbGrid;
 interface
 
 uses
-  Vcl.Grids,
   Winapi.Windows,
+  Vcl.Grids,
   Vcl.Graphics,
   Vcl.DBGrids;
 

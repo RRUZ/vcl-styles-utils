@@ -25,14 +25,14 @@ unit Vcl.Styles.NC;
 interface
 
 uses
-  Vcl.ImgList,
   System.Types,
+  System.Classes,
+  System.Generics.Collections,
   System.UITypes,
   Winapi.Windows,
-  Vcl.Graphics,
   Winapi.Messages,
-  System.Classes,
-  Generics.Collections,
+  Vcl.ImgList,
+  Vcl.Graphics,
   Vcl.Themes,
   Vcl.Controls,
   Vcl.Menus,

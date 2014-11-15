@@ -24,18 +24,17 @@ unit Vcl.Styles.Utils.SysStyleHook;
 interface
 
 uses
-  Vcl.Styles,
-  Vcl.Themes,
-  Vcl.ExtCtrls,
+  System.Classes,
   System.Types,
+  System.SysUtils,
   Winapi.Windows,
   Winapi.Messages,
-  System.Classes,
-  UxTheme,
-  Vcl.Graphics,
-  System.SysUtils,
+  Winapi.UxTheme,
+  Winapi.CommCtrl,
+  Vcl.Themes,
+  Vcl.ExtCtrls,
   Vcl.Controls,
-  CommCtrl;
+  Vcl.Graphics;
 
 const
   CM_BASE = WM_USER + $113;

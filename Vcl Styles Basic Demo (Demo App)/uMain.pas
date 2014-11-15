@@ -39,7 +39,7 @@ Uses
   Vcl.Themes,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
-  uHSLUtils;
+  Vcl.Styles.Utils.Graphics;
 
 
 {$R *.dfm}

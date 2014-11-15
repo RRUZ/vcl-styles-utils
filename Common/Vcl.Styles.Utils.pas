@@ -23,12 +23,12 @@ unit Vcl.Styles.Utils;
 
 interface
 uses
-  uHSLUtils,
   System.Classes,
+  System.Generics.Collections,
+  Vcl.Styles.Utils.Graphics,
   Vcl.Styles,
   Vcl.Themes,
-  Vcl.Styles.Ext,
-  Generics.Collections;
+  Vcl.Styles.Ext;
 
 type
   TVCLStylesElement  = (vseBitmaps, vseSysColors, vseStyleColors, vseStyleFontColors);

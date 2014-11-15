@@ -90,7 +90,7 @@
 				<Form>FrmMain</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
-			<DCCReference Include="..\Common\uHSLUtils.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Ext.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.pas"/>
 			<BuildConfiguration Include="Release">

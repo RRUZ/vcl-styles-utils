@@ -25,11 +25,11 @@ interface
 
 uses
   Winapi.CommCtrl,
+  Winapi.Messages,
+  Winapi.uxTheme,
   Vcl.Graphics,
   Vcl.ComCtrls,
-  Vcl.Controls,
-  Winapi.Messages,
-  Winapi.uxTheme;
+  Vcl.Controls;
 
 type
  TDateTimePickerStyleHookFix= class(TDateTimePickerStyleHook)
@@ -40,16 +40,16 @@ type
  public
     procedure PaintBackground(Canvas: TCanvas); override;
     constructor Create(AControl: TWinControl); override;
- end;
+ end deprecated 'Use the Vcl.Styles.Hooks unit Instead';
 
 implementation
 
 uses
-  Vcl.Styles,
-  Vcl.Themes,
   System.SysUtils,
   System.Classes,
-  WinApi.Windows;
+  WinApi.Windows,
+  Vcl.Styles,
+  Vcl.Themes:
 
 type
  TDateTimePickerStyleHookHelper = class helper for TDateTimePickerStyleHook
@@ -79,7 +79,6 @@ function TDateTimePickerStyleHookHelper.GetMouseOnButton: Boolean;
 begin
  Result:=Self.FMouseOnButton;
 end;
-
 
 procedure TDateTimePickerStyleHookHelper.SetDroppedDown(const Value: Boolean);
 begin

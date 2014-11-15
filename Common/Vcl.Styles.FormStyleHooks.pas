@@ -164,14 +164,13 @@ type
 implementation
 
 Uses
-  Winapi.UxTheme,
   System.SysUtils,
   System.Classes,
   System.Types,
+  Winapi.UxTheme,
   Vcl.Imaging.Jpeg,
   Vcl.Imaging.pngimage,
-  Vcl.Imaging.GIFImg,
-  Vcl.Styles;
+  Vcl.Imaging.GIFImg;
 
 type
   TCustomFormClass = class(TCustomForm);

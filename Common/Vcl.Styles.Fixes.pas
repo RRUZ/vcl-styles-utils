@@ -29,16 +29,16 @@ unit Vcl.Styles.Fixes;
 interface
 
 uses
+  Winapi.Windows,
+  Winapi.Messages,
   Vcl.Controls,
   Vcl.ComCtrls,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
-  Winapi.Windows,
-  Winapi.Messages,
   Vcl.Graphics;
 
-type
 {$IF CompilerVersion = 23.0}
+type
   /// <summary> The <c>TButtonStyleHookFix</c> vcl style hook fix these QC #103708, #107764 for Delphi XE2
   /// </summary>
   /// <remarks>
@@ -53,6 +53,8 @@ type
   end;
 {$IFEND}
 
+{$IF CompilerVersion <= 24.0}
+type
   /// <summary> The <c>TListViewStyleHookFix</c> vcl style hook fix these QC #108678, #108875 for Delphi XE2 and Delphi XE3
   /// </summary>
   /// <remarks>
@@ -91,6 +93,7 @@ type
     procedure ComboBoxWndProc(var Msg: TMessage); override;
     procedure DrawComboBox(DC: HDC); override;
   end;
+{$IFEND}
 
 implementation
 
@@ -115,6 +118,7 @@ type
   end;
 {$IFEND}
 
+{$IF CompilerVersion <= 24.0}
   TListViewStyleHookHelper = class helper for TListViewStyleHook
     function HeaderHandle: HWnd;
   end;
@@ -122,6 +126,7 @@ type
   TComboBoxExStyleHookHelper = class helper for TComboBoxExStyleHook
     function DroppedDown: Boolean;
   end;
+{$IFEND}
 
 {$IF CompilerVersion = 23.0}
 
@@ -376,11 +381,19 @@ begin
   Result := Self.FPressed;
 end;
 {$IFEND}
-{ TListViewStyleHookHelper }
 
+
+{$IF CompilerVersion <= 24.0}
+{ TListViewStyleHookHelper }
 function TListViewStyleHookHelper.HeaderHandle: HWnd;
 begin
   Result := Self.FHeaderHandle;
+end;
+
+{ TComboBoxExStyleHookHelper }
+function TComboBoxExStyleHookHelper.DroppedDown: Boolean;
+begin
+  Exit(Self.FDroppedDown);
 end;
 
 { TListViewStyleHookFix }
@@ -727,12 +740,7 @@ begin
     LCanvas.Free;
   end;
 end;
+{$IFEND}
 
-{ TComboBoxExStyleHookHelper }
-
-function TComboBoxExStyleHookHelper.DroppedDown: Boolean;
-begin
-  Exit(Self.FDroppedDown);
-end;
 
 end.
