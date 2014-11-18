@@ -64,8 +64,14 @@ begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled  then
     Result:= TrampolineGetSysColor(nIndex)
   else
+  if nIndex= COLOR_HOTLIGHT then
+    Result:= DWORD(StyleServices.GetSystemColor(clHighlight))
+  else
     Result:= DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
+
+  //OutputDebugString(PChar('Detour_GetSysColor nIndex '+IntToStr(nIndex)) );
 end;
+
 
 
 function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
@@ -93,7 +99,10 @@ begin
      begin
        LBrush:=TBrush.Create;
        LCurrentStyleBrush.Add(nIndex, LBrush);
-       LBrush.Color:= StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
+       if nIndex= COLOR_HOTLIGHT then
+         LBrush.Color:= DWORD(StyleServices.GetSystemColor(clHighlight))
+       else
+         LBrush.Color:= StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
        //OutputDebugString(PChar(Format('nIndex %d Color %x RGB %x', [nIndex, LBrush.Color, ColorToRGB(LBrush.Color)])));
        Exit(LBrush.Handle);
      end;
