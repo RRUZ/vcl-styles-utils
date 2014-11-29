@@ -1021,6 +1021,7 @@ procedure TSysPopupStyleHook.WndProc(var Message: TMessage);
 var
   i: integer;
   TopWin: HWND;
+  TopCntrl:TControl;
 begin
   // AddToLog(Message);
   case Message.Msg of
@@ -1184,11 +1185,22 @@ begin
         if TopWin > 0 then
         begin
           { The parent window that host menu should be repained !! }
-          if IsVCLControl(TopWin) or IsControlHooked(TopWin) then
+          if IsVCLControl(TopWin) then
+          begin
+            TopCntrl := FindControl(TopWin);
+            if Assigned(TopCntrl) then
+            begin
+              {
+                Must use TControl.Refresh to allow invalidating
+                others no TWinControl !
+              }
+              TopCntrl.Refresh;
+            end;
+          end
+          else if IsControlHooked(TopWin) then
           begin
             // AddToLog(IntToStr(TopWin));
             InvalidateRect(TopWin, nil, False);
-
             UpdateWindow(TopWin);
           end;
         end;
@@ -1197,6 +1209,7 @@ begin
         SubMenuItemInfoArray := nil;
         Handled := False;
       end;
+
 //
 //    WM_NCDESTROY :
 //    begin
