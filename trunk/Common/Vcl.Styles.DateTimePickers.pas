@@ -49,7 +49,7 @@ uses
   System.Classes,
   WinApi.Windows,
   Vcl.Styles,
-  Vcl.Themes:
+  Vcl.Themes;
 
 type
  TDateTimePickerStyleHookHelper = class helper for TDateTimePickerStyleHook
