@@ -1,6 +1,7 @@
 {$DEFINE UseInline}
 {$DEFINE BuildThreadSafe}
-{.$DEFINE UseGenerics}
+{$DEFINE UseGenerics}
+{$DEFINE UseMultiBytesNop}
 //----------------------------------------------
 {$IFDEF FPC}
   {$IFDEF CPU64}
@@ -36,5 +37,3 @@
 {$IF DEFINED(GenericsExist) and DEFINED(UseGenerics)}
   {$DEFINE MustUseGenerics}
 {$IFEND}
-
-

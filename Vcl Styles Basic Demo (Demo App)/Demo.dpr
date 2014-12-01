@@ -1,3 +1,4 @@
+// JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
 program Demo;
 
 uses

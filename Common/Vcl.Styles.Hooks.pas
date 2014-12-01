@@ -100,7 +100,7 @@ begin
        LBrush:=TBrush.Create;
        LCurrentStyleBrush.Add(nIndex, LBrush);
        if nIndex= COLOR_HOTLIGHT then
-         LBrush.Color:= DWORD(StyleServices.GetSystemColor(clHighlight))
+         LBrush.Color:=StyleServices.GetSystemColor(clHighlight)
        else
          LBrush.Color:= StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
        //OutputDebugString(PChar(Format('nIndex %d Color %x RGB %x', [nIndex, LBrush.Color, ColorToRGB(LBrush.Color)])));
