@@ -26,7 +26,6 @@ uses
   System.Classes,
   System.Generics.Collections,
   Vcl.Styles.Utils.Graphics,
-  Vcl.Styles,
   Vcl.Themes,
   Vcl.Styles.Ext;
 

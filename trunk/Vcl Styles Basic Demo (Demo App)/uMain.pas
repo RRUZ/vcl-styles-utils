@@ -35,7 +35,6 @@ implementation
 Uses
   Vcl.GraphUtil,
   Generics.Collections,
-  Vcl.Styles,
   Vcl.Themes,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,

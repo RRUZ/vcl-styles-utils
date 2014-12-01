@@ -155,7 +155,7 @@ var
   s: string;
 begin
 {$IFDEF DEBUG}
-  ReportMemoryLeaksOnShutdown := True;
+ //ReportMemoryLeaksOnShutdown := True;
 {$ENDIF }
   for s in TStyleManager.StyleNames do
     ComboBox1.Items.Add(s);
