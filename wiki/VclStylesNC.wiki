@@ -1,4 +1,4 @@
-#summary One-sentence Add support for controls in the Non Client Area of the forms
+#summary Add support for controls in the Non Client Area of the forms
 
 The [https://code.google.com/p/vcl-styles-utils/source/browse/trunk/Common/Vcl.Styles.NC.pas Vcl.Styles.NC] unit allows add controls in the Non Client Area of the forms through the TNCControls component, you can try a sample application [https://code.google.com/p/vcl-styles-utils/source/browse/#svn%2Ftrunk%2FVcl%20Styles%20Utils%20NC%20(Demo%20App) here].
 
