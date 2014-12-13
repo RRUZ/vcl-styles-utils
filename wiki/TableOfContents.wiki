@@ -1,3 +1,0 @@
-#summary Table of contents
-
-  * VclStylesSysControls  Vcl Styles Sys
