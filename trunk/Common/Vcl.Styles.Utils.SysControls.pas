@@ -129,6 +129,7 @@ type
     /// Collection of Styled Child Controls
     /// </summary>
     class property ChildRegSysStylesList: TObjectDictionary<HWND, TChildControlInfo> read FChildRegSysStylesList;
+    class procedure AddControlDirectly(Handle: HWND; const sClassName : string; IncludeChildControls : Boolean = False);
   end;
 
 function GetWindowClassName(Window: HWND): String;
@@ -622,6 +623,59 @@ begin
   inherited;
 end;
 
+class procedure TSysStyleManager.AddControlDirectly(Handle: HWND; const sClassName : string; IncludeChildControls : Boolean = False);
+var
+ LStyleHook  : TSysStyleHook;
+ ParentStyle : DWORD;
+
+  procedure AddChildControl(ChildHandle: HWND);
+  var
+    Info: TChildControlInfo;
+    sChildClassName : string;
+    LStyleHook  : TSysStyleHook;
+  begin
+   { Hook the control directly ! }
+    ZeroMemory(@Info, sizeof(TChildControlInfo));
+    Info.Parent := Handle;
+    Info.ParentStyle := ParentStyle;
+    sChildClassName := LowerCase(GetWindowClassName(ChildHandle));
+    if FRegSysStylesList.ContainsKey(sChildClassName) then
+    begin
+      LStyleHook:=FRegSysStylesList[LowerCase(sChildClassName)].Create(ChildHandle);
+      FSysStyleHookList.Add(ChildHandle, LStyleHook);
+      SendMessage(ChildHandle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
+      InvalidateRect(ChildHandle, nil, False);
+//    if Assigned(FSysHookNotificationProc) then
+//      FSysHookNotificationProc(cAdded, @Info);
+    end;
+  end;
+
+  function EnumChildProc(const hWindow: hWnd; const LParam : LParam): boolean; stdcall;
+  begin
+    AddChildControl(hWindow);
+    Result:= True;
+  end;
+
+begin
+  if not FRegSysStylesList.ContainsKey(LowerCase(sClassName)) then
+   Exit;
+  { Hook the control directly ! }
+  if FSysStyleHookList.ContainsKey(Handle) then
+    FSysStyleHookList.Remove(Handle);
+  LStyleHook:=FRegSysStylesList[LowerCase(sClassName)].Create(Handle);
+  FSysStyleHookList.Add(Handle, LStyleHook);
+  SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
+//    if Assigned(FSysHookNotificationProc) then
+//      FSysHookNotificationProc(cAdded, @Info);
+
+  if IncludeChildControls then
+  begin
+   ParentStyle:=GetWindowLongPtr(Handle, GWL_STYLE);
+   EnumChildWindows(Handle, @EnumChildProc, 0);
+  end;
+end;
+
+
 constructor TSysStyleManager.Create(AOwner: TComponent);
 begin
   inherited;
@@ -695,7 +749,7 @@ begin
     sClassName := LowerCase(sClassName);
 
   //  if SameText(sClassName, 'button') then
-      //OutputDebugString(PChar('Class '+sclassName+' '+IntToHex(wParam, 8)));
+  //    OutputDebugString(PChar('Class '+sclassName+' '+IntToHex(wParam, 8)));
 
     Parent := CBTSturct.lpcs.hwndParent;
     Style := CBTSturct.lpcs.Style;
