@@ -688,7 +688,12 @@ begin
   begin
     TextFormat := [tfCenter, tfVerticalCenter, tfSingleLine, tfHidePrefix];
     if (SysControl.Style and BS_MULTILINE = BS_MULTILINE) then
+    begin
       Exclude(TextFormat, tfSingleLine);
+      include(TextFormat, tfWordBreak)
+    end;
+
+
     DrawText(Canvas.Handle, LDetails, SysControl.Text, LRect, TextFormat);
   end;
 end;
