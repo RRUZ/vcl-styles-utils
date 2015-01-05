@@ -167,6 +167,13 @@
 [Exception Log]
 EurekaLog Version=7001
 Activate=0
-DeleteMapAfterCompile=1
+atVCL=1
+DeleteMapAfterCompile=0
 Encrypt Password=""
+idEurekaLog=1
+idEurekaLogDetailed=1
+idMSClassic=1
+idStepsToReproduce=1
+loResCatchLeaks=1
+ProjectID="{24D5E32A-AD3D-4F31-B6B3-A4A46BA789F8}"
 EurekaLog Last Line -->

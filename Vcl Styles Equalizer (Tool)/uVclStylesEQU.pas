@@ -704,7 +704,7 @@ begin
  FPreview.BoundsRect := TabSheetPreview.ClientRect;
  }
  DragAcceptFiles( Handle, True );
- ReportMemoryLeaksOnShutdown:=True;
+ //ReportMemoryLeaksOnShutdown:=True;
 
   FillListStyles;
   if ComboBoxVclStyles.Items.Count>0 then
