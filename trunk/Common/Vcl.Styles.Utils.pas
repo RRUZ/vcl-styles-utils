@@ -120,7 +120,7 @@ end;
 
 class procedure TVclStylesUtils.SaveSettings(const FileName:String;Elements :TVCLStylesElements; FilterType : TVCLStylesFilter;Filters : TObjectList<TBitmapFilter>);
 var
-  Doc       : TXMLDocument;
+  Doc       : IXMLDocument;
   RootNode, ChildNode, oNode : IXMLNode;
   LFilter   : TBitmapFilter;
 begin

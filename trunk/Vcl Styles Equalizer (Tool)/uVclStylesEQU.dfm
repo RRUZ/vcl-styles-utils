@@ -2102,10 +2102,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheetRGB: TTabSheet
       Caption = 'RGB'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label5: TLabel
         Left = 11
         Top = 14
@@ -2353,10 +2349,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheetTextures: TTabSheet
       Caption = 'Textures'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label10: TLabel
         Left = 3
         Top = 7
@@ -2480,10 +2472,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheetStyleColors: TTabSheet
       Caption = 'Style Colors'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ListViewStyleColors: TListView
         Left = 0
         Top = 24
@@ -2527,10 +2515,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheetStyleFonts: TTabSheet
       Caption = 'Style Font Colors'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ListViewStyleFontColors: TListView
         Left = 0
         Top = 24
@@ -2574,10 +2558,6 @@ object FrmHueSat: TFrmHueSat
     object TabSheetSystemColors: TTabSheet
       Caption = 'System Colors'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ListViewSystemColors: TListView
         Left = 0
         Top = 24
@@ -2660,7 +2640,7 @@ object FrmHueSat: TFrmHueSat
     Left = 168
     Top = 203
     Bitmap = {
-      494C010101000800C80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010101000800D00010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
