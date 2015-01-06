@@ -153,6 +153,7 @@ object FrmMain: TFrmMain
           Width = 244
           Height = 21
           Style = csDropDownList
+          Sorted = True
           TabOrder = 9
           OnSelect = ComboBoxStylesSelect
         end
@@ -375,7 +376,7 @@ object FrmMain: TFrmMain
           Width = 225
           Height = 160
           MultiSelect = True
-          Date = 41947.241987442130000000
+          Date = 41947.359236226850000000
           EndDate = 41947.000000000000000000
           TabOrder = 1
         end
@@ -441,7 +442,7 @@ object FrmMain: TFrmMain
     Left = 408
     Top = 45
     Bitmap = {
-      494C0101070009001C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000900200010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       00000000000000000000000000000000000000000005000000150000001A0000
       001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000

@@ -119,6 +119,7 @@ type
 
   TSysTreeViewStyleHook = class(TSysScrollingStyleHook)
   protected
+    procedure Scroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer); override;
     procedure UpdateColors; override;
     procedure WndProc(var Message: TMessage); override;
   public
@@ -792,6 +793,46 @@ destructor TSysTreeViewStyleHook.Destroy;
 begin
 
   inherited;
+end;
+
+procedure TSysTreeViewStyleHook.Scroll(const Kind: TScrollBarKind;
+  const ScrollType: TSysScrollingType; Pos, Delta: Integer);
+begin
+  if Kind = sbVertical then
+  begin
+    case ScrollType of
+      skTracking:
+        begin
+          LstPos := Pos;
+          AllowScrolling := True;
+          SendMessage(Handle, WM_VSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
+          AllowScrolling := False;
+          //OutputDebugString(PChar(Format('sbVertical Pos %d Delta %d', [Pos, Delta])));
+        end;
+      skLineUp: SendMessage(Handle, WM_VSCROLL, SB_LINEUP, 0);
+      skLineDown: SendMessage(Handle, WM_VSCROLL, SB_LINEDOWN, 0);
+      skPageUp: SendMessage(Handle, WM_VSCROLL, SB_PAGEUP, 0);
+      skPageDown: SendMessage(Handle, WM_VSCROLL, SB_PAGEDOWN, 0);
+    end;
+  end
+  else
+  if Kind = sbHorizontal then
+  begin
+    case ScrollType of
+      skTracking:
+        begin
+          LstPos := Pos;
+          AllowScrolling := True;
+          SendMessage(Handle, WM_HSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
+          AllowScrolling := False;
+          //OutputDebugString(PChar(Format('sbHorizontal Pos %d Delta %d', [Pos, Delta])));
+        end;
+      skLineLeft: SendMessage(Handle, WM_HSCROLL, SB_LINELEFT, 0);
+      skLineRight: SendMessage(Handle, WM_HSCROLL, SB_LINERIGHT, 0);
+      skPageLeft: SendMessage(Handle, WM_HSCROLL, SB_PAGELEFT, 0);
+      skPageRight: SendMessage(Handle, WM_HSCROLL, SB_PAGERIGHT, 0);
+    end;
+  end;
 end;
 
 procedure TSysTreeViewStyleHook.UpdateColors;
