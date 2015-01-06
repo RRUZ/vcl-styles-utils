@@ -78,6 +78,8 @@ function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
 var
   LCurrentStyleBrush : TListStyleBrush;
   LBrush : TBrush;
+  LColor : TColor;
+  //LogBrush: TLogBrush;
 begin
   VCLStylesLock.Enter;
   try
@@ -94,11 +96,27 @@ begin
      end;
 
      if LCurrentStyleBrush.ContainsKey(nIndex) then
-      Exit(LCurrentStyleBrush.Items[nIndex].Handle)
+     begin
+      LBrush:=LCurrentStyleBrush.Items[nIndex];
+//      if GetObject(LBrush.Handle, SizeOf(TLogBrush), @LogBrush) <> 0 then
+//        OutputDebugString(PChar(Format('nIndex %d Color %x RGB %x  GetObject %x', [nIndex, LBrush.Color, ColorToRGB(LBrush.Color), LogBrush.lbColor])));
+      Exit(LBrush.Handle);
+     end
      else
+//     if LCurrentStyleBrush.ContainsKey(nIndex) then
+//      LCurrentStyleBrush.Remove(nIndex);
      begin
        LBrush:=TBrush.Create;
        LCurrentStyleBrush.Add(nIndex, LBrush);
+       if nIndex= COLOR_WINDOW then
+       begin
+         LBrush.Color:= StyleServices.GetSystemColor(clWindow);
+         LColor := LBrush.Color;
+         case LColor of
+          $303030, $232323, $644239, $121212 : LBrush.Color:= LColor + 1;
+         end;
+       end
+       else
        if nIndex= COLOR_HOTLIGHT then
          LBrush.Color:=StyleServices.GetSystemColor(clHighlight)
        else

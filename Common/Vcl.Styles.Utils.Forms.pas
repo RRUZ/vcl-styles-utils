@@ -94,6 +94,8 @@ type
     function IsHorzScrollDisabled: Boolean;
     function IsVertScrollDisabled: Boolean;
   protected
+    property LstPos : Integer read FLstPos write FLstPos;
+    property AllowScrolling : Boolean read FAllowScrolling write FAllowScrolling;
     function NormalizePoint(const P: TPoint): TPoint;
     procedure Scroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer); virtual;
     procedure DoScroll(const Kind: TScrollBarKind; const ScrollType: TSysScrollingType; Pos, Delta: Integer);
