@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.Hooks.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -58,6 +58,88 @@ var
 
   TrampolineGetSysColor           : function (nIndex: Integer): DWORD; stdcall =  nil;
   TrampolineGetSysColorBrush      : function (nIndex: Integer): HBRUSH; stdcall=  nil;
+  //TrampolineCreateSolidBrush      : function (p1: COLORREF): HBRUSH; stdcall  = nil;
+  //TrampolineSelectObject          : function (DC: HDC; p2: HGDIOBJ): HGDIOBJ; stdcall = nil;
+  //TrampolineGetStockObject        : function (Index: Integer): HGDIOBJ; stdcall = nil;
+  //TrampolineSetBkColor            : function (DC: HDC; Color: COLORREF): COLORREF; stdcall = nil;
+  TrampolineFillRect              : function (hDC: HDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall = nil;
+  TrampolineDrawEdge              : function (hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall = nil;
+  //TrampolineFrameRect             : function (hDC: HDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall = nil;
+
+
+//function  Detour_FrameRect(hDC: HDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
+//begin
+//  OutputDebugString(PChar('Detour_FrameRect hbr '+IntToStr(hbr)));
+//  Result:=TrampolineFrameRect(hDC, lprc, hbr);
+//end;
+
+
+function Detour_DrawEdge(hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
+begin
+ if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled  then
+   Exit(TrampolineDrawEdge(hdc, qrc, edge, grfFlags));
+
+    case  edge of
+      BDR_RAISEDOUTER,
+      BDR_SUNKENOUTER,
+      BDR_RAISEDINNER,
+      BDR_SUNKENINNER,
+      EDGE_SUNKEN,
+      EDGE_ETCHED,
+      EDGE_BUMP,
+      EDGE_RAISED :
+        begin
+          DrawStyleEdge(hdc, qrc, TStyleElementEdges(edge), TStyleElementEdgeFlags(grfFlags));
+          Exit(True);
+        end;
+    end;
+   Exit(TrampolineDrawEdge(hdc, qrc, edge, grfFlags));
+end;
+
+//function  Detour_CreateSolidBrush(p1: COLORREF): HBRUSH; stdcall;
+//begin
+//  OutputDebugString(PChar('Detour_CreateSolidBrush p1 '+IntToStr(p1)));
+//  result:= TrampolineCreateSolidBrush(p1);
+//end;
+
+//function  Detour_SelectObject(DC: HDC; p2: HGDIOBJ): HGDIOBJ; stdcall; //need decode p2
+//begin
+//  OutputDebugString(PChar('Detour_SelectObject p2 '+IntToStr(p2)));
+// Result:= TrampolineSelectObject(DC, p2);
+//end;
+
+//function  Detour_GetStockObject(Index: Integer): HGDIOBJ; stdcall;   //returns 4,5,13
+//begin
+//  OutputDebugString(PChar('Detour_GetStockObject Index '+IntToStr(Index)));
+//  Result:=TrampolineGetStockObject(Index);
+//end;
+
+//function  Detour_SetBkColor(DC: HDC; Color: COLORREF): COLORREF; stdcall;
+//begin
+// //OutputDebugString(PChar('Detour_SetBkColor Color '+IntToStr(Color)));
+// Result:=TrampolineSetBkColor(DC, Color);
+//end;
+
+
+{
+From MSDN
+The brush identified by the hbr parameter may be either a handle to a logical brush or a color value.
+ ...
+ ...
+ If specifying a color value for the hbr parameter, it must be one of the standard system colors (the value 1 must be added to the chosen color).
+ For example:
+ FillRect(hdc, &rect, (HBRUSH) (COLOR_WINDOW+1));
+}
+function  Detour_FillRect(hDC: HDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
+begin
+ if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled  then
+  Exit(TrampolineFillRect(hDC, lprc, hbr))
+ else
+ if (hbr>0) and (hbr<COLOR_ENDCOLORS+1) then
+  Exit(TrampolineFillRect(hDC, lprc, GetSysColorBrush(hbr-1)))
+ else
+  Exit(TrampolineFillRect(hDC, lprc, hbr));
+end;
 
 function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
@@ -72,14 +154,11 @@ begin
   //OutputDebugString(PChar('Detour_GetSysColor nIndex '+IntToStr(nIndex)) );
 end;
 
-
-
 function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
 var
   LCurrentStyleBrush : TListStyleBrush;
   LBrush : TBrush;
   LColor : TColor;
-  //LogBrush: TLogBrush;
 begin
   VCLStylesLock.Enter;
   try
@@ -147,11 +226,17 @@ initialization
 
    @TrampolineGetSysColor         :=  InterceptCreate(user32, 'GetSysColor', @Detour_GetSysColor);
    @TrampolineGetSysColorBrush    :=  InterceptCreate(user32, 'GetSysColorBrush', @Detour_GetSysColorBrush);
+   @TrampolineFillRect            :=  InterceptCreate(user32, 'FillRect', @Detour_FillRect);
+   @TrampolineDrawEdge            :=  InterceptCreate(user32, 'DrawEdge', @Detour_DrawEdge);
+   //@TrampolineFrameRect           :=  InterceptCreate(user32, 'FrameRect', @Detour_FrameRect);
  end;
 
 finalization
   InterceptRemove(@TrampolineGetSysColor);
   InterceptRemove(@TrampolineGetSysColorBrush);
+  InterceptRemove(@TrampolineFillRect);
+  InterceptRemove(@TrampolineDrawEdge);
+  //InterceptRemove(@TrampolineFrameRect);
 
   VCLStylesBrush.Free;
   VCLStylesLock.Free;

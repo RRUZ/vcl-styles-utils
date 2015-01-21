@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // ************************************************************************************************
@@ -804,6 +804,7 @@ begin
       skTracking:
         begin
           LstPos := Pos;
+          //OutputDebugString(PChar(Format('sbVertical Pos %d Delta %d AllowScrolling %s', [Pos, Delta, BooltoStr(AllowScrolling, True)])));
           AllowScrolling := True;
           SendMessage(Handle, WM_VSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
           AllowScrolling := False;
@@ -822,6 +823,7 @@ begin
       skTracking:
         begin
           LstPos := Pos;
+          //OutputDebugString(PChar(Format('sbHorizontal Pos %d Delta %d AllowScrolling %s', [Pos, Delta, BooltoStr(AllowScrolling, True)])));
           AllowScrolling := True;
           SendMessage(Handle, WM_HSCROLL, MakeWParam(SB_THUMBTRACK, Pos), 0);
           AllowScrolling := False;

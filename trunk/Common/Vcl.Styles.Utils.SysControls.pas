@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -66,7 +66,7 @@ type
   private
   class var
     FEnabled: Boolean;
-    FHook: HHook;
+    FHook_WH_CBT: HHook;
     FBeforeHookingControlProc: TBeforeHookingControl;
     FSysHookNotificationProc: TSysHookNotification;
     FRegSysStylesList: TObjectDictionary<String, TSysStyleHookClass>;
@@ -78,15 +78,15 @@ type
     /// <summary>
     /// Install the Hook
     /// </summary>
-    class procedure InstallHook;
+    class procedure InstallHook_WH_CBT;
     /// <summary>
     /// Remove the Hook
     /// </summary>
-    class procedure RemoveHook;
+    class procedure RemoveHook_WH_CBT;
     /// <summary>
     /// Hook Callback
     /// </summary>
-    class function HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT; stdcall; static;
+    class function HookActionCallBackCBT(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT; stdcall; static;
   public
     /// <summary>
     /// Register a Sys Style Hook for an specified class.
@@ -602,6 +602,7 @@ end;
 
 class constructor TSysStyleManager.Create;
 begin
+  FHook_WH_CBT:=0;
   FBeforeHookingControlProc := @BeforeHookingControl;
   FSysHookNotificationProc := @HookNotification;
   FUseStyleColorsChildControls := True;
@@ -611,12 +612,12 @@ begin
   FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;
   FChildRegSysStylesList := TObjectDictionary<HWND, TChildControlInfo>.Create;
   //FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([]);
-  InstallHook;
+  InstallHook_WH_CBT;
 end;
 
 class destructor TSysStyleManager.Destroy;
 begin
-  RemoveHook;
+  RemoveHook_WH_CBT;
   FRegSysStylesList.Free;
   FSysStyleHookList.Free; // remove the childs too because doOwnsValues
   FChildRegSysStylesList.Free;
@@ -689,11 +690,11 @@ end;
 type
  TSysStyleClass = class(TSysStyleHook);
 
-class function TSysStyleManager.HookCBProc(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;
+class function TSysStyleManager.HookActionCallBackCBT(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;
 var
   CBTSturct: TCBTCreateWnd;
   sClassName, Tmp: string;
-  Parent: HWND;
+  {LHWND,} Parent: HWND;
   Style, ParentStyle, ExStyle, ParentExStyle: NativeInt;
   Info: TControlInfo;
 
@@ -738,9 +739,25 @@ var
   end;
 
 begin
-  Result := CallNextHookEx(FHook, nCode, wParam, lParam);
+  Result := CallNextHookEx(FHook_WH_CBT, nCode, wParam, lParam);
   if not FEnabled then
     Exit;
+
+//  if (nCode = HCBT_ACTIVATE) and not(StyleServices.IsSystemStyle) then
+//     begin
+//       LHWND := HWND(wParam);
+//       if(LHWND>0) then
+//       begin
+//          sClassName:= GetWindowClassName(LHWND);
+//          if (sClassName<>'') and  (not TSysStyleManager.SysStyleHookList.ContainsKey(LHWND)) and (SameText(sClassName,'#32770'))  then
+//          begin
+//            TSysStyleManager.AddControlDirectly(LHWND, sClassName);
+//            InvalidateRect(LHWND, nil, False);
+//          end;
+//       end;
+//     end;
+
+
   if (nCode = HCBT_CREATEWND) and not(StyleServices.IsSystemStyle) then
   begin
 
@@ -748,8 +765,8 @@ begin
     sClassName := GetWindowClassName(wParam);
     sClassName := LowerCase(sClassName);
 
-  //  if SameText(sClassName, 'button') then
-  //    OutputDebugString(PChar('Class '+sclassName+' '+IntToHex(wParam, 8)));
+//    if SameText(sClassName, '#32770') then
+//      OutputDebugString(PChar('Class '+sclassName+' '+IntToHex(wParam, 8)));
 
     Parent := CBTSturct.lpcs.hwndParent;
     Style := CBTSturct.lpcs.Style;
@@ -836,9 +853,9 @@ begin
   end;
 end;
 
-class procedure TSysStyleManager.InstallHook;
+class procedure TSysStyleManager.InstallHook_WH_CBT;
 begin
-  FHook := SetWindowsHookEx(WH_CBT, @HookCBProc, 0, GetCurrentThreadId);
+  FHook_WH_CBT := SetWindowsHookEx(WH_CBT, @HookActionCallBackCBT, 0, GetCurrentThreadId);
 end;
 
 class procedure TSysStyleManager.RegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
@@ -848,10 +865,10 @@ begin
   FRegSysStylesList.Add(LowerCase(SysControlClass), SysStyleHookClass);
 end;
 
-class procedure TSysStyleManager.RemoveHook;
+class procedure TSysStyleManager.RemoveHook_WH_CBT;
 begin
-  if FHook <> 0 then
-    UnhookWindowsHookEx(FHook);
+  if FHook_WH_CBT <> 0 then
+    UnhookWindowsHookEx(FHook_WH_CBT);
 end;
 
 class procedure TSysStyleManager.UnRegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);

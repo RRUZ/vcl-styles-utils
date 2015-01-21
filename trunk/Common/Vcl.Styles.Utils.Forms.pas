@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -160,6 +160,7 @@ type
     procedure WMNCACTIVATE(var Message: TWMNCActivate); message WM_NCACTIVATE;
     procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
     procedure WMSIZE(var Message: TWMSize); message WM_SIZE;
+    procedure WMSetText(var Message: TMessage); message WM_SETTEXT;
     function GetCaptionRect: TRect;
     function GetBorderStyle: TFormBorderStyle;
     function GetBorderIcons: TBorderIcons;
@@ -1219,6 +1220,38 @@ begin
   Message.Result := CallDefaultProc(Message);
   Handled := True;
 end;
+
+procedure TSysDialogStyleHook.WMSetText(var Message: TMessage);
+var
+  FRedraw: Boolean;
+  LBorderStyle : TFormBorderStyle;
+begin
+  LBorderStyle := BorderStyle;
+  if (LBorderStyle = bsNone) or (WindowState = wsMinimized) or (StyleServices.IsSystemStyle) then
+  begin
+    Handled := False;
+    Exit;
+  end;
+
+  FRedraw := True;
+
+  if  IsWindowVisible(Handle) then
+  begin
+    //Application.ProcessMessages;
+    FRedraw := False;
+    SetRedraw(False);
+  end;
+
+  CallDefaultProc(Message);
+
+  if not FRedraw then
+  begin
+    SetRedraw(True);
+    InvalidateNC;
+  end;
+  Handled := True;
+end;
+
 
 procedure TSysDialogStyleHook.WMSIZE(var Message: TWMSize);
 begin
