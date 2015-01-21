@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -125,6 +125,7 @@ type
     function GetBorderSize: TRect; override;
     procedure WndProc(var Message: TMessage); override;
     procedure UpdateColors; override;
+    procedure PaintBackground(Canvas: TCanvas); override;
   public
     constructor Create(AHandle: THandle); override;
     Destructor Destroy; override;
@@ -380,6 +381,7 @@ begin
   OverridePaintNC := True;
   OverrideFont := False;
 {$IFEND}
+  //OverrideEraseBkgnd:=True;
 end;
 
 destructor TSysListBoxStyleHook.Destroy;
@@ -395,12 +397,17 @@ begin
   begin
     Result := Rect(2, 2, 2, 2);
   end;
-  if SysControl.ControlClassName = 'ComboLBox' then
+  if SameText(SysControl.ControlClassName, 'ComboLBox') then
   begin
     if SysControl.Parent.Style and CBS_SIMPLE = CBS_SIMPLE then
       Exit;
     Result := Rect(0, 0, 0, 0);
   end;
+end;
+
+procedure TSysListBoxStyleHook.PaintBackground(Canvas: TCanvas);
+begin
+  inherited;
 end;
 
 procedure TSysListBoxStyleHook.UpdateColors;
@@ -2373,8 +2380,10 @@ end;
 function TSysStaticStyleHook.GetIsFrameOrLine: Boolean;
 begin
   with SysControl do
-    Result := (Style and SS_ETCHEDFRAME = SS_ETCHEDFRAME) or
+    Result :=
+      (Style and SS_ETCHEDFRAME = SS_ETCHEDFRAME) or
       (Style and SS_ETCHEDHORZ = SS_ETCHEDHORZ) or
+      (Style and SS_SUNKEN = SS_SUNKEN) or
       (Style and SS_ETCHEDVERT = SS_ETCHEDVERT);
 end;
 
@@ -2518,7 +2527,7 @@ begin
   end;
 end;
 
-{ TNewCheckBoxStyleHook }
+{ TSysCheckBoxStyleHook }
 function RectVCenter(var R: TRect; Bounds: TRect): TRect;
 begin
   OffsetRect(R, -R.Left, -R.Top);
@@ -2760,7 +2769,7 @@ begin
   inherited;
 end;
 
-{ TNewRadioButtonStyleHook }
+{ TSysRadioButtonStyleHook }
 
 constructor TSysRadioButtonStyleHook.Create(AHandle: THandle);
 begin
