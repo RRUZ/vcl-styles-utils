@@ -34,6 +34,7 @@ uses
   System.SyncObjs,
   System.SysUtils,
   System.Types,
+  System.UITypes,
   System.Classes,
   System.Generics.Collections,
   System.StrUtils,
