@@ -51,7 +51,8 @@ uses
   Vcl.Themes;
 
 type
-  TListStyleBrush = TObjectDictionary<Integer, TBrush>;
+  //TListStyleBrush = TObjectDictionary<Integer, TBrush>;
+    TListStyleBrush = TObjectDictionary<Integer, HBRUSH>;
 
 var
   VCLStylesBrush   : TObjectDictionary<string, TListStyleBrush>;
@@ -155,6 +156,7 @@ begin
   //OutputDebugString(PChar('Detour_GetSysColor nIndex '+IntToStr(nIndex)) );
 end;
 
+{
 function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
 var
   LCurrentStyleBrush : TListStyleBrush;
@@ -204,6 +206,53 @@ begin
        //OutputDebugString(PChar(Format('nIndex %d Color %x RGB %x', [nIndex, LBrush.Color, ColorToRGB(LBrush.Color)])));
        Exit(LBrush.Handle);
      end;
+    end;
+  finally
+    VCLStylesLock.Leave;
+  end;
+end;
+}
+function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
+var
+  LCurrentStyleBrush: TListStyleBrush;
+  LBrush: HBRUSH;
+  LColor: TColor;
+begin
+  {
+    The reason to change the previous code implementation
+    is that the win32 graphics may differ with the VCL graphics:
+    Eg: TColor is signed in VCL and Unsigned in Win32Api.
+    When hooking : keep always using the native way !
+    Need Color ?
+    Use GetObject with LOGBRUSH ! or use TBrushColorPair !
+  }
+
+  VCLStylesLock.Enter;
+  try
+    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+      Exit(TrampolineGetSysColorBrush(nIndex))
+    else
+    begin
+      if VCLStylesBrush.ContainsKey(StyleServices.Name) then
+        LCurrentStyleBrush := VCLStylesBrush.Items[StyleServices.Name]
+      else
+      begin
+        VCLStylesBrush.Add(StyleServices.Name, TListStyleBrush.Create());
+        LCurrentStyleBrush := VCLStylesBrush.Items[StyleServices.Name];
+      end;
+      if Assigned(LCurrentStyleBrush) then
+      begin
+        if LCurrentStyleBrush.ContainsKey(nIndex) then
+          Exit(LCurrentStyleBrush[nIndex])
+        else
+        begin
+          LColor := StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
+          LBrush := CreateSolidBrush(LColor);
+          LCurrentStyleBrush.Add(nIndex, LBrush);
+          Exit(LBrush);
+        end;
+      end;
+      Exit(TrampolineGetSysColorBrush(nIndex));
     end;
   finally
     VCLStylesLock.Leave;
