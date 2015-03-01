@@ -1570,7 +1570,7 @@ begin
             end
         else
          begin
-          OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
+          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeBackgroundEx  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
           Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
          end;
         end;
