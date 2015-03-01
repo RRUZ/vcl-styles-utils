@@ -51,8 +51,7 @@ uses
   Vcl.Themes;
 
 type
-  //TListStyleBrush = TObjectDictionary<Integer, TBrush>;
-    TListStyleBrush = TObjectDictionary<Integer, HBRUSH>;
+  TListStyleBrush = TObjectDictionary<Integer, HBRUSH>;
 
 var
   VCLStylesBrush   : TObjectDictionary<string, TListStyleBrush>;
@@ -156,62 +155,6 @@ begin
   //OutputDebugString(PChar('Detour_GetSysColor nIndex '+IntToStr(nIndex)) );
 end;
 
-{
-function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
-var
-  LCurrentStyleBrush : TListStyleBrush;
-  LBrush : TBrush;
-  LColor : TColor;
-begin
-  VCLStylesLock.Enter;
-  try
-    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled  then
-     Exit(TrampolineGetSysColorBrush(nIndex))
-    else
-    begin
-     if VCLStylesBrush.ContainsKey(StyleServices.Name) then
-      LCurrentStyleBrush:=VCLStylesBrush.Items[StyleServices.Name]
-     else
-     begin
-       VCLStylesBrush.Add(StyleServices.Name, TListStyleBrush.Create([doOwnsValues]));
-       LCurrentStyleBrush:=VCLStylesBrush.Items[StyleServices.Name];
-     end;
-
-     if LCurrentStyleBrush.ContainsKey(nIndex) then
-     begin
-      LBrush:=LCurrentStyleBrush.Items[nIndex];
-//      if GetObject(LBrush.Handle, SizeOf(TLogBrush), @LogBrush) <> 0 then
-//        OutputDebugString(PChar(Format('nIndex %d Color %x RGB %x  GetObject %x', [nIndex, LBrush.Color, ColorToRGB(LBrush.Color), LogBrush.lbColor])));
-      Exit(LBrush.Handle);
-     end
-     else
-//     if LCurrentStyleBrush.ContainsKey(nIndex) then
-//      LCurrentStyleBrush.Remove(nIndex);
-     begin
-       LBrush:=TBrush.Create;
-       LCurrentStyleBrush.Add(nIndex, LBrush);
-       if nIndex= COLOR_WINDOW then
-       begin
-         LBrush.Color:= StyleServices.GetSystemColor(clWindow);
-         LColor := LBrush.Color;
-         case LColor of
-          $303030, $232323, $644239, $121212 : LBrush.Color:= LColor + 1;
-         end;
-       end
-       else
-       if nIndex= COLOR_HOTLIGHT then
-         LBrush.Color:=StyleServices.GetSystemColor(clHighlight)
-       else
-         LBrush.Color:= StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
-       //OutputDebugString(PChar(Format('nIndex %d Color %x RGB %x', [nIndex, LBrush.Color, ColorToRGB(LBrush.Color)])));
-       Exit(LBrush.Handle);
-     end;
-    end;
-  finally
-    VCLStylesLock.Leave;
-  end;
-end;
-}
 function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
 var
   LCurrentStyleBrush: TListStyleBrush;
@@ -226,7 +169,6 @@ begin
     Need Color ?
     Use GetObject with LOGBRUSH ! or use TBrushColorPair !
   }
-
   VCLStylesLock.Enter;
   try
     if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then

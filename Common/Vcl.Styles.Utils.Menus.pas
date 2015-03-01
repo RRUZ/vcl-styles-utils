@@ -1565,7 +1565,7 @@ SubMenuItemInfoArray := nil;
 {$IFDEF UseVCLStyleUtilsMenu}
 {$IF CompilerVersion >= 27} // Disable XE6-XE7 menu syshooks
 TStyleManager.SystemHooks := TStyleManager.SystemHooks - [shMenus];
-{$ENDIF CompilerVersion}
+{$IFEND CompilerVersion}
 if StyleServices.Available then
   TSysStyleManager.RegisterSysStyleHook('#32768', TSysPopupStyleHook);
 {$ENDIF UseVCLStyleUtilsMenu}
