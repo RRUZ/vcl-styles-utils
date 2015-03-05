@@ -2,6 +2,8 @@
 {$DEFINE BuildThreadSafe}
 {$DEFINE UseGenerics}
 {$DEFINE UseMultiBytesNop}
+//Define HookInternalFuncs if you want to hook internal functions used by DDL core!
+{.$DEFINE HookInternalFuncs}
 //----------------------------------------------
 {$IFDEF FPC}
   {$IFDEF CPU64}
@@ -26,8 +28,15 @@
     {$DEFINE CanInline}
   {$IFEND}
   {$IF CompilerVersion >=20}
+    {$DEFINE D2009UP }  
     {$DEFINE GenericsExist }
   {$IFEND}
+  {$IF CompilerVersion >=23}
+    {$DEFINE DXE2UP } 
+  {$IFEND}  
+  {$IF CompilerVersion >=24}
+    {$DEFINE DXE3UP } 
+  {$IFEND}    
 {$ENDIF !FPC}
 
 {$IF DEFINED(UseInline) and DEFINED(CanInline)}

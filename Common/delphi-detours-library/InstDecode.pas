@@ -14,21 +14,25 @@
 // The Original Code is InstDecode.pas.
 //
 // The Initial Developer of the Original Code is Mahdi Safsafi [SMP3].
-// Portions created by Mahdi Safsafi . are Copyright (C) 2013-2014 Mahdi Safsafi .
+// Portions created by Mahdi Safsafi . are Copyright (C) 2013-2015 Mahdi Safsafi .
 // All Rights Reserved.
 //
 // **************************************************************************************************
 
 { ===============================> CHANGE LOG <======================================================
+  ==>  Dec 27,2014 , Mahdi Safsafi :
+  +BugFix : IN/INS/OUT/OUTS instructions decoding.
+  +BugFix : MOV with offset instructions decoding.
 
+  ==> Version 2:
   +Updated opcodes map .
-  +Adding support to three byte escape Table
-  +Adding support to vex decoding (vex three & two byte).
-  +Adding support to groups opcodes instructions.
-  +Adding support to decode invalid opcode .
-  +Adding support to 16-bits ModRm .
-  +Adding support to handling errors.
-  +Adding support for mandatory prefixes.
+  +Added support to three byte escape Table
+  +Added support to vex decoding (vex three & two byte).
+  +Added support to groups opcodes instructions.
+  +Added support to decode invalid opcode .
+  +Added support to 16-bits ModRm .
+  +Added support to handling errors.
+  +Added support for mandatory prefixes.
   +Improve Decoding Process .=> Very faster than the old one !
   +Reduce memory usage .
   +Removing inused fields.
@@ -63,24 +67,24 @@ type
 
 const
   { CPUX }
-  CPUX32 = 0; { x86-32 }
-  CPUX64 = 1; { x86-64 }
+  CPUX32 = $00; { x86-32 }
+  CPUX64 = $01; { x86-64 }
   CPUX = {$IFDEF CPUX64}CPUX64 {$ELSE}CPUX32 {$ENDIF};
 
   { Address Mode }
-  am16 = 1; { 16-bit addressing mode }
-  am32 = 2; { 32-bit addressing mode }
-  am64 = 3; { 64-bit addressing mode }
+  am16 = $01; { 16-bit addressing mode }
+  am32 = $02; { 32-bit addressing mode }
+  am64 = $03; { 64-bit addressing mode }
   { Default Addressing Mode Depending on CPUX (32/64)bit }
   DefAddressMode: array [0 .. 1] of Byte = (am32, am64);
   { Used to select Addressing Mode when Address Mode Prefix is used ! }
   AddressMode: array [0 .. 1] of Byte = (am16, am32);
 
   { Tables }
-  tbOneByte = 1; { One Byte OpCodes Table }
-  tbTwoByte = 2; { Two Byte OpCodes Table }
-  tbThreeByte = 3; { Three Byte OpCodes Table }
-  tbFPU = 4; { FPU OpCodes Table }
+  tbOneByte = $01; { One Byte OpCodes Table }
+  tbTwoByte = $02; { Two Byte OpCodes Table }
+  tbThreeByte = $03; { Three Byte OpCodes Table }
+  tbFPU = $04; { FPU OpCodes Table }
 
   { Prefixs }
   Prf_Seg_CS = $01;
@@ -108,62 +112,73 @@ const
   Seg_SS = $06;
 
   { OpSize }
-  ops8bits = 1;
-  ops16bits = 2;
-  ops32bits = 4;
-  ops48bits = 6;
-  ops64bits = 8;
-  ops128bits = 16;
-  ops256bits = 32;
-  ops512bits = 64;
+  ops8bits = $01;
+  ops16bits = $02;
+  ops32bits = $04;
+  ops48bits = $06;
+  ops64bits = $08;
+  ops128bits = $10;
+  ops256bits = $20;
+  ops512bits = $40;
 
   { OpType }
-  otNone = 0;
-  otRET = 1; { RET Instruction }
-  otCALL = 2; { CALL Instruction }
-  otJMP = 4; { JMP Instruction }
-  otJ = 8;
+  otNone = $00;
+  otRET = $01; { RET Instruction }
+  otCALL = $02; { CALL Instruction }
+  otJMP = $04; { JMP Instruction }
+  otJ = $08;
   otJcc = $10; { Conditional JUMP Instruction }
 
   { OpKind }
-  kGrp = 1;
-  // kFPU = 2; Use OpTable !
+  kGrp = $01;
+  // kFPU = $02; Use OpTable !
 
   { Options }
-  DecodeVex = 1;
+  DecodeVex = $01;
 
   { ModRm Flags }
   mfUsed = $80; { ModRm Used }
 
   { Sib Flags }
-  sfUsed = 1; { Sib Used }
+  sfUsed = $01; { Sib Used }
 
   { Displacement Flags }
-  dfUsed = 1; { Disp Used }
-  dfDispOnly = 2; { Displacement Only without registers ! }
-  dfSigned = 4; { Displacement can be signed ! }
-  dfRip = 2; { RIP Disp }
+  dfUsed = $01; { Disp Used }
+  dfRip = $02; { RIP Disp }
+  dfSigned = $04; { Displacement can be signed ! }
+  dfDispOnly = $08; { Displacement Only without registers ! }
+  dfOffset = $10; { Offset coded after the opcode. }
 
   { Immediat Flags }
-  imfUsed = 1; { Imm Used }
+  imfUsed = $01; { Imm Used }
 
   { Branch Flags }
-  bfUsed = 1; { JUMP/CALL Used }
-  bfRel = 2; { Relative Branch }
-  bfAbs = 4; { Absolute Branch }
-  bfIndirect = 8; { Indirect Branch }
+  bfUsed = $01; { JUMP/CALL Used }
+  bfRel = $02; { Relative Branch }
+  bfAbs = $04; { Absolute Branch }
+  bfIndirect = $08; { Indirect Branch }
   bfReg = $10;
   bfFar = bfAbs or $20; { Far Branch }
   bfRip = $40;
 
   { Operand Flags }
-  opdD64 = 1;
-  opdF64 = 2;
-  opdDf64 = 3;
-  opdDv64 = 4;
+  opdD64 = $01;
+  opdF64 = $02;
+  opdDf64 = $03;
+  opdDv64 = $04;
 
   { Options }
-  UseVA = 1;
+  UseVA = $01;
+
+  { General Purpose Registers }
+  rEAX = $00;
+  rECX = $01;
+  rEDX = $02;
+  rEBX = $03;
+  rESP = $04;
+  rEBP = $05;
+  rESI = $06;
+  rEDI = $07;
 
   { Error }
   NO_ERROR = $00;
@@ -194,13 +209,13 @@ const
     { INVALID_GROUP_OPCODE }
     'Invalid group opcode');
 
-  _vex3_ = 3;
-  _opcode_ = 1;
-  _modrm_ = 1;
-  _sib_ = 1;
-  _disp32_ = 4;
-  _imm32_ = 4;
-  _imm64_ = 8;
+  _vex3_ = $03;
+  _opcode_ = $01;
+  _modrm_ = $01;
+  _sib_ = $01;
+  _disp32_ = $04;
+  _imm32_ = $04;
+  _imm64_ = $08;
   { Intel define instruction length as a 15 bytes !
     However , it's possible to incode instructions
     that exceed the defined length !
@@ -338,19 +353,26 @@ type
 function DecodeInst(PInst: PInstruction): ShortInt;
 
 { Useful ModRm Routines }
-function GetModRm_Mod(const Value: Byte): Byte; {$IFDEF MustInline}inline; {$ENDIF}
-function GetModRm_Reg(const Value: Byte): Byte; {$IFDEF MustInline}inline; {$ENDIF}
-function GetModRm_Rm(const Value: Byte): Byte; {$IFDEF MustInline}inline; {$ENDIF}
+function GetModRm_Mod(const Value: Byte): Byte; {$IFDEF MustInline}inline;
+{$ENDIF}
+function GetModRm_Reg(const Value: Byte): Byte; {$IFDEF MustInline}inline;
+{$ENDIF}
+function GetModRm_Rm(const Value: Byte): Byte; {$IFDEF MustInline}inline;
+{$ENDIF}
 { Useful Sib Routines }
-function GetSib_Base(const Value: Byte): Byte; {$IFDEF MustInline}inline; {$ENDIF}
-function GetSib_Index(const Value: Byte): Byte; {$IFDEF MustInline}inline; {$ENDIF}
-function GetSib_Scale(const Value: Byte): Byte; {$IFDEF MustInline}inline; {$ENDIF}
-function IsSibBaseRegValid(PInst: PInstruction): Boolean; {$IFDEF MustInline}inline; {$ENDIF}
+function GetSib_Base(const Value: Byte): Byte; {$IFDEF MustInline}inline;
+{$ENDIF}
+function GetSib_Index(const Value: Byte): Byte; {$IFDEF MustInline}inline;
+{$ENDIF}
+function GetSib_Scale(const Value: Byte): Byte; {$IFDEF MustInline}inline;
+{$ENDIF}
+function IsSibBaseRegValid(PInst: PInstruction): Boolean;
+{$IFDEF MustInline}inline; {$ENDIF}
 
 implementation
 
-{$I OpCodesTable.inc}
-{$I ModRmFlagsTable.inc}
+{$I OpCodesTables.inc}
+{$I ModRmFlagsTables.inc}
 { ================================== 00 ================================== }
 procedure Decode_InvalidOpCode(PInst: PInstruction); forward;
 { ================================== 01 ================================== }
@@ -394,126 +416,130 @@ procedure Decode_NA_Ib_D64(PInst: PInstruction); forward;
 { ================================== 20 ================================== }
 procedure Decode_NA_ModRm_Ib(PInst: PInstruction); forward;
 { ================================== 21 ================================== }
-procedure Decode_NA_Jb_Df64(PInst: PInstruction); forward;
-{ ================================== 22 ================================== }
-procedure Decode_Group_1(PInst: PInstruction); forward;
-{ ================================== 23 ================================== }
-procedure Decode_Group_1A(PInst: PInstruction); forward;
-{ ================================== 24 ================================== }
 procedure Decode_NA(PInst: PInstruction); forward;
+{ ================================== 22 ================================== }
+procedure Decode_NA_Jb_Df64(PInst: PInstruction); forward;
+{ ================================== 23 ================================== }
+procedure Decode_Group_1(PInst: PInstruction); forward;
+{ ================================== 24 ================================== }
+procedure Decode_Group_1A(PInst: PInstruction); forward;
 { ================================== 25 ================================== }
 procedure Decode_NA_CALL_Ap_I64(PInst: PInstruction); forward;
 { ================================== 26 ================================== }
-procedure Decode_Group_2(PInst: PInstruction); forward;
+procedure Decode_NA_OfstV(PInst: PInstruction); forward;
 { ================================== 27 ================================== }
-procedure Decode_NA_RET_Iw_Df64(PInst: PInstruction); forward;
+procedure Decode_NA_Iv(PInst: PInstruction); forward;
 { ================================== 28 ================================== }
-procedure Decode_NA_RET_Df64(PInst: PInstruction); forward;
+procedure Decode_Group_2(PInst: PInstruction); forward;
 { ================================== 29 ================================== }
-procedure Decode_VEX3_Prefix(PInst: PInstruction); forward;
+procedure Decode_NA_RET_Iw_Df64(PInst: PInstruction); forward;
 { ================================== 30 ================================== }
-procedure Decode_VEX2_Prefix(PInst: PInstruction); forward;
+procedure Decode_NA_RET_Df64(PInst: PInstruction); forward;
 { ================================== 31 ================================== }
-procedure Decode_Group_11(PInst: PInstruction); forward;
+procedure Decode_VEX3_Prefix(PInst: PInstruction); forward;
 { ================================== 32 ================================== }
-procedure Decode_NA_Iw_Ib_D64(PInst: PInstruction); forward;
+procedure Decode_VEX2_Prefix(PInst: PInstruction); forward;
 { ================================== 33 ================================== }
-procedure Decode_NA_RET_Iw(PInst: PInstruction); forward;
+procedure Decode_Group_11(PInst: PInstruction); forward;
 { ================================== 34 ================================== }
-procedure Decode_NA_RET(PInst: PInstruction); forward;
+procedure Decode_NA_Iw_Ib_D64(PInst: PInstruction); forward;
 { ================================== 35 ================================== }
-procedure Decode_NA_Ib_I64(PInst: PInstruction); forward;
+procedure Decode_NA_RET_Iw(PInst: PInstruction); forward;
 { ================================== 36 ================================== }
-procedure Decode_Escape_FPU_D8(PInst: PInstruction); forward;
+procedure Decode_NA_RET(PInst: PInstruction); forward;
 { ================================== 37 ================================== }
-procedure Decode_Escape_FPU_D9(PInst: PInstruction); forward;
+procedure Decode_NA_Ib_I64(PInst: PInstruction); forward;
 { ================================== 38 ================================== }
-procedure Decode_Escape_FPU_DA(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_D8(PInst: PInstruction); forward;
 { ================================== 39 ================================== }
-procedure Decode_Escape_FPU_DB(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_D9(PInst: PInstruction); forward;
 { ================================== 40 ================================== }
-procedure Decode_Escape_FPU_DC(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_DA(PInst: PInstruction); forward;
 { ================================== 41 ================================== }
-procedure Decode_Escape_FPU_DD(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_DB(PInst: PInstruction); forward;
 { ================================== 42 ================================== }
-procedure Decode_Escape_FPU_DE(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_DC(PInst: PInstruction); forward;
 { ================================== 43 ================================== }
-procedure Decode_Escape_FPU_DF(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_DD(PInst: PInstruction); forward;
 { ================================== 44 ================================== }
-procedure Decode_NA_CALL_Jz_Df64(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_DE(PInst: PInstruction); forward;
 { ================================== 45 ================================== }
-procedure Decode_NA_JMP_Jz_Df64(PInst: PInstruction); forward;
+procedure Decode_Escape_FPU_DF(PInst: PInstruction); forward;
 { ================================== 46 ================================== }
-procedure Decode_NA_JMP_Ap_I64(PInst: PInstruction); forward;
+procedure Decode_NA_CALL_Jz_Df64(PInst: PInstruction); forward;
 { ================================== 47 ================================== }
-procedure Decode_NA_JMP_Jb_Df64(PInst: PInstruction); forward;
+procedure Decode_NA_JMP_Jz_Df64(PInst: PInstruction); forward;
 { ================================== 48 ================================== }
-procedure Decode_LOCK_Prefix(PInst: PInstruction); forward;
+procedure Decode_NA_JMP_Ap_I64(PInst: PInstruction); forward;
 { ================================== 49 ================================== }
-procedure Decode_REPNE_Prefix(PInst: PInstruction); forward;
+procedure Decode_NA_JMP_Jb_Df64(PInst: PInstruction); forward;
 { ================================== 50 ================================== }
-procedure Decode_REPE_Prefix(PInst: PInstruction); forward;
+procedure Decode_LOCK_Prefix(PInst: PInstruction); forward;
 { ================================== 51 ================================== }
-procedure Decode_Group_3(PInst: PInstruction); forward;
+procedure Decode_REPNE_Prefix(PInst: PInstruction); forward;
 { ================================== 52 ================================== }
-procedure Decode_Group_4_INC_DEC(PInst: PInstruction); forward;
+procedure Decode_REPE_Prefix(PInst: PInstruction); forward;
 { ================================== 53 ================================== }
-procedure Decode_Group_5_INC_DEC(PInst: PInstruction); forward;
+procedure Decode_Group_3(PInst: PInstruction); forward;
 { ================================== 54 ================================== }
-procedure Decode_Group_6(PInst: PInstruction); forward;
+procedure Decode_Group_4_INC_DEC(PInst: PInstruction); forward;
 { ================================== 55 ================================== }
-procedure Decode_Group_7(PInst: PInstruction); forward;
+procedure Decode_Group_5_INC_DEC(PInst: PInstruction); forward;
 { ================================== 56 ================================== }
-procedure Decode_NA_CALL(PInst: PInstruction); forward;
+procedure Decode_Group_6(PInst: PInstruction); forward;
 { ================================== 57 ================================== }
-procedure Decode_NA_66_F2_F3_ModRm(PInst: PInstruction); forward;
+procedure Decode_Group_7(PInst: PInstruction); forward;
 { ================================== 58 ================================== }
-procedure Decode_NA_66_ModRm(PInst: PInstruction); forward;
+procedure Decode_NA_CALL(PInst: PInstruction); forward;
 { ================================== 59 ================================== }
-procedure Decode_NA_66_F3_ModRm(PInst: PInstruction); forward;
+procedure Decode_NA_66_F2_F3_ModRm(PInst: PInstruction); forward;
 { ================================== 60 ================================== }
-procedure Decode_Group_16(PInst: PInstruction); forward;
+procedure Decode_NA_66_ModRm(PInst: PInstruction); forward;
 { ================================== 61 ================================== }
-procedure Decode_NA_ModRm_F64(PInst: PInstruction); forward;
+procedure Decode_NA_66_F3_ModRm(PInst: PInstruction); forward;
 { ================================== 62 ================================== }
-procedure Decode_Escape_3_Byte(PInst: PInstruction); forward;
+procedure Decode_Group_16(PInst: PInstruction); forward;
 { ================================== 63 ================================== }
-procedure Decode_NA_F3_ModRm(PInst: PInstruction); forward;
+procedure Decode_NA_ModRm_F64(PInst: PInstruction); forward;
 { ================================== 64 ================================== }
-procedure Decode_66_ModRm(PInst: PInstruction); forward;
+procedure Decode_Escape_3_Byte(PInst: PInstruction); forward;
 { ================================== 65 ================================== }
-procedure Decode_NA_66_F2_F3_ModRm_Ib(PInst: PInstruction); forward;
+procedure Decode_NA_F3_ModRm(PInst: PInstruction); forward;
 { ================================== 66 ================================== }
-procedure Decode_Group_12(PInst: PInstruction); forward;
+procedure Decode_66_ModRm(PInst: PInstruction); forward;
 { ================================== 67 ================================== }
-procedure Decode_Group_13(PInst: PInstruction); forward;
+procedure Decode_NA_66_F2_F3_ModRm_Ib(PInst: PInstruction); forward;
 { ================================== 68 ================================== }
-procedure Decode_Group_14(PInst: PInstruction); forward;
+procedure Decode_Group_12(PInst: PInstruction); forward;
 { ================================== 69 ================================== }
-procedure Decode_66_F2_ModRm(PInst: PInstruction); forward;
+procedure Decode_Group_13(PInst: PInstruction); forward;
 { ================================== 70 ================================== }
-procedure Decode_NA_Jz_Df64(PInst: PInstruction); forward;
+procedure Decode_Group_14(PInst: PInstruction); forward;
 { ================================== 71 ================================== }
-procedure Decode_Group_15(PInst: PInstruction); forward;
+procedure Decode_66_F2_ModRm(PInst: PInstruction); forward;
 { ================================== 72 ================================== }
-procedure Decode_F3_ModRm(PInst: PInstruction); forward;
+procedure Decode_NA_Jz_Df64(PInst: PInstruction); forward;
 { ================================== 73 ================================== }
-procedure Decode_Group_10_UD2(PInst: PInstruction); forward;
+procedure Decode_Group_15(PInst: PInstruction); forward;
 { ================================== 74 ================================== }
-procedure Decode_Group_8(PInst: PInstruction); forward;
+procedure Decode_F3_ModRm(PInst: PInstruction); forward;
 { ================================== 75 ================================== }
-procedure Decode_NA_66_ModRm_Ib(PInst: PInstruction); forward;
+procedure Decode_Group_10_UD2(PInst: PInstruction); forward;
 { ================================== 76 ================================== }
-procedure Decode_Group_9(PInst: PInstruction); forward;
+procedure Decode_Group_8(PInst: PInstruction); forward;
 { ================================== 77 ================================== }
-procedure Decode_66_F2_F3_ModRm(PInst: PInstruction); forward;
+procedure Decode_NA_66_ModRm_Ib(PInst: PInstruction); forward;
 { ================================== 78 ================================== }
-procedure Decode_F2_ModRm(PInst: PInstruction); forward;
+procedure Decode_Group_9(PInst: PInstruction); forward;
 { ================================== 79 ================================== }
-procedure Decode_SP_T38_F0_F7(PInst: PInstruction); forward;
+procedure Decode_66_F2_F3_ModRm(PInst: PInstruction); forward;
 { ================================== 80 ================================== }
-procedure Decode_66_ModRm_Ib(PInst: PInstruction); forward;
+procedure Decode_F2_ModRm(PInst: PInstruction); forward;
 { ================================== 81 ================================== }
+procedure Decode_SP_T38_F0_F7(PInst: PInstruction); forward;
+{ ================================== 82 ================================== }
+procedure Decode_66_ModRm_Ib(PInst: PInstruction); forward;
+{ ================================== 83 ================================== }
 procedure Decode_F2_ModRm_Ib(PInst: PInstruction); forward;
 
 procedure JumpError(PInst: PInstruction); forward;
@@ -543,7 +569,7 @@ const
     JumpError { }
     );
 
-  DecoderProcTable: array [0 .. $52 - 1] of TDecoderProc = ( //
+  DecoderProcTable: array [0 .. $54 - 1] of TDecoderProc = ( //
     { 00 } Decode_InvalidOpCode,
     { 01 } Decode_NA_ModRm,
     { 02 } Decode_NA_Ib,
@@ -565,68 +591,69 @@ const
     { 18 } Decode_NA_ModRm_Iz,
     { 19 } Decode_NA_Ib_D64,
     { 20 } Decode_NA_ModRm_Ib,
-    { 21 } Decode_NA_Jb_Df64,
-    { 22 } Decode_Group_1,
-    { 23 } Decode_Group_1A,
-    { 24 } Decode_NA,
+    { 21 } Decode_NA,
+    { 22 } Decode_NA_Jb_Df64,
+    { 23 } Decode_Group_1,
+    { 24 } Decode_Group_1A,
     { 25 } Decode_NA_CALL_Ap_I64,
-    { 26 } Decode_Group_2,
-    { 27 } Decode_NA_RET_Iw_Df64,
-    { 28 } Decode_NA_RET_Df64,
-    { 29 } Decode_VEX3_Prefix,
-    { 30 } Decode_VEX2_Prefix,
-    { 31 } Decode_Group_11,
-    { 32 } Decode_NA_Iw_Ib_D64,
-    { 33 } Decode_NA_RET_Iw,
-    { 34 } Decode_NA_RET,
-    { 35 } Decode_NA_Ib_I64,
-    { 36 } Decode_Escape_FPU_D8,
-    { 37 } Decode_Escape_FPU_D9,
-    { 38 } Decode_Escape_FPU_DA,
-    { 39 } Decode_Escape_FPU_DB,
-    { 40 } Decode_Escape_FPU_DC,
-    { 41 } Decode_Escape_FPU_DD,
-    { 42 } Decode_Escape_FPU_DE,
-    { 43 } Decode_Escape_FPU_DF,
-    { 44 } Decode_NA_CALL_Jz_Df64,
-    { 45 } Decode_NA_JMP_Jz_Df64,
-    { 46 } Decode_NA_JMP_Ap_I64,
-    { 47 } Decode_NA_JMP_Jb_Df64,
-    { 48 } Decode_LOCK_Prefix,
-    { 49 } Decode_REPNE_Prefix,
-    { 50 } Decode_REPE_Prefix,
-    { 51 } Decode_Group_3,
-    { 52 } Decode_Group_4_INC_DEC,
-    { 53 } Decode_Group_5_INC_DEC,
-    { 54 } Decode_Group_6,
-    { 55 } Decode_Group_7,
-    { 56 } Decode_NA_CALL,
-    { 57 } Decode_NA_66_F2_F3_ModRm,
-    { 58 } Decode_NA_66_ModRm,
-    { 59 } Decode_NA_66_F3_ModRm,
-    { 60 } Decode_Group_16,
-    { 61 } Decode_NA_ModRm_F64,
-    { 62 } Decode_Escape_3_Byte,
-    { 63 } Decode_NA_F3_ModRm,
-    { 64 } Decode_66_ModRm,
-    { 65 } Decode_NA_66_F2_F3_ModRm_Ib,
-    { 66 } Decode_Group_12,
-    { 67 } Decode_Group_13,
-    { 68 } Decode_Group_14,
-    { 69 } Decode_66_F2_ModRm,
-    { 70 } Decode_NA_Jz_Df64,
-    { 71 } Decode_Group_15,
-    { 72 } Decode_F3_ModRm,
-    { 73 } Decode_Group_10_UD2,
-    { 74 } Decode_Group_8,
-    { 75 } Decode_NA_66_ModRm_Ib,
-    { 76 } Decode_Group_9,
-    { 77 } Decode_66_F2_F3_ModRm,
-    { 78 } Decode_F2_ModRm,
-    { 79 } Decode_SP_T38_F0_F7,
-    { 80 } Decode_66_ModRm_Ib,
-    { 81 } Decode_F2_ModRm_Ib);
-
+    { 26 } Decode_NA_OfstV,
+    { 27 } Decode_NA_Iv,
+    { 28 } Decode_Group_2,
+    { 29 } Decode_NA_RET_Iw_Df64,
+    { 30 } Decode_NA_RET_Df64,
+    { 31 } Decode_VEX3_Prefix,
+    { 32 } Decode_VEX2_Prefix,
+    { 33 } Decode_Group_11,
+    { 34 } Decode_NA_Iw_Ib_D64,
+    { 35 } Decode_NA_RET_Iw,
+    { 36 } Decode_NA_RET,
+    { 37 } Decode_NA_Ib_I64,
+    { 38 } Decode_Escape_FPU_D8,
+    { 39 } Decode_Escape_FPU_D9,
+    { 40 } Decode_Escape_FPU_DA,
+    { 41 } Decode_Escape_FPU_DB,
+    { 42 } Decode_Escape_FPU_DC,
+    { 43 } Decode_Escape_FPU_DD,
+    { 44 } Decode_Escape_FPU_DE,
+    { 45 } Decode_Escape_FPU_DF,
+    { 46 } Decode_NA_CALL_Jz_Df64,
+    { 47 } Decode_NA_JMP_Jz_Df64,
+    { 48 } Decode_NA_JMP_Ap_I64,
+    { 49 } Decode_NA_JMP_Jb_Df64,
+    { 50 } Decode_LOCK_Prefix,
+    { 51 } Decode_REPNE_Prefix,
+    { 52 } Decode_REPE_Prefix,
+    { 53 } Decode_Group_3,
+    { 54 } Decode_Group_4_INC_DEC,
+    { 55 } Decode_Group_5_INC_DEC,
+    { 56 } Decode_Group_6,
+    { 57 } Decode_Group_7,
+    { 58 } Decode_NA_CALL,
+    { 59 } Decode_NA_66_F2_F3_ModRm,
+    { 60 } Decode_NA_66_ModRm,
+    { 61 } Decode_NA_66_F3_ModRm,
+    { 62 } Decode_Group_16,
+    { 63 } Decode_NA_ModRm_F64,
+    { 64 } Decode_Escape_3_Byte,
+    { 65 } Decode_NA_F3_ModRm,
+    { 66 } Decode_66_ModRm,
+    { 67 } Decode_NA_66_F2_F3_ModRm_Ib,
+    { 68 } Decode_Group_12,
+    { 69 } Decode_Group_13,
+    { 70 } Decode_Group_14,
+    { 71 } Decode_66_F2_ModRm,
+    { 72 } Decode_NA_Jz_Df64,
+    { 73 } Decode_Group_15,
+    { 74 } Decode_F3_ModRm,
+    { 75 } Decode_Group_10_UD2,
+    { 76 } Decode_Group_8,
+    { 77 } Decode_NA_66_ModRm_Ib,
+    { 78 } Decode_Group_9,
+    { 79 } Decode_66_F2_F3_ModRm,
+    { 80 } Decode_F2_ModRm,
+    { 81 } Decode_SP_T38_F0_F7,
+    { 82 } Decode_66_ModRm_Ib,
+    { 83 } Decode_F2_ModRm_Ib);
 {$REGION 'COMMON'}
   { ========================== COMMON =============================== }
 
@@ -660,7 +687,7 @@ end;
 
 function GetModRm_Reg(const Value: Byte): Byte;
 begin
-  Result := (Value and $38) shr 3;
+  Result := (Value and $38) shr $03;
 end;
 
 function GetModRm_Rm(const Value: Byte): Byte;
@@ -675,7 +702,7 @@ end;
 
 function GetSib_Index(const Value: Byte): Byte;
 begin
-  Result := (Value and $38) shr 3;
+  Result := (Value and $38) shr $03;
 end;
 
 function GetSib_Scale(const Value: Byte): Byte;
@@ -690,18 +717,18 @@ begin
     Result := not((PInst^.ModRm.iMod = 0) and (PInst^.Sib.Base = 5));
 end;
 
-procedure SetOpCode(PInst: PInstruction);{$IFDEF MustInline}inline; {$ENDIF}
+procedure SetOpCode(PInst: PInstruction); {$IFDEF MustInline}inline; {$ENDIF}
 begin
   PInst^.OpCode := PInst^.NextInst^;
   Inc(PInst^.NextInst);
 end;
 
-procedure SetGroup(PInst: PInstruction);{$IFDEF MustInline}inline; {$ENDIF}
+procedure SetGroup(PInst: PInstruction); {$IFDEF MustInline}inline; {$ENDIF}
 begin
   PInst^.OpKind := kGrp;
 end;
 
-procedure ForceOpSize(PInst: PInstruction);{$IFDEF MustInline}inline; {$ENDIF}
+procedure ForceOpSize(PInst: PInstruction); {$IFDEF MustInline}inline; {$ENDIF}
 begin
   if PInst^.Archi = CPUX32 then
     Exit;
@@ -727,19 +754,19 @@ var
   Size: Byte;
   DispOnly: Boolean;
 begin
-  Disp := 0;
+  Disp := $00;
   Size := PInst^.Disp.Size;
   PInst^.Disp.Flags := dfUsed;
   DispOnly := (PInst^.ModRm.iMod = $00) and (PInst^.ModRm.Rm = $05);
 
   case Size of
     ops8bits:
-      Disp := (PUInt8(PInst^.NextInst)^) ;//and $FF;
+      Disp := (PUInt8(PInst^.NextInst)^); // and $FF;
     ops16bits:
-      Disp := (PUInt16(PInst^.NextInst)^) ;//and $FFFF;
+      Disp := (PUInt16(PInst^.NextInst)^); // and $FFFF;
     ops32bits:
       begin
-        Disp := (PUInt32(PInst^.NextInst)^);// and $FFFFFFFF;
+        Disp := (PUInt32(PInst^.NextInst)^); // and $FFFFFFFF;
         if (PInst^.Archi = CPUX64) and DispOnly then
           { RIP disp ! }
           PInst^.Disp.Flags := PInst^.Disp.Flags or dfRip;
@@ -800,7 +827,7 @@ var
   Imm: Int64;
   PImm: PImmediat;
 begin
-  Imm := 0;
+  Imm := $00;
   case immSize of
     ops8bits:
       Imm := (PInt8(PInst^.NextInst)^);
@@ -833,7 +860,7 @@ var
   Value: Int64;
   VA: PByte;
 begin
-  Value := 0;
+  Value := $00;
   case Size of
     ops8bits:
       Value := (PInt8(PInst^.NextInst)^);
@@ -928,18 +955,21 @@ begin
   PInst^.Branch.Target := nil;
 end;
 
-procedure Decode_InvalidOpCode(PInst: PInstruction);{$IFDEF MustInline}inline; {$ENDIF}
+procedure Decode_InvalidOpCode(PInst: PInstruction); {$IFDEF MustInline}inline;
+{$ENDIF}
 begin
   SetOpCode(PInst);
 end;
 
-procedure Decode_Invalid_Group(PInst: PInstruction); {$IFDEF MustInline}inline; {$ENDIF}
+procedure Decode_Invalid_Group(PInst: PInstruction); {$IFDEF MustInline}inline;
+{$ENDIF}
 begin
   SetOpCode(PInst);
   Inc(PInst^.NextInst);
 end;
 
-procedure Decode_Invalid_FPU(PInst: PInstruction); {$IFDEF MustInline}inline; {$ENDIF}
+procedure Decode_Invalid_FPU(PInst: PInstruction); {$IFDEF MustInline}inline;
+{$ENDIF}
 begin
   SetOpCode(PInst);
   Inc(PInst^.NextInst);
@@ -1645,7 +1675,7 @@ begin
       SetOpCode(PInst);
       Inc(PInst^.NextInst);
       Decode_J(PInst, PInst^.LID.zOpSize);
-      PInst^.OpType := 0;
+      PInst^.OpType := $00;
       Exit;
     end;
   end;
@@ -2289,6 +2319,29 @@ begin
   Decode_J(PInst, PInst^.LID.zOpSize);
 end;
 
+procedure Decode_NA_OfstV(PInst: PInstruction);
+begin
+  SetOpCode(PInst);
+  Decode_Imm(PInst, PInst.LID.vOpSize);
+  PInst.Disp.Value := PInst.Imm.Value;
+  PInst.Disp.Size := PInst.Imm.Size;
+  PInst.Disp.Flags := dfUsed or dfOffset;
+  PInst.Imm.Size := $00;
+  PInst.Imm.Value := $00;
+  PInst.Imm.Flags := $00;
+end;
+
+procedure Decode_NA_Iv(PInst: PInstruction);
+begin
+  { Only valid when mandatory prefix is : $00 }
+  if ((PInst^.OpTable <> tbOneByte) and not(PInst^.LID.MndPrf = $00)) then
+  begin
+    Decode_InvalidOpCode(PInst);
+    Exit;
+  end;
+  SetOpCode(PInst);
+  Decode_Imm(PInst, PInst^.LID.vOpSize);
+end;
 {$ENDREGION}
 
 function DecodeInst(PInst: PInstruction): ShortInt;
