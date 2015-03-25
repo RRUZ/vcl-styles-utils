@@ -145,7 +145,7 @@ function WM_To_String(const WM_Message: Integer): string;
 implementation
 
 uses
-  CommCtrl;
+  WinApi.CommCtrl;
 
 {$IFDEF EventLog}
 
