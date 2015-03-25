@@ -53,8 +53,8 @@ type
   end;
 {$IFEND}
 
-type
 {$IF CompilerVersion <= 27.0}
+type
   /// <summary> The <c>TListViewStyleHookFix</c> vcl style hook fix these QC #108678, #108875 for Delphi XE2-XE6
   /// </summary>
   /// <remarks>
@@ -70,6 +70,7 @@ type
 {$IFEND}
 
 {$IF CompilerVersion <= 24.0}
+type
   /// <summary> This interposer class fix the QC #114032  for Delphi XE2 and Delphi XE3
   /// </summary>
   /// <remarks>
