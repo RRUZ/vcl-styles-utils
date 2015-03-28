@@ -54,8 +54,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure CheckBox1Click(Sender: TObject);
     procedure ComboBoxStylesSelect(Sender: TObject);
-  private
-    procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
   public
     { Public declarations }
   end;
@@ -80,11 +78,6 @@ begin
   TSysStyleManager.Enabled := TCheckBox(Sender).Checked;
   TListViewClass(ListView1).RecreateWnd;
   TListViewClass(ListView2).RecreateWnd;
-end;
-
-procedure TFrmMain.CMStyleChanged(var Message: TMessage);
-begin
-
 end;
 
 procedure TFrmMain.ComboBoxStylesSelect(Sender: TObject);
