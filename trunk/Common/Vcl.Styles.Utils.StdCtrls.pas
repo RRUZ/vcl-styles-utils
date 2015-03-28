@@ -1304,6 +1304,15 @@ end;
 
 function TSysComboBoxStyleHook.ListBoxVertScrollRect: TRect;
 begin
+  Result := ListBoxBoundsRect;
+  OffsetRect(Result, -Result.Left, -Result.Top);
+  InflateRect(Result, -1, -1);
+  OffsetRect(Result, 1, 1);
+  if SysControl.BiDiMode <> TBidiModeDirection.bmRightToLeft then
+    Result.Left := Result.Right - GetSystemMetrics(SM_CXVSCROLL)
+  else
+    Result.Right := Result.Left + GetSystemMetrics(SM_CXVSCROLL);
+  if ListBoxBoundsRect.Height > 30 then OffsetRect(Result, -1, -1);
 
 end;
 

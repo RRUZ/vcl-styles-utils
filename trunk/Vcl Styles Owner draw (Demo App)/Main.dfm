@@ -1,6 +1,6 @@
 object FrmMain: TFrmMain
-  Left = 0
-  Top = 0
+  Left = 698
+  Top = 287
   Caption = 'Demo Owner Draw Vcl Styles'
   ClientHeight = 456
   ClientWidth = 569
@@ -11,6 +11,7 @@ object FrmMain: TFrmMain
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -94,7 +95,7 @@ object FrmMain: TFrmMain
     ColorDepth = cd32Bit
     Left = 120
     Bitmap = {
-      494C01010A001800300010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010A001800340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

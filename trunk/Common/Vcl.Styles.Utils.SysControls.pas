@@ -684,7 +684,7 @@ end;
 
 destructor TSysStyleManager.Destroy;
 begin
-
+  inherited;
 end;
 
 type

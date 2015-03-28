@@ -719,7 +719,7 @@ begin
     IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
     if not StyleServices.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
-    R := ButtonRect;
+    //R := ButtonRect;
     R := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R, ButtonRect);
     Result := ButtonRect;
@@ -1516,7 +1516,7 @@ begin
       Detail := FBtnRightDetail;
       if (not SysControl.Enabled) or (HorzScrollDisabled) then
         Detail := tsArrowBtnRightDisabled;
-      R := HorzRightRect;
+      //R := HorzRightRect;
       R := Rect(B.Width - cx, 0, B.Width, cy);
       LDetails := StyleServices.GetElementDetails(Detail);
       StyleServices.DrawElement(BmpDC, LDetails, R);
@@ -1722,14 +1722,10 @@ var
   PosX: Integer;
 begin
   Result := Rect(0, 0, 0, 0);
-  with HorzScrollInfo do
-  begin
-    ThumbSize := GetHorzThumbSize;
-    PosX := MulDiv(nPos, HorzTrackRect.Width, nMax - nMin);
-    with HorzTrackRect do
-      Result := Rect(Left + PosX, Top, Left + PosX + ThumbSize, Bottom);
-  end;
-
+  ThumbSize := GetHorzThumbSize;
+  PosX := MulDiv(HorzScrollInfo.nPos, HorzTrackRect.Width, HorzScrollInfo.nMax - HorzScrollInfo.nMin);
+  with HorzTrackRect do
+    Result := Rect(Left + PosX, Top, Left + PosX + ThumbSize, Bottom);
 end;
 
 function TSysScrollingStyleHook.GetHorzThumbPosFromPos(const Pos: Integer): Integer;
@@ -1885,13 +1881,10 @@ var
   PosY: Integer;
 begin
   Result := Rect(0, 0, 0, 0);
-  with VertScrollInfo do
-  begin
-    ThumbSize := GetVertThumbSize;
-    PosY := MulDiv(nPos, VertTrackRect.Height, nMax - nMin);
-    with VertTrackRect do
-      Result := Rect(Left, Top + PosY, Right, Top + PosY + ThumbSize);
-  end;
+  ThumbSize := GetVertThumbSize;
+  PosY := MulDiv(VertScrollInfo.nPos, VertTrackRect.Height, VertScrollInfo.nMax - VertScrollInfo.nMin);
+  with VertTrackRect do
+    Result := Rect(Left, Top + PosY, Right, Top + PosY + ThumbSize);
 end;
 
 function TSysScrollingStyleHook.GetVertThumbPosFromPos(const Pos: Integer): Integer;

@@ -85,13 +85,13 @@ type
       end;
 
     var
-    LSM_CXHTHUMB  : Integer;
-    LSM_CYVTHUMB  : Integer;
-    VScrollBar  : TScrollBar;
-    HScrollBar  : TScrollBar;
-    VScrollBarContainer   : TWinContainer;
-    HScrollBarContainer   : TWinContainer;
-    ScrollCornerContainer : TWinContainer;
+    FLSM_CXHTHUMB  : Integer;
+    FLSM_CYVTHUMB  : Integer;
+    FVScrollBar  : TScrollBar;
+    FHScrollBar  : TScrollBar;
+    FVScrollBarContainer   : TWinContainer;
+    FHScrollBarContainer   : TWinContainer;
+    FScrollCornerContainer : TWinContainer;
     procedure CMVisibleChanged(var MSg: TMessage); message CM_VISIBLECHANGED;
     procedure ResizeScrollBars;
     procedure VScrollChange(Sender: TObject);
@@ -204,32 +204,32 @@ end;
 constructor TVclStylesWebBrowser.Create(AOwner: TComponent);
 begin
   inherited;
-  LSM_CXHTHUMB:=GetSystemMetrics(SM_CXHTHUMB);
-  LSM_CYVTHUMB:=GetSystemMetrics(SM_CYVTHUMB);
+  FLSM_CXHTHUMB:=GetSystemMetrics(SM_CXHTHUMB);
+  FLSM_CYVTHUMB:=GetSystemMetrics(SM_CYVTHUMB);
 
-  VScrollBarContainer := nil;
-  HScrollBarContainer := nil;
+  FVScrollBarContainer := nil;
+  FHScrollBarContainer := nil;
 
-  ScrollCornerContainer := TWinContainer.Create(Self);
-  ScrollCornerContainer.Visible := False;
+  FScrollCornerContainer := TWinContainer.Create(Self);
+  FScrollCornerContainer.Visible := False;
 
-  VScrollBarContainer := TWinContainer.Create(Self);
-  VScrollBarContainer.Visible := True;
-  VScrollBar := TScrollBar.Create(Self);
-  VScrollBar.Parent   := VScrollBarContainer;
-  VScrollBar.Kind     := sbVertical;
-  VScrollBar.Visible  := True;
-  VScrollBar.Align    := alClient;
-  VScrollBar.OnChange := VScrollChange;
-  VScrollBar.Enabled  := False;
+  FVScrollBarContainer := TWinContainer.Create(Self);
+  FVScrollBarContainer.Visible := True;
+  FVScrollBar := TScrollBar.Create(Self);
+  FVScrollBar.Parent   := FVScrollBarContainer;
+  FVScrollBar.Kind     := sbVertical;
+  FVScrollBar.Visible  := True;
+  FVScrollBar.Align    := alClient;
+  FVScrollBar.OnChange := VScrollChange;
+  FVScrollBar.Enabled  := False;
 
-  HScrollBarContainer := TWinContainer.Create(Self);
-  HScrollBarContainer.Visible := False;
-  HScrollBar := TScrollBar.Create(Self);
-  HScrollBar.Parent   := HScrollBarContainer;
-  HScrollBar.Visible  := True;
-  HScrollBar.Align    := alClient;
-  HScrollBar.OnChange := HScrollChange;
+  FHScrollBarContainer := TWinContainer.Create(Self);
+  FHScrollBarContainer.Visible := False;
+  FHScrollBar := TScrollBar.Create(Self);
+  FHScrollBar.Parent   := FHScrollBarContainer;
+  FHScrollBar.Visible  := True;
+  FHScrollBar.Align    := alClient;
+  FHScrollBar.OnChange := HScrollChange;
 
   FCustomizeJSErrorDialog :=True;
   FCustomizeStdDialogs    :=True;
@@ -508,9 +508,9 @@ begin
   inherited;
   if not (csDestroying in ComponentState) then
   begin
-    VScrollBarContainer.Parent := AParent;
-    HScrollBarContainer.Parent := AParent;
-    ScrollCornerContainer.Parent := AParent;
+    FVScrollBarContainer.Parent := AParent;
+    FHScrollBarContainer.Parent := AParent;
+    FScrollCornerContainer.Parent := AParent;
     ResizeScrollBars;
   end;
 end;
@@ -535,50 +535,50 @@ var
 
   procedure UpdateContainers;
   begin
-    if VScrollBarContainer.Visible then
+    if FVScrollBarContainer.Visible then
     begin
       LRect := BoundsRect;
       //OutputDebugString(PChar(Format('Original VScrollBarContainer Left %d Top %d Width %d Height %d',[LRect.Left, LRect.Top, LRect.Width, LRect.Height]) ));
-      LRect.Left := LRect.Right - LSM_CXHTHUMB;
-      if HScrollBarContainer.Visible then
-        LRect.Bottom := LRect.Bottom - LSM_CYVTHUMB;
+      LRect.Left := LRect.Right - FLSM_CXHTHUMB;
+      if FHScrollBarContainer.Visible then
+        LRect.Bottom := LRect.Bottom - FLSM_CYVTHUMB;
 
       //LRect.Width:=2;
-      VScrollBarContainer.BoundsRect := LRect;
+      FVScrollBarContainer.BoundsRect := LRect;
     end;
 
-    if HScrollBarContainer.Visible then
+    if FHScrollBarContainer.Visible then
     begin
       LRect := BoundsRect;
       //OutputDebugString(PChar(Format('Original HScrollBarContainer Left %d Top %d Width %d Height %d',[LRect.Left, LRect.Top, LRect.Width, LRect.Height]) ));
-      LRect.Top := LRect.Bottom - LSM_CYVTHUMB;
-      if VScrollBarContainer.Visible then
-        LRect.Right := LRect.Right - LSM_CXHTHUMB;
+      LRect.Top := LRect.Bottom - FLSM_CYVTHUMB;
+      if FVScrollBarContainer.Visible then
+        LRect.Right := LRect.Right - FLSM_CXHTHUMB;
 
       //LRect.Height:=2;
-      HScrollBarContainer.BoundsRect := LRect;
+      FHScrollBarContainer.BoundsRect := LRect;
       //OutputDebugString(PChar(Format('ScrollBar Left %d Top %d Width %d Height %d',[LRect.Left, LRect.Top, LRect.Width, LRect.Height]) ));
     end;
 
-    StateVisible := ScrollCornerContainer.Visible;
-    ScrollCornerContainer.Visible := HScrollBarContainer.Visible and VScrollBarContainer.Visible;
+    StateVisible := FScrollCornerContainer.Visible;
+    FScrollCornerContainer.Visible := FHScrollBarContainer.Visible and FVScrollBarContainer.Visible;
 
-    if ScrollCornerContainer.Visible then
+    if FScrollCornerContainer.Visible then
     begin
       LRect := BoundsRect;
-      LRect.Left := LRect.Right - LSM_CXHTHUMB;
-      LRect.Top := LRect.Bottom - LSM_CYVTHUMB;
-      ScrollCornerContainer.BoundsRect := LRect;
-      if not StateVisible then ScrollCornerContainer.BringToFront;
+      LRect.Left := LRect.Right - FLSM_CXHTHUMB;
+      LRect.Top := LRect.Bottom - FLSM_CYVTHUMB;
+      FScrollCornerContainer.BoundsRect := LRect;
+      if not StateVisible then FScrollCornerContainer.BringToFront;
     end;
   end;
 
 begin
   IEHWND:=GetIEHandle;
 
-  if (IEHWND=0) or (VScrollBarContainer = nil) or (HScrollBarContainer = nil) then Exit;
+  if (IEHWND=0) or (FVScrollBarContainer = nil) or (FHScrollBarContainer = nil) then Exit;
 
-   VScrollBarContainer.Visible := True;
+   FVScrollBarContainer.Visible := True;
 
   if (Document <> nil) and (IHtmldocument2(Document).Body <> nil) then
    begin
@@ -588,51 +588,51 @@ begin
        ScrollWidth:=OleVariant(Document).DocumentElement.scrollWidth;
        //OutputDebugString(PChar(Format('ScrollWidth %s',[inttoStr(ScrollWidth)])));
 
-       if (HScrollBar.Max<>ScrollWidth) and (ScrollWidth>=HScrollBar.PageSize) and (ScrollWidth>=HScrollBar.Min) then
-         HScrollBar.Max := ScrollWidth;
+       if (FHScrollBar.Max<>ScrollWidth) and (ScrollWidth>=FHScrollBar.PageSize) and (ScrollWidth>=FHScrollBar.Min) then
+         FHScrollBar.Max := ScrollWidth;
 
        ScrollHeight:=OleVariant(Document).DocumentElement.scrollHeight;
        //OutputDebugString(PChar(Format('ScrollHeight %s',[inttoStr(ScrollHeight)])));
 
-       if (VScrollBar.Max<>ScrollHeight) and (ScrollHeight>=VScrollBar.PageSize) and (ScrollHeight>=VScrollBar.Min) then
-         VScrollBar.Max := ScrollHeight;
+       if (FVScrollBar.Max<>ScrollHeight) and (ScrollHeight>=FVScrollBar.PageSize) and (ScrollHeight>=FVScrollBar.Min) then
+         FVScrollBar.Max := ScrollHeight;
      end
      else
      begin
        ScrollWidth  := IHtmldocument2(Document).Body.getAttribute('ScrollWidth', 0);
-       if (HScrollBar.Max<>ScrollWidth) and (ScrollWidth>=HScrollBar.PageSize) and (ScrollWidth>=HScrollBar.Min) then
-         HScrollBar.Max := ScrollWidth;
+       if (FHScrollBar.Max<>ScrollWidth) and (ScrollWidth>=FHScrollBar.PageSize) and (ScrollWidth>=FHScrollBar.Min) then
+         FHScrollBar.Max := ScrollWidth;
 
        ScrollHeight:=IHtmldocument2(Document).Body.getAttribute('ScrollHeight', 0);
-       if (VScrollBar.Max<>ScrollHeight) and (ScrollHeight>=VScrollBar.PageSize) and (ScrollHeight>=VScrollBar.Min) then
-         VScrollBar.Max := ScrollHeight;
+       if (FVScrollBar.Max<>ScrollHeight) and (ScrollHeight>=FVScrollBar.PageSize) and (ScrollHeight>=FVScrollBar.Min) then
+         FVScrollBar.Max := ScrollHeight;
      end;
 
-     if (HScrollBar.Max > Self.Width - LSM_CXHTHUMB) and(HScrollBar.Max > 0) and (HScrollBar.Max <> Self.Width) then
-       VPageSize := Self.Height - LSM_CYVTHUMB
+     if (FHScrollBar.Max > Self.Width - FLSM_CXHTHUMB) and(FHScrollBar.Max > 0) and (FHScrollBar.Max <> Self.Width) then
+       VPageSize := Self.Height - FLSM_CYVTHUMB
      else
        VPageSize := Self.Height;
 
-     VScrollBar.PageSize:=VPageSize;
-     VScrollBar.SetParams(VScrollBar.Position, 0, VScrollBar.Max);
-     VScrollBar.LargeChange := VScrollBar.PageSize;
+     FVScrollBar.PageSize:=VPageSize;
+     FVScrollBar.SetParams(FVScrollBar.Position, 0, FVScrollBar.Max);
+     FVScrollBar.LargeChange := FVScrollBar.PageSize;
 
-     HPageSize := Self.Width - LSM_CXHTHUMB;
-     HScrollBar.PageSize:=HPageSize;
-     HScrollBar.SetParams(HScrollBar.Position, 0, HScrollBar.Max);
-     HScrollBar.LargeChange := HScrollBar.PageSize;
+     HPageSize := Self.Width - FLSM_CXHTHUMB;
+     FHScrollBar.PageSize:=HPageSize;
+     FHScrollBar.SetParams(FHScrollBar.Position, 0, FHScrollBar.Max);
+     FHScrollBar.LargeChange := FHScrollBar.PageSize;
 
-     VScrollBar.Enabled := (VPageSize < VScrollBar.Max) and(VScrollBar.PageSize > 0) and (VScrollBar.Max > 0) and (VScrollBar.Max <> Self.Height);
+     FVScrollBar.Enabled := (VPageSize < FVScrollBar.Max) and(FVScrollBar.PageSize > 0) and (FVScrollBar.Max > 0) and (FVScrollBar.Max <> Self.Height);
 
-     StateVisible := HScrollBarContainer.Visible;
+     StateVisible := FHScrollBarContainer.Visible;
 
-     if IsWindow(HScrollBarContainer.Handle) then
-      HScrollBarContainer.Visible := (HPageSize < HScrollBar.Max) and (HScrollBar.PageSize < HScrollBar.Max) and (HScrollBar.Max > 0) and (HScrollBar.Max <> Self.Width);
+     if IsWindow(FHScrollBarContainer.Handle) then
+      FHScrollBarContainer.Visible := (HPageSize < FHScrollBar.Max) and (FHScrollBar.PageSize < FHScrollBar.Max) and (FHScrollBar.Max > 0) and (FHScrollBar.Max <> Self.Width);
 
-     if not StateVisible and HScrollBarContainer.Visible then
-       HScrollBarContainer.BringToFront;
+     if not StateVisible and FHScrollBarContainer.Visible then
+       FHScrollBarContainer.BringToFront;
 
-     VScrollBarContainer.BringToFront;
+     FVScrollBarContainer.BringToFront;
    end;
 
    UpdateContainers;
@@ -659,14 +659,14 @@ begin
   then
   begin
     if (OleVariant(Document).DocumentElement.scrollTop = 0) then
-      VScrollBar.Position := IHtmldocument2(Document).Body.getAttribute('ScrollTop', 0)
+      FVScrollBar.Position := IHtmldocument2(Document).Body.getAttribute('ScrollTop', 0)
     else
-      VScrollBar.Position := OleVariant(Document).DocumentElement.scrollTop;
+      FVScrollBar.Position := OleVariant(Document).DocumentElement.scrollTop;
 
     if (OleVariant(Document).DocumentElement.scrollLeft = 0) then
-      HScrollBar.Position := IHtmldocument2(Document).Body.getAttribute('ScrollLeft', 0)
+      FHScrollBar.Position := IHtmldocument2(Document).Body.getAttribute('ScrollLeft', 0)
     else
-      HScrollBar.Position := OleVariant(Document).DocumentElement.scrollLeft
+      FHScrollBar.Position := OleVariant(Document).DocumentElement.scrollLeft
   end;
   ResizeScrollBars;
 end;
@@ -679,13 +679,13 @@ end;
 procedure TVclStylesWebBrowser.VScrollChange(Sender: TObject);
 begin
  if (Document <> nil) and (IHTMLDocument2(Document).ParentWindow<>nil) then
-    IHTMLWindow2(IHTMLDocument2(Document).ParentWindow).Scroll(HScrollBar.Position, VScrollBar.Position);
+    IHTMLWindow2(IHTMLDocument2(Document).ParentWindow).Scroll(FHScrollBar.Position, FVScrollBar.Position);
 end;
 
 procedure TVclStylesWebBrowser.HScrollChange(Sender: TObject);
 begin
  if (Document <> nil) and (IHTMLDocument2(Document).ParentWindow<>nil) then
-    IHTMLWindow2(IHTMLDocument2(Document).ParentWindow).Scroll(HScrollBar.Position, VScrollBar.Position);
+    IHTMLWindow2(IHTMLDocument2(Document).ParentWindow).Scroll(FHScrollBar.Position, FVScrollBar.Position);
 end;
 
 
@@ -736,9 +736,9 @@ end;
 procedure TVclStylesWebBrowser.CMVisibleChanged(var MSg: TMessage);
 begin
   inherited ;
-  VScrollBarContainer.Visible   := Self.Visible;
-  HScrollBarContainer.Visible   := Self.Visible;
-  ScrollCornerContainer.Visible := Self.Visible;
+  FVScrollBarContainer.Visible   := Self.Visible;
+  FHScrollBarContainer.Visible   := Self.Visible;
+  FScrollCornerContainer.Visible := Self.Visible;
 end;
 
 procedure TVclStylesWebBrowser.Loaded;

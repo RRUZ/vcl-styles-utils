@@ -134,7 +134,7 @@ Type
   TBitmapFilter=class(TColorFilter)
   private
    //FColorValue   : Integer;
-   UseBitmap: Boolean;
+   FUseBitmap: Boolean;
    FSourceBitmap : TBitmap;
   public
    constructor Create(AColorValue:Integer);
@@ -1390,7 +1390,7 @@ end;
 
 procedure TBitmap32BlendBurn.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendBurn)
@@ -1415,7 +1415,7 @@ end;
 
 procedure TBitmap32BlendMultiply.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendMultiply)
@@ -1440,7 +1440,7 @@ end;
 
 procedure TBitmap32BlendAdditive.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendAdditive)
@@ -1465,7 +1465,7 @@ end;
 
 procedure TBitmap32BlendDodge.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDodge)
@@ -1490,7 +1490,7 @@ end;
 
 procedure TBitmap32BlendOverlay.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendOverlay)
@@ -1515,7 +1515,7 @@ end;
 
 procedure TBitmap32BlendLighten.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendLighten)
@@ -1541,7 +1541,7 @@ end;
 
 procedure TBitmap32BlendDarken.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDarken)
@@ -1566,7 +1566,7 @@ end;
 
 procedure TBitmap32BlendScreen.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendScreen)
@@ -1591,7 +1591,7 @@ end;
 
 procedure TBitmap32BlendDifference.ProcessBitmap(ABitMap: TBitmap);
 begin
-  if UseBitmap then
+  if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
      _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDifference)
@@ -1618,13 +1618,13 @@ constructor TBitmapFilter.CreateBitMap(ASourceBitmap: TBitmap);
 begin
   inherited Create (clNone);
   FSourceBitmap:=ASourceBitmap;
-  UseBitmap:=True;
+  FUseBitmap:=True;
 end;
 
 constructor TBitmapFilter.Create(AColorValue: Integer);
 begin
   inherited Create(AColorValue);
-  UseBitmap:=False;
+  FUseBitmap:=False;
   FSourceBitmap:=nil;
 end;
 
