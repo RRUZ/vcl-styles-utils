@@ -1,8 +1,8 @@
 object FrmMain: TFrmMain
-  Left = 988
-  Top = 183
+  Left = 480
+  Top = 0
   Caption = 'Demo'
-  ClientHeight = 536
+  ClientHeight = 492
   ClientWidth = 478
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object FrmMain: TFrmMain
     Left = 0
     Top = 0
     Width = 478
-    Height = 536
+    Height = 492
     Align = alClient
     BorderWidth = 5
     TabOrder = 0
@@ -28,7 +28,7 @@ object FrmMain: TFrmMain
       Left = 6
       Top = 6
       Width = 466
-      Height = 524
+      Height = 480
       ActivePage = TabSheet1
       Align = alClient
       TabOrder = 0
@@ -169,7 +169,7 @@ object FrmMain: TFrmMain
           Left = 0
           Top = 49
           Width = 458
-          Height = 447
+          Height = 403
           Align = alClient
           BorderWidth = 5
           TabOrder = 0
@@ -181,7 +181,7 @@ object FrmMain: TFrmMain
             Left = 6
             Top = 6
             Width = 446
-            Height = 435
+            Height = 391
             ActivePage = TabSheet6
             Align = alClient
             TabOrder = 0
@@ -314,7 +314,7 @@ object FrmMain: TFrmMain
           Left = 0
           Top = 49
           Width = 458
-          Height = 447
+          Height = 403
           Align = alClient
           Indent = 19
           TabOrder = 0
@@ -384,7 +384,7 @@ object FrmMain: TFrmMain
           Width = 225
           Height = 160
           MultiSelect = True
-          Date = 41947.033292384260000000
+          Date = 41947.701691712970000000
           EndDate = 41947.000000000000000000
           TabOrder = 1
         end
@@ -454,7 +454,7 @@ object FrmMain: TFrmMain
     Left = 360
     Top = 229
     Bitmap = {
-      494C010107000900300010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000900340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       00000000000000000000000000000000000000000005000000150000001A0000
       001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000

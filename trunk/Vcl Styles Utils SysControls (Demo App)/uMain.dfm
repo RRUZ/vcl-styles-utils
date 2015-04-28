@@ -207,7 +207,7 @@ object Form1: TForm1
     Left = 168
     Top = 38
     Bitmap = {
-      494C01010D002400680010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010D0024006C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000002300000033000000330000
       0033000000330000003300000033000000330000003300000033000000330000
@@ -744,8 +744,8 @@ object Form1: TForm1
   end
   object PopupMenu1: TPopupMenu
     Images = ImageList1
-    Left = 360
-    Top = 174
+    Left = 88
+    Top = 54
     object I1: TMenuItem
       Caption = 'Item 1'
       ImageIndex = 2
@@ -753,6 +753,11 @@ object Form1: TForm1
     object C2: TMenuItem
       Caption = 'Checked Item'
       Checked = True
+    end
+    object C1: TMenuItem
+      Caption = 'Checked and Image'
+      Checked = True
+      ImageIndex = 8
     end
     object S1: TMenuItem
       Caption = 'Sub Item'
@@ -798,8 +803,8 @@ object Form1: TForm1
     BiDiMode = bdRightToLeft
     Images = ImageList1
     ParentBiDiMode = False
-    Left = 384
-    Top = 6
+    Left = 32
+    Top = 30
     object R2: TMenuItem
       Caption = 'Right To Left Item 1'
       ImageIndex = 4
@@ -820,8 +825,8 @@ object Form1: TForm1
   end
   object MainMenu1: TMainMenu
     Images = ImageList1
-    Left = 192
-    Top = 142
+    Left = 96
+    Top = 65518
     object File1: TMenuItem
       Caption = '&File'
       object New1: TMenuItem
@@ -986,7 +991,7 @@ object Form1: TForm1
     Top = 190
   end
   object PrintDialog1: TPrintDialog
-    Left = 352
-    Top = 150
+    Left = 384
+    Top = 142
   end
 end

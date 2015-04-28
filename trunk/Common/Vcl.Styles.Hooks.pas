@@ -73,7 +73,7 @@ procedure(Self: TObject; Style: TCustomStyleServices);
   var
     CanDraw: Boolean;
   begin
-    CanDraw := (not StyleServices.IsSystemStyle) or (TSysStyleManager.Enabled);
+    CanDraw := (not StyleServices.IsSystemStyle) and (TSysStyleManager.Enabled);
     if (CanDraw) and (edge <> BDR_OUTER) and (edge <> BDR_INNER) then
     begin
       DrawStyleEdge(hDC, qrc, TStyleElementEdges(edge), TStyleElementEdgeFlags(grfFlags));

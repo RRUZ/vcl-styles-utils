@@ -551,6 +551,7 @@ begin
           LImageWidth := Bmp.Width;
           LImageRect := Rect(0, 0, Bmp.Width, Bmp.Height);
           RectVCenter(LImageRect, ItemRect);
+
           if not RightToLeft then
             OffsetRect(LImageRect, 4, 0)
           else
@@ -562,6 +563,7 @@ begin
           Canvas.Draw(LImageRect.Left, LImageRect.Top, Bmp)
         end
         else
+        if (Bmp.Width > 0) and (Bmp.Height > 0) then
         begin
           LImageWidth := 16;
           LImageRect := Rect(0, 0, 16, 16);
@@ -574,6 +576,15 @@ begin
             LImageRect.Right := ItemRect.Right;
           end;
 
+          if (SysItem.Checked) and (not SysItem.RadioCheck)  then
+          begin
+           R:=LImageRect;
+           InflateRect(R, 2, 2);
+           Canvas.Brush.Style:=bsClear;
+           Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+           Canvas.Rectangle(R);
+          end;
+
           Canvas.StretchDraw(LImageRect, Bmp);
         end;
 
@@ -584,6 +595,7 @@ begin
         DisplayCheckedGlyph := False;
         LImageRect := Rect(0, 0, Images.Width, Images.Height);
         RectVCenter(LImageRect, ItemRect);
+
         if not RightToLeft then
           OffsetRect(LImageRect, 4, 0)
         else
@@ -591,6 +603,16 @@ begin
           LImageRect.Left := ItemRect.Right - Images.Width - 4;
           LImageRect.Right := ItemRect.Right;
         end;
+
+        if (SysItem.Checked) and (not SysItem.RadioCheck)  then
+        begin
+         R:=LImageRect;
+         InflateRect(R, 2, 2);
+         Canvas.Brush.Style:=bsClear;
+         Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+         Canvas.Rectangle(R);
+        end;
+
         Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
       end;
     end;
@@ -647,9 +669,21 @@ begin
           LImageRect.Left := ItemRect.Right - BmpWidth - 4;
           LImageRect.Right := ItemRect.Right;
         end;
+
         Icon := BmpToIcon(hBmp);
         if Icon <> 0 then
         begin
+
+          if (SysItem.Checked) and (not SysItem.RadioCheck)  then
+          begin
+           R:=LImageRect;
+           InflateRect(R, 2, 2);
+           Canvas.Brush.Style:=bsClear;
+           Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+           Canvas.Rectangle(R);
+          end;
+
+
           DrawIconEX(DC, LImageRect.Left, LImageRect.Top, Icon, BmpWidth, BmpHeight, 0, 0, DI_NORMAL);
           DeleteObject(Icon);
         end;
@@ -657,7 +691,7 @@ begin
     end;
   end;
 
-  if (SysItem.Checked) and (DisplayCheckedGlyph) then
+  if (SysItem.Checked)  then
   begin
     Detail := TThemedMenu(integer(tmPopupCheckNormal) + integer(SysItem.Disabled));
     if SysItem.RadioCheck then
@@ -665,15 +699,19 @@ begin
     LDetails := StyleServices.GetElementDetails(Detail);
     StyleServices.GetElementSize(DC, LDetails, esActual, LSize);
     LImageRect := Rect(0, 0, LSize.Width, LSize.Height);
+
     RectVCenter(LImageRect, ItemRect);
-    if not RightToLeft then
-      OffsetRect(LImageRect, 4, 0)
-    else
+    if DisplayCheckedGlyph then
     begin
-      LImageRect.Left := ItemRect.Right - LSize.Width - 4;
-      LImageRect.Right := ItemRect.Right;
+      if not RightToLeft then
+        OffsetRect(LImageRect, 4, 0)
+      else
+      begin
+        LImageRect.Left := ItemRect.Right - LSize.Width - 4;
+        LImageRect.Right := ItemRect.Right;
+      end;
+      StyleServices.DrawElement(DC, LDetails, LImageRect);
     end;
-    StyleServices.DrawElement(DC, LDetails, LImageRect);
   end;
 
   { Draw Text }
