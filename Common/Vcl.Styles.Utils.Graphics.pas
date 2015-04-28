@@ -243,7 +243,8 @@ Type
   const AStartColor, AEndColor: TColor; const ARect: TRect;
   const Direction: TGradientDirection; Radius : Integer);
 
-  procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte);
+  procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
+  procedure AlphaBlendFillCanvas(const DC: HDC;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
 
 implementation
 
@@ -292,8 +293,12 @@ begin
   end;
 end;
 
-
 procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte);
+begin
+  AlphaBlendFillCanvas(ACanvas.Handle, AColor, ARect, SourceConstantAlpha);
+end;
+
+procedure AlphaBlendFillCanvas(const DC: HDC;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
 var
  LBuffer   : TBitmap;
  LBlendFunc: TBlendFunction;
@@ -309,7 +314,7 @@ begin
     LBlendFunc.BlendFlags := 0;
     LBlendFunc.SourceConstantAlpha := SourceConstantAlpha;
     LBlendFunc.AlphaFormat := 0;
-    AlphaBlend(ACanvas.Handle, ARect.Left, ARect.Top, LBuffer.Width, LBuffer.Height, LBuffer.Canvas.Handle, 0, 0, LBuffer.Width, LBuffer.Height, LBlendFunc);
+    AlphaBlend(DC, ARect.Left, ARect.Top, LBuffer.Width, LBuffer.Height, LBuffer.Canvas.Handle, 0, 0, LBuffer.Width, LBuffer.Height, LBlendFunc);
   finally
     LBuffer.Free;
   end;

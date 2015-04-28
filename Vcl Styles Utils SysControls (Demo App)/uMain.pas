@@ -91,6 +91,7 @@ type
     N4: TMenuItem;
     N5: TMenuItem;
     N6: TMenuItem;
+    C1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ComboBox1Select(Sender: TObject);
     procedure BtnOpenDialogClick(Sender: TObject);
