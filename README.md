@@ -44,5 +44,5 @@ The **VCL Styles Utils** is a Delphi library which extend, fix bugs and add new 
 </li>
 </ul>
 
-<blockquote>If you want to use the VCl.Styles.Hooks unit you must also include the Delphi detours library files Ex : C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library</blockquote>
+**Note** : If you want to use the Vcl.Styles.Hooks unit you must also include the [Delphi Detours Library](https://code.google.com/p/delphi-detours-library/) files in your lib/search path Ex : C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library
 
