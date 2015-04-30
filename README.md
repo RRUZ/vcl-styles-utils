@@ -1,7 +1,6 @@
-The **VCL Styles Utils** is a library which extend, fix QC reports and add new features to the [VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview).
+The **VCL Styles Utils** is a library which extend, fix QC reports and add new features to the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview).
 
 [![](https://theroadtodelphi.files.wordpress.com/2014/07/followrruz.png)](https://twitter.com/RRUZ)
-
 
 ## Features ##
 <ul>
