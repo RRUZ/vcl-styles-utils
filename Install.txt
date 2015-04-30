@@ -1,6 +1,5 @@
 Vcl Styles Utils
-http://code.google.com/p/vcl-styles-utils/
-
+https://github.com/RRUZ/vcl-styles-utils
 
 Installation :
 --------------
