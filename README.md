@@ -3,7 +3,7 @@ The **VCL Styles Utils** is a library which extend, fix QC reports and add new f
 [![](https://theroadtodelphi.files.wordpress.com/2014/07/followrruz.png)](https://twitter.com/RRUZ)
 
 
-### Features ###
+## Features ##
 <ul>
  <li>Works in Delphi XE2-XE8</li>
  <li>The <a href='http://code.google.com/p/vcl-styles-utils/wiki/VclStylesExt'>Vcl.Styles.Ext</a> unit extended the VCL Styles adding new properties and methods to list, remove and reload VCL Styles.</li>
@@ -36,7 +36,8 @@ The **VCL Styles Utils** is a library which extend, fix QC reports and add new f
  <li>The <a href='http://code.google.com/p/vcl-styles-utils/wiki/VclStylesColorTabs'>Vcl.Styles.ColorTabs</a> unit includes a new Style hook for the TPageControl and TTabSheet components.</li>
  <li>Includes the <a href='https://code.google.com/p/vcl-styles-utils/wiki/TVclStylesSystemMenu'>TVclStylesSystemMenu</a> component for select a VCL Style from the system Menu.</li>
 </ul>
-### Installation ###
+
+## Installation ##
 
 <ul>
  <li>Unzip or checkout the files of the library in a writable folder.</li>
