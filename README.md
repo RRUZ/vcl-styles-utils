@@ -29,9 +29,11 @@ The **VCL Styles Utils** is a Delphi library which extend, fix bugs and add new 
  ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png)
 <ul>
  <li>Allows style the <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme'>Task Dialogs</a>.</li>
- </lu>
+</ul>
+ 
  ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Task%20Dialogs/TaskDialogs2.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Task%20Dialogs/TaskDialogs2.png)
- <lu>
+
+<ul>
  <li>The <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFixes'>Vcl.Styles.Fixes</a> unit Fix several QC reports related to the VCL Styles.</li>
  <li>Includes the <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesPreview'>TVclStylesPreview</a> component to preview a VCL Style.</li>
  <li>The <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesHook'>Vcl.Styles.Hook</a> unit patch some WinApi and UxTheme functions, in order to fix the highlight colors and some visual elements.</li>
