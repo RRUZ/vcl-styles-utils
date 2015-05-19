@@ -1,0 +1,76 @@
+unit uDropdown;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Styles.NC, Vcl.Dialogs, Vcl.ImgList, Vcl.Menus,
+  Vcl.StdCtrls;
+
+type
+  TFrmDropDown = class(TForm)
+    ImageList1: TImageList;
+    PopupMenu1: TPopupMenu;
+    Window1: TMenuItem;
+    NewWindow1: TMenuItem;
+    Tile1: TMenuItem;
+    Cascade1: TMenuItem;
+    ArrangeAll1: TMenuItem;
+    Hide1: TMenuItem;
+    Show1: TMenuItem;
+    N1: TMenuItem;
+    Edit1: TMenuItem;
+    Undo1: TMenuItem;
+    Repeat1: TMenuItem;
+    Cut1: TMenuItem;
+    Copy1: TMenuItem;
+    Paste1: TMenuItem;
+    PasteSpecial1: TMenuItem;
+    Find1: TMenuItem;
+    Replace1: TMenuItem;
+    GoTo1: TMenuItem;
+    Links1: TMenuItem;
+    Object1: TMenuItem;
+    N2: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    Help1: TMenuItem;
+    Contents1: TMenuItem;
+    SearchforHelpOn1: TMenuItem;
+    HowtoUseHelp1: TMenuItem;
+    About1: TMenuItem;
+    Label1: TLabel;
+    procedure FormCreate(Sender: TObject);
+  private
+    { Private declarations }
+     NCControls : TNCControls;
+  public
+    { Public declarations }
+    procedure ButtonNCClick(Sender: TObject);
+  end;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmDropDown.ButtonNCClick(Sender: TObject);
+begin
+ ShowMessage('Hello');
+end;
+
+procedure TFrmDropDown.FormCreate(Sender: TObject);
+begin
+  NCControls:=TNCControls.Create(Self);
+  NCControls.ShowSystemMenu:=False;
+  NCControls.Add(TNCButton.Create(NCControls));
+  NCControls[0].Style       := nsSplitButton;
+  NCControls[0].ImageStyle  := isGrayHot;
+  NCControls[0].Images      := ImageList1;
+  NCControls[0].ImageIndex  := 3;
+  NCControls[0].BoundsRect  := Rect(5,0,85,25);
+  NCControls[0].Caption     := 'Menu';
+  NCControls[0].DropDownMenu:= PopupMenu1;
+  NCControls[0].OnClick     := ButtonNCClick;
+end;
+
+end.

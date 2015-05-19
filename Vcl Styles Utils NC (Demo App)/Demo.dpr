@@ -15,12 +15,15 @@ uses
   Vcl.Styles.FormStyleHooks in '..\Common\Vcl.Styles.FormStyleHooks.pas',
   Vcl.Styles.NC in '..\Common\Vcl.Styles.NC.pas',
   Vcl.Styles.Utils.SystemMenu in '..\Common\Vcl.Styles.Utils.SystemMenu.pas',
-  Unit1 in 'Unit1.pas' {Form1},
-  Unit2 in 'Unit2.pas' {Form2},
-  Unit3 in 'Unit3.pas' {Form3},
+  uDropdown in 'uDropdown.pas' {FrmDropDown},
+  uButtonsStyles in 'uButtonsStyles.pas' {FrmButtonsStyles},
+  uCustomStyles in 'uCustomStyles.pas' {FrmCustomStyles},
   Vcl.Styles.Utils.Menus in '..\Common\Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
-  Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas';
+  Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
+  Vcl.Styles.Utils.Graphics in '..\Common\Vcl.Styles.Utils.Graphics.pas',
+  DDetours in '..\Common\delphi-detours-library\DDetours.pas',
+  uAlphaGradient in 'uAlphaGradient.pas' {FrmAlphaGradient};
 
 {$R *.res}
 

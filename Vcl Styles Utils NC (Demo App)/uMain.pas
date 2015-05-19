@@ -45,16 +45,18 @@ type
     Tutorial1: TMenuItem;
     HowtoUseHelp2: TMenuItem;
     About2: TMenuItem;
-    BtnSample1: TButton;
+    BtnDropDownMenu: TButton;
     ImageList1: TImageList;
-    Button1: TButton;
-    Button3: TButton;
-    CheckBox1: TCheckBox;
+    BtnStyles: TButton;
+    BtnCustomStyle: TButton;
+    CheckBoxNCVisible: TCheckBox;
+    BtnAlpha: TButton;
     procedure FormCreate(Sender: TObject);
-    procedure BtnSample1Click(Sender: TObject);
-    procedure CheckBox1Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure BtnDropDownMenuClick(Sender: TObject);
+    procedure CheckBoxNCVisibleClick(Sender: TObject);
+    procedure BtnStylesClick(Sender: TObject);
+    procedure BtnCustomStyleClick(Sender: TObject);
+    procedure BtnAlphaClick(Sender: TObject);
   private
     { Private declarations }
      NCControls : TNCControls;
@@ -70,33 +72,40 @@ implementation
 
 uses
  Vcl.Styles.Utils.SystemMenu,
- Unit1, Unit2, Unit3;
+ uButtonsStyles, uCustomStyles, uDropdown, uAlphaGradient;
 
 {$R *.dfm}
 
 
-procedure TFrmMain.BtnSample1Click(Sender: TObject);
+procedure TFrmMain.BtnDropDownMenuClick(Sender: TObject);
 var
- LForm : TForm1;
+ LForm : TFrmDropDown;
 begin
-   LForm:= TForm1.Create(Self);
+   LForm:= TFrmDropDown.Create(Self);
    LForm.Show();
 end;
 
-procedure TFrmMain.Button1Click(Sender: TObject);
+procedure TFrmMain.BtnStylesClick(Sender: TObject);
 var
- LForm : TForm2;
+ LForm : TFrmButtonsStyles;
 begin
-   LForm:= TForm2.Create(Self);
+   LForm:= TFrmButtonsStyles.Create(Self);
    LForm.Show();
 end;
 
 
-procedure TFrmMain.Button3Click(Sender: TObject);
+procedure TFrmMain.BtnAlphaClick(Sender: TObject);
 var
- LForm : TForm3;
+ LForm : TFrmAlphaGradient;
 begin
-   LForm:= TForm3.Create(Self);
+   LForm:= TFrmAlphaGradient.Create(Self);
+   LForm.Show();
+end;
+procedure TFrmMain.BtnCustomStyleClick(Sender: TObject);
+var
+ LForm : TFrmCustomStyles;
+begin
+   LForm:= TFrmCustomStyles.Create(Self);
    LForm.Show();
 end;
 
@@ -106,9 +115,9 @@ begin
   ShowMessage(Format('You clicked the button %s', [TNCButton(Sender).Name]));
 end;
 
-procedure TFrmMain.CheckBox1Click(Sender: TObject);
+procedure TFrmMain.CheckBoxNCVisibleClick(Sender: TObject);
 begin
-  NCControls.Visible:=CheckBox1.Checked;
+  NCControls.Visible:=CheckBoxNCVisible.Checked;
 end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
@@ -121,18 +130,18 @@ begin
   NCControls:=TNCControls.Create(Self);
    for i:=0 to 10 do
    begin
-      NCControls.List.Add(TNCButton.Create(NCControls));
-      NCControls.List[i].Name      := Format('NCButton%d',[i+1]);
-      NCControls.List[i].Hint      := Format('Hint for NCButton%d',[i+1]);
-      NCControls.List[i].ShowHint  := True;
-      NCControls.List[i].Caption   :='';
-      NCControls.List[i].Style     :=nsTranparent;
-      NCControls.List[i].ImageStyle:=isGrayHot;
-      NCControls.List[i].Images    :=ImageList1;
-      NCControls.List[i].ImageIndex:=i;
-      NCControls.List[i].ImageAlignment := TImageAlignment.iaCenter;
-      NCControls.List[i].BoundsRect:=Rect(30+(i*20),5,50+(i*20),25);
-      NCControls.List[i].OnClick   := ButtonNCClick;
+      NCControls.Add(TNCButton.Create(NCControls));
+      NCControls[i].Name      := Format('NCButton%d',[i+1]);
+      NCControls[i].Hint      := Format('Hint for NCButton%d',[i+1]);
+      NCControls[i].ShowHint  := True;
+      NCControls[i].Caption   :='';
+      NCControls[i].Style     :=nsTranparent;
+      NCControls[i].ImageStyle:=isGrayHot;
+      NCControls[i].Images    :=ImageList1;
+      NCControls[i].ImageIndex:=i;
+      NCControls[i].ImageAlignment := TImageAlignment.iaCenter;
+      NCControls[i].BoundsRect:=Rect(30+(i*20),5,50+(i*20),25);
+      NCControls[i].OnClick   := ButtonNCClick;
    end;
 end;
 

@@ -1,9 +1,9 @@
 object FrmMain: TFrmMain
-  Left = 732
-  Top = 345
+  Left = 673
+  Top = 209
   Caption = 'Sample NC Buttons'
-  ClientHeight = 226
-  ClientWidth = 440
+  ClientHeight = 103
+  ClientWidth = 462
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,7 +16,7 @@ object FrmMain: TFrmMain
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object BtnSample1: TButton
+  object BtnDropDownMenu: TButton
     Left = 8
     Top = 31
     Width = 217
@@ -26,27 +26,27 @@ object FrmMain: TFrmMain
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
-    OnClick = BtnSample1Click
+    OnClick = BtnDropDownMenuClick
   end
-  object Button1: TButton
-    Left = 8
-    Top = 62
+  object BtnStyles: TButton
+    Left = 231
+    Top = 31
     Width = 217
     Height = 25
     Caption = 'NC Buttons Styles'
     TabOrder = 1
-    OnClick = Button1Click
+    OnClick = BtnStylesClick
   end
-  object Button3: TButton
-    Left = 8
-    Top = 93
+  object BtnCustomStyle: TButton
+    Left = 231
+    Top = 62
     Width = 217
     Height = 25
     Caption = 'NC Buttons with custom VCL Style'
     TabOrder = 2
-    OnClick = Button3Click
+    OnClick = BtnCustomStyleClick
   end
-  object CheckBox1: TCheckBox
+  object CheckBoxNCVisible: TCheckBox
     Left = 8
     Top = 8
     Width = 121
@@ -55,11 +55,20 @@ object FrmMain: TFrmMain
     Checked = True
     State = cbChecked
     TabOrder = 3
-    OnClick = CheckBox1Click
+    OnClick = CheckBoxNCVisibleClick
+  end
+  object BtnAlpha: TButton
+    Left = 8
+    Top = 62
+    Width = 217
+    Height = 25
+    Caption = 'NC Alpha && Gradient Buttons'
+    TabOrder = 4
+    OnClick = BtnAlphaClick
   end
   object MainMenu1: TMainMenu
-    Left = 160
-    Top = 24
+    Left = 240
+    Top = 8
     object Edit1: TMenuItem
       Caption = '&Edit'
       object Undo1: TMenuItem
@@ -172,10 +181,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 176
-    Top = 48
+    Left = 296
+    Top = 24
     Bitmap = {
-      494C01010C0011000C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010C001100180010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

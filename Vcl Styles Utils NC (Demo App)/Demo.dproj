@@ -106,18 +106,24 @@
 			<DCCReference Include="..\Common\Vcl.Styles.FormStyleHooks.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.NC.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SystemMenu.pas"/>
-			<DCCReference Include="Unit1.pas">
-				<Form>Form1</Form>
+			<DCCReference Include="uDropdown.pas">
+				<Form>FrmDropDown</Form>
 			</DCCReference>
-			<DCCReference Include="Unit2.pas">
-				<Form>Form2</Form>
+			<DCCReference Include="uButtonsStyles.pas">
+				<Form>FrmButtonsStyles</Form>
 			</DCCReference>
-			<DCCReference Include="Unit3.pas">
-				<Form>Form3</Form>
+			<DCCReference Include="uCustomStyles.pas">
+				<Form>FrmCustomStyles</Form>
 			</DCCReference>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
+			<DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
+			<DCCReference Include="uAlphaGradient.pas">
+				<Form>FrmAlphaGradient</Form>
+				<FormType>dfm</FormType>
+			</DCCReference>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -139,10 +145,10 @@
 						<Source Name="MainSource">Demo.dpr</Source>
 					</Source>
 					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k200.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp200.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k200.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\dclofficexp200.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp160.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>

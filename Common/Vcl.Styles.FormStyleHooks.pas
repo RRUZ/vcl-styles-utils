@@ -134,6 +134,7 @@ type
     procedure SetFChangeSizeCalled(const Value: Boolean);
     function GetFRegion: HRGN;
     procedure SetFRegion(const Value: HRGN);
+    function GetForm: TCustomForm;
   public
     property _FCloseButtonRect : TRect read GetFCloseButtonRect Write SetFCloseButtonRect;
     property _FMaxButtonRect : TRect read GetFMaxButtonRect Write SetFMaxButtonRect;
@@ -151,11 +152,13 @@ type
     property _FPressedButton: Integer read GetFPressedButton;
     property _FHotButton: Integer read GetFHotButton;
     property _FRegion: HRGN read GetFRegion write SetFRegion;
+    property _Form : TCustomForm read GetForm;
     procedure MainMenuBarHookPaint(Canvas: TCanvas);
     function _GetIconFast: TIcon;
     procedure _ChangeSize;
     function _NormalizePoint(P: TPoint): TPoint;
     function _GetHitTest(P: TPoint): Integer;
+    function _GetBorderSizeAddr  : Pointer;
   end;
 
   function RectVCenter(var R: TRect; Bounds: TRect): TRect;
@@ -1291,6 +1294,11 @@ begin
  result:=Self.FMinButtonRect;
 end;
 
+function TFormStyleHookHelper.GetForm: TCustomForm;
+begin
+ Result:=Self.Form;
+end;
+
 function TFormStyleHookHelper.GetFPressedButton: Integer;
 begin
  Result:=Self.FPressedButton;
@@ -1391,6 +1399,15 @@ function TFormStyleHookHelper._GetBorderSize: TRect;
 begin
   Result:=Self.GetBorderSize;
 end;
+
+function TFormStyleHookHelper._GetBorderSizeAddr: Pointer;
+var
+  MethodAddr: function : TRect of object;
+begin
+  MethodAddr := Self.GetBorderSize;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
 
 function TFormStyleHookHelper._GetHitTest(P: TPoint): Integer;
 begin
