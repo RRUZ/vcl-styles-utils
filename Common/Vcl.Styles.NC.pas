@@ -642,7 +642,8 @@ begin
   if THintWindowClass(FHintWindow).WindowHandle=0 then
   begin
     FHintWindow.Visible := False;
-    FHintWindow.Color   := NCControls.StyleServices.GetSystemColor(clInfoBk);
+    FHintWindow.Color       := NCControls.StyleServices.GetSystemColor(clInfoBk);
+    FHintWindow.Font.Color  := NCControls.StyleServices.GetSystemColor(clInfoText);
     FHintWindow.Caption := Hint;
     FHintWindow.ParentWindow := Application.Handle;
     FHintWindow.Left:=NCControls.FForm.Left + BoundsRect.Left;
@@ -1332,7 +1333,7 @@ begin
     if not LStylesServices.Available then
       Exit;
 
-    R := Rect(0, 0, TFormStyleHookClass(Self).Control.Width, TFormStyleHookClass(Self).Control.Height);
+    R := Rect(0, 0, TFormStyleHookClass(Self)._FWidth, TFormStyleHookClass(Self)._FHeight);
     if (LForm.BorderStyle <> bsToolWindow) and
        (LForm.BorderStyle <> bsSizeToolWin) then
       Detail := twCaptionActive
