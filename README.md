@@ -1,4 +1,4 @@
-The **VCL Styles Utils** is a library which extend, fix QC reports and add new features to the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview).
+The **VCL Styles Utils** is a Delphi library which extend, fix bugs and add new features to the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview).
 
 [![](https://theroadtodelphi.files.wordpress.com/2014/07/followrruz.png)](https://twitter.com/RRUZ)
 
@@ -29,6 +29,11 @@ The **VCL Styles Utils** is a library which extend, fix QC reports and add new f
  ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png)
 <ul>
  <li>Allows style the <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme'>Task Dialogs</a>.</li>
+</ul>
+ 
+ ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Task%20Dialogs/TaskDialogs2.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Task%20Dialogs/TaskDialogs2.png)
+
+<ul>
  <li>The <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFixes'>Vcl.Styles.Fixes</a> unit Fix several QC reports related to the VCL Styles.</li>
  <li>Includes the <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesPreview'>TVclStylesPreview</a> component to preview a VCL Style.</li>
  <li>The <a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesHook'>Vcl.Styles.Hook</a> unit patch some WinApi and UxTheme functions, in order to fix the highlight colors and some visual elements.</li>
@@ -44,5 +49,5 @@ The **VCL Styles Utils** is a library which extend, fix QC reports and add new f
 </li>
 </ul>
 
-<blockquote>If you want to use the VCl.Styles.Hooks unit you must also include the Delphi detours library files Ex : C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library</blockquote>
+**Note** : If you want to use the Vcl.Styles.Hooks unit you must also include the [Delphi Detours Library](https://code.google.com/p/delphi-detours-library/) files in your lib/search path Ex : C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library
 
