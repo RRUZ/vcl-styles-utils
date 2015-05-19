@@ -51,6 +51,7 @@ type
     BtnCustomStyle: TButton;
     CheckBoxNCVisible: TCheckBox;
     BtnAlpha: TButton;
+    Label1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure BtnDropDownMenuClick(Sender: TObject);
     procedure CheckBoxNCVisibleClick(Sender: TObject);

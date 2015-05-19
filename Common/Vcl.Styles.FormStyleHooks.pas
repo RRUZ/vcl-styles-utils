@@ -158,7 +158,9 @@ type
     procedure _ChangeSize;
     function _NormalizePoint(P: TPoint): TPoint;
     function _GetHitTest(P: TPoint): Integer;
-    function _GetBorderSizeAddr  : Pointer;
+    function _GetBorderSizeAddr : Pointer;
+    function _GetRegionAddr : Pointer;
+
   end;
 
   function RectVCenter(var R: TRect; Bounds: TRect): TRect;
@@ -1418,6 +1420,15 @@ function TFormStyleHookHelper._GetIconFast: TIcon;
 begin
   Result:=Self.GetIconFast;
 end;
+
+function TFormStyleHookHelper._GetRegionAddr: Pointer;
+var
+  MethodAddr: function : HRgn of object;
+begin
+  MethodAddr := Self.GetRegion;
+  Result     := TMethod(MethodAddr).Code;
+end;
+
 
 function TFormStyleHookHelper._NormalizePoint(P: TPoint): TPoint;
 begin

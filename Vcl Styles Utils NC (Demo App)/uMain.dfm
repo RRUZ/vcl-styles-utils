@@ -1,8 +1,8 @@
 object FrmMain: TFrmMain
-  Left = 673
-  Top = 209
+  Left = 563
+  Top = 331
   Caption = 'Sample NC Buttons'
-  ClientHeight = 103
+  ClientHeight = 125
   ClientWidth = 462
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,9 +16,16 @@ object FrmMain: TFrmMain
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
+  object Label1: TLabel
+    Left = 8
+    Top = 8
+    Width = 223
+    Height = 13
+    Caption = 'Click on the System Menu to select a VCL Style'
+  end
   object BtnDropDownMenu: TButton
     Left = 8
-    Top = 31
+    Top = 55
     Width = 217
     Height = 25
     Hint = 'Sample Button with Dropdown menu'
@@ -30,7 +37,7 @@ object FrmMain: TFrmMain
   end
   object BtnStyles: TButton
     Left = 231
-    Top = 31
+    Top = 55
     Width = 217
     Height = 25
     Caption = 'NC Buttons Styles'
@@ -39,16 +46,16 @@ object FrmMain: TFrmMain
   end
   object BtnCustomStyle: TButton
     Left = 231
-    Top = 62
+    Top = 86
     Width = 217
     Height = 25
-    Caption = 'NC Buttons with custom VCL Style'
+    Caption = 'Nonclient Area with custom VCL Style'
     TabOrder = 2
     OnClick = BtnCustomStyleClick
   end
   object CheckBoxNCVisible: TCheckBox
     Left = 8
-    Top = 8
+    Top = 32
     Width = 121
     Height = 17
     Caption = 'NC Controls Visible'
@@ -59,7 +66,7 @@ object FrmMain: TFrmMain
   end
   object BtnAlpha: TButton
     Left = 8
-    Top = 62
+    Top = 86
     Width = 217
     Height = 25
     Caption = 'NC Alpha && Gradient Buttons'
@@ -68,7 +75,7 @@ object FrmMain: TFrmMain
   end
   object MainMenu1: TMainMenu
     Left = 240
-    Top = 8
+    Top = 32
     object Edit1: TMenuItem
       Caption = '&Edit'
       object Undo1: TMenuItem
@@ -181,10 +188,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 296
-    Top = 24
+    Left = 280
+    Top = 32
     Bitmap = {
-      494C01010C001100180010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010C0011001C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

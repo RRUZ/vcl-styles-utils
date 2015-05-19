@@ -201,6 +201,7 @@ type
 
 var
   Trampoline_TFormStyleHook_GetBorderSize : function (Self : TFormStyleHook) : TRect;
+  Trampoline_TFormStyleHook_GetRegion     : function (Self : TFormStyleHook) : HRgn;
 
 
 
@@ -275,7 +276,13 @@ end;
 procedure TNCControls.SetStyleServices(const Value: TCustomStyleServices);
 begin
  if Value<>FStyleServices then
+ begin
    FStyleServices:= Value;
+   if IsWindowVisible(TCustomFormClass(FForm).Handle) then
+     PostMessage(TCustomFormClass(FForm).Handle, CM_CUSTOMSTYLECHANGED, 0, 0)
+   else
+     SendMessage(TCustomFormClass(FForm).Handle, CM_CUSTOMSTYLECHANGED, 0, 0);
+ end;
 end;
 
 procedure TNCControls.SetVisible(const Value: Boolean);
@@ -312,7 +319,7 @@ begin
   FOnDropDownClick   :=nil;
   FOnClick           :=nil;
   FHintWindow        :=THintWindow.Create(Self);
-  FAlphaColor             :=StyleServices.GetSystemColor(clBtnFace);
+  FAlphaColor        :=FNCControls.StyleServices.GetSystemColor(clBtnFace);
   FDirection := TGradientDirection.gdHorizontal;
 end;
 
@@ -509,7 +516,7 @@ begin
 
       if (FStyle=nsSplitTrans) and (not AMouseInControl)  then
        //use font color of the caption
-       StyleServices.GetElementColor(StyleServices.GetElementDetails(twCaptionActive), ecTextColor, ThemeTextColor)
+       LStyleServices.GetElementColor(LStyleServices.GetElementDetails(twCaptionActive), ecTextColor, ThemeTextColor)
       else
        ThemeTextColor:=clNone;
        DrawControlText(ACanvas, Details, Text, DrawRect, DT_VCENTER or DT_CENTER, ThemeTextColor);
@@ -571,7 +578,7 @@ begin
       else
       if (FStyle=nsTranparent) and (not AMouseInControl)  then
        //use font color of the caption
-       StyleServices.GetElementColor(StyleServices.GetElementDetails(twCaptionActive), ecTextColor, ThemeTextColor)
+       LStyleServices.GetElementColor(LStyleServices.GetElementDetails(twCaptionActive), ecTextColor, ThemeTextColor)
       else
        ThemeTextColor:=clNone;
 
@@ -635,7 +642,7 @@ begin
   if THintWindowClass(FHintWindow).WindowHandle=0 then
   begin
     FHintWindow.Visible := False;
-    FHintWindow.Color   := StyleServices.GetSystemColor(clInfoBk);
+    FHintWindow.Color   := NCControls.StyleServices.GetSystemColor(clInfoBk);
     FHintWindow.Caption := Hint;
     FHintWindow.ParentWindow := Application.Handle;
     FHintWindow.Left:=NCControls.FForm.Left + BoundsRect.Left;
@@ -1309,11 +1316,42 @@ begin
 end;
 
 
+function Detour_TFormStyleHook_GetRegion(Self : TFormStyleHook): HRgn;
+var
+  R: TRect;
+  Details: TThemedElementDetails;
+  Detail: TThemedWindow;
+  LStylesServices : TCustomStyleServices;
+  LForm : TCustomForm;
+begin
+  if (Self is TFormStyleNCControls) and (TFormStyleNCControls(Self).NCControls<>nil) then
+  begin
+    LStylesServices:= TFormStyleNCControls(Self).NCControls.StyleServices;
+    LForm := TFormStyleHookClass(Self)._Form;
+    Result := 0;
+    if not LStylesServices.Available then
+      Exit;
+
+    R := Rect(0, 0, TFormStyleHookClass(Self).Control.Width, TFormStyleHookClass(Self).Control.Height);
+    if (LForm.BorderStyle <> bsToolWindow) and
+       (LForm.BorderStyle <> bsSizeToolWin) then
+      Detail := twCaptionActive
+    else
+      Detail := twSmallCaptionActive;
+    Details := LStylesServices.GetElementDetails(Detail);
+    LStylesServices.GetElementRegion(Details, R, Result);
+  end
+  else
+     Exit(Trampoline_TFormStyleHook_GetRegion(Self));
+end;
+
 
 initialization
  Trampoline_TFormStyleHook_GetBorderSize  := InterceptCreate(TFormStyleHookClass(nil)._GetBorderSizeAddr, @Detour_TFormStyleHook_GetBorderSize);
+ Trampoline_TFormStyleHook_GetRegion      := InterceptCreate(TFormStyleHookClass(nil)._GetRegionAddr, @Detour_TFormStyleHook_GetRegion);
 
 finalization
  InterceptRemove(@Trampoline_TFormStyleHook_GetBorderSize);
+ InterceptRemove(@Trampoline_TFormStyleHook_GetRegion);
 
 end.

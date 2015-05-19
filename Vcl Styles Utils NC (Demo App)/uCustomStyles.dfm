@@ -1,10 +1,9 @@
 object FrmCustomStyles: TFrmCustomStyles
-  Left = 483
-  Top = 204
-  BorderStyle = bsSingle
+  Left = 538
+  Top = 247
   Caption = 'Title'
-  ClientHeight = 310
-  ClientWidth = 645
+  ClientHeight = 253
+  ClientWidth = 614
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,9 +18,9 @@ object FrmCustomStyles: TFrmCustomStyles
   object Label1: TLabel
     Left = 8
     Top = 24
-    Width = 290
+    Width = 284
     Height = 13
-    Caption = 'Choose a VCL Style to be used to draw the Non Cliente Area'
+    Caption = 'Choose a VCL Style to be used to draw the Non Client Area'
   end
   object ComboBox1: TComboBox
     Left = 8
@@ -29,15 +28,109 @@ object FrmCustomStyles: TFrmCustomStyles
     Width = 145
     Height = 21
     Style = csDropDownList
+    Sorted = True
     TabOrder = 0
     OnChange = ComboBox1Change
+  end
+  object Button1: TButton
+    Left = 8
+    Top = 206
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 1
+  end
+  object Button2: TButton
+    Left = 89
+    Top = 206
+    Width = 75
+    Height = 25
+    Caption = 'Button2'
+    TabOrder = 2
+  end
+  object Button3: TButton
+    Left = 170
+    Top = 206
+    Width = 75
+    Height = 25
+    Caption = 'Button3'
+    TabOrder = 3
+  end
+  object RadioButton1: TRadioButton
+    Left = 8
+    Top = 88
+    Width = 113
+    Height = 17
+    Caption = 'RadioButton1'
+    TabOrder = 4
+  end
+  object RadioButton2: TRadioButton
+    Left = 132
+    Top = 88
+    Width = 113
+    Height = 17
+    Caption = 'RadioButton2'
+    Checked = True
+    TabOrder = 5
+    TabStop = True
+  end
+  object RadioButton3: TRadioButton
+    Left = 251
+    Top = 88
+    Width = 113
+    Height = 17
+    Caption = 'RadioButton3'
+    TabOrder = 6
+  end
+  object CheckBox1: TCheckBox
+    Left = 8
+    Top = 127
+    Width = 97
+    Height = 17
+    Caption = 'CheckBox1'
+    Checked = True
+    State = cbChecked
+    TabOrder = 7
+  end
+  object CheckBox2: TCheckBox
+    Left = 132
+    Top = 127
+    Width = 97
+    Height = 17
+    Caption = 'CheckBox2'
+    TabOrder = 8
+  end
+  object CheckBox3: TCheckBox
+    Left = 251
+    Top = 127
+    Width = 97
+    Height = 17
+    Caption = 'CheckBox3'
+    TabOrder = 9
+  end
+  object ScrollBar1: TScrollBar
+    Left = 8
+    Top = 176
+    Width = 340
+    Height = 17
+    PageSize = 0
+    TabOrder = 10
+  end
+  object ScrollBar2: TScrollBar
+    Left = 370
+    Top = 72
+    Width = 17
+    Height = 121
+    Kind = sbVertical
+    PageSize = 0
+    TabOrder = 11
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     Left = 328
     Top = 16
     Bitmap = {
-      494C01010C001100100010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010C001100140010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
