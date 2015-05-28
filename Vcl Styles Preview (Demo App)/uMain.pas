@@ -141,22 +141,22 @@ begin
             }
 
    for StyleName in  TStyleManager.StyleNames do
-   if CompareText(StyleName,'Windows')<>0 then
-   begin
-      Item:=ListView1.Items.Add;
-      Item.Caption:='Resource';
-      Item.SubItems.Add('');
+     if not SameText(StyleName,'Windows') then
+     begin
+        Item:=ListView1.Items.Add;
+        Item.Caption:='Resource';
+        Item.SubItems.Add('');
 
-      SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
-      VCLStyleExt:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
+        SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
+        VCLStyleExt:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
 
-      Item.Data  :=VCLStyleExt;
-      StyleInfo  :=TCustomStyleExt(VCLStyleExt).StyleInfo;
-      Item.SubItems.Add(StyleInfo.Name);
-      Item.SubItems.Add(StyleInfo.Author);
-      Item.SubItems.Add(StyleInfo.AuthorURL);
-      Item.SubItems.Add(StyleInfo.Version);
-   end;
+        Item.Data  :=VCLStyleExt;
+        StyleInfo  :=TCustomStyleExt(VCLStyleExt).StyleInfo;
+        Item.SubItems.Add(StyleInfo.Name);
+        Item.SubItems.Add(StyleInfo.Author);
+        Item.SubItems.Add(StyleInfo.AuthorURL);
+        Item.SubItems.Add(StyleInfo.Version);
+     end;
 
    Loading:=False;
 end;

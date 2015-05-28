@@ -8,7 +8,6 @@ uses
 
 type
   TFrmMain = class(TForm)
-    Button1: TButton;
     RadioButton1: TRadioButton;
     CheckBox1: TCheckBox;
     PageControl1: TPageControl;
@@ -17,6 +16,7 @@ type
     Edit1: TEdit;
     Button2: TButton;
     Button3: TButton;
+    Label1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -45,7 +45,6 @@ Uses
 
 procedure TFrmMain.Button1Click(Sender: TObject);
 begin
- Close;
 end;
 
 {
@@ -69,9 +68,9 @@ begin
   Filters:=TObjectList<TBitmapFilter>.Create;
   try
     //create a TBitmap32BlendOverlay filter and add to the list
-    Filters.Add(TBitmap32BlendOverlay.Create(clYellow));
+    Filters.Add(TBitmap32BlendOverlay.Create(clGreen));
     //set the elements to be affected
-    VclStylesUtils.Elements:=VclStylesUtils.Elements+ [vseBitmaps ,vseSysColors, vseStyleColors];
+    VclStylesUtils.Elements:=VclStylesUtils.Elements + [vseBitmaps ,vseSysColors, vseStyleColors];
     //set the filters
     VclStylesUtils.SetFilters(Filters);
     //Apply the changes to the style

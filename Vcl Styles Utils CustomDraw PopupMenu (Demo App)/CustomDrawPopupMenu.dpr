@@ -1,7 +1,12 @@
+// JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
 program CustomDrawPopupMenu;
 
 uses
   Vcl.Forms,
+  Windows,
+  Sysutils,
+  System.IOUtils,
+  Types,
   uMain in 'uMain.pas' {Form1},
   Vcl.Themes,
   Vcl.Styles,
@@ -15,10 +20,44 @@ uses
 
 {$R *.res}
 
+function PathCanonicalize(lpszDst: PChar; lpszSrc: PChar): LongBool; stdcall; external 'shlwapi.dll' name 'PathCanonicalizeW';
+
+function ResolvePath(const RelPath, BasePath: string): string;
+var
+  lpszDst: array[0..MAX_PATH-1] of char;
 begin
+  PathCanonicalize(@lpszDst[0], PChar(IncludeTrailingPathDelimiter(BasePath) + RelPath));
+  Exit(lpszDst);
+end;
+
+procedure LoadVCLStyles;
+var
+  f, s : string;
+  LFiles : TStringDynArray;
+  StyleInfo: TStyleInfo;
+begin
+  s:=ExtractFilePath(ParamStr(0));
+  LFiles:=TDirectory.GetFiles(s, '*.vsf');
+  if Length(LFiles)>0 then
+  begin
+   for f in TDirectory.GetFiles(s, '*.vsf') do
+    if TStyleManager.IsValidStyle(f , StyleInfo) and SameText(StyleInfo.Name, 'Auric') then
+     TStyleManager.LoadFromFile(f)
+  end
+  else
+  begin
+    s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
+    for f in TDirectory.GetFiles(s, '*.vsf') do
+     if TStyleManager.IsValidStyle(f , StyleInfo) and SameText(StyleInfo.Name, 'Auric') then
+       TStyleManager.LoadFromFile(f);
+  end;
+end;
+
+begin
+  LoadVCLStyles;
+  TStyleManager.TrySetStyle('Auric');
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  TStyleManager.TrySetStyle('Cyan Night');
   Application.CreateForm(TForm1, Form1);
   Application.Run;
 end.

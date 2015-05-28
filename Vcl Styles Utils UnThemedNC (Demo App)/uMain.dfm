@@ -30,7 +30,7 @@ object Form1: TForm1
     Caption = 'This App  show a dialog without style the NC area'
   end
   object OpenDialog1: TOpenDialog
-    Left = 120
-    Top = 32
+    Left = 248
+    Top = 16
   end
 end

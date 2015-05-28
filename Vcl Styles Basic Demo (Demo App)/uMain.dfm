@@ -1,8 +1,8 @@
 object FrmMain: TFrmMain
-  Left = 662
-  Top = 586
+  Left = 431
+  Top = 301
   Caption = 'Simple Demo'
-  ClientHeight = 224
+  ClientHeight = 234
   ClientWidth = 323
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,14 +15,12 @@ object FrmMain: TFrmMain
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Button1: TButton
-    Left = 96
-    Top = 181
-    Width = 75
-    Height = 25
-    Caption = 'Close'
-    TabOrder = 0
-    OnClick = Button1Click
+  object Label1: TLabel
+    Left = 8
+    Top = 184
+    Width = 303
+    Height = 13
+    Caption = 'Press the below button to see how the current style is modified'
   end
   object RadioButton1: TRadioButton
     Left = 8
@@ -30,7 +28,7 @@ object FrmMain: TFrmMain
     Width = 113
     Height = 17
     Caption = 'RadioButton1'
-    TabOrder = 1
+    TabOrder = 0
   end
   object CheckBox1: TCheckBox
     Left = 8
@@ -38,7 +36,7 @@ object FrmMain: TFrmMain
     Width = 97
     Height = 17
     Caption = 'CheckBox1'
-    TabOrder = 2
+    TabOrder = 1
   end
   object PageControl1: TPageControl
     Left = 8
@@ -46,7 +44,7 @@ object FrmMain: TFrmMain
     Width = 289
     Height = 105
     ActivePage = TabSheet1
-    TabOrder = 3
+    TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'TabSheet1'
       object Edit1: TEdit
@@ -70,19 +68,15 @@ object FrmMain: TFrmMain
     object TabSheet2: TTabSheet
       Caption = 'TabSheet2'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
   end
   object Button3: TButton
     Left = 8
-    Top = 181
+    Top = 203
     Width = 75
     Height = 25
     Caption = 'Press Me'
-    TabOrder = 4
+    TabOrder = 3
     OnClick = Button3Click
   end
 end

@@ -168,6 +168,7 @@ object FrmMain: TFrmMain
     Width = 337
     Height = 21
     Style = csDropDownList
+    Sorted = True
     TabOrder = 2
     OnChange = ComboBoxStylesChange
   end

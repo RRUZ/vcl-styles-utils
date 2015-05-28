@@ -42,7 +42,6 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
-			<VCL_Custom_Styles>&quot;Cyan Night|VCLSTYLE|$(PUBLIC)\Documents\RAD Studio\9.0\Styles\CyanNight.vsf&quot;</VCL_Custom_Styles>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
 			<DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_E>false</DCC_E>
@@ -87,7 +86,6 @@
 			</DelphiCompile>
 			<DCCReference Include="uMain.pas">
 				<Form>Form1</Form>
-				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ComCtrls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.Forms.pas"/>
