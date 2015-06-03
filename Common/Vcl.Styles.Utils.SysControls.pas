@@ -153,7 +153,7 @@ uses
 procedure AddToLog(const Msg: TMessage);
 begin
   with Msg do
-    OutputDebugString(PChar('Msg = ' + WM_To_String(Msg) + ' wParam = ' + IntToStr(wParam) + ' LParam = ' + IntToStr(lParam)));
+    OutputDebugString(PChar(FormatDateTime('hh:nn:ss.zzz', Now)+' Msg = ' + WM_To_String(Msg) + ' wParam = ' + IntToStr(wParam) + ' LParam = ' + IntToStr(lParam)));
 end;
 
 procedure AddToLog(const S: string; const Value: Integer);
@@ -317,6 +317,33 @@ begin
     $00F6: Result := 'BM_GETIMAGE';
     $00F7: Result := 'BM_SETIMAGE';
     $00F8: Result := 'BM_SETDONTCLICK';
+
+    $0090: result := 'WM_UAHDESTROYWINDOW';
+    $0091: result := 'WM_UAHDRAWMENU';
+    $0092: result := 'WM_UAHDRAWMENUITEM';
+    $0093: result := 'WM_UAHINITMENU';
+    $0094: result := 'WM_UAHMEASUREMENUITEM';
+    $0095: result := 'WM_UAHNCPAINTMENUPOPUP';
+
+    $01E0: Result := 'MN_SETHMENU';
+    $01E1: Result := 'MN_GETHMENU';
+    $01E2: Result := 'MN_SIZEWINDOW';
+    $01E3: Result := 'MN_OPENHIERARCHY';
+    $01E4: Result := 'MN_CLOSEHIERARCHY';
+    $01E5: Result := 'MN_SELECTITEM';
+    $01E6: Result := 'MN_CANCELMENUS';
+    $01E7: Result := 'MN_SELECTFIRSTVALIDITEM';
+
+    $01EA: Result := 'MN_GETPPOPUPMENU';
+    $01EB: Result := 'MN_FINDMENUWINDOWFROMPOINT';
+    $01EC: Result := 'MN_SHOWPOPUPWINDOW';
+    $01ED: Result := 'MN_BUTTONDOWN';
+    $01F0: Result := 'MN_SETTIMERTOOPENHIERARCHY';
+    $01F1: Result := 'MN_DBLCLK';
+    $01F2: Result := 'MN_ENDMENU';
+    $01F3: Result := 'MN_DODRAGDROP';
+
+
     // button control messages end
     $0100: Result := 'WM_KEYFIRST or WM_KEYDOWN';
     $0101: Result := 'WM_KEYUP';

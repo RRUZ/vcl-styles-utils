@@ -51,11 +51,14 @@ type
     FVisible: Boolean;
     FForm : TCustomForm;
     FShowSystemMenu: Boolean;
+    FFormBorderSize: TRect;
+    FActiveTabButtonIndex : Integer;
     function GetStyleServices: TCustomStyleServices;
     procedure SetStyleServices(const Value: TCustomStyleServices);
     procedure SetVisible(const Value: Boolean);
     function GetButton(index: Integer): TNCButton;
     function GetCount: Integer;
+    property FormBorderSize : TRect read FFormBorderSize write FFormBorderSize;
   public
     property Buttons[index : Integer] : TNCButton read GetButton; default;
     property ButtonsCount  : Integer read GetCount;
@@ -69,7 +72,7 @@ type
 
   TNCButton  = class(TControl)
   public type
-    TNCButtonStyle = (nsPushButton, nsTranparent, nsSplitButton, nsSplitTrans, nsAlpha, nsGradient);
+    TNCButtonStyle = (nsPushButton, nsTranparent, nsSplitButton, nsSplitTrans, nsAlpha, nsGradient, nsTab);
     TNCImageStyle  = (isNormal, isGray, isGrayHot);
   private
     FDropDown : Boolean;
@@ -108,6 +111,8 @@ type
     procedure SetImageStyle(const Value: TNCImageStyle);
     procedure ShowHintWindow(X, Y : Integer);
     procedure HideHintWindow;
+    function GetTabIndex: Integer;
+    property TabIndex : Integer read GetTabIndex;
   public
     property Style: TNCButtonStyle read FStyle write SetStyle;
     property ImageStyle: TNCImageStyle read FImageStyle write SetImageStyle;
@@ -132,6 +137,8 @@ type
     property StartColor : TColor read FStartColor write FStartColor;
     property EndColor : TColor read FEndColor write FEndColor;
     property Direction : TGradientDirection read FDirection write FDirection;
+
+
 
     constructor Create(AOwner: TComponent);  reintroduce; virtual;
     destructor Destroy; override;
@@ -247,6 +254,7 @@ begin
   if not IsStyleHookRegistered(AOwner.ClassType, TFormStyleNCControls) then
     TStyleManager.Engine.RegisterStyleHook(AOwner.ClassType, TFormStyleNCControls);
   FForm.Perform(CM_RECREATEWND, 0, 0);
+  FActiveTabButtonIndex := 0;
 end;
 
 destructor TNCControls.Destroy;
@@ -355,6 +363,21 @@ begin
   end;
 end;
 
+function TNCButton.GetTabIndex: Integer;
+var
+  i : Integer;
+begin
+  Result:=-1;
+  for i := 0 to NCControls.ButtonsCount-1 do
+  begin
+   if NCControls[i].Style=nsTab then
+    Inc(Result);
+
+   if NCControls[i] = Self then
+     Break;
+  end;
+end;
+
 procedure DoDrawGrayImage(hdcDst: HDC; himl: HIMAGELIST; ImageIndex, X, Y: Integer);
 var
   pimldp: TImageListDrawParams;
@@ -409,6 +432,8 @@ begin
     Details := LStyleServices.GetElementDetails(tbPushButtonNormal);
 
   DrawRect := BoundsRect;//ClientRect;
+  if FStyle=nsTab then
+    DrawRect.Height := NCControls.FormBorderSize.Top- DrawRect.Top;
 
   if FStyle=nsAlpha then
   begin
@@ -445,6 +470,22 @@ begin
     ACanvas.Brush.Style:=bsClear;
     LRect:=DrawRect;
     ACanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+  end
+  else
+  if FStyle=nsTab then
+  begin
+//    if AMouseInControl then
+//      Details := LStyleServices.GetElementDetails(ttTabItemHot)
+//    else
+    if Pressed or (NCControls.FActiveTabButtonIndex= TabIndex) then
+      Details := LStyleServices.GetElementDetails(ttTabItemSelected)
+    else
+    if not Enabled then
+      Details := LStyleServices.GetElementDetails(ttTabItemDisabled)
+    else
+     Details := LStyleServices.GetElementDetails(ttTabItemNormal);
+
+    LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
   end
   else
   if Enabled and (FStyle in [nsTranparent, nsSplitTrans]) and AMouseInControl then
@@ -752,15 +793,15 @@ end;
 
 procedure TFormStyleNCControls.PaintNCControls(Canvas: TCanvas; ARect : TRect);
 var
-  i : Integer;
+  LCurrent : Integer;
   LNCButton : TNCButton;
 begin
   if (NCControls<>nil) and (NCControls.ButtonsCount>0) and (NCControls.Visible) then
-   for i:=0 to NCControls.ButtonsCount-1 do
+   for LCurrent:=0 to NCControls.ButtonsCount-1 do
    begin
-    LNCButton:=NCControls.Buttons[i];
+    LNCButton:=NCControls.Buttons[LCurrent];
     if LNCButton.Visible and (LNCButton.BoundsRect.Right<= ARect.Right) then
-     LNCButton.DrawButton(Canvas, FHotNCBtnIndex=i, FPressedNCBtnIndex=i);
+     LNCButton.DrawButton(Canvas, FHotNCBtnIndex=LCurrent, FPressedNCBtnIndex=LCurrent);
    end;
 end;
 
@@ -817,6 +858,7 @@ end;
 procedure TFormStyleNCControls.WMNCLButtonDown(var Message: TWMNCHitMessage);
 var
  P : TPoint;
+ i : integer;
 begin
   inherited;
   {$IF CompilerVersion>23}
@@ -833,6 +875,16 @@ begin
     if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and PointInButton(P) then
     begin
       FPressedNCBtnIndex := GetButtonIndex(P);
+
+      //process click on buttton  with the nstab style
+      if (FPressedNCBtnIndex>=0)  and (FNCControls<>nil) and (FNCControls[FPressedNCBtnIndex].Style=nsTab) then
+      begin
+        FNCControls.FActiveTabButtonIndex:=-1;
+        For i:=0 to FPressedNCBtnIndex do
+         if FNCControls[i].Style=nsTab then
+          Inc(FNCControls.FActiveTabButtonIndex);
+      end;
+
       InvalidateNC;
       Message.Result := 0;
       Message.Msg := WM_NULL;
@@ -979,7 +1031,8 @@ begin
   if not LStyleServices.Available then
     Exit;
   R := _GetBorderSize;
-
+  if NCControls<>nil then
+    NCControls.FormBorderSize := R;
 
   if (Form.BorderStyle <> bsToolWindow) and
      (Form.BorderStyle <> bsSizeToolWin) then
@@ -1267,7 +1320,7 @@ var
   LStylesServices : TCustomStyleServices;
   LForm : TCustomForm;
 begin
-  if (Self is TFormStyleNCControls) and (TFormStyleNCControls(Self).NCControls<>nil) then
+  if (Self is TFormStyleNCControls)  and (TFormStyleNCControls(Self).NCControls<>nil) then
   begin
       LStylesServices:= TFormStyleNCControls(Self).NCControls.StyleServices;
       LForm := TFormStyleHookClass(Self)._Form;
@@ -1348,11 +1401,16 @@ end;
 
 
 initialization
+ {$IFDEF CPUX86}
  Trampoline_TFormStyleHook_GetBorderSize  := InterceptCreate(TFormStyleHookClass(nil)._GetBorderSizeAddr, @Detour_TFormStyleHook_GetBorderSize);
+ {$ENDIF}
+
  Trampoline_TFormStyleHook_GetRegion      := InterceptCreate(TFormStyleHookClass(nil)._GetRegionAddr, @Detour_TFormStyleHook_GetRegion);
 
 finalization
+ {$IFDEF CPUX86}
  InterceptRemove(@Trampoline_TFormStyleHook_GetBorderSize);
+ {$ENDIF}
  InterceptRemove(@Trampoline_TFormStyleHook_GetRegion);
 
 end.

@@ -23,7 +23,8 @@ uses
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.Utils.Graphics in '..\Common\Vcl.Styles.Utils.Graphics.pas',
   DDetours in '..\Common\delphi-detours-library\DDetours.pas',
-  uAlphaGradient in 'uAlphaGradient.pas' {FrmAlphaGradient};
+  uAlphaGradient in 'uAlphaGradient.pas' {FrmAlphaGradient},
+  uButtonsTabsStyles in 'uButtonsTabsStyles.pas' {FrmButtonsTabsStyle};
 
 {$R *.res}
 

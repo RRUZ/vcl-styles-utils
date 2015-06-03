@@ -52,12 +52,14 @@ type
     CheckBoxNCVisible: TCheckBox;
     BtnAlpha: TButton;
     Label1: TLabel;
+    BtnStyleTabs: TButton;
     procedure FormCreate(Sender: TObject);
     procedure BtnDropDownMenuClick(Sender: TObject);
     procedure CheckBoxNCVisibleClick(Sender: TObject);
     procedure BtnStylesClick(Sender: TObject);
     procedure BtnCustomStyleClick(Sender: TObject);
     procedure BtnAlphaClick(Sender: TObject);
+    procedure BtnStyleTabsClick(Sender: TObject);
   private
     { Private declarations }
      NCControls : TNCControls;
@@ -73,7 +75,7 @@ implementation
 
 uses
  Vcl.Styles.Utils.SystemMenu,
- uButtonsStyles, uCustomStyles, uDropdown, uAlphaGradient;
+ uButtonsStyles, uCustomStyles, uDropdown, uAlphaGradient, uButtonsTabsStyles;
 
 {$R *.dfm}
 
@@ -95,6 +97,14 @@ begin
 end;
 
 
+procedure TFrmMain.BtnStyleTabsClick(Sender: TObject);
+var
+ LForm : TFrmButtonsTabsStyle;
+begin
+   LForm:= TFrmButtonsTabsStyle.Create(Self);
+   LForm.Show();
+end;
+
 procedure TFrmMain.BtnAlphaClick(Sender: TObject);
 var
  LForm : TFrmAlphaGradient;
@@ -102,6 +112,7 @@ begin
    LForm:= TFrmAlphaGradient.Create(Self);
    LForm.Show();
 end;
+
 procedure TFrmMain.BtnCustomStyleClick(Sender: TObject);
 var
  LForm : TFrmCustomStyles;

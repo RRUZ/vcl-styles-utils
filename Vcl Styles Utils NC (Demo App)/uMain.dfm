@@ -2,7 +2,7 @@ object FrmMain: TFrmMain
   Left = 563
   Top = 331
   Caption = 'Sample NC Buttons'
-  ClientHeight = 125
+  ClientHeight = 346
   ClientWidth = 462
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -73,9 +73,17 @@ object FrmMain: TFrmMain
     TabOrder = 4
     OnClick = BtnAlphaClick
   end
+  object BtnStyleTabs: TButton
+    Left = 8
+    Top = 117
+    Width = 217
+    Height = 25
+    Caption = 'NC Buttons Tabs Style'
+    TabOrder = 5
+    OnClick = BtnStyleTabsClick
+  end
   object MainMenu1: TMainMenu
     Left = 240
-    Top = 32
     object Edit1: TMenuItem
       Caption = '&Edit'
       object Undo1: TMenuItem
@@ -188,10 +196,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 280
-    Top = 32
+    Left = 288
+    Top = 65528
     Bitmap = {
-      494C01010C0011001C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010C001100280010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

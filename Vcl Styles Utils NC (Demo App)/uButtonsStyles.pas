@@ -12,12 +12,10 @@ type
     Label1: TLabel;
     procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
     NCControls : TNCControls;
     procedure ButtonNCClick(Sender: TObject);
     procedure ButtonNCDropDownClick(Sender: TObject);
   public
-    { Public declarations }
   end;
 
 

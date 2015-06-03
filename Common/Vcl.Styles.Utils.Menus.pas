@@ -120,6 +120,7 @@ type
 {$ENDREGION}
 
   var
+    FOffset : Integer;
     FItemsPainted: Boolean;
     FParentSubItemPainted: Boolean;
     FPreviousHotItemIndex: integer;
@@ -291,6 +292,7 @@ begin
   FItemsPainted := False;
   FSysPopupItem := nil;
   FVCLMenuItems := nil;
+  FOffset := 0;
   // Font := Screen.MenuFont;
 end;
 
@@ -303,7 +305,7 @@ end;
 
 procedure TSysPopupStyleHook.DoDrawItem(Canvas: TCanvas; const Index: integer);
 var
-  LItemRect: TRect;
+  LRect, LRect2, LItemRect: TRect;
   P: TPoint;
   State: TSysPopupItemState;
   Style: TSysPopupItemStyle;
@@ -313,11 +315,32 @@ var
 begin
   if (Index < 0) or (Index > Count - 1) then
     Exit;
+
   Item := Items[Index];
   LItemRect := Item.ItemRect;
   P := Point(LItemRect.Left, LItemRect.Top);
   ScreenToClient(Handle, P);
+
+ GetMenuItemRect(0, FMenu, Index, LRect);
+ //OutputDebugString(PChar(Format('Index %d  Width %d Height %d Left %d Top %d', [Index, LRect.Width, LRect.Height, LRect.Left, LRect.Top])));
+
+ if SysControl.ClientRect.Height>LRect.Height then
+ begin
+   LRect2:= SysControl.ClientRect;
+   LRect2.Height:=  LRect2.Height - LRect.Height;
+ end
+ else
+   LRect2:= SysControl.ClientRect;
+
+  if not PtInRect (LRect2, P) then
+  begin
+   //OutputDebugString(PChar('Index '+IntToStr(Index)+' False'));
+   Exit;
+  end;
+
   LItemRect := Rect(P.X, P.Y, P.X + LItemRect.Width, P.Y + LItemRect.Height);
+
+
   if LItemRect.Left < 2 then
     LItemRect.Left := 2;
   inc(LItemRect.Right, 4);
@@ -886,7 +909,7 @@ begin
   { The undocumented MN_SELECTITEM Message:
     This is the most importants message ,
     Windows sends this message every time when the user
-    select an item (not clicking,only select) ...
+    select an item (not clicking, only select) ...
     wParam=Current Item Index .
     lparam= may be it's unused (not sure).
   }
@@ -900,6 +923,9 @@ begin
     DC := GetDC(Handle);
     Canvas.Handle := DC;
     Index := integer(Message.WParam);
+
+    //OutputDebugString(PChar(Format('MNSELECTITEM Index %d', [Index])));
+
     if Assigned(Font) then
       Canvas.Font := Font;
     { Out of index . }
@@ -1022,7 +1048,6 @@ var
   i: integer;
   Canvas: TCanvas;
 begin
-
   FMenu := GetMenuFromHandle(Handle);
   FCount := GetItemsCount;
 
@@ -1044,7 +1069,16 @@ begin
 
   if Count > -1 then
   begin
-    for i := 0 to Count - 1 do
+    //exit;
+    //FCount:=48;
+
+//    for i := 0 to Count - 1 do
+//    begin
+//     GetMenuItemRect(0, FMenu, i, LRect);
+//     OutputDebugString(PChar(Format('Index %d  Width %d Height %d Left %d Top %d', [i, LRect.Width, LRect.Height, LRect.Left, LRect.Top])));
+//    end;
+
+    for i := 0 + FOffset to Count - 1 do
       PostMessage(Handle, MN_SELECTITEM, i, 0);
   end;
   Handled := True;
@@ -1072,8 +1106,18 @@ var
   TopWin: HWND;
   TopCntrl: TControl;
 begin
-  // AddToLog(Message);
+//  AddToLog(Message);
+//  Message.Result := CallDefaultProc(Message);
+//  Exit;
+
   case Message.Msg of
+//
+//    MN_BUTTONDOWN:
+//      begin
+//        AddToLog(Message);
+//        Message.Result := CallDefaultProc(Message);
+//        Exit;
+//      end;
 
     MN_SELECTITEM, WM_PRINT:
       begin
@@ -1125,7 +1169,11 @@ begin
 
     MN_BUTTONDOWN:
       begin
+        Inc(FOffset);
+        //AddToLog(Message);
+        //AddToLog('Index '+IntToStr(UINT(Message.WParamLo)));
         SetRedraw(False);
+        //SendMessage(Handle, WM_PRINT, 0, 0);
         Message.Result := CallDefaultProc(Message);
         SetRedraw(True);
       end;
