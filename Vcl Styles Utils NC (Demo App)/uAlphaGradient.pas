@@ -36,10 +36,10 @@ end;
 procedure TFrmAlphaGradient.FormCreate(Sender: TObject);
 begin
   NCControls:=TNCControls.Create(Self);
-  NCControls.Add(TNCButton.Create(NCControls));
+  NCControls.Images      := ImageList1;
+  NCControls.ButtonsList.Add;
   NCControls[0].Style       := nsAlpha;
   NCControls[0].ImageStyle  := isNormal;
-  NCControls[0].Images      := ImageList1;
   NCControls[0].ImageIndex  := 0;
   NCControls[0].BoundsRect  := Rect(30, 1, 120, 26);
   NCControls[0].Caption     := 'nsAlpha1';
@@ -50,10 +50,9 @@ begin
   NCControls[0].HotFontColor:= clYellow;
   NCControls[0].OnClick     := ButtonNCClick;
 
-  NCControls.Add(TNCButton.Create(NCControls));
+  NCControls.ButtonsList.Add;
   NCControls[1].Style       := nsAlpha;
   NCControls[1].ImageStyle  := isGrayHot;
-  NCControls[1].Images      := ImageList1;
   NCControls[1].ImageIndex  := 1;
   NCControls[1].BoundsRect  := Rect(125, 1, 215, 26);
   NCControls[1].Caption     := 'nsAlpha2';
@@ -65,10 +64,9 @@ begin
   NCControls[1].OnClick     := ButtonNCClick;
 
 
-  NCControls.Add(TNCButton.Create(NCControls));
+  NCControls.ButtonsList.Add;
   NCControls[2].Style       := nsAlpha;
   NCControls[2].ImageStyle  := isGrayHot;
-  NCControls[2].Images      := ImageList1;
   NCControls[2].ImageIndex  := 2;
   NCControls[2].BoundsRect  := Rect(220, 1, 310, 26);
   NCControls[2].Caption     := 'nsAlpha3';
@@ -79,7 +77,7 @@ begin
   NCControls[2].HotFontColor:= clWebWhite;
   NCControls[2].OnClick     := ButtonNCClick;
 
-  NCControls.Add(TNCButton.Create(NCControls));
+  NCControls.ButtonsList.Add;
   NCControls[3].Style        := nsGradient;
   NCControls[3].StartColor   := clWebSkyBlue;
   NCControls[3].EndColor     := clWebChocolate;
@@ -87,14 +85,13 @@ begin
   NCControls[3].FontColor    := clWhite;
   NCControls[3].HotFontColor := clYellow;
   NCControls[3].ImageStyle  := isGrayHot;
-  NCControls[3].Images      := ImageList1;
   NCControls[3].ImageIndex  := 3;
   NCControls[3].BoundsRect  := Rect(315, 1, 415, 26);
   NCControls[3].Caption     := 'nsGradient1';
   NCControls[3].Name        := 'nsGradient1';
   NCControls[3].OnClick     := ButtonNCClick;
 
-  NCControls.Add(TNCButton.Create(NCControls));
+  NCControls.ButtonsList.Add;
   NCControls[4].Style        := nsGradient;
   NCControls[4].StartColor   := clWebSeashell;
   NCControls[4].EndColor     := clWebGray;
@@ -102,7 +99,6 @@ begin
   NCControls[4].FontColor   := clWhite;
   NCControls[4].HotFontColor:= clYellow;
   NCControls[4].ImageStyle  := isGrayHot;
-  NCControls[4].Images      := ImageList1;
   NCControls[4].ImageIndex  := 7;
   NCControls[4].BoundsRect  := Rect(420, 1, 520, 26);
   NCControls[4].Caption     := 'nsGradient2';
@@ -110,7 +106,7 @@ begin
   NCControls[4].OnClick     := ButtonNCClick;
 
 
-  NCControls.Add(TNCButton.Create(NCControls));
+  NCControls.ButtonsList.Add;
   NCControls[5].Style        := nsGradient;
   NCControls[5].StartColor   := clWebDarkOrange;
   NCControls[5].EndColor     := clRed;
@@ -118,7 +114,6 @@ begin
   NCControls[5].FontColor    := clWhite;
   NCControls[5].HotFontColor := clYellow;
   NCControls[5].ImageStyle   := isGrayHot;
-  NCControls[5].Images       := ImageList1;
   NCControls[5].ImageIndex   := 8;
   NCControls[5].BoundsRect   := Rect(525, 1, 625, 26);
   NCControls[5].Caption      := 'nsGradient3';

@@ -140,16 +140,16 @@ begin
   TVclStylesSystemMenu.Create(Self);
 
   NCControls:=TNCControls.Create(Self);
+  NCControls.Images    :=ImageList1;
    for i:=0 to 10 do
    begin
-      NCControls.Add(TNCButton.Create(NCControls));
+      NCControls.ButtonsList.Add;
       NCControls[i].Name      := Format('NCButton%d',[i+1]);
       NCControls[i].Hint      := Format('Hint for NCButton%d',[i+1]);
       NCControls[i].ShowHint  := True;
       NCControls[i].Caption   :='';
       NCControls[i].Style     :=nsTranparent;
       NCControls[i].ImageStyle:=isGrayHot;
-      NCControls[i].Images    :=ImageList1;
       NCControls[i].ImageIndex:=i;
       NCControls[i].ImageAlignment := TImageAlignment.iaCenter;
       NCControls[i].BoundsRect:=Rect(30+(i*20),5,50+(i*20),25);

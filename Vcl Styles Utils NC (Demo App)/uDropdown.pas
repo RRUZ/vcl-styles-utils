@@ -59,18 +59,21 @@ begin
 end;
 
 procedure TFrmDropDown.FormCreate(Sender: TObject);
+var
+  LNCButton : TNCButton;
 begin
   NCControls:=TNCControls.Create(Self);
+  NCControls.Images      := ImageList1;
   NCControls.ShowSystemMenu:=False;
-  NCControls.Add(TNCButton.Create(NCControls));
-  NCControls[0].Style       := nsSplitButton;
-  NCControls[0].ImageStyle  := isGrayHot;
-  NCControls[0].Images      := ImageList1;
-  NCControls[0].ImageIndex  := 3;
-  NCControls[0].BoundsRect  := Rect(5,0,85,25);
-  NCControls[0].Caption     := 'Menu';
-  NCControls[0].DropDownMenu:= PopupMenu1;
-  NCControls[0].OnClick     := ButtonNCClick;
+
+  LNCButton:= NCControls.ButtonsList.Add();
+  LNCButton.Style       := nsSplitButton;
+  LNCButton.ImageStyle  := isGrayHot;
+  LNCButton.ImageIndex  := 3;
+  LNCButton.BoundsRect  := Rect(5,0,85,25);
+  LNCButton.Caption     := 'Menu';
+  LNCButton.DropDownMenu:= PopupMenu1;
+  LNCButton.OnClick     := ButtonNCClick;
 end;
 
 end.
