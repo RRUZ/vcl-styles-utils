@@ -738,14 +738,15 @@ end;
 
 { TSysTreeViewStyleHook }
 
+
 constructor TSysTreeViewStyleHook.Create(AHandle: THandle);
 begin
   inherited;
 {$IF CompilerVersion > 23}
-  StyleElements := [seFont, seBorder];
+  StyleElements := [seFont{, seBorder}];  //Allow to the Vcl.Styles.Hook handle the NC and scroll paint
 {$ELSE}
   OverrideFont := True;
-  OverridePaintNC := True;
+  OverridePaintNC := False; //Allow to the Vcl.Styles.Hook handle the NC and scroll paint
 {$IFEND}
   OverrideEraseBkgnd := True;
 end;

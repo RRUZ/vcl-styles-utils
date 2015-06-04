@@ -130,6 +130,7 @@ type
     FCount: integer;
     FMenu: HMENU;
     FVCLMenuItems: TMenuItem;
+    FNCRect : TRect;
     function GetMenuFromHandle(AHandle: HWND): HMENU;
     function GetItemsCount: integer;
     procedure MNSELECTITEM(var Message: TMessage); message MN_SELECTITEM;
@@ -326,17 +327,17 @@ begin
 
  if SysControl.ClientRect.Height>LRect.Height then
  begin
+   //GetWindowRect(SysControl.Handle, LRect2);
    LRect2:= SysControl.ClientRect;
    LRect2.Height:=  LRect2.Height - LRect.Height;
  end
  else
    LRect2:= SysControl.ClientRect;
 
+  //prevent draw  not visible items on larger menus
   if not PtInRect (LRect2, P) then
-  begin
-   //OutputDebugString(PChar('Index '+IntToStr(Index)+' False'));
    Exit;
-  end;
+
 
   LItemRect := Rect(P.X, P.Y, P.X + LItemRect.Width, P.Y + LItemRect.Height);
 
@@ -1263,6 +1264,17 @@ begin
 
     WM_NCCALCSIZE, WM_NCPAINT:
       begin
+        if Message.Msg= WM_NCCALCSIZE then
+        begin
+          if TWMNCCalcSize(Message).CalcValidRects then
+          begin
+            FNCRect := TWMNCCalcSize(Message).CalcSize_Params.rgrc[0];
+            //Message.Result := CallDefaultProc(Message);
+            //LRect := TWMNCCalcSize(Message).CalcSize_Params.rgrc0;
+            //OutputDebugString(PChar(Format('LRect.Height %d WParam %d', [FNCRect.Height, Message.WParam])));
+          end;
+        end;
+
         if (not OverridePaint) or (not OverridePaintNC) then
         begin
           Message.Result := CallDefaultProc(Message);
