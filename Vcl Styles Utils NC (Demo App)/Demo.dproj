@@ -82,6 +82,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_Define>madExcept;LeakChecking;$(DCC_Define)</DCC_Define>
 			<DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
 			<DCC_RangeChecking>true</DCC_RangeChecking>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -203,6 +204,13 @@
 [Exception Log]
 EurekaLog Version=7001
 Activate=0
-DeleteMapAfterCompile=1
+atVCL=1
+DeleteMapAfterCompile=0
 Encrypt Password=""
+idEurekaLog=1
+idEurekaLogDetailed=1
+idMSClassic=1
+idStepsToReproduce=1
+loResCatchLeaks=1
+ProjectID="{6A3DC018-3634-42B8-9302-92D64717AD2D}"
 EurekaLog Last Line -->

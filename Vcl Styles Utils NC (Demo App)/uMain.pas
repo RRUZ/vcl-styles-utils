@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls, Vcl.ImgList,
-  Vcl.ComCtrls, Vcl.ToolWin, Vcl.Styles.NC;
+  Vcl.ComCtrls, Vcl.ToolWin, Vcl.Styles.NC, Vcl.ExtCtrls;
 
 type
   TFrmMain = class(TForm)
@@ -53,6 +53,7 @@ type
     BtnAlpha: TButton;
     Label1: TLabel;
     BtnStyleTabs: TButton;
+    CheckBoxSystemMenu: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure BtnDropDownMenuClick(Sender: TObject);
     procedure CheckBoxNCVisibleClick(Sender: TObject);
@@ -60,9 +61,11 @@ type
     procedure BtnCustomStyleClick(Sender: TObject);
     procedure BtnAlphaClick(Sender: TObject);
     procedure BtnStyleTabsClick(Sender: TObject);
+    procedure CheckBoxSystemMenuClick(Sender: TObject);
   private
     { Private declarations }
      NCControls : TNCControls;
+     procedure UpdateButtons;
   public
     { Public declarations }
     procedure ButtonNCClick(Sender: TObject);
@@ -132,30 +135,55 @@ begin
   NCControls.Visible:=CheckBoxNCVisible.Checked;
 end;
 
-procedure TFrmMain.FormCreate(Sender: TObject);
-var
- i : integer;
+procedure TFrmMain.CheckBoxSystemMenuClick(Sender: TObject);
 begin
-  ReportMemoryLeaksOnShutdown:=True;
-  TVclStylesSystemMenu.Create(Self);
-
-  NCControls:=TNCControls.Create(Self);
-  NCControls.Images    :=ImageList1;
-   for i:=0 to 10 do
-   begin
-      NCControls.ButtonsList.Add;
-      NCControls[i].Name      := Format('NCButton%d',[i+1]);
-      NCControls[i].Hint      := Format('Hint for NCButton%d',[i+1]);
-      NCControls[i].ShowHint  := True;
-      NCControls[i].Caption   :='';
-      NCControls[i].Style     :=nsTranparent;
-      NCControls[i].ImageStyle:=isGrayHot;
-      NCControls[i].ImageIndex:=i;
-      NCControls[i].ImageAlignment := TImageAlignment.iaCenter;
-      NCControls[i].BoundsRect:=Rect(30+(i*20),5,50+(i*20),25);
-      NCControls[i].OnClick   := ButtonNCClick;
-   end;
+  NCControls.ShowSystemMenu:=CheckBoxSystemMenu.Checked;
+  UpdateButtons;
+  NCControls.Invalidate;
 end;
 
+procedure TFrmMain.FormCreate(Sender: TObject);
+begin
+ // ReportMemoryLeaksOnShutdown:=True;
+  TVclStylesSystemMenu.Create(Self);
+  NCControls:=TNCControls.Create(Self);
+  NCControls.Images    :=ImageList1;
+  UpdateButtons;
+end;
+
+
+procedure TFrmMain.UpdateButtons;
+const
+ cWidth = 20;
+var
+ iLeft, i : integer;
+begin
+   iLeft:=5;
+   if NCControls.ShowSystemMenu then
+    iLeft:=30;
+
+   NCControls.ButtonsList.Clear;
+   NCControls.ButtonsList.BeginUpdate;
+   try
+     for i:=0 to 10 do
+     begin
+        NCControls.ButtonsList.Add;
+        NCControls[i].Name      := Format('NCButton%d', [i+1]);
+        NCControls[i].Hint      := Format('Hint for NCButton%d', [i+1]);
+        NCControls[i].ShowHint  := True;
+        NCControls[i].Caption   :='';
+        NCControls[i].Style     :=nsTranparent;
+        NCControls[i].ImageStyle:=isGrayHot;
+        NCControls[i].ImageIndex:=i;
+        NCControls[i].ImageAlignment := TImageAlignment.iaCenter;
+        NCControls[i].BoundsRect  := Rect(iLeft, 5, iLeft + cWidth, 25);
+        inc(iLeft, cWidth + 2);
+        NCControls[i].OnClick   := ButtonNCClick;
+     end;
+   finally
+     NCControls.ButtonsList.EndUpdate;
+   end;
+
+end;
 
 end.

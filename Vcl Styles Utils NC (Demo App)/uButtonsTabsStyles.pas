@@ -29,7 +29,7 @@ begin
   NCControls[0].Style       := nsTab;
   NCControls[0].ImageStyle  := isGrayHot;
   NCControls[0].ImageIndex  := 0;
-  NCControls[0].BoundsRect  := Rect(30, 1, 140, 26);
+  NCControls[0].BoundsRect  := Rect(30, 5, 140, 26);
   NCControls[0].Caption     := 'Text Tab1';
   NCControls[0].Name        := 'nsTab1';
   //NCControls[0].OnClick     := ButtonNCClick;
@@ -39,7 +39,7 @@ begin
   NCControls[1].Style       := nsTab;
   NCControls[1].ImageStyle  := isGrayHot;
   NCControls[1].ImageIndex  := 1;
-  NCControls[1].BoundsRect  := Rect(141, 1, 251, 26);
+  NCControls[1].BoundsRect  := Rect(141, 5, 251, 26);
   NCControls[1].Caption     := 'Text Tab2';
   NCControls[1].Name        := 'nsTab2';
   //NCControls[1].OnClick     := ButtonNCClick;
@@ -48,7 +48,7 @@ begin
   NCControls[2].Style       := nsTab;
   NCControls[2].ImageStyle  := isGrayHot;
   NCControls[2].ImageIndex  := 3;
-  NCControls[2].BoundsRect  := Rect(252, 1, 362, 26);
+  NCControls[2].BoundsRect  := Rect(252, 5, 362, 26);
   NCControls[2].Caption     := 'Text Tab3';
   NCControls[2].Name        := 'nsTab3';
   //NCControls[2].OnClick     := ButtonNCClick;
