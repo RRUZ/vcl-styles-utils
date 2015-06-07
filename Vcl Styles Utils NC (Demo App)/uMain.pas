@@ -54,6 +54,7 @@ type
     Label1: TLabel;
     BtnStyleTabs: TButton;
     CheckBoxSystemMenu: TCheckBox;
+    CheckBoxShowCaption: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure BtnDropDownMenuClick(Sender: TObject);
     procedure CheckBoxNCVisibleClick(Sender: TObject);
@@ -62,6 +63,7 @@ type
     procedure BtnAlphaClick(Sender: TObject);
     procedure BtnStyleTabsClick(Sender: TObject);
     procedure CheckBoxSystemMenuClick(Sender: TObject);
+    procedure CheckBoxShowCaptionClick(Sender: TObject);
   private
     { Private declarations }
      NCControls : TNCControls;
@@ -133,6 +135,12 @@ end;
 procedure TFrmMain.CheckBoxNCVisibleClick(Sender: TObject);
 begin
   NCControls.Visible:=CheckBoxNCVisible.Checked;
+end;
+
+procedure TFrmMain.CheckBoxShowCaptionClick(Sender: TObject);
+begin
+  NCControls.ShowCaption:=CheckBoxShowCaption.Checked;
+
 end;
 
 procedure TFrmMain.CheckBoxSystemMenuClick(Sender: TObject);

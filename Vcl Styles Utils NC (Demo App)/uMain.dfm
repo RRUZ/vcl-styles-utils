@@ -58,7 +58,7 @@ object FrmMain: TFrmMain
     Top = 32
     Width = 121
     Height = 17
-    Caption = 'NC Controls Visible'
+    Caption = 'Show NC Controls'
     Checked = True
     State = cbChecked
     TabOrder = 3
@@ -92,6 +92,17 @@ object FrmMain: TFrmMain
     State = cbChecked
     TabOrder = 6
     OnClick = CheckBoxSystemMenuClick
+  end
+  object CheckBoxShowCaption: TCheckBox
+    Left = 288
+    Top = 32
+    Width = 97
+    Height = 17
+    Caption = 'Show Caption'
+    Checked = True
+    State = cbChecked
+    TabOrder = 7
+    OnClick = CheckBoxShowCaptionClick
   end
   object MainMenu1: TMainMenu
     Left = 360
@@ -208,10 +219,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 304
-    Top = 16
+    Left = 248
+    Top = 120
     Bitmap = {
-      494C01010C0011003C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010C001100400010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

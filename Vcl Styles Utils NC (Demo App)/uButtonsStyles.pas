@@ -67,7 +67,7 @@ procedure TFrmButtonsStyles.UpdateNCButtons;
 const
   cWidth = 95;
 var
-  iLeft, i : Integer;
+  iLeft, iSep, i : Integer;
   LNCControl : TNCButton;
 begin
   NCControls.ButtonsList.Clear;
@@ -81,7 +81,13 @@ begin
       LNCControl.ImageStyle  := isNormal;
       LNCControl.ImageIndex  := i;
       LNCControl.BoundsRect  := Rect(iLeft, 2, iLeft + cWidth, 26);
-      inc(iLeft, cWidth + 5);
+
+      iSep:=5;
+      if LNCControl.Style=nsTab then
+        iSep:=0;
+
+      inc(iLeft, cWidth + iSep);
+
       LNCControl.Caption     := 'NCButton '+IntToStr(i);
       LNCControl.Name        := 'NcButton'+IntToStr(i);
 

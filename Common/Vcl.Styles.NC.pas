@@ -72,6 +72,7 @@ type
     FFormBorderSize: TRect;
     FActiveTabButtonIndex : Integer;
     FImages: TCustomImageList;
+    FShowCaption: Boolean;
     function GetStyleServices: TCustomStyleServices;
     procedure SetStyleServices(const Value: TCustomStyleServices);
     procedure SetVisible(const Value: Boolean);
@@ -79,6 +80,7 @@ type
     function GetCount: Integer;
     procedure SetImages(const Value: TCustomImageList);
     procedure SetShowSystemMenu(const Value: Boolean);
+    procedure SetShowCaption(const Value: Boolean);
     property FormBorderSize : TRect read FFormBorderSize write FFormBorderSize;
     property Form : TCustomForm read FForm;
   public
@@ -94,6 +96,7 @@ type
     property Visible : Boolean read FVisible write SetVisible default True;
     property Images: TCustomImageList read FImages write SetImages;
     property ShowSystemMenu : Boolean read FShowSystemMenu write SetShowSystemMenu default True;
+    property ShowCaption  : Boolean read FShowCaption  write SetShowCaption default True;
   end;
 
   TNCButton  = class(TCollectionItem)
@@ -307,6 +310,7 @@ begin
   FStyleServices:=nil;
   FImages  :=nil;
   FVisible:=True;
+  FShowCaption   :=True;
   FShowSystemMenu:=True;
   if not IsStyleHookRegistered(AOwner.ClassType, TFormStyleNCControls) then
     TStyleManager.Engine.RegisterStyleHook(AOwner.ClassType, TFormStyleNCControls);
@@ -347,6 +351,15 @@ end;
 procedure TNCControls.SetImages(const Value: TCustomImageList);
 begin
   FImages := Value;
+end;
+
+procedure TNCControls.SetShowCaption(const Value: Boolean);
+begin
+ if Value<>FShowCaption then
+ begin
+  FShowCaption := Value;
+  Invalidate;
+ end;
 end;
 
 procedure TNCControls.SetShowSystemMenu(const Value: Boolean);
@@ -1417,16 +1430,21 @@ begin
       end;
 
       R2:=TextRect;
+
       if (NCControls<>nil) and  (NCControls.ButtonsCount>0) and (NCControls.Visible) then
        Inc(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount-1].BoundsRect.Right - NCControls.ButtonsList[0].BoundsRect.Left + 10);
 
       //text
-      TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
-      if Control.UseRightToLeftReading then
-        Include(TextFormat, tfRtlReading);
+      if (NCControls<>nil) and  (NCControls.ShowCaption) then
+      begin
 
-      LText := Text;
-      LStyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+        TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
+        if Control.UseRightToLeftReading then
+          Include(TextFormat, tfRtlReading);
+
+        LText := Text;
+        LStyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+      end;
 
       if (NCControls<>nil) and (NCControls.ButtonsCount>0) and (NCControls.Visible) then
        Dec(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount-1].BoundsRect.Right - NCControls.ButtonsList[0].BoundsRect.Left + 10);
