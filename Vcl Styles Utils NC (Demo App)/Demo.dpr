@@ -1,14 +1,6 @@
-// JCL_DEBUG_EXPERT_INSERTJDBG OFF
-// JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
-// JCL_DEBUG_EXPERT_GENERATEJDBG OFF
 program Demo;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   uMain in 'uMain.pas' {FrmMain},
   System.IOUtils,

@@ -54,7 +54,7 @@ var
   LStyle : TNCButton.TNCButtonStyle;
 begin
   for LStyle:= Low(TNCButton.TNCButtonStyle) to High(TNCButton.TNCButtonStyle) do
-  if not (LStyle in [nsAlpha, nsGradient]) then
+ // if not (LStyle in [nsAlpha, nsGradient]) then
     cbNCBtnStyles.Items.AddObject(GetEnumName(TypeInfo(TNCButton.TNCButtonStyle), Integer(LStyle)), TObject(LStyle));
   cbNCBtnStyles.ItemIndex:=0;
 
@@ -66,6 +66,10 @@ end;
 procedure TFrmButtonsStyles.UpdateNCButtons;
 const
   cWidth = 95;
+  ColorsPalette: Array[0..11] of TColor = (
+    clWebRosyBrown, clWebYellowGreen, clGray, clWebOrange, clWebMoccasin, clWebMediumPurple,
+    clWebMediumBlue, clWebMediumOrchid, clWebIvory, clWebSeashell, clWebPapayaWhip, clWebPeru);
+
 var
   iLeft, iSep, i : Integer;
   LNCControl : TNCButton;
@@ -96,6 +100,22 @@ begin
 
       LNCControl.OnClick     := ButtonNCClick;
       LNCControl.OnDropDownClick := ButtonNCDropDownClick;
+
+
+      if LNCControl.Style=nsAlpha then
+      begin
+        LNCControl.AlphaColor    := ColorsPalette[i];
+        LNCControl.AlphaHotColor := ColorsPalette[i+2];
+        LNCControl.FontColor     := clWhite;
+      end
+      else
+      if LNCControl.Style=nsGradient then
+      begin
+        LNCControl.StartColor    := ColorsPalette[i];
+        LNCControl.EndColor      := ColorsPalette[i+1];
+        LNCControl.FontColor     := clWhite;
+        LNCControl.HotFontColor  := clBlack;
+      end
     end;
   finally
     NCControls.ButtonsList.EndUpdate;

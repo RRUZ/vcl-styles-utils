@@ -192,6 +192,7 @@ type
     property AlphaHotColor : TColor read FAlphaHotColor write FAlphaHotColor;
     property FontColor : TColor read FFontColor write FFontColor;
     property HotFontColor : TColor read FHotFontColor write FHotFontColor;
+
     property StartColor : TColor read FStartColor write FStartColor;
     property EndColor : TColor read FEndColor write FEndColor;
 
@@ -556,46 +557,55 @@ begin
 
   if FStyle=nsAlpha then
   begin
-    //LColor := StyleServices.GetSystemColor(clHighlight);
+    LColor := ACanvas.Pen.Color;
+    try
 
-    if AMouseInControl then
-    begin
+      if AMouseInControl then
+      begin
+        LRect:=DrawRect;
+        InflateRect(LRect, -1, -1);
+        AlphaBlendFillCanvas(ACanvas.Handle, FAlphaHotColor, LRect, 96);
+        ACanvas.Pen.Color:=FAlphaHotColor;
+      end
+      else
+      begin
+        LRect:=DrawRect;
+        InflateRect(LRect, -1, -1);
+        AlphaBlendFillCanvas(ACanvas.Handle, FAlphaColor, LRect, 96);
+        ACanvas.Pen.Color:=FAlphaColor;
+      end;
+
+      //OutputDebugString(PChar(Format('%s ACanvas.Pen.Color %s',[formatDateTime('hh:nn:ss.zzz', Now), ColorToString(ACanvas.Pen.Color)])));
+
       LRect:=DrawRect;
-      InflateRect(LRect, -1, -1);
-      AlphaBlendFillCanvas(ACanvas.Handle, FAlphaHotColor, LRect, 96);
-      ACanvas.Pen.Color:=FAlphaHotColor;
-    end
-    else
-    begin
-      LRect:=DrawRect;
-      InflateRect(LRect, -1, -1);
-      AlphaBlendFillCanvas(ACanvas.Handle, FAlphaColor, LRect, 96);
-      ACanvas.Pen.Color:=FAlphaColor;
+      ACanvas.Brush.Style:=bsSolid;
+      ACanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+
+    finally
+      ACanvas.Pen.Color:=LColor;
     end;
-
-    //OutputDebugString(PChar(Format('%s ACanvas.Pen.Color %s',[formatDateTime('hh:nn:ss.zzz', Now), ColorToString(ACanvas.Pen.Color)])));
-
-    LRect:=DrawRect;
-    ACanvas.Brush.Style:=bsSolid;
-    ACanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-
   end
   else
   if FStyle=nsGradient then
   begin
-    if AMouseInControl then
-      GradientFillCanvas(ACanvas, FEndColor, FStartColor, DrawRect, FDirection)
-    else
-      GradientFillCanvas(ACanvas, FStartColor, FEndColor, DrawRect, FDirection);
+    LColor := ACanvas.Pen.Color;
+    try
+      if AMouseInControl then
+        GradientFillCanvas(ACanvas, FEndColor, FStartColor, DrawRect, FDirection)
+      else
+        GradientFillCanvas(ACanvas, FStartColor, FEndColor, DrawRect, FDirection);
 
-    if AMouseInControl then
-     ACanvas.Pen.Color:=FEndColor
-    else
-     ACanvas.Pen.Color:=FStartColor;
+      if AMouseInControl then
+       ACanvas.Pen.Color:=FEndColor
+      else
+       ACanvas.Pen.Color:=FStartColor;
 
-    ACanvas.Brush.Style:=bsClear;
-    LRect:=DrawRect;
-    ACanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+      ACanvas.Brush.Style:=bsClear;
+      LRect:=DrawRect;
+      ACanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+    finally
+      ACanvas.Pen.Color:=LColor;
+    end;
   end
   else
   if FStyle=nsTab then
@@ -727,35 +737,42 @@ begin
 
       with ACanvas do
       begin
-        // draw split line
-        if FStyle<>nsSplitTrans then
-        begin
-          Pen.Color := LStyleServices.GetSystemColor(clBtnShadow);
-          MoveTo(LRect.Right - 15, LRect.Top + 3);
-          LineTo(LRect.Right - 15, LRect.Bottom - 3);
-          if Enabled then
-            Pen.Color := LStyleServices.GetSystemColor(clBtnHighLight)
+
+          LColor:=Pen.Color;
+
+          // draw split line
+          if FStyle<>nsSplitTrans then
+          begin
+            Pen.Color := LStyleServices.GetSystemColor(clBtnShadow);
+            MoveTo(LRect.Right - 15, LRect.Top + 3);
+            LineTo(LRect.Right - 15, LRect.Bottom - 3);
+            if Enabled then
+              Pen.Color := LStyleServices.GetSystemColor(clBtnHighLight)
+            else
+              Pen.Color := Font.Color;
+            MoveTo(LRect.Right - 14, LRect.Top + 3);
+            LineTo(LRect.Right - 14, LRect.Bottom - 3);
+          end;
+
+
+          // draw arrow
+
+          if (FStyle=nsSplitTrans) and (not AMouseInControl)  then
+           Pen.Color := ThemeTextColor
           else
-            Pen.Color := Font.Color;
-          MoveTo(LRect.Right - 14, LRect.Top + 3);
-          LineTo(LRect.Right - 14, LRect.Bottom - 3);
-        end;
+           Pen.Color := Font.Color;
 
+          X := LRect.Right - 8;
+          Y := LRect.Top + (Height div 2) + 1;
+          for i := 3 downto 0 do
+          begin
+            MoveTo(X - I, Y - I);
+            LineTo(X + I + 1, Y - I);
+          end;
 
-        // draw arrow
-        if (FStyle=nsSplitTrans) and (not AMouseInControl)  then
-         Pen.Color := ThemeTextColor
-        else
-         Pen.Color := Font.Color;
-
-        X := LRect.Right - 8;
-        Y := LRect.Top + (Height div 2) + 1;
-        for i := 3 downto 0 do
-        begin
-          MoveTo(X - I, Y - I);
-          LineTo(X + I + 1, Y - I);
-        end;
+          Pen.Color := LColor;
       end;
+
     end
     else
     begin
