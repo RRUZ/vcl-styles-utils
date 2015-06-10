@@ -529,6 +529,9 @@ begin
   with SysControl do
     Result := (Style and BS_RADIOBUTTON = BS_RADIOBUTTON) or
       (Style and BS_AUTORADIOBUTTON = BS_AUTORADIOBUTTON);
+
+ if Result then
+      Result:= not IsSplitButton;
 end;
 
 function TSysButtonStyleHook.IsSplitButton: Boolean;

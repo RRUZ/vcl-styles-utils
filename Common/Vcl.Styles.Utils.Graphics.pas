@@ -26,6 +26,8 @@ unit Vcl.Styles.Utils.Graphics;
 interface
 
 uses
+  Vcl.Styles,
+  Vcl.Themes,
   System.Classes,
   System.SysUtils,
   Winapi.Windows,
@@ -246,6 +248,9 @@ Type
   procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
   procedure AlphaBlendFillCanvas(const DC: HDC;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
 
+  procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect);
+  procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
+
 implementation
 
 Uses
@@ -260,6 +265,52 @@ type
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
 
+
+procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
+var
+ SaveIndex, X, Y, I : Integer;
+ LColor : TColor;
+ LCanvas : TCanvas;
+begin
+  SaveIndex := SaveDC(hdc);
+  LCanvas:=TCanvas.Create;
+  try
+    LCanvas.Handle:=hdc;
+    with LCanvas do
+    begin
+      LColor:=Pen.Color;
+      try
+        Pen.Color:= AColor;
+        X := LRect.Right - 8;
+        Y := LRect.Top + (LRect.Height div 2) + 1;
+        for i := 3 downto 0 do
+        begin
+          MoveTo(X - I, Y - I);
+          LineTo(X + I + 1, Y - I);
+        end;
+      finally
+        Pen.Color:=LColor;
+      end;
+    end;
+  finally
+    LCanvas.Handle:=0;
+    LCanvas.Free;
+    RestoreDC(hdc, SaveIndex);
+  end;
+end;
+
+procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect);
+var
+  SaveIndex : Integer;
+begin
+  SaveIndex := SaveDC(hdc);
+  try
+     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+  finally
+    RestoreDC(hdc, SaveIndex);
+  end;
+
+end;
 
 procedure GradientRoundedFillCanvas(const ACanvas: TCanvas;
   const AStartColor, AEndColor: TColor; const ARect: TRect;
