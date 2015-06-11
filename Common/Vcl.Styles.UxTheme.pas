@@ -37,8 +37,16 @@ implementation
 {$DEFINE HOOK_Spin}
 {$DEFINE HOOK_EDIT}
 {$DEFINE HOOK_Rebar}
-{.$DEFINE HOOK_Menu}
-{.$DEFINE HOOK_PopMenu}
+{$DEFINE HOOK_ToolBar}
+{$DEFINE HOOK_Menu}
+
+
+//Undocumented
+{$DEFINE HOOK_CommandModule}
+{$DEFINE HOOK_SearchBox}
+{$DEFINE HOOK_AddressBand}
+
+
 
 uses
   DDetours,
@@ -71,6 +79,21 @@ const
   VSCLASS_ITEMSVIEW_LISTVIEW             = 'ItemsView::ListView';
   VSCLASS_ITEMSVIEW_HEADER               = 'ItemsView::Header';
   VSCLASS_EXPLORER_LISTVIEW              = 'Explorer::ListView';
+{$ENDIF}
+
+{$IFDEF HOOK_CommandModule}
+const
+  VSCLASS_COMMANDMODULE                  = 'CommandModule';
+{$ENDIF}
+
+{$IFDEF HOOK_SearchBox}
+const
+  VSCLASS_SEARCHBOX                     = 'SearchBoxCompositedSearchBox::SearchBox';
+{$ENDIF}
+
+{$IFDEF HOOK_AddressBand}
+const
+  VSCLASS_ADDRESSBAND                   = 'AddressBand';
 {$ENDIF}
 
 var
@@ -306,12 +329,11 @@ begin
 //
 //    if (LThemeClass<>'')  then
 //    begin
-//      //if SameText(LThemeClass, VSCLASS_MENU) then
-//        OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain  class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])))
+//        OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
 //    end
 //    else
 //      OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
-
+//
 
     ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
     LHWND := THThemesHWND.Items[hTheme];
@@ -319,52 +341,506 @@ begin
     VCLStylesLock.Leave;
   end;
 
-   {$IFDEF HOOK_PopMenu}
+   {$IFDEF HOOK_ToolBar}
+   if SameText(LThemeClass, VSCLASS_TOOLBAR) then
+   begin
+             case iPartId of
+               TP_BUTTON :
+                                       begin
+                                          case iStateId of
+
+                                           TS_NORMAL :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonNormal), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_HOT :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonHot), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_PRESSED :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonPressed), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_NEARHOT :
+                                                       begin
+                                                         //DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonNearHot), pRect);
+                                                         //DrawStyleFillRect(hdc, pRect, clRed);
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonHot), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+                                          end;
+                                       end;
+
+               TP_SPLITBUTTON :
+                                       begin
+                                          case iStateId of
+
+                                           TS_NORMAL :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonNormal), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_HOT :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonHot), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_PRESSED :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonPressed), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+
+                                           TS_NEARHOT :
+                                                       begin
+                                                         //DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonNearHot), pRect);
+                                                         //DrawStyleFillRect(hdc, pRect, clRed);
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonHot), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_OTHERSIDEHOT :
+                                                       begin
+                                                         //DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonOtherSideHot), pRect);
+                                                         //DrawStyleFillRect(hdc, pRect, clBlue);
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonHot), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                          end;
+                                       end;
+               TP_SPLITBUTTONDROPDOWN :
+                                       begin
+                                          case iStateId of
+
+                                           TS_NORMAL :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_HOT :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownHot), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_PRESSED :
+                                                       begin
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownPressed), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+
+                                           TS_OTHERSIDEHOT :
+                                                       begin
+                                                         //DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownOtherSideHot), pRect);
+                                                         DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownHot), pRect);
+                                                         Exit(S_OK);
+                                                       end;
+                                          end;
+                                       end;
+
+
+
+             end;
+      //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+   end
+   else
+   {$ENDIF}
+   {$IFDEF HOOK_AddressBand}
+   if SameText(LThemeClass, VSCLASS_ADDRESSBAND) then
+   begin
+             case iPartId of
+                  //address bar control
+                    1 :
+                          begin
+                             case iStateId of
+                              //normal
+                              1:
+                                   begin
+                                       DrawStyleElement(hdc, StyleServices.GetElementDetails(teEditBorderNoScrollNormal), pRect);
+                                       Exit(S_OK);
+                                   end;
+                              //hot
+                              2:
+                                   begin
+                                       DrawStyleElement(hdc, StyleServices.GetElementDetails(teEditBorderNoScrollHot), pRect);
+                                       Exit(S_OK);
+                                   end;
+                              //editing
+                              4:
+                                   begin
+                                       DrawStyleElement(hdc, StyleServices.GetElementDetails(teEditBorderNoScrollFocused), pRect);
+                                       Exit(S_OK);
+                                   end;
+
+                             end;
+
+                          end;
+             end;
+
+      //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+   end
+   else
+   {$ENDIF}
+   {$IFDEF HOOK_SearchBox}
+   if SameText(LThemeClass, VSCLASS_SEARCHBOX) then  //OK
+   begin
+             case iPartId of
+                  //searchbox control
+                    1 :
+                          begin
+                             case iStateId of
+                              //normal
+                              1:
+                                   begin
+                                       DrawStyleElement(hdc, StyleServices.GetElementDetails(teEditBorderNoScrollNormal), pRect);
+                                       Exit(S_OK);
+                                   end;
+                              //hot
+                              2:
+                                   begin
+                                       DrawStyleElement(hdc, StyleServices.GetElementDetails(teEditBorderNoScrollHot), pRect);
+                                       Exit(S_OK);
+                                   end;
+                              //editing
+                              4:
+                                   begin
+                                       DrawStyleElement(hdc, StyleServices.GetElementDetails(teEditBorderNoScrollFocused), pRect);
+                                       Exit(S_OK);
+                                   end;
+
+                             end;
+
+                          end;
+             end;
+
+      //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+   end
+   else
+   {$ENDIF}
+   {$IFDEF HOOK_CommandModule}
+   if  SameText(LThemeClass, VSCLASS_COMMANDMODULE) then
+   begin
+
+      case iPartId of
+                      //Top Bar
+                      1 :
+                          begin
+                             case iStateId of
+                              0:
+                                   begin
+                                        DrawStyleElement(hdc, StyleServices.GetElementDetails(tcpThemedHeader), pRect);
+                                        Exit(S_OK);
+                                   end;
+
+                             end;
+
+                          end;
+
+                      //Buttons background
+                      3 :
+                          begin
+                             case iStateId of
+                              //normal
+                              1:
+                                   begin
+                                      DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                                      Exit(S_OK);
+                                   end;
+                              //Hot
+                              2:
+                                   begin
+
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      Exit(S_OK);
+                                   end;
+
+                              //pressed
+                              3:
+                                   begin
+                                      //awStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      Exit(S_OK);
+                                   end;
+
+                              //focused
+                              4:
+                                   begin
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                                      Exit(S_OK);
+                                   end;
+                             end;
+
+                          end;
+
+                      //button with dropdown
+                      4 :
+                          begin
+                             case iStateId of
+                              //normal
+                              1:
+                                   begin
+                                      DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+                              //hot
+                              2:
+                                   begin
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      //awStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+                              //pressed
+                              3:
+                                   begin
+                                     LColor:=StyleServices.GetSystemColor(clHighlight);
+                                     AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+
+                                   //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+                              //focused
+                              4:
+                                   begin
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+
+                              5: // hot arrow button
+                                   begin
+                                     LColor:=StyleServices.GetSystemColor(clHighlight);
+                                     AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                    //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                                      Exit(S_OK);
+                                   end;
+                             end;
+
+
+                          end;
+
+                      //narrow button with dropdown - background
+                      5 :
+                          begin
+                             case iStateId of
+                              //normal
+                              1:
+                                   begin
+                                      DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                                      Exit(S_OK);
+                                   end;
+                              //hot on arrow
+                              2:
+                                   begin
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      Exit(S_OK);
+                                   end;
+
+                              //pressed arrow (button down)
+                              3:
+                                   begin
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      Exit(S_OK);
+                                   end;
+
+                              //selected
+                              4:
+                                   begin
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                                      Exit(S_OK);
+                                   end;
+
+                              //hot on button
+                              5:
+                                   begin
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+                             end;
+
+                          end;
+
+                      //dropdown arrow
+                      6 :
+                          begin
+                             case iStateId of
+                              0:
+                                   begin
+                                      LRect:=pRect;
+                                      LRect.Left  := LRect.Left  + 5;
+                                      LRect.Width := LRect.Width + 5;
+                                      DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                                      Exit(S_OK);
+                                   end;
+
+                              //down arrow normal
+                              1:
+                                   begin
+                                      LRect:=pRect;
+                                      LRect.Left  := LRect.Left  + 2;
+                                      LRect.Width := LRect.Width + 2;
+                                      DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                                      Exit(S_OK);
+                                   end;
+                             end;
+
+                          end;
+
+
+                      8 ://arrow button - Top Bar of listview
+                          begin
+                             case iStateId of
+                              //normal
+                              1:
+                                   begin
+                                      LRect:=pRect;
+                                      LRect.Left  := LRect.Left  + 5;
+                                      LRect.Width := LRect.Width + 5;
+                                      DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                                      Exit(S_OK);
+                                   end;
+                              //hot
+                              2:
+                                   begin
+                                      LRect:=pRect;
+                                      LRect.Left  := LRect.Left  + 5;
+                                      LRect.Width := LRect.Width + 5;
+                                      DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                                      Exit(S_OK);
+                                   end;
+                             end;
+
+                          end;
+
+                      9 : //button -Top Bar of listview
+                          begin
+
+                             case iStateId of
+                              //normal
+                              1:
+                                   begin
+                                      DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+                              //hot
+                              2:
+                                   begin
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+                              3: //pressed arrow (button down)
+                                   begin
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+                              //selected
+                              4:
+                                   begin
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                                      Exit(S_OK);
+                                   end;
+
+
+                              //hot on button
+                              5:
+                                   begin
+                                      LColor:=StyleServices.GetSystemColor(clHighlight);
+                                      AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                                      //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
+                                      Exit(S_OK);
+                                   end;
+                             end;
+
+                          end;
+
+
+                      //Top Bar of listview - background  solid color
+                      11 :
+                          begin
+                             case iStateId of
+                              0:
+                                   begin
+                                      LDetails:=StyleServices.GetElementDetails(tpPanelBackground);
+                                      StyleServices.GetElementColor(LDetails, ecFillColor, LColor);
+                                      DrawStyleFillRect(hdc, pRect, LColor);
+                                      Exit(S_OK);
+                                   end;
+                             end;
+
+                          end;
+
+                      //Top Bar of listview - backgroundimage
+                      12 :
+                          begin
+                             case iStateId of
+                              0:
+                                   begin
+                                      LDetails:=StyleServices.GetElementDetails(tpPanelBackground);
+                                      StyleServices.GetElementColor(LDetails, ecFillColor, LColor);
+                                      DrawStyleFillRect(hdc, pRect, LColor);
+                                      Exit(S_OK);
+                                   end;
+                             end;
+
+
+                          end;
+
+      end;
+   end
+   else
+   {$ENDIF}
+   {$IFDEF HOOK_Menu}
    if  SameText(LThemeClass, VSCLASS_MENU) then
    begin
       case iPartId of
 
-         MENU_POPUPBORDERS       :
+         MENU_POPUPBORDERS   :
                                  begin
-                                    LDetails:=StyleServices.GetElementDetails(tmPopupBorders);
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBorders), pRect);
                                     Exit(S_OK);
                                  end;
-
-
-         MENU_POPUPGUTTER       :
-                                 begin
-                                    LDetails:=StyleServices.GetElementDetails(tmPopupGutter);
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-                                    Exit(S_OK);
-                                 end;
-
-         MENU_POPUPBACKGROUND :
-                                 begin
-                                    LDetails:=StyleServices.GetElementDetails(tmPopupBackground);
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-
-
-                                    //OutputDebugString2(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d pRect.Le/ft %d pRect.Top %d pRect.Width %d pRect.Height %d',
-                                    //[THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId, pRect.Left, pRect.Top, pRect.Width, pRect.Height]));
-                                    Exit(S_OK);
-                                 end;
-
 
          MENU_POPUPITEM      :
                                  begin
@@ -377,28 +853,10 @@ begin
                                       //MPI_DISABLEDPUSHED : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed);
                                     end;
 
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
+                                    DrawStyleElement(hdc, LDetails, pRect);
                                     Exit(S_OK);
                                  end;
-       else
-       begin
-          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
-          //OutputDebugString2(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId]));
-          Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
-       end;
-      end;
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Menu}
-   if  SameText(LThemeClass, VSCLASS_MENU) then
-   begin
-      case iPartId of
+
          MENU_BARBACKGROUND :
                                  begin
                                     case iStateId of
@@ -408,16 +866,7 @@ begin
                                       Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
                                     end;
 
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-
-
-                                    //OutputDebugString2(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d pRect.Le/ft %d pRect.Top %d pRect.Width %d pRect.Height %d',
-                                    //[THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId, pRect.Left, pRect.Top, pRect.Width, pRect.Height]));
+                                    DrawStyleElement(hdc, LDetails, pRect);
                                     Exit(S_OK);
                                  end;
 
@@ -432,18 +881,33 @@ begin
                                       MBI_DISABLEDPUSHED : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed);
                                     end;
 
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
+                                    DrawStyleElement(hdc, LDetails, pRect);
+                                    Exit(S_OK);
+                                 end;
+
+
+        MENU_POPUPSEPARATOR   :
+
+                                 begin
+                                   DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupSeparator), pRect);
+                                   //DrawStyleFillRect(hdc, pRect, clRed);
+                                   Exit(S_OK);
+                                 end;
+
+         MENU_POPUPGUTTER       :
+                                 begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupGutter), pRect);
+                                    Exit(S_OK);
+                                 end;
+
+         MENU_POPUPBACKGROUND :
+                                 begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
                                     Exit(S_OK);
                                  end;
        else
        begin
-          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
-          //OutputDebugString2(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId]));
+          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
           Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
        end;
       end;
@@ -456,26 +920,14 @@ begin
       case iPartId of
         RP_BAND       :
                         begin
-                                LDetails:=StyleServices.GetElementDetails(trBand);
-                                SaveIndex := SaveDC(hdc);
-                                try
-                                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                finally
-                                  RestoreDC(hdc, SaveIndex);
-                                end;
-                                Result:=S_OK;
+                                DrawStyleElement(hdc, StyleServices.GetElementDetails(trBand), pRect);
+                                Exit(S_OK);
                         end;
 
         RP_BACKGROUND :
                         begin
-                                LDetails:=StyleServices.GetElementDetails(trBackground);
-                                SaveIndex := SaveDC(hdc);
-                                try
-                                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                finally
-                                  RestoreDC(hdc, SaveIndex);
-                                end;
-                                Result:=S_OK;
+                                DrawStyleElement(hdc, StyleServices.GetElementDetails(trBackground), pRect);
+                                Exit(S_OK);
                         end
       else
           begin
@@ -491,6 +943,8 @@ begin
    if  SameText(LThemeClass, VSCLASS_EDIT) then
    begin
       case iPartId of
+
+         EP_BACKGROUNDWITHBORDER,
          EP_EDITBORDER_NOSCROLL :
                                  begin
                                     case iStateId of
@@ -500,13 +954,8 @@ begin
                                       EPSN_DISABLED :LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
                                     end;
 
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-                                    Result:=S_OK;
+                                   DrawStyleElement(hdc, LDetails, pRect);
+                                   Exit(S_OK);
                                  end;
 
          EP_EDITBORDER_HSCROLL :
@@ -518,13 +967,8 @@ begin
                                       EPSH_DISABLED :LDetails:=StyleServices.GetElementDetails(teEditBorderHScrollDisabled);
                                     end;
 
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-                                    Result:=S_OK;
+                                   DrawStyleElement(hdc, LDetails, pRect);
+                                   Exit(S_OK);
                                  end;
 
          EP_EDITBORDER_VSCROLL :
@@ -536,13 +980,8 @@ begin
                                       EPSV_DISABLED :LDetails:=StyleServices.GetElementDetails(teEditBorderVScrollDisabled);
                                     end;
 
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-                                    Result:=S_OK;
+                                   DrawStyleElement(hdc, LDetails, pRect);
+                                   Exit(S_OK);
                                  end;
 
          EP_EDITBORDER_HVSCROLL :
@@ -554,19 +993,14 @@ begin
                                       EPSHV_DISABLED :LDetails:=StyleServices.GetElementDetails(teEditBorderHVScrollDisabled);
                                     end;
 
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-                                    Result:=S_OK;
+
+                                   DrawStyleElement(hdc, LDetails, pRect);
+                                   Exit(S_OK);
                                  end
 
        else
        begin
           //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
-          //OutputDebugString2(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId]));
           Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
        end;
       end;
@@ -579,22 +1013,15 @@ begin
       case iPartId of
        LBCP_BORDER_NOSCROLL :
                               begin
-                                      
-                                    case iStateId of
-                                      LBPSN_NORMAL   : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
-                                      LBPSN_FOCUSED  : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollFocused);
-                                      LBPSN_HOT      : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollHot);
-                                      LBPSN_DISABLED : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
-                                    end;
+                                  case iStateId of
+                                    LBPSN_NORMAL   : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
+                                    LBPSN_FOCUSED  : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollFocused);
+                                    LBPSN_HOT      : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollHot);
+                                    LBPSN_DISABLED : LDetails:=StyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
+                                  end;
 
-
-                                    SaveIndex := SaveDC(hdc);
-                                    try
-                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-                                    finally
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
-                                    Exit(S_OK);
+                                  DrawStyleElement(hdc, LDetails, pRect);
+                                  Exit(S_OK);
                               end;
       else
         begin
@@ -1602,13 +2029,7 @@ begin
                   RBS_CHECKEDDISABLED   : LDetails:=StyleServices.GetElementDetails(tbRadioButtonCheckedDisabled);
               end;
 
-              SaveIndex := SaveDC(hdc);
-              try
-                 StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-              finally
-                RestoreDC(hdc, SaveIndex);
-              end;
-
+              DrawStyleElement(hdc, LDetails, pRect);
               Exit(S_OK);
             end;
 
@@ -1638,12 +2059,7 @@ begin
                   CBS_EXCLUDEDDISABLED    : LDetails:=StyleServices.GetElementDetails(tbCheckBoxExcludedDisabled);
               end;
 
-              SaveIndex := SaveDC(hdc);
-              try
-                StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-              finally
-                RestoreDC(hdc, SaveIndex);
-              end;
+              DrawStyleElement(hdc, LDetails, pRect);
               Exit(S_OK);
             end
         else
@@ -1856,17 +2272,114 @@ begin
            Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
            //pColor:=clRed;
            //Result:=S_OK;
-           //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Theme Class %LThemeClass hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
           end;
          end;
       end
       else
       {$ENDIF}
+     {$IFDEF HOOK_TreeView}
+      if  SameText(LThemeClass, VSCLASS_TREEVIEW) then
+      begin
+
+        pColor:=clNone;
+//        case iPartId of
+//          0 :
+//              case iStateId  of
+//               0 :  pColor:= StyleServices.GetSystemColor(clHighlight);//OK
+//
+//              end;
+//
+//
+//          TVP_BRANCH :
+//              case iStateId  of
+//               0 :  pColor:= StyleServices.GetSystemColor(clHighlight);//OK
+//              end;
+//        end;
+
+       if pColor=clNone then
+       begin
+         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+       end
+       else
+         Result:=S_OK;
+
+      end
+      else
+     {$ENDIF}
+     {$IFDEF HOOK_ListView}
+      if  SameText(LThemeClass, VSCLASS_LISTVIEW) then
+      begin
+
+//        pColor:=clLime;
+//        case iPartId of
+//          //button with dropdown
+//          3 :
+//              case iStateId  of
+//               1 :  pColor:= StyleServices.GetSystemColor(clHighlight);//OK
+//               6 :  pColor:= clYellow;//StyleServices.GetSystemColor(clBtnShadow);
+//              end;
+//         9 :
+//              case iStateId  of
+//               1 :  pColor:= StyleServices.GetSystemColor(clBtnText);
+//               //Highlight
+//               2 :  pColor:= StyleServices.GetSystemColor(clBtnText); //OK
+//               3 :  pColor:= StyleServices.GetSystemColor(clBtnText); //OK
+//               6 :  pColor:= clLime;//StyleServices.GetSystemColor(clBtnShadow);
+//              end;
+//          10 :
+//              case iStateId  of
+//               1 :  pColor:= StyleServices.GetSystemColor(clHighlight);
+//              end;
+//        end;
+       Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+       //Result:=S_OK;
+//       if pColor=clLime then
+//         OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+      end
+      else
+     {$ENDIF}
+     {$IFDEF HOOK_CommandModule}
+      if  SameText(LThemeClass, VSCLASS_COMMANDMODULE) then
+      begin
+
+        pColor:=clNone;
+        case iPartId of
+
+          //button with dropdown
+          3 :
+              case iStateId  of
+               1 :  pColor:= StyleServices.GetSystemColor(clHighlight);//OK
+               6 :  pColor:= clYellow;//StyleServices.GetSystemColor(clBtnShadow);
+              end;
+
+         9 :
+              case iStateId  of
+               1 :  pColor:= StyleServices.GetSystemColor(clBtnText);
+               //Highlight
+               2 :  pColor:= StyleServices.GetSystemColor(clBtnText); //OK
+               3 :  pColor:= StyleServices.GetSystemColor(clBtnText); //OK
+               6 :  pColor:= clLime;//StyleServices.GetSystemColor(clBtnShadow);
+              end;
+
+          10 :
+              case iStateId  of
+               1 :  pColor:= StyleServices.GetSystemColor(clHighlight);
+              end;
+        end;
+
+       Result:=S_OK;
+       //if pColor=clNone then
+         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+      end
+      else
+     {$ENDIF}
       begin
        Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-       //pColor:=clGreen;
+      // pColor:=clRed;
        //Result:=S_OK;
-       //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
+       //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
       end;
     end
     else
@@ -1877,6 +2390,9 @@ begin
      //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
      //OutputDebugString2(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor]));
     end;
+
+//    if pColor=7104329 then
+//      OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 end;
 
 
@@ -1913,7 +2429,9 @@ begin
      LThemeClass:=THThemesClasses.Items[hTheme];
      ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
      //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s %s', [hTheme, iPartId, iStateId, pszText, LThemeClass])));
-     OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d class %s iPartId %d iStateId %d  text %s', [hTheme, LThemeClass, iPartId, iStateId, pszText])));
+
+//     if Pos('Details', pszText)>0 then
+//       OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d class %s iPartId %d iStateId %d  text %s', [hTheme, LThemeClass, iPartId, iStateId, pszText])));
    finally
      VCLStylesLock.Leave;
    end;
@@ -1921,7 +2439,66 @@ begin
    if LThemeClass<>'' then
    begin
 
-     {$IFDEF HOOK_PopMenu}
+     {$IFDEF HOOK_ToolBar}
+     if SameText(LThemeClass, VSCLASS_TOOLBAR) then //OK
+     begin
+       case iPartId of
+          0  :
+                          begin
+                            case iStateId of
+                              TS_NORMAL    :
+                                            begin
+                                               ThemeTextColor:=StyleServices.GetSystemColor(clBtnText);
+                                               LDetails:=StyleServices.GetElementDetails(ttbButtonNormal);
+                                            end;
+
+                              TS_HOT    :
+                                            begin
+                                               ThemeTextColor:=StyleServices.GetSystemColor(clHighlight);
+                                               LDetails:=StyleServices.GetElementDetails(ttbButtonHot);
+                                            end;
+
+                              TS_PRESSED    :
+                                            begin
+                                               ThemeTextColor:=StyleServices.GetSystemColor(clHighlight);
+                                               LDetails:=StyleServices.GetElementDetails(ttbButtonPressed);
+                                            end;
+
+                              TS_NEARHOT    :
+                                            begin
+                                               ThemeTextColor:=StyleServices.GetSystemColor(clBtnText);
+                                               LDetails:=StyleServices.GetElementDetails(ttbButtonHot);
+                                            end;
+
+                              TS_OTHERSIDEHOT    :
+                                            begin
+                                               ThemeTextColor:=StyleServices.GetSystemColor(clHighlight);
+                                               LDetails:=StyleServices.GetElementDetails(ttbButtonHot);
+                                            end;
+
+//                            else
+//                                OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+                            end;
+
+                            LRect:=pRect;
+                            StyleServices.DrawText(hdc, LDetails, string(pszText), LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+                            Exit(S_OK);
+                          end;
+       else
+           Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+       end;
+     end
+     else
+     {$ENDIF}
+     {$IFDEF HOOK_CommandModule}
+     if  SameText(LThemeClass, VSCLASS_COMMANDMODULE) then
+     begin
+        //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+        Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+     end
+     else
+     {$ENDIF}
+     {$IFDEF HOOK_Menu}
      if  SameText(LThemeClass, VSCLASS_MENU) then
      begin
         case iPartId of
@@ -1960,23 +2537,10 @@ begin
                                        RestoreDC(hdc, SaveIndex);
                                      end;
                                    end;
-         else
-         begin
-            OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-            Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
-         end;
-        end;
-     end
-     else
-     {$ENDIF}
-     {$IFDEF HOOK_Menu}
-     if  SameText(LThemeClass, VSCLASS_MENU) then
-     begin
-        case iPartId of
 
            MENU_BARITEM      :
                                    begin
-                                    // SaveIndex := SaveDC(hdc);
+                                     SaveIndex := SaveDC(hdc);
                                      try
                                       case iStateId of
                                         MBI_NORMAL         : LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
@@ -1991,7 +2555,7 @@ begin
                                       StyleServices.DrawText(hdc, LDetails, string(pszText), LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
                                       Exit(S_OK);
                                      finally
-                                      // RestoreDC(hdc, SaveIndex);
+                                       RestoreDC(hdc, SaveIndex);
                                      end;
                                    end;
          else
@@ -2238,7 +2802,6 @@ var
   plf: LOGFONTW;
 begin
 
- //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
  //Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
  VCLStylesLock.Enter;
  try
@@ -2250,8 +2813,51 @@ begin
    VCLStylesLock.Leave;
  end;
 
+//  if SameText(pszText, 'Details') then
+//   OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+
+
  if LThemeClass<>'' then
  begin
+     {$IFDEF HOOK_EDIT}
+     if  SameText(LThemeClass, VSCLASS_EDIT) then  //TODO
+     begin
+        ThemeTextColor := clNone;
+
+        case iPartId of
+              0 :
+                   case  iStateId of
+                       0 :
+                           begin
+                             ThemeTextColor:=clRed;//StyleServices.GetSystemColor(clWindowText);
+                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
+                           end;
+                   end;
+
+
+            EP_EDITTEXT :
+                   case  iStateId of
+                       ETS_DISABLED :
+                           begin
+                             ThemeTextColor:=clBlue;//StyleServices.GetSystemColor(clWindowText);
+                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
+                           end;
+                   end;
+
+
+        end;
+
+        if ThemeTextColor<>clNone then
+        begin
+           StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+           Exit(S_OK);
+        end
+        else
+         Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+
+     end
+     else
+     {$ENDIF}
      {$IFDEF HOOK_PopMenu}
      if  SameText(LThemeClass, VSCLASS_MENU) then
      begin
@@ -2261,6 +2867,7 @@ begin
                                    begin
                                      SaveIndex := SaveDC(hdc);
                                      try
+
                                       case iStateId of
                                         MPI_NORMAL         : LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
                                         MPI_HOT            : LDetails:=StyleServices.GetElementDetails(tmPopupItemHot);

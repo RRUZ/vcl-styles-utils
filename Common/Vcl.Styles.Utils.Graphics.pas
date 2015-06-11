@@ -250,6 +250,7 @@ Type
 
   procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect);
   procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
+  procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
 
 implementation
 
@@ -264,6 +265,26 @@ type
   TRGBArray32 = array[0..0] of TRGBQuad;
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
+
+
+procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
+var
+ SaveIndex : Integer;
+ LCanvas : TCanvas;
+begin
+  LCanvas:=TCanvas.Create;
+  SaveIndex := SaveDC(hdc);
+  try
+    LCanvas.Handle:=hdc;
+    LCanvas.Brush.Color:=AColor;
+    //LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+    LCanvas.FillRect(LRect);
+  finally
+    LCanvas.Handle:=0;
+    LCanvas.Free;
+    RestoreDC(hdc, SaveIndex);
+  end;
+end;
 
 
 procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
