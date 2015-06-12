@@ -1224,7 +1224,7 @@ begin
                                       HIS_SORTEDNORMAL   : LDetails:=StyleServices.GetElementDetails(thHeaderItemNormal);
                                       HIS_SORTEDHOT      : LDetails:=StyleServices.GetElementDetails(thHeaderItemHot);
                                       HIS_SORTEDPRESSED  : LDetails:=StyleServices.GetElementDetails(thHeaderItemPressed);
-                                      
+
                                       HIS_ICONNORMAL   : LDetails:=StyleServices.GetElementDetails(thHeaderItemNormal);
                                       HIS_ICONHOT      : LDetails:=StyleServices.GetElementDetails(thHeaderItemHot);
                                       HIS_ICONPRESSED  : LDetails:=StyleServices.GetElementDetails(thHeaderItemPressed);
@@ -1248,44 +1248,49 @@ begin
                                   Exit(S_OK);
                               end;   
 
-//          HP_HEADERSORTARROW :
-//                              begin
+          HP_HEADERSORTARROW :
+                              begin
 //                                  case iStateId of
 //                                      HSAS_SORTEDUP    : LDetails:=StyleServices.GetElementDetails(thHeaderSortArrowSortedUp);
 //                                      HSAS_SORTEDDOWN  : LDetails:=StyleServices.GetElementDetails(thHeaderSortArrowSortedDown);
 //                                  end;
-//
-//                                  SaveIndex := SaveDC(hdc);
-//                                  try
-//                                     if THThemesHWND.ContainsKey(hTheme)  then
-//                                       DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
-//                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-//                                  finally
-//                                    RestoreDC(hdc, SaveIndex);
-//                                  end;
-//
-//                                  Exit(S_OK);
-//                              end;
-//
-//         HP_HEADERDROPDOWN   :
-//                              begin
-//                                  case iStateId of
-//                                      HDDS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tcDropDownButtonNormal); //thHeaderDropDownNormal
-//                                      HDDS_SOFTHOT  : LDetails:=StyleServices.GetElementDetails(tcDropDownButtonHot); //thHeaderDropDownSoftHot
-//                                      HDDS_HOT      : LDetails:=StyleServices.GetElementDetails(tcDropDownButtonHot);  //thHeaderDropDownHot
-//                                  end;
-//
-//                                  SaveIndex := SaveDC(hdc);
-//                                  try
-//                                     if THThemesHWND.ContainsKey(hTheme)  then
-//                                       DrawParentBackground(THThemesHWND.Items[hTheme], hdc, pRect);
-//                                     StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-//                                  finally
-//                                    RestoreDC(hdc, SaveIndex);
-//                                  end;
-//
-//                                  Exit(S_OK);
-//                              end;
+
+                                  SaveIndex := SaveDC(hdc);
+                                  LCanvas:=TCanvas.Create;
+                                  try
+                                    LCanvas.Handle:=hdc;
+                                    LStartColor:= StyleServices.GetSystemColor(clHighlight);
+
+                                    LCanvas.Pen.Color:=LStartColor;
+                                    LCanvas.Brush.Style:=bsClear;
+
+                                    LRect:= pRect;
+                                    LRect.Top :=  LRect.Top + 3;
+
+                                    if (iStateId=HSAS_SORTEDUP) then
+                                      DrawArrow(LCanvas, TScrollDirection.sdUp, LRect.Location, 3)
+                                    else
+                                      DrawArrow(LCanvas, TScrollDirection.sdDown, LRect.Location, 3);
+                                  finally
+                                    LCanvas.Handle:=0;
+                                    LCanvas.Free;
+                                    RestoreDC(hdc, SaveIndex);
+                                  end;
+
+                                  Exit(S_OK);
+                              end;
+
+         HP_HEADERDROPDOWN   :
+                              begin
+                                  case iStateId of
+                                      HDDS_NORMAL   : LDetails:=StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal); //tcDropDownButtonNormal, thHeaderDropDownNormal
+                                      HDDS_SOFTHOT  : LDetails:=StyleServices.GetElementDetails(ttbSplitButtonDropDownHot); //tcDropDownButtonHot, thHeaderDropDownSoftHot
+                                      HDDS_HOT      : LDetails:=StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);  //tcDropDownButtonHot, thHeaderDropDownHot
+                                  end;
+
+                                  DrawStyleElement(hdc, LDetails, pRect);
+                                  Exit(S_OK);
+                              end;
 
         else
            begin
@@ -2203,65 +2208,106 @@ begin
     case iPartId of
       TVP_GLYPH  :
                    begin
-                     case iStateId of
-                       GLPS_CLOSED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphClosed);
-                       GLPS_OPENED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphOpened);
-                     end;
+//                     case iStateId of
+//                       GLPS_CLOSED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphClosed);
+//                       GLPS_OPENED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphOpened);
+//                     end;
 
-                     LBuffer:=TBitmap.Create;
-                     try
-                       LSize.cx:=11;
-                       LSize.cy:=11;
-                       LRect := Rect(0, 0, LSize.Width, LSize.Height);
-                       LBuffer.SetSize(LRect.Width, LRect.Height);
-                       StyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
-                       BitBlt(hdc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
-                     finally
-                       LBuffer.Free;
-                     end;
+//                     LBuffer:=TBitmap.Create;
+//                     try
+//                       LSize.cx:=11;
+//                       LSize.cy:=11;
+//                       LRect := Rect(0, 0, LSize.Width, LSize.Height);
+//                       LBuffer.SetSize(LRect.Width, LRect.Height);
+//
+//                       LBuffer.Canvas.Brush.Color:=StyleServices.GetSystemColor(clWindow);
+//                       LBuffer.Canvas.FillRect(LRect);
+//
+////                       if LHWND<>0  then
+////                         DrawParentBackground(LHWND, LBuffer.Canvas.Handle, LRect);
+//
+//
+//                       StyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+//                       BitBlt(hdc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+//                     finally
+//                       LBuffer.Free;
+//                     end;
+
+                      SaveIndex := SaveDC(hdc);
+                      LCanvas:=TCanvas.Create;
+                      try
+                        LCanvas.Handle:=hdc;
+                        LStartColor:= StyleServices.GetSystemColor(clWindowText);
+
+                        LCanvas.Pen.Color:=LStartColor;
+                        LCanvas.Brush.Style:=bsClear;
+
+                        LRect:= pRect;
+                        LRect.Top :=  LRect.Top + 5;
+
+                        if (iStateId=GLPS_OPENED) or (iStateId=HGLPS_OPENED) then
+                          DrawArrow(LCanvas, TScrollDirection.sdDown, LRect.Location, 3)
+                        else
+                          DrawArrow(LCanvas, TScrollDirection.sdRight, LRect.Location, 3);
+                      finally
+                        LCanvas.Handle:=0;
+                        LCanvas.Free;
+                        RestoreDC(hdc, SaveIndex);
+                      end;
+
+
                      Exit(S_OK);
                    end;
 
 
       TVP_HOTGLYPH :
                    begin
-                     case iStateId of
-                       HGLPS_CLOSED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphClosed);
-                       HGLPS_OPENED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphOpened);
-                     end;
+//                     case iStateId of
+//                       HGLPS_CLOSED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphClosed);
+//                       HGLPS_OPENED : LDetails := StyleServices.GetElementDetails(tcbCategoryGlyphOpened);
+//                     end;
+//
+//                     LBuffer:=TBitmap.Create;
+//                     try
+//                       LSize.cx:=11;
+//                       LSize.cy:=11;
+//                       LRect := Rect(0, 0, LSize.Width, LSize.Height);
+//                       LBuffer.SetSize(LRect.Width, LRect.Height);
+//
+//                       LBuffer.Canvas.Brush.Color:=StyleServices.GetSystemColor(clWindow);
+//                       LBuffer.Canvas.FillRect(LRect);
+//
+//                       StyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
+//                       BitBlt(hdc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
+//                     finally
+//                       LBuffer.Free;
+//                     end;
 
-                     LBuffer:=TBitmap.Create;
-                     try
-                       LSize.cx:=11;
-                       LSize.cy:=11;
-                       LRect := Rect(0, 0, LSize.Width, LSize.Height);
-                       LBuffer.SetSize(LRect.Width, LRect.Height);
-                       StyleServices.DrawElement(LBuffer.Canvas.Handle, LDetails, LRect);
-                       BitBlt(hdc, pRect.Left, pRect.Top, LRect.Width, LRect.Height, LBuffer.Canvas.Handle, 0, 0, SRCCOPY);
-                     finally
-                       LBuffer.Free;
-                     end;
+                      SaveIndex := SaveDC(hdc);
+                      LCanvas:=TCanvas.Create;
+                      try
+                        LCanvas.Handle:=hdc;
+                        LStartColor:= StyleServices.GetSystemColor(clHighlightText);
+
+                        LCanvas.Pen.Color:=LStartColor;
+                        LCanvas.Brush.Style:=bsClear;
+
+                        LRect:= pRect;
+                        LRect.Top :=  LRect.Top + 5;
+
+                        if (iStateId=HGLPS_OPENED) then
+                          DrawArrow(LCanvas, TScrollDirection.sdDown, LRect.Location, 3)
+                        else
+                          DrawArrow(LCanvas, TScrollDirection.sdRight, LRect.Location, 3);
+                      finally
+                        LCanvas.Handle:=0;
+                        LCanvas.Free;
+                        RestoreDC(hdc, SaveIndex);
+                      end;
+
                      Exit(S_OK);
                    end;
 
-//                                  SaveIndex := SaveDC(hdc);
-//                                  LCanvas:=TCanvas.Create;
-//                                  try
-//                                    LCanvas.Handle:=hdc;
-//                                    LStartColor:= StyleServices.GetSystemColor(clWindowText);
-//
-//                                    LCanvas.Pen.Color:=LStartColor;
-//                                    LCanvas.Brush.Style:=bsClear;
-//                                    if (iStateId=GLPS_OPENED) or (iStateId=HGLPS_OPENED) then
-//                                      DrawArrow(LCanvas, TScrollDirection.sdDown, pRect.Location, 3)
-//                                    else
-//                                      DrawArrow(LCanvas, TScrollDirection.sdRight, pRect.Location, 3);
-//                                  finally
-//                                    LCanvas.Handle:=0;
-//                                    LCanvas.Free;
-//                                    RestoreDC(hdc, SaveIndex);
-//                                  end;
-//                                  Result:=S_OK;
 
 
 
@@ -2374,9 +2420,9 @@ begin
 
       //if SameText('PROPERTREE', LThemeClass)   then
       //begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-         if pColor=$323338 then
-           OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+//         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+//         if pColor=8020044 then
+//           OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
      //    pColor:=StyleServices.GetSystemColor(clWindow);
      //    Exit(S_OK);
      // end;
@@ -2384,8 +2430,30 @@ begin
 
     //Exit(TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
 //              TMT_HEADING1TEXTCOLOR
-//                      dd
 
+    {$IFDEF HOOK_ListView}
+    if (SameText(LThemeClass, VSCLASS_HEADER) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_HEADER)) then
+    begin
+        pColor:=clNone;
+        case iPartId of
+
+          HP_HEADERITEM :
+              case iStateId  of
+               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+              end;
+
+        end;
+
+       if pColor=clNone then
+       begin
+         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+       end
+       else
+         Result:=S_OK;
+    end
+    else
+    {$ENDIF}
     if LThemeClass<>'' then
     begin
       if  SameText(LThemeClass, VSCLASS_PREVIEWPANE) then
@@ -2495,7 +2563,6 @@ begin
                                0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindow));
                               end;
 
-
           LVP_LISTSORTEDDETAIL :
                               case iStateId  of
                                1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
@@ -2504,7 +2571,7 @@ begin
 
           LVP_EMPTYTEXT :
                               case iStateId  of
-                               0 :  pColor:= ColorToRGB(clRed);//StyleServices.GetSystemColor(clWindowText);
+                               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
                               end;
 
           LVP_GROUPHEADER :
@@ -2516,7 +2583,7 @@ begin
        //Result:=S_OK;
        if pColor=clNone then
        begin
-         OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
        end
        else
@@ -3008,43 +3075,43 @@ begin
  if LThemeClass<>'' then
  begin
      {$IFDEF HOOK_EDIT}
-     if  SameText(LThemeClass, VSCLASS_EDIT) then  //TODO
-     begin
-        ThemeTextColor := clNone;
-
-        case iPartId of
-              0 :
-                   case  iStateId of
-                       0 :
-                           begin
-                             ThemeTextColor:=clRed;//StyleServices.GetSystemColor(clWindowText);
-                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
-                           end;
-                   end;
-
-
-            EP_EDITTEXT :
-                   case  iStateId of
-                       ETS_DISABLED :
-                           begin
-                             ThemeTextColor:=clBlue;//StyleServices.GetSystemColor(clWindowText);
-                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
-                           end;
-                   end;
-
-
-        end;
-
-        if ThemeTextColor<>clNone then
-        begin
-           StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
-           Exit(S_OK);
-        end
-        else
-         Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
-
-     end
-     else
+//     if  SameText(LThemeClass, VSCLASS_EDIT) then  //TODO
+//     begin
+//        ThemeTextColor := clNone;
+//
+//        case iPartId of
+//              0 :
+//                   case  iStateId of
+//                       0 :
+//                           begin
+//                             ThemeTextColor:=clRed;//StyleServices.GetSystemColor(clWindowText);
+//                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
+//                           end;
+//                   end;
+//
+//
+//            EP_EDITTEXT :
+//                   case  iStateId of
+//                       ETS_DISABLED :
+//                           begin
+//                             ThemeTextColor:=clBlue;//StyleServices.GetSystemColor(clWindowText);
+//                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
+//                           end;
+//                   end;
+//
+//
+//        end;
+//
+//        if ThemeTextColor<>clNone then
+//        begin
+//           StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+//           Exit(S_OK);
+//        end
+//        else
+//         Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+//
+//     end
+//     else
      {$ENDIF}
      {$IFDEF HOOK_PopMenu}
      if  SameText(LThemeClass, VSCLASS_MENU) then
