@@ -24,11 +24,21 @@ unit Vcl.Styles.Hooks;
 
 interface
 
+uses
+  WinApi.Windows;
+
+var
+
+  TrampolineGetSysColorBrush: function(nIndex: Integer): HBRUSH; stdcall;
+  TrampolineGetSysColor: function(nIndex: Integer): DWORD; stdcall;
+
+
 implementation
 
 {$DEFINE HOOK_UXTHEME}
 {$DEFINE HOOK_TDateTimePicker}
 {$DEFINE HOOK_TProgressBar}
+
 
 uses
   DDetours,
@@ -39,7 +49,6 @@ uses
   System.Classes,
   System.Generics.Collections,
   System.StrUtils,
-  WinApi.Windows,
   WinApi.Messages,
   Vcl.Graphics,
 {$IFDEF HOOK_UXTHEME}
@@ -59,9 +68,6 @@ var
   VCLStylesBrush: TObjectDictionary<string, TListStyleBrush>;
   VCLStylesLock: TCriticalSection = nil;
   LSetStylePtr: TSetStyle;
-
-  TrampolineGetSysColorBrush: function(nIndex: Integer): HBRUSH; stdcall;
-  TrampolineGetSysColor: function(nIndex: Integer): DWORD; stdcall;
   TrampolineFillRect: function(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
   TrampolineDrawEdge: function(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;
 stdcall = nil;

@@ -25,6 +25,17 @@ interface
 
 implementation
 
+{
+   W8  Check Color text disabled on listview hot item
+   Test on W10
+   Test Task Dialogs
+   fix preview windows background color when no elements are shown
+   fix background of homegroup folder (and related)
+}
+
+
+
+
 {$DEFINE HOOK_Button}
 {$DEFINE HOOK_Scrollbar}
 {$DEFINE HOOK_TaskDialog}
@@ -38,7 +49,7 @@ implementation
 {$DEFINE HOOK_EDIT}
 {$DEFINE HOOK_Rebar}
 {$DEFINE HOOK_ToolBar}
-{$DEFINE HOOK_Menu}
+{.$DEFINE HOOK_Menu}
 
 
 //Undocumented
@@ -62,6 +73,7 @@ uses
   Vcl.Graphics,
   Vcl.GraphUtil,
   Vcl.Themes,
+  Vcl.Styles.Hooks,
   Vcl.Styles.Utils.Graphics,
   Vcl.Styles.Utils.SysControls;
 
@@ -345,6 +357,10 @@ begin
 //    else
 //      OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
 //
+
+//    DrawStyleFillRect(hdc, pRect, clRed);
+//    Exit(S_OK);
+
 
     ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
     LHWND := THThemesHWND.Items[hTheme];
@@ -1214,6 +1230,13 @@ begin
    if (SameText(LThemeClass, VSCLASS_HEADER) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_HEADER)) then
    begin
         case iPartId of
+          0                :
+                              begin
+                                  DrawStyleElement(hdc, StyleServices.GetElementDetails(tcpThemedHeader), pRect);
+                                  Exit(S_OK);
+                              end;
+
+
           HP_HEADERITEM    :
                               begin
                                   case iStateId of
@@ -1292,10 +1315,24 @@ begin
                                   Exit(S_OK);
                               end;
 
+         HP_HEADERDROPDOWNFILTER   :
+                              begin
+                                  case iStateId of
+                                      HDDFS_NORMAL   : LDetails:=StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal); //tcDropDownButtonNormal, thHeaderDropDownNormal
+                                      HDDFS_SOFTHOT  : LDetails:=StyleServices.GetElementDetails(ttbSplitButtonDropDownHot); //tcDropDownButtonHot, thHeaderDropDownSoftHot
+                                      HDDFS_HOT      : LDetails:=StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);  //tcDropDownButtonHot, thHeaderDropDownHot
+                                  end;
+
+                                  DrawStyleElement(hdc, LDetails, pRect);
+                                  Exit(S_OK);
+                              end;
+
         else
            begin
              //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
              Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+             //DrawStyleFillRect(hdc, pRect, clRed);
+             //Exit(S_OK);
            end;
         end;
 
@@ -2418,17 +2455,27 @@ begin
  end;
 
 
+
       //if SameText('PROPERTREE', LThemeClass)   then
       //begin
-//         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-//         if pColor=8020044 then
-//           OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+       if iPropId = TMT_TEXTCOLOR then
+       begin
+         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         if (Result=S_OK) and  (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) then
+         begin
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+           pColor:=ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+           Exit(S_OK);
+         end;
+       end;
+
      //    pColor:=StyleServices.GetSystemColor(clWindow);
-     //    Exit(S_OK);
+     //    Exit;
      // end;
 
 
-    //Exit(TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
+ //    pColor:=ColorToRGB(clYellow);
+//     Exit(s_ok);
 //              TMT_HEADING1TEXTCOLOR
 
     {$IFDEF HOOK_ListView}
@@ -2561,6 +2608,11 @@ begin
           0 :
                               case iStateId  of
                                0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindow));
+                              end;
+
+          LVP_LISTITEM :
+                              case iStateId  of
+                               0 :  pColor:= ColorToRGB(ClRed);
                               end;
 
           LVP_LISTSORTEDDETAIL :
