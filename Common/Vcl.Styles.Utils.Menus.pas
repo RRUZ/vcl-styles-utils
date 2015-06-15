@@ -873,11 +873,8 @@ begin
 end;
 
 procedure TSysPopupStyleHook.PaintBackground(Canvas: TCanvas);
-var
-  LDetails: TThemedElementDetails;
 begin
-  LDetails := StyleServices.GetElementDetails(tmPopupBorders);
-  StyleServices.DrawElement(Canvas.Handle, LDetails, SysControl.ClientRect);
+  StyleServices.DrawElement(Canvas.Handle, StyleServices.GetElementDetails(tmPopupBorders), SysControl.ClientRect);
 end;
 
 procedure TSysPopupStyleHook.UpdateColors;

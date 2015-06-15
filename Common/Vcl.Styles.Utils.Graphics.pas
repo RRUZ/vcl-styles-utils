@@ -28,6 +28,7 @@ interface
 uses
   Vcl.Styles,
   Vcl.Themes,
+  System.UITypes,
   System.Classes,
   System.SysUtils,
   Winapi.Windows,
@@ -251,6 +252,8 @@ Type
   procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect);
   procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
+  procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
+
 
 implementation
 
@@ -265,6 +268,26 @@ type
   TRGBArray32 = array[0..0] of TRGBQuad;
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
+
+procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
+var
+  SaveIndex : Integer;
+  LCanvas   : TCanvas;
+begin
+  SaveIndex := SaveDC(hdc);
+  LCanvas:=TCanvas.Create;
+  try
+    LCanvas.Handle:=hdc;
+    LCanvas.Pen.Color:=AColor;
+    LCanvas.Brush.Style:=bsClear;
+    DrawArrow(LCanvas, Direction, Location, Size);
+  finally
+    LCanvas.Handle:=0;
+    LCanvas.Free;
+    RestoreDC(hdc, SaveIndex);
+  end;
+end;
+
 
 
 procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
