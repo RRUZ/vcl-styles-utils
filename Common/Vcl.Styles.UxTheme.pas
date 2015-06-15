@@ -31,6 +31,9 @@ implementation
    Test Task Dialogs
    fix preview windows background color when no elements are shown
    fix background of homegroup folder (and related)
+   fix popup windows with trackbar
+
+   disable unused code of DrawThemeText and DrawThemeTextEx, (replaced by GetThemColor)
 }
 
 
@@ -56,6 +59,7 @@ implementation
 {$DEFINE HOOK_CommandModule}
 {$DEFINE HOOK_SearchBox}
 {$DEFINE HOOK_AddressBand}
+{$DEFINE HOOK_PreviewPane}
 
 
 
@@ -110,8 +114,12 @@ const
 {$ENDIF}
 
 
+{$IFDEF HOOK_PreviewPane}
 const
   VSCLASS_PREVIEWPANE                  = 'PreviewPane';
+  VSCLASS_READINGPANE                  = 'ReadingPane';
+{$ENDIF}
+
 
 {$IFDEF HOOK_TreeView}
 const
@@ -358,7 +366,7 @@ begin
 //      OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
 //
 
-//    DrawStyleFillRect(hdc, pRect, clRed);
+//    DrawStyleFillRect(hdc, pRect, clGray);
 //    Exit(S_OK);
 
 
@@ -368,7 +376,7 @@ begin
     VCLStylesLock.Leave;
   end;
 
-
+   {$IFDEF HOOK_PreviewPane}
    if SameText(LThemeClass, VSCLASS_PREVIEWPANE) then
    begin
              case iPartId of
@@ -427,6 +435,7 @@ begin
 
    end
    else
+   {$ENDIF}
    {$IFDEF HOOK_ToolBar}
    if SameText(LThemeClass, VSCLASS_TOOLBAR) then
    begin
@@ -2445,38 +2454,62 @@ var
   LThemeClass : string;
 begin
 
- VCLStylesLock.Enter;
- try
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not THThemesClasses.ContainsKey(hTheme) then
-   Exit(TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
-   LThemeClass:=THThemesClasses.Items[hTheme];
- finally
-   VCLStylesLock.Leave;
- end;
+     VCLStylesLock.Enter;
+     try
+      if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not THThemesClasses.ContainsKey(hTheme) then
+       Exit(TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
+       LThemeClass:=THThemesClasses.Items[hTheme];
+     finally
+       VCLStylesLock.Leave;
+     end;
 
+     case iPropId  of
 
-
-      //if SameText('PROPERTREE', LThemeClass)   then
-      //begin
-       if iPropId = TMT_TEXTCOLOR then
-       begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-         if (Result=S_OK) and  (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) then
+         TMT_TEXTCOLOR :
          begin
-           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-           pColor:=ColorToRGB(StyleServices.GetSystemColor(clWindowText));
-           Exit(S_OK);
+           Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           if (Result=S_OK) and  (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) then
+           begin
+             //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+             pColor:=ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+             Exit(S_OK);
+           end
+           else
+           //if SameText(LThemeClass, VSCLASS_ITEMSVIEW) then
+           begin
+//             OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+//             pColor:=ColorToRGB(clRed);
+//             Exit(S_OK);
+           end;
+
          end;
+
+//           TMT_FILLCOLOR :
+//           begin
+//             Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+//             if (Result=S_OK) {and  (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) }then
+//             begin
+//               //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+//               pColor:=ColorToRGB(clRed);//ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+//               Exit(S_OK);
+//             end;
+//
+//           end;
+
+
+     else
+       begin
+//           Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+//           //if pColor=$FCFCFC then
+//           if SameText('ReadingPane', LThemeClass) then
+//           begin
+//             OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+//             pColor:=ColorToRGB(clRed);
+//             Exit(S_OK);
+//           end;
        end;
+     end;
 
-     //    pColor:=StyleServices.GetSystemColor(clWindow);
-     //    Exit;
-     // end;
-
-
- //    pColor:=ColorToRGB(clYellow);
-//     Exit(s_ok);
-//              TMT_HEADING1TEXTCOLOR
 
     {$IFDEF HOOK_ListView}
     if (SameText(LThemeClass, VSCLASS_HEADER) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_HEADER)) then
@@ -2503,9 +2536,35 @@ begin
     {$ENDIF}
     if LThemeClass<>'' then
     begin
+
+      {$IFDEF HOOK_PreviewPane}
+      if  SameText(LThemeClass, VSCLASS_READINGPANE) then
+      begin
+        pColor:=clNone;
+        case iPartId of
+
+          1 :  //preview background
+              case iStateId  of
+               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindow));
+              end;
+
+          2 : //preview text
+              case iStateId  of
+               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+              end;
+        end;
+
+       if pColor=clNone then
+       begin
+         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+       end
+       else
+         Result:=S_OK;
+      end
+      else
       if  SameText(LThemeClass, VSCLASS_PREVIEWPANE) then
       begin
-
         pColor:=clNone;
         case iPartId of
 
@@ -2522,7 +2581,18 @@ begin
           7 :
               case iStateId  of
                1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
-               //2 :  pColor:= clGreen;// StyleServices.GetSystemColor(clHighlight);
+               2 :  pColor:= ColorToRGB(clGreen);
+              end;
+
+          8 :
+              case iStateId  of
+               0 :  pColor:=  ColorToRGB(clRed);
+              end;
+
+          9 :
+              case iStateId  of
+               1 :  pColor:=  ColorToRGB(clBlue);
+               2 :  pColor:= ColorToRGB(clYellow);
               end;
         end;
 
@@ -2536,6 +2606,7 @@ begin
 
       end
       else
+      {$ENDIF}
       {$IFDEF HOOK_TaskDialog}
       if SameText(LThemeClass, VSCLASS_TASKDIALOGSTYLE) then
       begin
@@ -2618,6 +2689,12 @@ begin
           LVP_LISTSORTEDDETAIL :
                               case iStateId  of
                                1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                               //hot text
+                               4 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                               5 :  pColor:= ColorToRGB(clBlue);
+                               6 :  pColor:= ColorToRGB(clYellow);
+                               7 :  pColor:= ColorToRGB(clGreen);
+                               8 :  pColor:= ColorToRGB(clFuchsia);
                               end;
 
 
