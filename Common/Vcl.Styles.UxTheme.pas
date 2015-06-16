@@ -26,11 +26,11 @@ interface
 implementation
 
 {
-   W8  Check Color text disabled on listview hot item
-   Test on W10
-   Test Task Dialogs
+done   W8  Check Color text disabled on listview hot item
+done   Test on W10
+done   Test Task Dialogs
    fix preview windows background color when no elements are shown
-   fix background of homegroup folder (and related)
+done   fix background of homegroup folder (and related)
    fix popup windows with trackbar
 
    remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by GetThemColor)
@@ -55,6 +55,7 @@ implementation
 {$DEFINE HOOK_ToolBar}
 {.$DEFINE HOOK_Menu}
 {$DEFINE HOOK_TrackBar}
+{$DEFINE HOOK_ToolTip}
 
 
 //Undocumented
@@ -98,6 +99,7 @@ const
   VSCLASS_ITEMSVIEW_HEADER               = 'ItemsView::Header';
   VSCLASS_EXPLORER_LISTVIEW              = 'Explorer::ListView';
   VSCLASS_ITEMSVIEW                      = 'ItemsView';
+  VSCLASS_LISTVIEWPOPUP                  = 'ListViewPopup';
 {$ENDIF}
 
 {$IFDEF HOOK_CommandModule}
@@ -128,9 +130,6 @@ const
   VSCLASS_PROPERTREE                   = 'PROPERTREE';
 {$ENDIF}
 
-
-const
- VSCLASS_LISTVIEWPOPUP                 = 'ListViewPopup';
 
 
 var
@@ -206,7 +205,8 @@ begin
       SendMessage(LParentHandle , WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
       ClientToScreen(Handle, LPoint);
       ScreenToClient(LParentHandle, LPoint);
-      //BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, Bmp.Canvas.Handle, P.X, P.Y, SRCCOPY)
+
+      //BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, LBuffer.Canvas.Handle, LPoint.X, LPoint.Y, SRCCOPY)
     end;
   finally
     LBuffer.Free;
@@ -1827,108 +1827,110 @@ var
 begin
     case iPartId of
 
-       MENU_POPUPBORDERS   :
-         begin
-            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBorders), pRect);
-            Exit(S_OK);
-         end;
+//       MENU_POPUPBORDERS   :
+//         begin
+//            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBorders), pRect);
+//            Exit(S_OK);
+//         end;
 
-       MENU_POPUPITEM      :
-         begin
-            case iStateId of
-              MPI_NORMAL      :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemNormal), pRect);
-                    Exit(S_OK);
-                  end;
+//       MENU_POPUPITEM      :
+//         begin
+//            case iStateId of
+//              MPI_NORMAL      :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemNormal), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MPI_HOT      :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MPI_DISABLED      :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemDisabled), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MPI_DISABLEDHOT      :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
+//                    Exit(S_OK);
+//                  end;
+//            end;
+//         end;
 
-              MPI_HOT      :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
-                    Exit(S_OK);
-                  end;
+//       MENU_BARBACKGROUND :
+//         begin
+//            case iStateId of
+//              MB_ACTIVE      :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarBackgroundActive), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MB_INACTIVE      :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarBackgroundInactive), pRect);
+//                    Exit(S_OK);
+//                  end;
+//            end;
+//         end;
+//
+//       MENU_BARITEM      :
+//         begin
+//            case iStateId of
+//              MBI_NORMAL         :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MBI_HOT            :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarItemHot), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MBI_PUSHED         :
+//                  begin
+//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarItemPushed), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MBI_DISABLED       :
+//                  begin
+//                    DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemDisabled), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MBI_DISABLEDHOT    :
+//                  begin
+//                    DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemDisabledHot), pRect);
+//                    Exit(S_OK);
+//                  end;
+//
+//              MBI_DISABLEDPUSHED :
+//                  begin
+//                    DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed), pRect);
+//                    Exit(S_OK);
+//                  end;
+//            end;
+//         end;
 
-              MPI_DISABLED      :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemDisabled), pRect);
-                    Exit(S_OK);
-                  end;
-
-              MPI_DISABLEDHOT      :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
-                    Exit(S_OK);
-                  end;
-            end;
-         end;
-
-       MENU_BARBACKGROUND :
-         begin
-            case iStateId of
-              MB_ACTIVE      :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarBackgroundActive), pRect);
-                    Exit(S_OK);
-                  end;
-
-              MB_INACTIVE      :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarBackgroundInactive), pRect);
-                    Exit(S_OK);
-                  end;
-            end;
-         end;
-
-       MENU_BARITEM      :
-         begin
-            case iStateId of
-              MBI_NORMAL         :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-                    Exit(S_OK);
-                  end;
-
-              MBI_HOT            :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarItemHot), pRect);
-                    Exit(S_OK);
-                  end;
-
-              MBI_PUSHED         :
-                  begin
-                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmMenuBarItemPushed), pRect);
-                    Exit(S_OK);
-                  end;
-
-              MBI_DISABLED       :
-                  begin
-                    DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemDisabled), pRect);
-                    Exit(S_OK);
-                  end;
-
-              MBI_DISABLEDHOT    :
-                  begin
-                    DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemDisabledHot), pRect);
-                    Exit(S_OK);
-                  end;
-
-              MBI_DISABLEDPUSHED :
-                  begin
-                    DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed), pRect);
-                    Exit(S_OK);
-                  end;
-            end;
-         end;
-
-      MENU_POPUPSEPARATOR   :
-
-         begin
-           DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupSeparator), pRect);
-           Exit(S_OK);
-         end;
-
+//      MENU_POPUPSEPARATOR   :
+//
+//         begin
+//           DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupSeparator), pRect);
+//           Exit(S_OK);
+//         end;
+//
        MENU_POPUPGUTTER       :
          begin
+            if hwnd<>0  then
+              DrawParentBackground(hwnd, hdc, pRect);
             DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
             //DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupGutter), pRect); //tmPopupGutter not defined in VCL Styles
             //DrawStyleFillRect(hdc, pRect, clGreen);
@@ -1936,15 +1938,15 @@ begin
          end;
 
 
-       MENU_POPUPBACKGROUND :
-         begin
-             //if hwnd<>0  then
-               //DrawParentBackground(hwnd, hdc, pRect);
-
-            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
-            //DrawStyleFillRect(hdc, pRect, clGreen);
-            Exit(S_OK);
-         end;
+//       MENU_POPUPBACKGROUND :
+//         begin
+//             //if hwnd<>0  then
+//               //DrawParentBackground(hwnd, hdc, pRect);
+//
+//            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
+//            //DrawStyleFillRect(hdc, pRect, clGreen);
+//            Exit(S_OK);
+//         end;
 
       MENU_POPUPSUBMENU :
          begin
@@ -2458,17 +2460,20 @@ begin
     VCLStylesLock.Leave;
   end;
 
-
+   {$IFDEF HOOK_ListView}
    if SameText(LThemeClass, VSCLASS_LISTVIEWPOPUP) then
    begin
      Exit(UxTheme_ListViewPopup(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
    end
    else
+   {$ENDIF}
+   {$IFDEF HOOK_ToolTip}
    if SameText(LThemeClass, VSCLASS_TOOLTIP) then
    begin
      Exit(UxTheme_ToolTip(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
    end
    else
+   {$ENDIF}
    {$IFDEF HOOK_TrackBar}
    if SameText(LThemeClass, VSCLASS_TRACKBAR) then
    begin
@@ -2727,7 +2732,7 @@ begin
 
 //             pColor:=ColorToRGB(clRed);
 //             Exit(S_OK);
-
+//
 
 
     if SameText(LThemeClass, VSCLASS_TOOLTIP) then
@@ -3529,7 +3534,7 @@ begin
                                        RestoreDC(hdc, SaveIndex);
                                      end;
                                    end;
-         else
+        else
          begin
              //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
              Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
