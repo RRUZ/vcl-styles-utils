@@ -29,11 +29,11 @@ implementation
 done   W8  Check Color text disabled on listview hot item
 done   Test on W10
 done   Test Task Dialogs
-   fix preview windows background color when no elements are shown
+done   fix preview windows background color when no elements are shown
 done   fix background of homegroup folder (and related)
    fix popup windows with trackbar
 
-   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by GetThemColor)
+done   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by GetThemColor)
    fix related shell dialogs
 }
 
@@ -53,9 +53,10 @@ done   fix background of homegroup folder (and related)
 {$DEFINE HOOK_EDIT}
 {$DEFINE HOOK_Rebar}
 {$DEFINE HOOK_ToolBar}
-{.$DEFINE HOOK_Menu}
+{$DEFINE HOOK_Menu}
 {$DEFINE HOOK_TrackBar}
 {$DEFINE HOOK_ToolTip}
+{$DEFINE HOOK_Tab}
 
 
 //Undocumented
@@ -130,6 +131,13 @@ const
   VSCLASS_PROPERTREE                   = 'PROPERTREE';
 {$ENDIF}
 
+{$IFDEF HOOK_Menu}
+const
+  MARLETT_RESTORE_CHAR = Char(50);
+  MARLETT_MINIMIZE_CHAR = Char(48);
+  MARLETT_CLOSE_CHAR = Char(114);
+  MARLETT_MAXIMIZE_CHAR = Char(49);
+{$ENDIF}
 
 
 var
@@ -150,6 +158,7 @@ var
   THThemesClasses  : TDictionary<HTHEME, string>;
   THThemesHWND     : TDictionary<HTHEME, HWND>;
   VCLStylesLock    : TCriticalSection = nil;
+
 
 
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
@@ -188,30 +197,6 @@ begin
   //OutputDebugString(PChar('Detour_UxTheme_OpenThemeDataEx '+pszClassList+' hTheme '+IntToStr(Result)+' Handle '+IntToHex(hwnd, 8)));
 end;
 
-procedure DrawParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
-var
-  LBuffer: TBitmap;
-  LPoint: TPoint;
-  LParentHandle : THandle;
-begin
-  if Handle=0 then exit;
-  LPoint := Point(ARect.Left, ARect.Top);
-  LBuffer := TBitmap.Create;
-  try
-    LParentHandle:=GetParent(Handle);
-    if LParentHandle<>0 then
-    begin
-      LBuffer.SetSize(ARect.Width, ARect.Height);
-      SendMessage(LParentHandle , WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
-      ClientToScreen(Handle, LPoint);
-      ScreenToClient(LParentHandle, LPoint);
-
-      //BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, LBuffer.Canvas.Handle, LPoint.X, LPoint.Y, SRCCOPY)
-    end;
-  finally
-    LBuffer.Free;
-  end;
-end;
 
 function AreBitmapsEqual(Bitmap1, Bitmap2: TBitmap): Boolean;
 var
@@ -230,41 +215,6 @@ begin
     if not Result then exit;
   End;
 
-end;
-
-function _GetThemeClass(hTheme: HTHEME ; iPartId, iStateId: Integer) : string;
-var
-  LBuffer, LBufferNew  : TBitmap;
-  hThemeNew : WinApi.UxTheme.HTHEME;
-  LRect   : TRect;
-begin
-  Result:='';
-
-  //Check for VSCLASS_SCROLLBAR
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_SCROLLBAR);
-  if hThemeNew=hTheme then
-   Exit(VSCLASS_SCROLLBAR)
-  else
-  try
-    LBuffer:=TBitmap.Create;
-    LBufferNew:=TBitmap.Create;
-    try
-      LBuffer.SetSize(25, 25);
-      lRect:=Rect(0, 0 , LBuffer.Width, LBuffer.Height);
-      TrampolineDrawThemeBackground(hTheme, LBuffer.Canvas.Handle, SBP_ARROWBTN, ABS_UPHOT, LRect, nil);
-
-      LBufferNew.SetSize(25, 25);
-        TrampolineDrawThemeBackground(hThemeNew, LBufferNew.Canvas.Handle, SBP_ARROWBTN, ABS_UPHOT, LRect, nil);
-
-        if AreBitmapsEqual(LBuffer, LBufferNew) then
-          Exit(VSCLASS_SCROLLBAR);
-    finally
-      LBuffer.Free;
-      LBufferNew.Free;
-    end;
-  finally
-     CloseThemeData(hThemeNew);
-  end;
 end;
 
 function GetThemeClass(hTheme: HTHEME ; iPartId, iStateId: Integer) : string;
@@ -317,15 +267,127 @@ end;
 
 
 
+
+function UxTheme_Tab(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+begin
+   case iPartId of
+       TABP_TOPTABITEM :
+         begin
+                case iStateId of
+                   TIS_NORMAL :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemNormal), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                   TIS_HOT :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemHot), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+                   TIS_SELECTED :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemSelected), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+                end;
+
+
+         end;
+
+       TABP_TOPTABITEMLEFTEDGE :
+         begin
+                case iStateId of
+                   TILES_NORMAL :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemLeftEdgeNormal), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                   TILES_HOT :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemLeftEdgeHot), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                   TILES_SELECTED :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemLeftEdgeSelected), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                   TILES_DISABLED :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemLeftEdgeDisabled), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                end;
+
+
+         end;
+
+       TABP_TOPTABITEMRIGHTEDGE :
+         begin
+                case iStateId of
+                   TIRES_NORMAL :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemRightEdgeNormal), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                     TIRES_HOT :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemRightEdgeHot), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                   TIRES_SELECTED :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemRightEdgeSelected), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+
+                   TIRES_DISABLED :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttTabItemRightEdgeDisabled), pRect);
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    Exit(S_OK);
+                                  end;
+                end;
+
+
+         end;
+
+       TABP_PANE :
+         begin
+          DrawStyleElement(hdc, StyleServices.GetElementDetails(ttPane), pRect);
+          Exit(S_OK);
+         end;
+   end;
+   //OutputDebugString(PChar(Format('UxTheme_Tab class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+end;
+
+
 function UxTheme_ListViewPopup(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
 begin
    case iPartId of
        0 :
-                     begin
-                      DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clWindow));
-                      Exit(S_OK);
-                     end;
-
+         begin
+          DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clWindow));
+          Exit(S_OK);
+         end;
    end;
    //OutputDebugString(PChar(Format('UxTheme_ListViewPopup class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
@@ -335,12 +397,11 @@ end;
 function UxTheme_ToolTip(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
 begin
    case iPartId of
-
        TTP_STANDARD :
-                     begin
-                      DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
-                      Exit(S_OK);
-                     end;
+         begin
+          DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
+          Exit(S_OK);
+         end;
 
    end;
    //OutputDebugString(PChar(Format('UxTheme_ToolTip class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
@@ -474,7 +535,7 @@ begin
            0 :
                        begin
                          if hwnd<>0  then
-                           DrawParentBackground(hwnd, hdc, pRect);
+                           DrawStyleParentBackground(hwnd, hdc, pRect);
 
                          LDetails.Element := teToolBar;
                          LDetails.Part := 0;
@@ -630,7 +691,7 @@ begin
         end;
    end;
 
-  //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+  //OutputDebugString(PChar(Format('UxTheme_AddressBand hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
@@ -930,7 +991,7 @@ begin
                             SaveIndex := SaveDC(hdc);
                             try
                                if hwnd<>0  then
-                                 DrawParentBackground(hwnd, hdc, pRect);
+                                 DrawStyleParentBackground(hwnd, hdc, pRect);
                                StyleServices.DrawElement(hdc, LDetails, pRect, nil);
                             finally
                               RestoreDC(hdc, SaveIndex);
@@ -951,7 +1012,7 @@ begin
                             SaveIndex := SaveDC(hdc);
                             try
                                if hwnd<>0  then
-                                 DrawParentBackground(hwnd, hdc, pRect);
+                                 DrawStyleParentBackground(hwnd, hdc, pRect);
                                StyleServices.DrawElement(hdc, LDetails, pRect, nil);
                             finally
                               RestoreDC(hdc, SaveIndex);
@@ -1100,7 +1161,7 @@ begin
                             SaveIndex := SaveDC(hdc);
                             try
                                if hwnd<>0  then
-                                 DrawParentBackground(hwnd, hdc, pRect);
+                                 DrawStyleParentBackground(hwnd, hdc, pRect);
                                StyleServices.DrawElement(hdc, LDetails, pRect, nil);
                             finally
                               RestoreDC(hdc, SaveIndex);
@@ -1203,7 +1264,7 @@ begin
           SaveIndex := SaveDC(hdc);
           try
            if hwnd<>0  then
-             DrawParentBackground(hwnd, hdc, pRect);
+             DrawStyleParentBackground(hwnd, hdc, pRect);
 
            StyleServices.DrawElement(hdc, LDetails, pRect, nil);
           finally
@@ -1224,7 +1285,7 @@ begin
           SaveIndex := SaveDC(hdc);
           try
            if hwnd<>0  then
-             DrawParentBackground(hwnd, hdc, pRect);
+             DrawStyleParentBackground(hwnd, hdc, pRect);
 
            StyleServices.DrawElement(hdc, LDetails, pRect, nil);
           finally
@@ -1355,7 +1416,7 @@ begin
         SaveIndex := SaveDC(hdc);
         try
            if hwnd<>0  then
-             DrawParentBackground(hwnd, hdc, pRect);
+             DrawStyleParentBackground(hwnd, hdc, pRect);
            StyleServices.DrawElement(hdc, LDetails, pRect, nil);
         finally
           RestoreDC(hdc, SaveIndex);
@@ -1388,7 +1449,7 @@ begin
         SaveIndex := SaveDC(hdc);
         try
            if hwnd<>0  then
-             DrawParentBackground(hwnd, hdc, pRect);
+             DrawStyleParentBackground(hwnd, hdc, pRect);
            StyleServices.DrawElement(hdc, LDetails, pRect, nil);
         finally
           RestoreDC(hdc, SaveIndex);
@@ -1410,7 +1471,7 @@ begin
         SaveIndex := SaveDC(hdc);
         try
            if hwnd<>0  then
-             DrawParentBackground(hwnd, hdc, pRect);
+             DrawStyleParentBackground(hwnd, hdc, pRect);
            StyleServices.DrawElement(hdc, LDetails, pRect, nil);
         finally
           RestoreDC(hdc, SaveIndex);
@@ -1511,7 +1572,7 @@ begin
           SaveIndex := SaveDC(hdc);
           try
              if hwnd<>0  then
-               DrawParentBackground(hwnd, hdc, pRect);
+               DrawStyleParentBackground(hwnd, hdc, pRect);
              StyleServices.DrawElement(hdc, LDetails, pRect, nil);
           finally
             RestoreDC(hdc, SaveIndex);
@@ -1585,7 +1646,7 @@ begin
    PP_TRANSPARENTBARVERT   :   LDetails:=StyleServices.GetElementDetails(tpBarVert);//GetElementDetails(tpTransparentBarVertNormal); not defined
   else
   begin
-    //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+    //OutputDebugString(PChar(Format('UxTheme_ProgressBar hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
   end;
   end;
@@ -1593,7 +1654,7 @@ begin
   SaveIndex := SaveDC(hdc);
   try
      if hwnd<>0  then
-       DrawParentBackground(hwnd, hdc, pRect);
+       DrawStyleParentBackground(hwnd, hdc, pRect);
      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
   finally
     RestoreDC(hdc, SaveIndex);
@@ -1820,6 +1881,62 @@ begin
 
 end;
 
+  procedure DrawMenuSpecialChar(DC: HDC; const Sign: Char; DestRect: TRect; const Bold: Boolean = False; const Disabled: Boolean = False);
+  var
+    LogFont: TLogFont;
+    pOldFont: HGDIOBJ;
+    AFont: HFONT;
+    oldColor: COLORREF;
+    OldMode: integer;
+  begin
+    LogFont.lfHeight := DestRect.Height;
+    LogFont.lfWidth := 0;
+    LogFont.lfEscapement := 0;
+    LogFont.lfOrientation := 0;
+    if Bold then
+      LogFont.lfWeight := FW_BOLD
+    else
+      LogFont.lfWeight := FW_NORMAL;
+    LogFont.lfItalic := 0;
+    LogFont.lfUnderline := 0;
+    LogFont.lfStrikeOut := 0;
+    LogFont.lfCharSet := DEFAULT_CHARSET;
+    LogFont.lfOutPrecision := OUT_DEFAULT_PRECIS;
+    LogFont.lfClipPrecision := CLIP_DEFAULT_PRECIS;
+    LogFont.lfQuality := DEFAULT_QUALITY;
+    LogFont.lfPitchAndFamily := DEFAULT_PITCH;
+    LogFont.lfFaceName := 'Marlett';
+
+    if Disabled then
+      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled)
+    else
+    begin
+      oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
+//      if isHot in State then
+//        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextHot);
+//      if isDisabled in State then
+//        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled);
+    end;
+
+    AFont := CreateFontIndirect(LogFont);
+    if AFont <> 0 then
+      try
+        oldColor := SetTextColor(DC, oldColor);
+        pOldFont := SelectObject(DC, AFont);
+        try
+          OldMode := SetBkMode(DC, Transparent);
+          Winapi.Windows.DrawText(DC, Sign, 1, DestRect, DT_LEFT or DT_SINGLELINE);
+          SetBkMode(DC, OldMode);
+          SelectObject(DC, oldColor);
+        finally
+          if pOldFont <> 0 then
+            SelectObject(DC, pOldFont);
+        end;
+      finally
+        DeleteObject(AFont);
+      end;
+  end;
+
 function UxTheme_Menu(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 var
   LRect : TRect;
@@ -1827,40 +1944,40 @@ var
 begin
     case iPartId of
 
-//       MENU_POPUPBORDERS   :
-//         begin
-//            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBorders), pRect);
-//            Exit(S_OK);
-//         end;
+       MENU_POPUPBORDERS   :  //OK
+         begin
+            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBorders), pRect);
+            Exit(S_OK);
+         end;
 
-//       MENU_POPUPITEM      :
-//         begin
-//            case iStateId of
-//              MPI_NORMAL      :
-//                  begin
-//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemNormal), pRect);
-//                    Exit(S_OK);
-//                  end;
-//
-//              MPI_HOT      :
-//                  begin
-//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
-//                    Exit(S_OK);
-//                  end;
-//
-//              MPI_DISABLED      :
-//                  begin
-//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemDisabled), pRect);
-//                    Exit(S_OK);
-//                  end;
-//
-//              MPI_DISABLEDHOT      :
-//                  begin
-//                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
-//                    Exit(S_OK);
-//                  end;
-//            end;
-//         end;
+       MENU_POPUPITEM      :  //OK
+         begin
+            case iStateId of
+              MPI_NORMAL      :
+                  begin
+                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemNormal), pRect);
+                    Exit(S_OK);
+                  end;
+
+              MPI_HOT      :
+                  begin
+                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
+                    Exit(S_OK);
+                  end;
+
+              MPI_DISABLED      :
+                  begin
+                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemDisabled), pRect);
+                    Exit(S_OK);
+                  end;
+
+              MPI_DISABLEDHOT      :
+                  begin
+                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemHot), pRect);
+                    Exit(S_OK);
+                  end;
+            end;
+         end;
 
 //       MENU_BARBACKGROUND :
 //         begin
@@ -1920,48 +2037,52 @@ begin
 //            end;
 //         end;
 
-//      MENU_POPUPSEPARATOR   :
-//
-//         begin
-//           DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupSeparator), pRect);
-//           Exit(S_OK);
-//         end;
-//
-       MENU_POPUPGUTTER       :
+      MENU_POPUPSEPARATOR   : //ok
+
          begin
-            if hwnd<>0  then
-              DrawParentBackground(hwnd, hdc, pRect);
-            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
-            //DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupGutter), pRect); //tmPopupGutter not defined in VCL Styles
-            //DrawStyleFillRect(hdc, pRect, clGreen);
-            Exit(S_OK);
+           DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupSeparator), pRect);
+           Exit(S_OK);
          end;
+
+//       MENU_POPUPGUTTER       :
+//         begin
+//            if hwnd<>0  then
+//              DrawStyleParentBackground(hwnd, hdc, pRect);
+//            //DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
+//            //DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupGutter), pRect); //tmPopupGutter not defined in VCL Styles
+//
+//           // DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clMenu));
+//            Exit(S_OK);
+//         end;
 
 
 //       MENU_POPUPBACKGROUND :
 //         begin
 //             //if hwnd<>0  then
 //               //DrawParentBackground(hwnd, hdc, pRect);
-//
+//            //OutputDebugString(PChar(Format('UxTheme_Menu class %s hTheme %d iPartId %d iStateId %d prect Left %d Top %d Width %d Height %d ',
+//            //[LThemeClass, hTheme, iPartId, iStateId, pRect.Left, pRect.Top, pRect.Width, pRect.Height])));
 //            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
 //            //DrawStyleFillRect(hdc, pRect, clGreen);
 //            Exit(S_OK);
 //         end;
 
-      MENU_POPUPSUBMENU :
+      MENU_POPUPSUBMENU :    //OK
          begin
             case iStateId of
+              MSM_DISABLED,
               MSM_NORMAL         :
                   begin
-                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-                    //DrawStyleFillRect(hdc, pRect, clYellow);
-                    LColor:= StyleServices.GetSystemColor(clHighlight);
+                    if iStateId=MSM_DISABLED then
+                      LColor:= StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled)
+                    else
+                      LColor:= StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
+
                     LRect:= pRect;
                     LRect.Top :=  LRect.Top + 3;
                     DrawStyleArrow(hdc, TScrollDirection.sdRight, LRect.Location, 3, LColor);
                     Exit(S_OK);
                   end;
-
             end;
          end;
 
@@ -2025,62 +2146,107 @@ begin
 //            end;
 //         end;
 
-//      MENU_SYSTEMRESTORE   :
-//         begin
-//            case iStateId of
-//              MSYSR_NORMAL :
-//                  begin
-//                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-//                    DrawStyleFillRect(hdc, pRect, clFuchsia);
-//                    Exit(S_OK);
-//                  end;
-//
-//              MSYSR_DISABLED :
-//                  begin
-//                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-//                    DrawStyleFillRect(hdc, pRect, clBlue);
-//                    Exit(S_OK);
-//                  end;
-//            end;
-//         end;
-//
-//      MENU_SYSTEMMAXIMIZE   :
-//         begin
-//            case iStateId of
-//              MSYSMX_NORMAL :
-//                  begin
-//                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-//                    DrawStyleFillRect(hdc, pRect, clFuchsia);
-//                    Exit(S_OK);
-//                  end;
-//
-//              MSYSMX_DISABLED :
-//                  begin
-//                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-//                    DrawStyleFillRect(hdc, pRect, clBlue);
-//                    Exit(S_OK);
-//                  end;
-//            end;
-//         end;
-//
-//       MENU_SYSTEMCLOSE  :
-//         begin
-//            case iStateId of
-//              MSYSC_NORMAL :
-//                  begin
-//                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-//                    DrawStyleFillRect(hdc, pRect, clFuchsia);
-//                    Exit(S_OK);
-//                  end;
-//
-//              MSYSC_DISABLED :
-//                  begin
-//                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmMenuBarItemNormal), pRect);
-//                    DrawStyleFillRect(hdc, pRect, clBlue);
-//                    Exit(S_OK);
-//                  end;
-//            end;
-//         end;
+
+      MENU_SYSTEMRESTORE   :
+         begin
+            case iStateId of
+              MSYSR_NORMAL :
+                  begin
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_RESTORE_CHAR, LRect, False, False);
+                    Exit(S_OK);
+                  end;
+
+              MSYSR_DISABLED :
+                  begin
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_RESTORE_CHAR, LRect, False, True);
+                    Exit(S_OK);
+                  end;
+            end;
+         end;
+
+      MENU_SYSTEMMINIMIZE   :
+         begin
+            case iStateId of
+              MSYSMN_NORMAL :
+                  begin
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_MINIMIZE_CHAR, LRect, False, False);
+                    Exit(S_OK);
+                  end;
+
+              MSYSMN_DISABLED :
+                  begin
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_MINIMIZE_CHAR, LRect, False, True);
+                    Exit(S_OK);
+                  end;
+            end;
+         end;
+
+      MENU_SYSTEMMAXIMIZE   :
+         begin
+            case iStateId of
+              MSYSMX_NORMAL :
+                  begin
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_MAXIMIZE_CHAR, LRect, False, False);
+                    Exit(S_OK);
+                  end;
+
+              MSYSMX_DISABLED :
+                  begin
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_MAXIMIZE_CHAR, LRect, False, True);
+                    Exit(S_OK);
+                  end;
+            end;
+         end;
+
+       MENU_SYSTEMCLOSE  :   //OK
+         begin
+            case iStateId of
+              MSYSC_NORMAL :
+                  begin
+                    //DrawStyleElement(hdc,  StyleServices.GetElementDetails(tmSystemCloseNormal), pRect);
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_CLOSE_CHAR, LRect, False, False);
+                    Exit(S_OK);
+                  end;
+
+              MSYSC_DISABLED :
+                  begin
+                    LRect:=pRect;
+                    LRect.Top:= LRect.Top + 3;
+                    LRect.Width:=10;
+                    LRect.Height:=10;
+                    DrawMenuSpecialChar(hdc, MARLETT_CLOSE_CHAR, LRect, False, True);
+                    Exit(S_OK);
+                  end;
+            end;
+         end;
     end;
 
     //OutputDebugString(PChar(Format('UxTheme_Menu class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
@@ -2411,7 +2577,7 @@ begin
           end;
    end;
 
-   //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+   //OutputDebugString(PChar(Format('UxTheme_SearchBox hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
@@ -2460,6 +2626,13 @@ begin
     VCLStylesLock.Leave;
   end;
 
+   {$IFDEF HOOK_Tab}
+   if SameText(LThemeClass, VSCLASS_TAB) then
+   begin
+     Exit(UxTheme_Tab(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
+   end
+   else
+   {$ENDIF}
    {$IFDEF HOOK_ListView}
    if SameText(LThemeClass, VSCLASS_LISTVIEWPOPUP) then
    begin
@@ -2667,6 +2840,7 @@ end;
 
 {
  doesn't affect Menus colors
+ doesn't affect compressed elemnts font color (blue)
 }
 
 function Detour_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;  stdcall;
@@ -3036,9 +3210,6 @@ begin
      //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
      //OutputDebugString2(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor]));
     end;
-
-//    if pColor=7104329 then
-//      OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 end;
 
 
@@ -3076,7 +3247,7 @@ begin
      ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
      //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s %s', [hTheme, iPartId, iStateId, pszText, LThemeClass])));
 
-//     if Pos('Name', pszText)>0 then
+//     if Pos('ggg', pszText)>0 then
 //       OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d class %s iPartId %d iStateId %d  text %s', [hTheme, LThemeClass, iPartId, iStateId, pszText])));
 
 
@@ -3460,8 +3631,8 @@ begin
  finally
    VCLStylesLock.Leave;
  end;
-
-//  if SameText(pszText, 'Name') then
+//
+//  if SameText(pszText, 'ggg') then
 //   OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
 
 //   if SameText(LThemeClass, VSCLASS_PREVIEWPANE) then

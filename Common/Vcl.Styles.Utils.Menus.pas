@@ -707,7 +707,6 @@ begin
            Canvas.Rectangle(R);
           end;
 
-
           DrawIconEX(DC, LImageRect.Left, LImageRect.Top, Icon, BmpWidth, BmpHeight, 0, 0, DI_NORMAL);
           DeleteObject(Icon);
         end;

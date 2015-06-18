@@ -249,15 +249,19 @@ Type
   procedure AlphaBlendFillCanvas(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
   procedure AlphaBlendFillCanvas(const DC: HDC;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
 
-  procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect);
+  procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True);
   procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
+  procedure DrawStyleParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
 
 
 implementation
 
 Uses
+
+  System.Types,
+  Winapi.Messages,
   Math;
 
 type
@@ -343,17 +347,45 @@ begin
   end;
 end;
 
-procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect);
+
+procedure DrawStyleParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
+var
+  LBuffer: TBitmap;
+  LPoint: TPoint;
+  LParentHandle : THandle;
+begin
+  if Handle=0 then exit;
+  LPoint := Point(ARect.Left, ARect.Top);
+  LBuffer := TBitmap.Create;
+  try
+    LParentHandle:=GetParent(Handle);
+    if LParentHandle<>0 then
+    begin
+      LBuffer.SetSize(ARect.Width, ARect.Height);
+      SendMessage(LParentHandle , WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
+      ClientToScreen(Handle, LPoint);
+      ScreenToClient(LParentHandle, LPoint);
+
+      //BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, LBuffer.Canvas.Handle, LPoint.X, LPoint.Y, SRCCOPY)
+    end;
+  finally
+    LBuffer.Free;
+  end;
+end;
+
+procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True);
 var
   SaveIndex : Integer;
 begin
-  SaveIndex := SaveDC(hdc);
+  SaveIndex :=0;
+  if RestoreDC then
+   SaveIndex := SaveDC(hdc);
   try
      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
   finally
-    RestoreDC(hdc, SaveIndex);
+    if (SaveIndex>0) and  RestoreDC then
+      Winapi.Windows.RestoreDC(hdc, SaveIndex);
   end;
-
 end;
 
 procedure GradientRoundedFillCanvas(const ACanvas: TCanvas;
