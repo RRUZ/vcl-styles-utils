@@ -123,6 +123,9 @@ procedure _BlendScreen(const AColor: TColor;Value: Integer; out NewColor:TColor)
 procedure _BlendScreen24(const ABitMap: TBitmap;Value: Integer);
 procedure _BlendScreen32(const ABitMap: TBitmap;Value: Integer);
 
+procedure Bitmap24_Grayscale(ABitmap: TBitmap);
+procedure Bitmap32_Grayscale(ABitmap: TBitmap);
+
 
 Type
   TColorFilter=class
@@ -273,6 +276,50 @@ type
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
 
+procedure Bitmap24_Grayscale(ABitmap: TBitmap);
+var
+  X: Integer;
+  Y: Integer;
+  LGrayColor: Byte;
+  LRGBTriple: PRGBTriple;
+begin
+  if ABitmap.PixelFormat<>pf24bit then Exit;
+  for Y := 0 to ABitmap.Height - 1 do
+  begin
+    LRGBTriple := ABitmap.ScanLine[Y];
+    for X := 0 to ABitmap.Width - 1 do
+    begin
+      LGrayColor := Round((0.299 * LRGBTriple.rgbtRed) + (0.587 * LRGBTriple.rgbtGreen) + (0.114 * LRGBTriple.rgbtBlue));
+      LRGBTriple.rgbtRed   := LGrayColor;
+      LRGBTriple.rgbtGreen := LGrayColor;
+      LRGBTriple.rgbtBlue  := LGrayColor;
+      Inc(LRGBTriple);
+    end;
+  end;
+end;
+
+procedure Bitmap32_Grayscale(ABitmap: TBitmap);
+var
+  X: Integer;
+  Y: Integer;
+  LGrayColor: Byte;
+  LRGBTriple: PRGBQuad;
+begin
+  if ABitmap.PixelFormat<>pf32bit then Exit;
+
+  for Y := 0 to ABitmap.Height - 1 do
+  begin
+    LRGBTriple := ABitmap.ScanLine[Y];
+    for X := 0 to ABitmap.Width - 1 do
+    begin
+      LGrayColor:= Round((0.299 * LRGBTriple.rgbRed) + (0.587 * LRGBTriple.rgbGreen) + (0.114 * LRGBTriple.rgbBlue));
+      LRGBTriple.rgbRed   := LGrayColor;
+      LRGBTriple.rgbGreen := LGrayColor;
+      LRGBTriple.rgbBlue  := LGrayColor;
+      Inc(LRGBTriple);
+    end;
+  end;
+end;
 procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
 var
   SaveIndex : Integer;
@@ -529,7 +576,7 @@ begin
   SourceN:=TBitmap.Create;
   try
     SourceN.SetSize(Dest.Width, Dest.Height);
-    SourceN.PixelFormat:=pf24bit;
+    SourceN.PixelFormat:=pf32bit;
 
     y := 0;
     while y < Dest.Height do
