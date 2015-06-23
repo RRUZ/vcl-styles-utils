@@ -35,6 +35,11 @@ done   fix background of homegroup folder (and related)
 
 done   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by GetThemColor)
    fix related shell dialogs
+
+done   fix navigation buttons
+
+
+
 }
 
 
@@ -60,11 +65,18 @@ done   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by Get
 
 
 //Undocumented
+
+//introduced in Windows Vista
+
 {$DEFINE HOOK_CommandModule}
 {$DEFINE HOOK_SearchBox}
 {$DEFINE HOOK_AddressBand}
 {$DEFINE HOOK_PreviewPane}
+{$DEFINE HOOK_TRYHARDER}
+{$DEFINE HOOK_BREADCRUMBAR}
 
+//introduced in Windows 8
+{$DEFINE HOOK_Navigation}
 
 
 uses
@@ -74,13 +86,16 @@ uses
   System.Types,
   System.Classes,
   System.UITypes,
+  System.Math,
   System.Generics.Collections,
+  System.Generics.Defaults,
   WinApi.Windows,
   Winapi.UxTheme,
   Winapi.Messages,
   Vcl.Graphics,
   Vcl.GraphUtil,
   Vcl.Themes,
+  Vcl.Imaging.pngimage,
   Vcl.Styles.Hooks,
   Vcl.Styles.Utils.Graphics,
   Vcl.Styles.Utils.SysControls;
@@ -126,6 +141,23 @@ const
 {$ENDIF}
 
 
+
+{$IFDEF HOOK_TRYHARDER}
+const
+  VSCLASS_TRYHARDER                    = 'TryHarder';
+{$ENDIF}
+
+{$IFDEF HOOK_BREADCRUMBAR}
+const
+  VSCLASS_BREADCRUMBAR                = 'BreadcrumbBar';
+{$ENDIF}
+
+
+{$IFDEF HOOK_Navigation}
+const
+  VSCLASS_NAVIGATION                  = 'Navigation';
+{$ENDIF}
+
 {$IFDEF HOOK_TreeView}
 const
   VSCLASS_PROPERTREE                   = 'PROPERTREE';
@@ -138,6 +170,13 @@ const
   MARLETT_CLOSE_CHAR = Char(114);
   MARLETT_MAXIMIZE_CHAR = Char(49);
 {$ENDIF}
+
+
+
+type
+  TFuncDrawThemeBackground  =  function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
+
+
 
 
 var
@@ -157,8 +196,10 @@ var
 
   THThemesClasses  : TDictionary<HTHEME, string>;
   THThemesHWND     : TDictionary<HTHEME, HWND>;
-  VCLStylesLock    : TCriticalSection = nil;
 
+  FuncsDrawThemeBackground  : TDictionary<string, TFuncDrawThemeBackground>;
+
+  VCLStylesLock    : TCriticalSection = nil;
 
 
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
@@ -265,10 +306,65 @@ begin
     CloseThemeData(hThemeNew);
 end;
 
+function UxTheme_BreadCrumBar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
+begin
+   case iPartId of
+       1 :
+         begin
+                case iStateId of
+                   1 :
+                                  begin
+                                    //DrawStyleFillRect(hdc, pRect, clGreen);
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonNormal), pRect);
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tsArrowBtnLeftNormal), pRect);
+                                    Exit(S_OK);
+                                  end;
+
+                   2 :
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonNormal), pRect);
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tsArrowBtnLeftNormal), pRect);
+                                    Exit(S_OK);
+                                  end;
 
 
+                   3 :            //Pressed
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonPressed), pRect);
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tsArrowBtnLeftPressed), pRect);
+                                    Exit(S_OK);
+                                  end;
 
-function UxTheme_Tab(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+                   8 :            //fade out (hot)
+                                  begin
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonHot), pRect);
+                                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tsArrowBtnLeftHot), pRect);
+                                    Exit(S_OK);
+                                  end;
+                end;
+
+
+         end;
+   end;
+   //OutputDebugString(PChar(Format('UxTheme_BreadCrumBar class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+end;
+
+
+function UxTheme_TryHarder(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
+begin
+   case iPartId of
+       0 :
+         begin
+          DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clWindow));
+          Exit(S_OK);
+         end;
+   end;
+   //OutputDebugString(PChar(Format('UxTheme_TryHarder class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+end;
+
+function UxTheme_Tab(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 begin
    case iPartId of
        TABP_TOPTABITEM :
@@ -380,7 +476,7 @@ begin
 end;
 
 
-function UxTheme_ListViewPopup(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_ListViewPopup(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 begin
    case iPartId of
        0 :
@@ -394,7 +490,7 @@ begin
 end;
 
 
-function UxTheme_ToolTip(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_ToolTip(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 begin
    case iPartId of
        TTP_STANDARD :
@@ -408,7 +504,7 @@ begin
    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
-function UxTheme_TrackBar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_TrackBar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 begin
    case iPartId of
      TKP_TRACKVERT :
@@ -463,7 +559,7 @@ begin
 end;
 
 
-function UxTheme_PreviewPane(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_PreviewPane(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 var
  LColor : TColor;
 begin
@@ -660,7 +756,7 @@ begin
 end;
 
 
-function UxTheme_AddressBand(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_AddressBand(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 begin
    case iPartId of
       //address bar control
@@ -696,7 +792,7 @@ begin
 end;
 
 
-function UxTheme_Rebar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_Rebar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 begin
   case iPartId of
     RP_BAND       :
@@ -1298,7 +1394,7 @@ begin
   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
-function UxTheme_ListBox(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_ListBox(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
 begin
@@ -1321,6 +1417,237 @@ begin
   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
+
+
+function UxTheme_Navigation(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
+var
+  LColor    : TColor;
+  LCanvas   : TCanvas;
+  LRect     : TRect;
+  LBitmap   : TBitmap;
+begin
+  case iPartId of
+     1 : //left button
+      begin
+          case iStateId of
+            1  : //enabled left
+                 begin
+                   LColor:=  StyleServices.GetSystemColor(clBtnFace);
+                   DrawStyleFillRect(hdc, pRect, LColor);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonNormal), pRect);
+
+                   LBitmap:=TBitmap.Create;
+                   try
+                     LBitmap.SetSize(pRect.Width, pRect.Height);
+                     LRect:= Rect(0, 0, LBitmap.Width, LBitmap.Height);
+
+                     LBitmap.Transparent:=True;
+                     LBitmap.TransparentColor :=  LColor;
+                     LBitmap.Canvas.Brush.Color := LColor;
+                     LBitmap.Canvas.FillRect(Rect(0, 0, LRect.Width, LRect.Height));
+
+                     DrawStyleElement(LBitmap.Canvas.Handle, StyleServices.GetElementDetails(tbCommandLinkGlyphNormal), LRect);
+                     RotateBitmap(LBitmap, DegToRad(180), False, LColor);
+
+                     LCanvas:=TCanvas.Create;
+                     try
+                       LCanvas.Handle:=hdc;
+                       LCanvas.Draw(pRect.Left, pRect.Top, LBitmap);
+                     finally
+                       LCanvas.Handle:=0;
+                       LCanvas.Free;
+                     end;
+                   finally
+                     LBitmap.Free;
+                   end;
+                   Exit(S_OK);
+                 end;
+
+            2  : //hot  left
+                 begin
+                   LColor:=  StyleServices.GetSystemColor(clBtnFace);
+                   DrawStyleFillRect(hdc, pRect, LColor);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonHot), pRect);
+
+                   LBitmap:=TBitmap.Create;
+                   try
+                     LBitmap.SetSize(pRect.Width, pRect.Height);
+                     LRect:= Rect(0, 0, LBitmap.Width, LBitmap.Height);
+
+                     LBitmap.Transparent:=True;
+                     LBitmap.TransparentColor :=  LColor;
+                     LBitmap.Canvas.Brush.Color := LColor;
+                     LBitmap.Canvas.FillRect(Rect(0, 0, LRect.Width, LRect.Height));
+
+                     DrawStyleElement(LBitmap.Canvas.Handle, StyleServices.GetElementDetails(tbCommandLinkGlyphHot), LRect);
+                     RotateBitmap(LBitmap, DegToRad(180), False, LColor);
+
+                     LCanvas:=TCanvas.Create;
+                     try
+                       LCanvas.Handle:=hdc;
+                       LCanvas.Draw(pRect.Left, pRect.Top, LBitmap);
+                     finally
+                       LCanvas.Handle:=0;
+                       LCanvas.Free;
+                     end;
+                   finally
+                     LBitmap.Free;
+                   end;
+
+                   Exit(S_OK);
+
+                 end;
+
+            3  : //pressed left
+                 begin
+                   LColor:=  StyleServices.GetSystemColor(clBtnFace);
+                   DrawStyleFillRect(hdc, pRect, LColor);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonPressed), pRect);
+
+                   LBitmap:=TBitmap.Create;
+                   try
+                     LBitmap.SetSize(pRect.Width, pRect.Height);
+                     LRect:= Rect(0, 0, LBitmap.Width, LBitmap.Height);
+
+                     LBitmap.Transparent:=True;
+                     LBitmap.TransparentColor :=  LColor;
+                     LBitmap.Canvas.Brush.Color := LColor;
+                     LBitmap.Canvas.FillRect(Rect(0, 0, LRect.Width, LRect.Height));
+
+                     DrawStyleElement(LBitmap.Canvas.Handle, StyleServices.GetElementDetails(tbCommandLinkGlyphPressed), LRect);
+                     RotateBitmap(LBitmap, DegToRad(180), False, LColor);
+
+                     LCanvas:=TCanvas.Create;
+                     try
+                       LCanvas.Handle:=hdc;
+                       LCanvas.Draw(pRect.Left, pRect.Top, LBitmap);
+                     finally
+                       LCanvas.Handle:=0;
+                       LCanvas.Free;
+                     end;
+                   finally
+                     LBitmap.Free;
+                   end;
+
+                   Exit(S_OK);
+
+                 end;
+
+            4  : //disabled left
+                 begin
+                   LColor:=  StyleServices.GetSystemColor(clBtnFace);
+                   DrawStyleFillRect(hdc, pRect, LColor);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonDisabled), pRect);
+
+                   LBitmap:=TBitmap.Create;
+                   try
+                     LBitmap.SetSize(pRect.Width, pRect.Height);
+                     LRect:= Rect(0, 0, LBitmap.Width, LBitmap.Height);
+
+                     LBitmap.Transparent:=True;
+                     LBitmap.TransparentColor :=  LColor;
+                     LBitmap.Canvas.Brush.Color := LColor;
+                     LBitmap.Canvas.FillRect(Rect(0, 0, LRect.Width, LRect.Height));
+
+                     DrawStyleElement(LBitmap.Canvas.Handle, StyleServices.GetElementDetails(tbCommandLinkGlyphDisabled), LRect);
+                     RotateBitmap(LBitmap, DegToRad(180), False, LColor);
+
+                     LCanvas:=TCanvas.Create;
+                     try
+                       LCanvas.Handle:=hdc;
+                       LCanvas.Draw(pRect.Left, pRect.Top, LBitmap);
+                     finally
+                       LCanvas.Handle:=0;
+                       LCanvas.Free;
+                     end;
+                   finally
+                     LBitmap.Free;
+                   end;
+
+                   Exit(S_OK);
+
+                 end;
+          end;
+
+      end;
+
+     2 :  //right button
+      begin
+          case iStateId of
+            1  : //enabled right
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonNormal), pRect);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(tbCommandLinkGlyphNormal), pRect);
+                   Exit(S_OK);
+                 end;
+
+            2  : //hot  right
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonHot), pRect);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(tbCommandLinkGlyphHot), pRect);
+                   Exit(S_OK);
+                 end;
+
+            3  : //pressed right
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonPressed), pRect);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(tbCommandLinkGlyphPressed), pRect);
+                   Exit(S_OK);
+                 end;
+
+            4  : //disabled right
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbButtonDisabled), pRect);
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(tbCommandLinkGlyphDisabled), pRect);
+                   Exit(S_OK);
+                 end;
+          end;
+
+      end;
+
+
+     3 :  //drop down button
+      begin
+          case iStateId of
+            1  : //enabled
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal), pRect);
+                   Exit(S_OK);
+                 end;
+
+            2  : //hot
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownHot), pRect);
+                   Exit(S_OK);
+                 end;
+
+            3  : //pressed
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownPressed), pRect);
+                   Exit(S_OK);
+                 end;
+
+            4  : //disabled
+                 begin
+                   DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clBtnFace));
+                   DrawStyleElement(hdc, StyleServices.GetElementDetails(ttbSplitButtonDropDownDisabled), pRect);
+                   Exit(S_OK);
+                 end;
+          end;
+
+      end;
+  end;
+
+  //OutputDebugString(PChar(Format('UxTheme_Navigation  class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+  Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+end;
 
 function UxTheme_TreeView(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 var
@@ -1663,7 +1990,7 @@ begin
 end;
 
 
-function UxTheme_ScrollBar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_ScrollBar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
   LScrollDetails: TThemedScrollBar;
@@ -1816,7 +2143,7 @@ begin
   Exit(S_OK);
 end;
 
-function UxTheme_Edit(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_Edit(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
 begin
@@ -1937,6 +2264,7 @@ end;
       end;
   end;
 
+{$IFDEF HOOK_Menu}
 function UxTheme_Menu(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 var
   LRect : TRect;
@@ -2040,20 +2368,25 @@ begin
       MENU_POPUPSEPARATOR   : //ok
 
          begin
+           DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemNormal), pRect);
+
+//             if hwnd<>0  then
+//               DrawStyleParentBackground(hwnd, hdc, pRect);
+
            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupSeparator), pRect);
            Exit(S_OK);
          end;
 
-//       MENU_POPUPGUTTER       :
-//         begin
-//            if hwnd<>0  then
-//              DrawStyleParentBackground(hwnd, hdc, pRect);
-//            //DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
-//            //DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupGutter), pRect); //tmPopupGutter not defined in VCL Styles
-//
-//           // DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clMenu));
-//            Exit(S_OK);
-//         end;
+       MENU_POPUPGUTTER       :
+         begin
+            if hwnd<>0  then
+              DrawStyleParentBackground(hwnd, hdc, pRect);
+            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemNormal), pRect);
+            //DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupGutter), pRect); //tmPopupGutter not defined in VCL Styles
+
+           // DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clMenu));
+            Exit(S_OK);
+         end;
 
 
 //       MENU_POPUPBACKGROUND :
@@ -2254,9 +2587,9 @@ begin
     //DrawStyleFillRect(hdc, pRect, clBlue);
     //Exit(S_OK);
 end;
+{$ENDIF}
 
-
-function UxTheme_CommandModule(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_CommandModule(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
   LColor    : TColor;
@@ -2548,7 +2881,7 @@ begin
 end;
 
 
-function UxTheme_SearchBox(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string): HRESULT; stdcall;
+function UxTheme_SearchBox(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 begin
    case iPartId of
       //searchbox control
@@ -2586,6 +2919,8 @@ var
   LThemeClass : string;
   LThemeClasses : TStrings;
   LHWND       : HWND;
+
+  LFuncDrawThemeBackground : TFuncDrawThemeBackground;
 begin
 
  LThemeClasses:=TStringList.Create;
@@ -2622,174 +2957,18 @@ begin
 
     ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
     LHWND := THThemesHWND.Items[hTheme];
+
   finally
     VCLStylesLock.Leave;
   end;
 
-   {$IFDEF HOOK_Tab}
-   if SameText(LThemeClass, VSCLASS_TAB) then
+
+   if FuncsDrawThemeBackground.ContainsKey(LThemeClass) then
    begin
-     Exit(UxTheme_Tab(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
+     LFuncDrawThemeBackground := FuncsDrawThemeBackground.Items[LThemeClass];
+     Exit(LFuncDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
    end
    else
-   {$ENDIF}
-   {$IFDEF HOOK_ListView}
-   if SameText(LThemeClass, VSCLASS_LISTVIEWPOPUP) then
-   begin
-     Exit(UxTheme_ListViewPopup(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_ToolTip}
-   if SameText(LThemeClass, VSCLASS_TOOLTIP) then
-   begin
-     Exit(UxTheme_ToolTip(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_TrackBar}
-   if SameText(LThemeClass, VSCLASS_TRACKBAR) then
-   begin
-     Exit(UxTheme_TrackBar(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_PreviewPane}
-   if SameText(LThemeClass, VSCLASS_PREVIEWPANE) then
-   begin
-      Exit(UxTheme_PreviewPane(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_ToolBar}
-   if SameText(LThemeClass, VSCLASS_TOOLBAR) then
-   begin
-      Exit(UxTheme_ToolBar(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_AddressBand}
-   if SameText(LThemeClass, VSCLASS_ADDRESSBAND) then
-   begin
-      Exit(UxTheme_AddressBand(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_SearchBox}
-   if SameText(LThemeClass, VSCLASS_SEARCHBOX) then  //OK
-   begin
-      Exit(UxTheme_SearchBox(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_CommandModule}
-   if  SameText(LThemeClass, VSCLASS_COMMANDMODULE) then
-   begin
-      Exit(UxTheme_CommandModule(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Menu}
-   if  SameText(LThemeClass, VSCLASS_MENU) then
-   begin
-      Exit(UxTheme_Menu(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Rebar}
-   if  SameText(LThemeClass, VSCLASS_REBAR) then
-   begin
-      Exit(UxTheme_Rebar(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Edit}
-   if  SameText(LThemeClass, VSCLASS_EDIT) then
-   begin
-      Exit(UxTheme_Edit(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_ListBox}
-   if SameText(LThemeClass, VSCLASS_LISTBOX) then
-   begin
-      Exit(UxTheme_ListBox(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Spin}
-   if SameText(LThemeClass, VSCLASS_SPIN) then
-   begin
-      Exit(UxTheme_Spin(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_ComboBox}
-   if  SameText(LThemeClass, VSCLASS_COMBOBOX) then
-   begin
-      Exit(UxTheme_ComboBox(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_ListView}
-   if (SameText(LThemeClass, VSCLASS_HEADER) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_HEADER)) then
-   begin
-      Exit(UxTheme_Header(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   if  (SameText(LThemeClass, VSCLASS_ITEMSVIEW) or SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) or SameText(LThemeClass, VSCLASS_EXPLORER_LISTVIEW)) then
-   begin
-      Exit(UxTheme_ListView(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_DateTimePicker}
-   if SameText(LThemeClass, VSCLASS_DATEPICKER) then
-   begin
-      Exit(UxTheme_DatePicker(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   if  SameText(LThemeClass, VSCLASS_MONTHCAL) then
-   begin
-      Exit(UxTheme_MonthCal(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Scrollbar}
-   if SameText(LThemeClass, VSCLASS_SCROLLBAR) then
-   begin
-     Exit(UxTheme_ScrollBar(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Progressbar}
-   if  (SameText(LThemeClass, VSCLASS_PROGRESS) or SameText(LThemeClass, VSCLASS_PROGRESS_INDERTERMINATE)) then
-   begin
-     Exit(UxTheme_ProgressBar(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_TaskDialog}
-   if  SameText(LThemeClass, VSCLASS_TASKDIALOG) then
-   begin
-     Exit(UxTheme_TaskDialog(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_Button}
-   if  LThemeClasses.IndexOf(VSCLASS_BUTTON)>=0 then //SameText(LThemeClass, VSCLASS_BUTTON)  then
-   begin
-     Exit(UxTheme_Button(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
-   {$IFDEF HOOK_TreeView}
-   if  SameText(LThemeClass, VSCLASS_TREEVIEW) then
-   begin
-     Exit(UxTheme_TreeView(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
-   end
-   else
-   {$ENDIF}
    begin
     //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
     //DrawStyleFillRect(hdc, pRect, clPurple);
@@ -3608,9 +3787,6 @@ begin
  end;
 end;
 
-
-
-
 function  Detour_UxTheme_DrawThemeTextEx(hTheme: HTHEME; hdc: HDC; iPartId: Integer; iStateId: Integer; pszText: LPCWSTR; cchText: Integer; dwTextFlags: DWORD; pRect: PRect; var pOptions: TDTTOpts): HResult; stdcall;
 var
   LDetails: TThemedElementDetails;
@@ -3826,9 +4002,95 @@ initialization
  VCLStylesLock    := TCriticalSection.Create;
  THThemesClasses  := TDictionary<HTHEME, string>.Create;
  THThemesHWND     := TDictionary<HTHEME, HWND>.Create;
+ FuncsDrawThemeBackground:= TDictionary<string, TFuncDrawThemeBackground>.Create(TIStringComparer.Ordinal);
 
  if StyleServices.Available then
  begin
+    {$IFDEF HOOK_BREADCRUMBAR}
+    FuncsDrawThemeBackground.Add(VSCLASS_BREADCRUMBAR, @UxTheme_BreadCrumBar);
+    {$ENDIF}
+    {$IFDEF HOOK_TRYHARDER}
+    FuncsDrawThemeBackground.Add(VSCLASS_TRYHARDER, @UxTheme_TryHarder);
+    {$ENDIF}
+    {$IFDEF HOOK_Tab}
+    FuncsDrawThemeBackground.Add(VSCLASS_TAB, @UxTheme_Tab);
+    {$ENDIF}
+    {$IFDEF HOOK_ToolTip}
+    FuncsDrawThemeBackground.Add(VSCLASS_TOOLTIP, @UxTheme_ToolTip);
+    {$ENDIF}
+    {$IFDEF HOOK_TrackBar}
+    FuncsDrawThemeBackground.Add(VSCLASS_TRACKBAR, @UxTheme_TrackBar);
+    {$ENDIF}
+    {$IFDEF HOOK_PreviewPane}
+    FuncsDrawThemeBackground.Add(VSCLASS_PREVIEWPANE, @UxTheme_PreviewPane);
+    {$ENDIF}
+    {$IFDEF HOOK_ToolBar}
+    FuncsDrawThemeBackground.Add(VSCLASS_TOOLBAR, @UxTheme_ToolBar);
+    {$ENDIF}
+    {$IFDEF HOOK_AddressBand}
+    FuncsDrawThemeBackground.Add(VSCLASS_ADDRESSBAND, @UxTheme_AddressBand);
+    {$ENDIF}
+    {$IFDEF HOOK_SearchBox}
+    FuncsDrawThemeBackground.Add(VSCLASS_SEARCHBOX, @UxTheme_SearchBox);
+    {$ENDIF}
+    {$IFDEF HOOK_CommandModule}
+    FuncsDrawThemeBackground.Add(VSCLASS_COMMANDMODULE, @UxTheme_CommandModule);
+    {$ENDIF}
+    {$IFDEF HOOK_Menu}
+    FuncsDrawThemeBackground.Add(VSCLASS_MENU, @UxTheme_Menu);
+    {$ENDIF}
+    {$IFDEF HOOK_Rebar}
+    FuncsDrawThemeBackground.Add(VSCLASS_REBAR, @UxTheme_Rebar);
+    {$ENDIF}
+    {$IFDEF HOOK_Edit}
+    FuncsDrawThemeBackground.Add(VSCLASS_EDIT, @UxTheme_Edit);
+    {$ENDIF}
+    {$IFDEF HOOK_ListBox}
+    FuncsDrawThemeBackground.Add(VSCLASS_LISTBOX, @UxTheme_ListBox);
+    {$ENDIF}
+    {$IFDEF HOOK_Spin}
+    FuncsDrawThemeBackground.Add(VSCLASS_SPIN, @UxTheme_Spin);
+    {$ENDIF}
+    {$IFDEF HOOK_ComboBox}
+    FuncsDrawThemeBackground.Add(VSCLASS_COMBOBOX, @UxTheme_ComboBox);
+    {$ENDIF}
+    {$IFDEF HOOK_ListView}
+    FuncsDrawThemeBackground.Add(VSCLASS_LISTVIEWPOPUP, @UxTheme_ListViewPopup);
+
+    FuncsDrawThemeBackground.Add(VSCLASS_HEADER, @UxTheme_Header);
+    FuncsDrawThemeBackground.Add(VSCLASS_ITEMSVIEW_HEADER, @UxTheme_Header);
+
+    FuncsDrawThemeBackground.Add(VSCLASS_LISTVIEW, @UxTheme_ListView);
+    FuncsDrawThemeBackground.Add(VSCLASS_ITEMSVIEW, @UxTheme_ListView);
+    FuncsDrawThemeBackground.Add(VSCLASS_ITEMSVIEW_LISTVIEW, @UxTheme_ListView);
+    FuncsDrawThemeBackground.Add(VSCLASS_EXPLORER_LISTVIEW, @UxTheme_ListView);
+    {$ENDIF}
+    {$IFDEF HOOK_DateTimePicker}
+    FuncsDrawThemeBackground.Add(VSCLASS_DATEPICKER, @UxTheme_DatePicker);
+    FuncsDrawThemeBackground.Add(VSCLASS_MONTHCAL, @UxTheme_MonthCal);
+    {$ENDIF}
+    {$IFDEF HOOK_Scrollbar}
+    FuncsDrawThemeBackground.Add(VSCLASS_SCROLLBAR, @UxTheme_ScrollBar);
+    {$ENDIF}
+    {$IFDEF HOOK_Progressbar}
+    FuncsDrawThemeBackground.Add(VSCLASS_PROGRESS, @UxTheme_ProgressBar);
+    FuncsDrawThemeBackground.Add(VSCLASS_PROGRESS_INDERTERMINATE, @UxTheme_ProgressBar);
+    {$ENDIF}
+    {$IFDEF HOOK_TaskDialog}
+    FuncsDrawThemeBackground.Add(VSCLASS_TASKDIALOG, @UxTheme_TaskDialog);
+    {$ENDIF}
+    {$IFDEF HOOK_Button}
+    FuncsDrawThemeBackground.Add(VSCLASS_BUTTON, @UxTheme_Button);
+    {$ENDIF}
+    {$IFDEF HOOK_TreeView}
+    FuncsDrawThemeBackground.Add(VSCLASS_TREEVIEW, @UxTheme_TreeView);
+    {$ENDIF}
+    {$IFDEF HOOK_Navigation}
+    if TOSVersion.Check(6,2) then //Windows 8
+      FuncsDrawThemeBackground.Add(VSCLASS_NAVIGATION, @UxTheme_Navigation);
+    {$ENDIF}
+
+
     @TrampolineOpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
     @TrampolineOpenThemeDataEx        := InterceptCreate(themelib, 'OpenThemeDataEx', @Detour_UxTheme_OpenThemeDataEx);
     @TrampolineDrawThemeBackground    := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
@@ -3856,6 +4118,7 @@ finalization
 
   THThemesClasses.Free;
   THThemesHWND.Free;
+  FuncsDrawThemeBackground.Free;
 
   VCLStylesLock.Free;
   VCLStylesLock := nil;

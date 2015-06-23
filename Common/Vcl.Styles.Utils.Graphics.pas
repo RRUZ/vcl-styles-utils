@@ -258,6 +258,8 @@ Type
   procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
   procedure DrawStyleParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
 
+  procedure RotateBitmap(ABitMap: TBitmap; Rads: Single; AdjustSize: Boolean; BackGroundColor: TColor = clNone);
+
 
 implementation
 
@@ -275,6 +277,48 @@ type
   TRGBArray32 = array[0..0] of TRGBQuad;
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
+
+procedure RotateBitmap(ABitMap: TBitmap; Rads: Single; AdjustSize: Boolean; BackGroundColor: TColor = clNone);
+var
+  C: Single;
+  S: Single;
+  LXForm: TXForm;
+  LBuffer: TBitmap;
+begin
+  C := Cos(Rads);
+  S := Sin(Rads);
+  LXForm.eM11 := C;
+  LXForm.eM12 := S;
+  LXForm.eM21 := -S;
+  LXForm.eM22 := C;
+  LBuffer := TBitmap.Create;
+  try
+    LBuffer.TransparentColor := ABitMap.TransparentColor;
+    LBuffer.TransparentMode := ABitMap.TransparentMode;
+    LBuffer.Transparent := ABitMap.Transparent;
+    LBuffer.Canvas.Brush.Color := BackGroundColor;
+    if AdjustSize then
+    begin
+      LBuffer.Width := Round(ABitMap.Width * Abs(C) + ABitMap.Height * Abs(S));
+      LBuffer.Height := Round(ABitMap.Width * Abs(S) + ABitMap.Height * Abs(C));
+      LXForm.eDx := (LBuffer.Width - ABitMap.Width * C + ABitMap.Height * S) / 2;
+      LXForm.eDy := (LBuffer.Height - ABitMap.Width * S - ABitMap.Height * C) / 2;
+    end
+    else
+    begin
+      LBuffer.Width := ABitMap.Width;
+      LBuffer.Height := ABitMap.Height;
+      LXForm.eDx := (ABitMap.Width - ABitMap.Width * C + ABitMap.Height * S) / 2;
+      LXForm.eDy := (ABitMap.Height - ABitMap.Width * S - ABitMap.Height * C) / 2;
+    end;
+    SetGraphicsMode(LBuffer.Canvas.Handle, GM_ADVANCED);
+    SetWorldTransform(LBuffer.Canvas.Handle, LXForm);
+    BitBlt(LBuffer.Canvas.Handle, 0, 0, LBuffer.Width, LBuffer.Height, ABitMap.Canvas.Handle, 0, 0, SRCCOPY);
+    ABitMap.Assign(LBuffer);
+  finally
+    LBuffer.Free;
+  end;
+end;
 
 procedure Bitmap24_Grayscale(ABitmap: TBitmap);
 var
