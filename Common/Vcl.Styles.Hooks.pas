@@ -183,6 +183,9 @@ var
   LBitmap : TBitmap;
   s       : string;
 begin
+  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+    Exit(TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
+
   if (hInst>0) and (ImageType=IMAGE_BITMAP) and (X=0) and (Y=0) and IS_INTRESOURCE(ImageName) then
   begin
     hModule:=GetModuleHandle(ExplorerFrame);
