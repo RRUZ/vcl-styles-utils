@@ -58,15 +58,15 @@ done   fix navigation buttons
 {$DEFINE HOOK_EDIT}
 {$DEFINE HOOK_Rebar}
 {$DEFINE HOOK_ToolBar}
-{$DEFINE HOOK_Menu}
+{.$DEFINE HOOK_Menu}
 {$DEFINE HOOK_TrackBar}
 {$DEFINE HOOK_ToolTip}
 {$DEFINE HOOK_Tab}
 
 
-//Undocumented
+//Undocumented Windows Themes
 
-//introduced in Windows Vista
+//Introduced in Windows Vista
 
 {$DEFINE HOOK_CommandModule}
 {$DEFINE HOOK_SearchBox}
@@ -74,8 +74,9 @@ done   fix navigation buttons
 {$DEFINE HOOK_PreviewPane}
 {$DEFINE HOOK_TRYHARDER}
 {$DEFINE HOOK_BREADCRUMBAR}
+{$DEFINE HOOK_InfoBar}
 
-//introduced in Windows 8
+//Introduced in Windows 8
 {$DEFINE HOOK_Navigation}
 
 
@@ -162,6 +163,13 @@ const
 const
   VSCLASS_PROPERTREE                   = 'PROPERTREE';
 {$ENDIF}
+
+
+{$IFDEF HOOK_InfoBar}
+const
+  VSCLASS_INFOBAR                      = 'InfoBar';
+{$ENDIF}
+
 
 {$IFDEF HOOK_Menu}
 const
@@ -306,6 +314,58 @@ begin
     CloseThemeData(hThemeNew);
 end;
 
+
+
+function UxTheme_InfoBar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
+var
+  LDetails  : TThemedElementDetails;
+  LColor    : TColor;
+begin
+   case iPartId of
+       1 :
+         begin
+                case iStateId of
+                   1 :            //normal
+                                  begin
+                                    LDetails:=StyleServices.GetElementDetails(tpPanelBackground);
+                                    StyleServices.GetElementColor(LDetails, ecFillColor, LColor);
+                                    DrawStyleFillRect(hdc, pRect, LColor);
+                                    Exit(S_OK);
+                                  end;
+
+                   2 :           //hot
+                                  begin
+                                    LDetails:=StyleServices.GetElementDetails(tpPanelBackground);
+                                    StyleServices.GetElementColor(LDetails, ecFillColor, LColor);
+                                    DrawStyleFillRect(hdc, pRect, LColor);
+                                    Exit(S_OK);
+                                  end;
+
+
+                   3 :            //Pressed
+                                  begin
+                                    LDetails:=StyleServices.GetElementDetails(tpPanelBackground);
+                                    StyleServices.GetElementColor(LDetails, ecFillColor, LColor);
+                                    DrawStyleFillRect(hdc, pRect, LColor);
+                                    Exit(S_OK);
+                                  end;
+
+                   4 :            //selected
+                                  begin
+                                    LDetails:=StyleServices.GetElementDetails(tpPanelBackground);
+                                    StyleServices.GetElementColor(LDetails, ecFillColor, LColor);
+                                    DrawStyleFillRect(hdc, pRect, LColor);
+                                    Exit(S_OK);
+                                  end;
+                end;
+
+
+         end;
+   end;
+   //OutputDebugString(PChar(Format('UxTheme_InfoBar class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+end;
+
 function UxTheme_BreadCrumBar(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 begin
    case iPartId of
@@ -349,6 +409,7 @@ begin
    //OutputDebugString(PChar(Format('UxTheme_BreadCrumBar class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
+
 
 
 function UxTheme_TryHarder(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
@@ -554,7 +615,7 @@ begin
        end;
    end;
 
-   //OutputDebugString(PChar(Format('UxTheme_TrackBar class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+   OutputDebugString(PChar(Format('UxTheme_TrackBar class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
@@ -2208,6 +2269,10 @@ begin
 
 end;
 
+
+
+{$IFDEF HOOK_Menu}
+
   procedure DrawMenuSpecialChar(DC: HDC; const Sign: Char; DestRect: TRect; const Bold: Boolean = False; const Disabled: Boolean = False);
   var
     LogFont: TLogFont;
@@ -2264,7 +2329,6 @@ end;
       end;
   end;
 
-{$IFDEF HOOK_Menu}
 function UxTheme_Menu(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 var
   LRect : TRect;
@@ -2388,17 +2452,17 @@ begin
             Exit(S_OK);
          end;
 
-
-//       MENU_POPUPBACKGROUND :
-//         begin
-//             //if hwnd<>0  then
-//               //DrawParentBackground(hwnd, hdc, pRect);
-//            //OutputDebugString(PChar(Format('UxTheme_Menu class %s hTheme %d iPartId %d iStateId %d prect Left %d Top %d Width %d Height %d ',
-//            //[LThemeClass, hTheme, iPartId, iStateId, pRect.Left, pRect.Top, pRect.Width, pRect.Height])));
-//            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
-//            //DrawStyleFillRect(hdc, pRect, clGreen);
-//            Exit(S_OK);
-//         end;
+//
+       MENU_POPUPBACKGROUND :
+         begin
+             //if hwnd<>0  then
+               //DrawParentBackground(hwnd, hdc, pRect);
+            //OutputDebugString(PChar(Format('UxTheme_Menu class %s hTheme %d iPartId %d iStateId %d prect Left %d Top %d Width %d Height %d ',
+            //[LThemeClass, hTheme, iPartId, iStateId, pRect.Left, pRect.Top, pRect.Width, pRect.Height])));
+            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
+            //DrawStyleFillRect(hdc, pRect, clGreen);
+            Exit(S_OK);
+         end;
 
       MENU_POPUPSUBMENU :    //OK
          begin
@@ -2917,16 +2981,14 @@ end;
 function Detour_UxTheme_DrawThemeMain(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground): HRESULT; stdcall;
 var
   LThemeClass : string;
-  LThemeClasses : TStrings;
   LHWND       : HWND;
-
   LFuncDrawThemeBackground : TFuncDrawThemeBackground;
 begin
-
- LThemeClasses:=TStringList.Create;
- try
   VCLStylesLock.Enter;
   try
+    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+
     if not THThemesClasses.ContainsKey(hTheme)  then
     begin
       LThemeClass:=GetThemeClass(hTheme, iPartId, iStateId);
@@ -2934,34 +2996,20 @@ begin
       begin
        THThemesClasses.Add(hTheme, LThemeClass);
        THThemesHWND.Add(hTheme, 0);
+      end
+      else
+      begin
+       //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+       Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
       end;
     end
     else
     LThemeClass := THThemesClasses.Items[hTheme];
 
-
-    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not THThemesClasses.ContainsKey(hTheme) then
-      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
-
-//    if (LThemeClass<>'')  then
-//    begin
-//        OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-//    end
-//    else
-//      OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
-//
-
 //    DrawStyleFillRect(hdc, pRect, clGray);
 //    Exit(S_OK);
 //
-
-    ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
     LHWND := THThemesHWND.Items[hTheme];
-
-  finally
-    VCLStylesLock.Leave;
-  end;
-
 
    if FuncsDrawThemeBackground.ContainsKey(LThemeClass) then
    begin
@@ -2970,14 +3018,15 @@ begin
    end
    else
    begin
-    //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-    //DrawStyleFillRect(hdc, pRect, clPurple);
-    //Exit(S_OK);
+//    OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+//    DrawStyleFillRect(hdc, pRect, clPurple);
+//    Exit(S_OK);
     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
    end;
- finally
-  LThemeClasses.Free;
- end;
+
+  finally
+    VCLStylesLock.Leave;
+  end;
 end;
 
 function Detour_UxTheme_DrawThemeBackgroundEx(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pOptions: Pointer): HRESULT; stdcall;
@@ -3041,7 +3090,7 @@ begin
          TMT_TEXTCOLOR :
          begin
            Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-           if (Result=S_OK) and  (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) then
+           if (Result=S_OK) and (@TrampolineGetSysColor<>nil) and (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) then
            begin
              //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
              pColor:=ColorToRGB(StyleServices.GetSystemColor(clWindowText));
@@ -3082,10 +3131,10 @@ begin
 //           end;
        end;
      end;
-
+//
 //             pColor:=ColorToRGB(clRed);
 //             Exit(S_OK);
-//
+
 
 
     if SameText(LThemeClass, VSCLASS_TOOLTIP) then
@@ -3426,7 +3475,7 @@ begin
      ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
      //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s %s', [hTheme, iPartId, iStateId, pszText, LThemeClass])));
 
-//     if Pos('ggg', pszText)>0 then
+//     if Pos('Includes', pszText)>0 then
 //       OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d class %s iPartId %d iStateId %d  text %s', [hTheme, LThemeClass, iPartId, iStateId, pszText])));
 
 
@@ -3808,7 +3857,7 @@ begin
    VCLStylesLock.Leave;
  end;
 //
-//  if SameText(pszText, 'ggg') then
+//  if Pos('Includes', pszText)>0 then
 //   OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
 
 //   if SameText(LThemeClass, VSCLASS_PREVIEWPANE) then
@@ -4006,6 +4055,9 @@ initialization
 
  if StyleServices.Available then
  begin
+    {$IFDEF HOOK_InfoBar}
+    FuncsDrawThemeBackground.Add(VSCLASS_INFOBAR, @UxTheme_InfoBar);
+    {$ENDIF}
     {$IFDEF HOOK_BREADCRUMBAR}
     FuncsDrawThemeBackground.Add(VSCLASS_BREADCRUMBAR, @UxTheme_BreadCrumBar);
     {$ENDIF}
@@ -4097,11 +4149,11 @@ initialization
     @TrampolineDrawThemeBackgroundEx  := InterceptCreate(themelib, 'DrawThemeBackgroundEx', @Detour_UxTheme_DrawThemeBackgroundEx);
     @TrampolineDrawThemeEdge          := InterceptCreate(themelib, 'DrawThemeEdge', @Detour_UxTheme_DrawThemeEdge);
 
-    @TrampolineDrawThemeText          := InterceptCreate(themelib,'DrawThemeText', @Detour_UxTheme_DrawThemeText);
-    @TrampolineDrawThemeTextEx        := InterceptCreate(themelib,'DrawThemeTextEx', @Detour_UxTheme_DrawThemeTextEx);
-    @TrampolineGetThemeSysColor       := InterceptCreate(themelib,'GetThemeSysColor', @Detour_GetThemeSysColor);
-    @TrampolineGetThemeSysColorBrush  := InterceptCreate(themelib,'GetThemeSysColorBrush', @Detour_GetThemeSysColorBrush);
-    @TrampolineGetThemeColor          := InterceptCreate(themelib,'GetThemeColor', @Detour_GetThemeColor);
+    @TrampolineDrawThemeText          := InterceptCreate(themelib, 'DrawThemeText', @Detour_UxTheme_DrawThemeText);
+    @TrampolineDrawThemeTextEx        := InterceptCreate(themelib, 'DrawThemeTextEx', @Detour_UxTheme_DrawThemeTextEx);
+    @TrampolineGetThemeSysColor       := InterceptCreate(themelib, 'GetThemeSysColor', @Detour_GetThemeSysColor);
+    @TrampolineGetThemeSysColorBrush  := InterceptCreate(themelib, 'GetThemeSysColorBrush', @Detour_GetThemeSysColorBrush);
+    @TrampolineGetThemeColor          := InterceptCreate(themelib, 'GetThemeColor', @Detour_GetThemeColor);
  end;
 
 finalization

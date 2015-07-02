@@ -2837,12 +2837,12 @@ if StyleServices.Available then
 begin
   with TSysStyleManager do
   begin
-    RegisterSysStyleHook('Button', TSysButtonStyleHook);
-    RegisterSysStyleHook('Edit', TSysEditStyleHook);
+    RegisterSysStyleHook(WC_BUTTON, TSysButtonStyleHook);
+    RegisterSysStyleHook(WC_EDIT, TSysEditStyleHook);
     RegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
-    RegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
-    RegisterSysStyleHook('Static', TSysStaticStyleHook);
+    RegisterSysStyleHook(WC_COMBOBOX, TSysComboBoxStyleHook);
+    RegisterSysStyleHook( 'ListBox', TSysListBoxStyleHook);
+    RegisterSysStyleHook( 'Static', TSysStaticStyleHook);
   end;
 end;
 
@@ -2850,10 +2850,10 @@ finalization
 
 with TSysStyleManager do
 begin
-  UnRegisterSysStyleHook('Button', TSysButtonStyleHook);
-  UnRegisterSysStyleHook('Edit', TSysEditStyleHook);
+  UnRegisterSysStyleHook(WC_BUTTON, TSysButtonStyleHook);
+  UnRegisterSysStyleHook(WC_EDIT, TSysEditStyleHook);
   UnRegisterSysStyleHook('ComboLBox', TSysListBoxStyleHook);
-  UnRegisterSysStyleHook('ComboBox', TSysComboBoxStyleHook);
+  UnRegisterSysStyleHook(WC_COMBOBOX, TSysComboBoxStyleHook);
   UnRegisterSysStyleHook('ListBox', TSysListBoxStyleHook);
   UnRegisterSysStyleHook('Static', TSysStaticStyleHook);
 end;

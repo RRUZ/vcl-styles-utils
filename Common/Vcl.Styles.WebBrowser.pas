@@ -22,7 +22,7 @@
 unit Vcl.Styles.WebBrowser;
 
 interface
-//Uncomment this option if you want which the TVclStylesWebBrowser hook the dialogs messages directly.
+//Uncomment this option if you want which the TVclStylesWebBrowser class hook the dialogs messages directly.
 {.$DEFINE HOOKDialogs}
 uses
   System.Classes,
@@ -492,7 +492,7 @@ begin
     ChildHWND := GetWindow(TempHWND, GW_CHILD);
     if ChildHWND=0 then break;
     GetClassName(ChildHWND, lpClassName, SizeOf(lpClassName));
-    if SameText(string(lpClassName),'Internet Explorer_Server') then
+    if SameText(string(lpClassName), 'Internet Explorer_Server') then
     begin
       Result :=ChildHWND;
       Exit;

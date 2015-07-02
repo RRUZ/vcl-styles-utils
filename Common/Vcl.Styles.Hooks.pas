@@ -15,8 +15,11 @@
 // The Original Code is Vcl.Styles.Hooks.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
+//
 // Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
+//
 // Contributor(s): Mahdi Safsafi.
+//
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -51,10 +54,10 @@ uses
   WinApi.Messages,
   Vcl.Graphics,
 {$IFDEF HOOK_UXTHEME}
+  Vcl.Styles.Utils.Graphics,
   Vcl.Styles.UxTheme,
 {$ENDIF HOOK_UXTHEME}
   Vcl.Styles.Utils.SysControls,
-  Vcl.Styles.Utils.Graphics,
   Vcl.Forms,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
@@ -72,7 +75,9 @@ var
   TrampolineFillRect  : function(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
   TrampolineDrawEdge  : function(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;  stdcall = nil;
   TrampolineSetStyle  : procedure(Self: TObject; Style: TCustomStyleServices);
+  {$IFDEF HOOK_UXTHEME}
   TrampolineLoadImageW: function (hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall = nil;
+  {$ENDIF HOOK_UXTHEME}
 
 
 function Detour_DrawEdge(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
@@ -175,6 +180,7 @@ begin
   end;
 end;
 
+{$IFDEF HOOK_UXTHEME}
 function Detour_LoadImageW(hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall;
 const
   ExplorerFrame = 'explorerframe.dll';
@@ -209,7 +215,7 @@ begin
 
   Result:= TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
 end;
-
+{$ENDIF HOOK_UXTHEME}
 
 
 initialization
@@ -233,8 +239,10 @@ begin
   @TrampolineFillRect := InterceptCreate(user32, 'FillRect', @Detour_FillRect);
   @TrampolineDrawEdge := InterceptCreate(user32, 'DrawEdge', @Detour_DrawEdge);
 
+{$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
    @TrampolineLoadImageW := InterceptCreate(user32, 'LoadImageW', @Detour_LoadImageW);
+{$ENDIF HOOK_UXTHEME}
 
   @TrampolineSetStyle := InterceptCreate(@LSetStylePtr, @Detour_SetStyle);
   EndHooks;
@@ -248,8 +256,10 @@ finalization
   InterceptRemove(@TrampolineFillRect);
   InterceptRemove(@TrampolineDrawEdge);
 
+{$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
     InterceptRemove(@TrampolineLoadImageW);
+{$ENDIF HOOK_UXTHEME}
 
   InterceptRemove(@TrampolineSetStyle);
   EndUnHooks;

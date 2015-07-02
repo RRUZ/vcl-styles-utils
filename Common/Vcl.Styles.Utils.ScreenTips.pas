@@ -53,6 +53,7 @@ type
 implementation
 
 uses
+  Winapi.CommCtrl,
   Vcl.Styles.Utils.SysControls;
 
 { TSysTooltipsStyleHook }
@@ -141,10 +142,10 @@ end;
 initialization
 
 if StyleServices.Available then
-  TSysStyleManager.RegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
+  TSysStyleManager.RegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
 
 finalization
 
-TSysStyleManager.UnRegisterSysStyleHook('tooltips_class32', TSysTooltipsStyleHook);
+TSysStyleManager.UnRegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
 
 end.

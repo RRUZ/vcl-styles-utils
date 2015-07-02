@@ -612,11 +612,27 @@ begin
     Exit;
   end;
 
-  if SameText(LInfo.ClassName, 'ToolBarWindow32') then
+  if SameText(LInfo.ClassName,  WC_LISTVIEW) then
   begin
+    if SameText(LInfo.ParentClassName, 'listviewpopup') then
+     Result:=False;
+  end
+  else
+  if SameText(LInfo.ClassName, TRACKBAR_CLASS) then
+  begin
+    if SameText(LInfo.ParentClassName, 'ViewControlClass') then
+     Result:=False;
+  end
+  else
+  //Prevent hook Toolbars on DirectUIHWND
+  if SameText(LInfo.ClassName, TOOLBARCLASSNAME) then
+  begin
+    if SameText(LInfo.ParentClassName, 'ViewControlClass') then
+     Result:=False
+    else
     if Root > 0 then
     begin
-      C := FindWinFromRoot(Root, 'ReBarWindow32');
+      C := FindWinFromRoot(Root, REBARCLASSNAME);
       Result := not(C > 0);
     end;
   end;
