@@ -247,24 +247,14 @@ begin
 end;
 
 
-function AreBitmapsEqual(Bitmap1, Bitmap2: TBitmap): Boolean;
-var
- i, ScanBytes : Integer;
+function GetStyleHighLightColor : TColor;
 begin
-  Result:= (Bitmap1<>nil) and (Bitmap2<>nil);
-  if not Result then exit;
-  Result:=(bitmap1.Width=bitmap2.Width) and (bitmap1.Height=bitmap2.Height) and (bitmap1.PixelFormat=bitmap2.PixelFormat);
-
-  if not Result then exit;
-
-  ScanBytes := Abs(Integer(Bitmap1.Scanline[1]) - Integer(Bitmap1.Scanline[0]));
-  for i:=0 to Bitmap1.Height-1 do
-  Begin
-    Result:=CompareMem(Bitmap1.ScanLine[i], Bitmap2.ScanLine[i], ScanBytes);
-    if not Result then exit;
-  End;
-
+  if ColorIsBright(StyleServices.GetSystemColor(clBtnFace)) or not ColorIsBright(StyleServices.GetSystemColor(clHighlight)) then
+    Result := StyleServices.GetSystemColor(clBtnText)
+  else
+    Result := StyleServices.GetSystemColor(clHighlight);
 end;
+
 
 function GetThemeClass(hTheme: HTHEME ; iPartId, iStateId: Integer) : string;
 var
@@ -1334,7 +1324,7 @@ begin
 //                                      HSAS_SORTEDDOWN  : LDetails:=StyleServices.GetElementDetails(thHeaderSortArrowSortedDown);
 //                                  end;
 
-                            LColor:= StyleServices.GetSystemColor(clHighlight);
+                            LColor := GetStyleHighLightColor;
                             LRect:= pRect;
                             LRect.Top :=  LRect.Top + 3;
                             if (iStateId=HSAS_SORTEDUP) then
@@ -2820,7 +2810,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 5;
                           LRect.Width := LRect.Width + 5;
-                          DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
                           Exit(S_OK);
                        end;
 
@@ -2830,7 +2820,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 2;
                           LRect.Width := LRect.Width + 2;
-                          DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
                           Exit(S_OK);
                        end;
                  end;
@@ -2846,7 +2836,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 5;
                           LRect.Width := LRect.Width + 5;
-                          DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
                           Exit(S_OK);
                        end;
                   //hot
@@ -2855,7 +2845,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 5;
                           LRect.Width := LRect.Width + 5;
-                          DrawStyleDownArrow(hdc, LRect, StyleServices.GetSystemColor(clHighlight));
+                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
                           Exit(S_OK);
                        end;
                  end;
@@ -3238,7 +3228,7 @@ begin
 
           5 :
               case iStateId  of
-               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+               0 :  ColorToRGB(StyleServices.GetSystemColor(clHighlight));
               end;
 
           6 :
@@ -3248,7 +3238,7 @@ begin
 
           7 :
               case iStateId  of
-               1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+               1 :  pColor:= GetStyleHighLightColor;
                2 :  pColor:= ColorToRGB(clGreen);
               end;
 
@@ -3271,7 +3261,6 @@ begin
        end
        else
          Result:=S_OK;
-
       end
       else
       {$ENDIF}
@@ -3398,7 +3387,7 @@ begin
           //button with dropdown
           3 :
               case iStateId  of
-               1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));//OK
+               1 :  pColor:= GetStyleHighLightColor;
                6 :  pColor:= clYellow;//StyleServices.GetSystemColor(clBtnShadow);
               end;
 
@@ -3413,7 +3402,7 @@ begin
 
           10 :
               case iStateId  of
-               1 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+               1 :  pColor:= GetStyleHighLightColor;
               end;
         end;
 
@@ -3448,7 +3437,7 @@ begin
   //Canvas.Font := TWinControlClass(Control).Font;
   Canvas.Font.Color := ThemeTextColor;
   TextFormat := TTextFormatFlags(Flags);
-   DrawText(Canvas.Handle, S,  Length(S), R, TTextFormatFlags(TextFormat));
+  DrawText(Canvas.Handle, S,  Length(S), R, TTextFormatFlags(TextFormat));
 end;
 
 
@@ -3501,13 +3490,13 @@ begin
 
                               TS_HOT    :
                                             begin
-                                               ThemeTextColor:=StyleServices.GetSystemColor(clHighlight);
+                                               ThemeTextColor:=GetStyleHighLightColor;
                                                LDetails:=StyleServices.GetElementDetails(ttbButtonHot);
                                             end;
 
                               TS_PRESSED    :
                                             begin
-                                               ThemeTextColor:=StyleServices.GetSystemColor(clHighlight);
+                                               ThemeTextColor:=GetStyleHighLightColor;
                                                LDetails:=StyleServices.GetElementDetails(ttbButtonPressed);
                                             end;
 
@@ -3519,7 +3508,7 @@ begin
 
                               TS_OTHERSIDEHOT    :
                                             begin
-                                               ThemeTextColor:=StyleServices.GetSystemColor(clHighlight);
+                                               ThemeTextColor:=GetStyleHighLightColor;
                                                LDetails:=StyleServices.GetElementDetails(ttbButtonHot);
                                             end;
 

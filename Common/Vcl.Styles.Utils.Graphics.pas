@@ -259,6 +259,7 @@ Type
   procedure DrawStyleParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
 
   procedure RotateBitmap(ABitMap: TBitmap; Rads: Single; AdjustSize: Boolean; BackGroundColor: TColor = clNone);
+  function ColorIsBright(AColor : TColor) : Boolean;
 
 
 implementation
@@ -277,6 +278,30 @@ type
   TRGBArray32 = array[0..0] of TRGBQuad;
 
   TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
+
+procedure GetRGB(Col: TColor; var R, G, B: byte);
+var
+  Color: $0..$FFFFFFFF;
+begin
+  Color := ColorToRGB(Col);
+  R     := ($000000FF and Color);
+  G     := ($0000FF00 and Color) shr 8;
+  B     := ($00FF0000 and Color) shr 16;
+end;
+
+
+function ColorIsBright(AColor : TColor) : Boolean;
+var
+ R, G , B : byte;
+ Delta : Double;
+begin
+  GetRGB(AColor, R, G, B);
+  // Counting the perceptive luminance - human eye favors green color...
+  Delta := 1 - ( (0.299 * R) + (0.587 * G) + (0.114 * B) )/255;
+  Result:= (Delta < 0.5);
+end;
+
+
 
 procedure RotateBitmap(ABitMap: TBitmap; Rads: Single; AdjustSize: Boolean; BackGroundColor: TColor = clNone);
 var
@@ -548,15 +573,6 @@ begin
 end;
 
 
-procedure GetRGB(Col: TColor; var R, G, B: byte);
-var
-  Color: $0..$FFFFFFFF;
-begin
-  Color := ColorToRGB(Col);
-  R     := ($000000FF and Color);
-  G     := ($0000FF00 and Color) shr 8;
-  B     := ($00FF0000 and Color) shr 16;
-end;
 
 
 procedure _ProcessBitmap32(const Dest: TBitmap;Value: Integer;_Process:TFilterCallback); overload;
