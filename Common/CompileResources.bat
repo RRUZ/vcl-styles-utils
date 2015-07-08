@@ -1,0 +1,2 @@
+"C:\Program Files (x86)\Embarcadero\Studio\16.0\bin\brcc32.exe" AwesomeFont.rc
+Pause

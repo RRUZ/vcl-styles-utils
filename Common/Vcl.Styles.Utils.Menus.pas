@@ -1077,6 +1077,7 @@ begin
 //        Exit;
 //      end;
 
+
     MN_SELECTITEM, WM_PRINT:
       begin
         if (not OverridePaint) or (not OverridePaintNC) then
@@ -1352,13 +1353,14 @@ begin
 
   Result := '';
 
-  FillChar(pMenuItemInfo, sizeof(MENUITEMINFO), Char(0));
-  pMenuItemInfo.cbSize := sizeof(MENUITEMINFO);
+  FillChar(pMenuItemInfo, SizeOf(MENUITEMINFO), Char(0));
+  pMenuItemInfo.cbSize := SizeOf(MENUITEMINFO);
   pMenuItemInfo.fMask := MIIM_STRING or MIIM_FTYPE;
   pMenuItemInfo.dwTypeData := nil;
   if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
   begin
-    if not(pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW) then
+     //Fix for shell menus on W10
+    if (VCLMenuItems=nil) or (not (pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW)) then
     begin
       { The Size needed for the Buffer . }
       StrSize := pMenuItemInfo.cch * 2 + 2;
