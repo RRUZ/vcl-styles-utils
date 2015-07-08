@@ -181,29 +181,67 @@ begin
 end;
 
 {$IFDEF HOOK_UXTHEME}
+
 function Detour_LoadImageW(hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall;
 const
   ExplorerFrame = 'explorerframe.dll';
 var
   hModule : WinApi.Windows.HMODULE;
   LBitmap : TBitmap;
-  s       : string;
+//  LIcon   : TIcon;
+//  s       : string;
+//  LStream : TMemoryStream;
+
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Exit(TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
+
+//
+//  if IS_INTRESOURCE(ImageName) and (Integer(ImageName)=5100) and (ImageType=IMAGE_ICON)  then
+//  begin
+//    s := IntToStr(Integer(ImageName));
+//    Result:= TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
+//
+//
+//    if  (ImageType=IMAGE_ICON) then
+//    begin
+//      LIcon:=TIcon.Create;
+//      try
+//        LIcon.Handle := Result;
+//        //LIcon.SaveToFile('C:\Users\Rodrigo\Desktop\vcl-styles-utils\Vcl Styles Utils New Dialogs (Demo App)\Win32\Debug\Images\'+s+'.ico');
+//
+//        LStream:=TMemoryStream.Create;
+//        try
+//          LIcon.SaveToStream(LStream);
+//
+//
+//        finally
+//          LStream.Free;
+//        end;
+//
+//        LIcon.ReleaseHandle;
+//
+//
+//      finally
+//        LIcon.Free;
+//      end;
+//    end;
+//
+//  end;
+
 
   if (hInst>0) and (ImageType=IMAGE_BITMAP) and (X=0) and (Y=0) and IS_INTRESOURCE(ImageName) then
   begin
     hModule:=GetModuleHandle(ExplorerFrame);
     if (hModule = hInst) then
     begin
-      s := IntToStr(Integer(ImageName));
+      //s := IntToStr(Integer(ImageName));
       Result:= TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
       LBitmap:=TBitmap.Create;
       try
         LBitmap.Handle := Result;
         Bitmap32_Grayscale(LBitmap);
-        _BlendBurn32(LBitmap, StyleServices.GetSystemColor(clHighlight));
+        _BlendMultiply32(LBitmap, StyleServices.GetSystemColor(clHighlight));
         LBitmap.ReleaseHandle;
       finally
         LBitmap.Free;
@@ -217,6 +255,8 @@ begin
 end;
 {$ENDIF HOOK_UXTHEME}
 
+
+//dont hook CreateSolidBrush, because is used internally but GetSysColorBrush
 
 initialization
 
@@ -242,6 +282,9 @@ begin
 {$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
    @TrampolineLoadImageW := InterceptCreate(user32, 'LoadImageW', @Detour_LoadImageW);
+
+  // @TrampolineCopyImage := InterceptCreate(user32, 'CopyImage', @Detour_CopyImage);
+
 {$ENDIF HOOK_UXTHEME}
 
   @TrampolineSetStyle := InterceptCreate(@LSetStylePtr, @Detour_SetStyle);
@@ -259,6 +302,8 @@ finalization
 {$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
     InterceptRemove(@TrampolineLoadImageW);
+
+ // InterceptRemove(@TrampolineCopyImage);
 {$ENDIF HOOK_UXTHEME}
 
   InterceptRemove(@TrampolineSetStyle);
