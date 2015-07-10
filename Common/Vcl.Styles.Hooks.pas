@@ -182,52 +182,93 @@ end;
 
 {$IFDEF HOOK_UXTHEME}
 
+
+procedure _BlendMultiply(const AColor: TColor; Value: Integer; out NewColor:TColor);
+var
+  r, g, b      : byte;
+  ARGB         : TColor;
+  br, bg, bb   : byte;
+begin
+  if AColor=clWhite then
+   NewColor:=AColor
+  else
+  begin
+    ARGB := Value;
+    GetRGB(AColor, r, g, b);
+    GetRGB(ARGB, br, bg, bb);
+    r:=(r*br) shr 8;
+    g:=(g*bg) shr 8;
+    b:=(b*bb) shr 8;
+    NewColor:= RGB(r,g,b);
+  end;
+end;
+
+function RoundIntToByte(i: integer): byte;
+begin
+  if i > 255 then Result := 255
+  else
+  if i < 0   then Result := 0
+  else
+    Result := i;
+end;
+
+procedure _BlendBurn(const AColor: TColor;Value: Integer; out NewColor:TColor);
+var
+  ARGB         : TColor;
+  r, g, b      : byte;
+  br, bg, bb   : byte;
+  c            : Integer;
+begin
+  if AColor=clWhite then
+   NewColor:=AColor
+  else
+  begin
+    GetRGB(AColor, r,g, b);
+    ARGB := Value;
+    GetRGB(ARGB, br,bg, bb);
+
+    if br=0 then
+     r:=0
+    else
+    begin
+     c:=RoundIntToByte(255-(((255-r) SHL 8) DIV br));
+     r:=c;
+    end;
+
+    if bg=0 then
+     g:=0
+    else
+    begin
+     c:=RoundIntToByte(255-(((255-g) SHL 8) DIV bg));
+     g:=c;
+    end;
+
+    if bb=0 then
+     b:=0
+    else
+    begin
+     c:=RoundIntToByte(255-(((255-b) SHL 8) DIV bb));
+     b:=c;
+    end;
+
+    NewColor:=RGB(r, g, b);
+  end;
+end;
+
+
+
 function Detour_LoadImageW(hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall;
 const
   ExplorerFrame = 'explorerframe.dll';
 var
   hModule : WinApi.Windows.HMODULE;
-  LBitmap : TBitmap;
-//  LIcon   : TIcon;
-//  s       : string;
-//  LStream : TMemoryStream;
-
+  LBitmap, LBuffer : TBitmap;
+  s       : string;
+  LRect : TRect;
+  LBackColor, LColor : TColor;
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Exit(TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
-
-//
-//  if IS_INTRESOURCE(ImageName) and (Integer(ImageName)=5100) and (ImageType=IMAGE_ICON)  then
-//  begin
-//    s := IntToStr(Integer(ImageName));
-//    Result:= TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
-//
-//
-//    if  (ImageType=IMAGE_ICON) then
-//    begin
-//      LIcon:=TIcon.Create;
-//      try
-//        LIcon.Handle := Result;
-//        //LIcon.SaveToFile('C:\Users\Rodrigo\Desktop\vcl-styles-utils\Vcl Styles Utils New Dialogs (Demo App)\Win32\Debug\Images\'+s+'.ico');
-//
-//        LStream:=TMemoryStream.Create;
-//        try
-//          LIcon.SaveToStream(LStream);
-//
-//
-//        finally
-//          LStream.Free;
-//        end;
-//
-//        LIcon.ReleaseHandle;
-//
-//
-//      finally
-//        LIcon.Free;
-//      end;
-//    end;
-//
-//  end;
 
 
   if (hInst>0) and (ImageType=IMAGE_BITMAP) and (X=0) and (Y=0) and IS_INTRESOURCE(ImageName) then
@@ -235,13 +276,133 @@ begin
     hModule:=GetModuleHandle(ExplorerFrame);
     if (hModule = hInst) then
     begin
-      //s := IntToStr(Integer(ImageName));
+      s := IntToStr(Integer(ImageName));
       Result:= TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
       LBitmap:=TBitmap.Create;
       try
         LBitmap.Handle := Result;
-        Bitmap32_Grayscale(LBitmap);
+
+        //Only for Windows Vista and 7
+        if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
+        begin
+          LBackColor:= StyleServices.GetSystemColor(clWindow);
+          LRect:=Rect(0, 0, LBitmap.Width, LBitmap.Height );
+          case Integer(ImageName) of
+           //Magnifier
+           34560..34562
+                    :
+                     begin
+                        LColor:= StyleServices.GetSystemColor(clHighlight);
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_search, LRect, LColor);
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                        //Bitmap32_SetAlphaByColor(LBitmap, 255, LColor);
+                     end;
+
+           //cross button normal
+           34569..34571
+                    :
+                     begin
+                        LColor:= StyleServices.GetSystemColor(clWindowText);
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+           //cross button hot
+           34575..34577,
+           34581..34583
+                    :
+                     begin
+                        LColor:= StyleServices.GetSystemColor(clHighlight);
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+           //Right Arrow, cross button, refresh, down arrow
+            288
+                    :
+                     begin
+                        LColor:= StyleServices.GetSystemColor(clBtnText);
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+
+                        LRect:=Rect(0, 0, 16, 16);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+
+                        OffsetRect(LRect, 16, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+
+                        OffsetRect(LRect, 16, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect, LColor);
+
+                        OffsetRect(LRect, 16, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+            //navigation buttons (arrows)
+            577..579,
+            581
+                    :
+                     begin
+                        case Integer(ImageName) of
+                          577 : LColor:= StyleServices.GetSystemColor(clBtnText);
+                          578 : LColor:= StyleServices.GetSystemColor(clHighlight);
+                          579 : LColor:= StyleServices.GetSystemColor(clGrayText);
+                          581 : LColor:= StyleServices.GetSystemColor(clBtnText);
+                        end;
+
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+
+                        LRect:=Rect(0, 0, 27, 27);
+                        InflateRect(LRect, -4, -4);
+
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
+
+                        OffsetRect(LRect, 27 + 4, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+            280     //background navigation buttons
+                    :
+                     begin
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+
+                        LRect:=Rect(0, 8, 12, 20);
+
+                        LColor:= StyleServices.GetSystemColor(clGrayText);
+                        OffsetRect(LRect, 58, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+
+                        LColor:= StyleServices.GetSystemColor(clBtnText);
+                        OffsetRect(LRect, 70, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+
+                        LColor:= StyleServices.GetSystemColor(clHighlight);
+                        OffsetRect(LRect, 70, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+
+                        LColor:= StyleServices.GetSystemColor(clHighlight);
+                        OffsetRect(LRect, 70, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+          else
+               begin
+                 Bitmap32_Grayscale(LBitmap);
+                 _ProcessBitmap32(LBitmap, StyleServices.GetSystemColor(clHighlight), _BlendBurn)
+               end;
+          end;
+        end
+        else
         _BlendMultiply32(LBitmap, StyleServices.GetSystemColor(clHighlight));
+
         LBitmap.ReleaseHandle;
       finally
         LBitmap.Free;

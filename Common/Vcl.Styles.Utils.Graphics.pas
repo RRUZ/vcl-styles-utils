@@ -571,6 +571,7 @@ type
   TAwesomeFont = class
   private
     FFontHandle : THandle;
+    FDefaultQuality : DWORD;
     procedure LoadFontFromResource;
   public
    constructor Create;
@@ -578,6 +579,9 @@ type
    procedure DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor : TColor); overload;
    procedure DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor : TColor); overload;
   end;
+
+
+  TImageFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
 
 const
   MaxHue = 180;
@@ -592,7 +596,11 @@ const
   MinLig = -255;
   DefLig = 0;
 
+  procedure _ProcessBitmap32(const Dest: TBitmap;Value: Integer;_Process:TImageFilterCallback); overload;
+  procedure _ProcessBitmap24(const ABitMap: TBitmap; Value: Integer; _Process:TImageFilterCallback); overload;
 
+
+  procedure GetRGB(Col: TColor; var R, G, B: byte);
   function  _HSLtoRGB(HueValue, SaturationValue, LightValue: Double): TColor;
   procedure _RGBtoHSL(RGB: TColor; var HueValue, SaturationValue, LightValue: Double);
 
@@ -661,7 +669,13 @@ const
 
   procedure Bitmap24_Grayscale(ABitmap: TBitmap);
   procedure Bitmap32_Grayscale(ABitmap: TBitmap);
-  procedure Bitmap32_SetAlpha(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
+  //Set the Alpha and Color of a 32 bit Bitmap
+  procedure Bitmap32_SetAlphaAndColor(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
+  //Set the Alpha value for a specific Color of a 32 bit Bitmap
+  procedure Bitmap32_SetAlphaByColor(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
+
+  //Set the Alpha value for all Colors, execept the Color Param of a 32 bit Bitmap
+  procedure Bitmap32_SetAlphaExceptColor(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
 
  type
   TColorFilter=class
@@ -824,7 +838,6 @@ type
   PRGBArray32 = ^TRGBArray32;
   TRGBArray32 = array[0..0] of TRGBQuad;
 
-  TFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
 
 type
   TMirrorKind = (mtHorizontal, mtVertical, mtBoth );
@@ -1025,7 +1038,33 @@ begin
 end;
 
 
-procedure Bitmap32_SetAlpha(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
+procedure Bitmap32_SetAlphaAndColor(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
+var
+  X: Integer;
+  Y: Integer;
+  LRGBQuad: PRGBQuad;
+  R, G, B : Byte;
+begin
+  GetRGB(AColor, R, G, B);
+  if ABitmap.PixelFormat<>pf32bit then Exit;
+  for Y := 0 to ABitmap.Height - 1 do
+  begin
+    LRGBQuad := ABitmap.ScanLine[Y];
+    for X := 0 to ABitmap.Width - 1 do
+    begin
+      //if Cardinal(ColorToRGB(AColor)) = RGB(LRGBQuad.rgbRed, LRGBQuad.rgbGreen, LRGBQuad.rgbBlue ) then
+      begin
+        LRGBQuad.rgbRed   := R;
+        LRGBQuad.rgbGreen := G;
+        LRGBQuad.rgbBlue  := B;
+        LRGBQuad.rgbReserved :=  AlphaValue;
+      end;
+      Inc(LRGBQuad);
+    end;
+  end;
+end;
+
+procedure Bitmap32_SetAlphaByColor(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
 var
   X: Integer;
   Y: Integer;
@@ -1038,12 +1077,26 @@ begin
     for X := 0 to ABitmap.Width - 1 do
     begin
       if Cardinal(ColorToRGB(AColor)) = RGB(LRGBQuad.rgbRed, LRGBQuad.rgbGreen, LRGBQuad.rgbBlue ) then
-      begin
-        LRGBQuad.rgbRed   := 0;
-        LRGBQuad.rgbGreen := 0;
-        LRGBQuad.rgbBlue  := 0;
         LRGBQuad.rgbReserved :=  AlphaValue;
-      end;
+      Inc(LRGBQuad);
+    end;
+  end;
+end;
+
+procedure Bitmap32_SetAlphaExceptColor(ABitmap: TBitmap; AlphaValue : Byte; AColor: TColor);
+var
+  X: Integer;
+  Y: Integer;
+  LRGBQuad: PRGBQuad;
+begin
+  if ABitmap.PixelFormat<>pf32bit then Exit;
+  for Y := 0 to ABitmap.Height - 1 do
+  begin
+    LRGBQuad := ABitmap.ScanLine[Y];
+    for X := 0 to ABitmap.Width - 1 do
+    begin
+      if Cardinal(ColorToRGB(AColor)) <> RGB(LRGBQuad.rgbRed, LRGBQuad.rgbGreen, LRGBQuad.rgbBlue ) then
+        LRGBQuad.rgbReserved :=  AlphaValue;
       Inc(LRGBQuad);
     end;
   end;
@@ -1286,7 +1339,7 @@ end;
 
 
 
-procedure _ProcessBitmap32(const Dest: TBitmap;Value: Integer;_Process:TFilterCallback); overload;
+procedure _ProcessBitmap32(const Dest: TBitmap; Value: Integer; _Process:TImageFilterCallback); overload;
 var
   r, g, b, a   : byte;
   x, y:    integer;
@@ -1334,7 +1387,7 @@ begin
   end;
 end;
 
-procedure _ProcessBitmap32(const Source, Dest: TBitmap;_Process:TFilterCallback); overload;
+procedure _ProcessBitmap32(const Source, Dest: TBitmap;_Process:TImageFilterCallback); overload;
 var
   r, g, b, a   : byte;
   x, y:    integer;
@@ -1416,7 +1469,7 @@ end;
 
 
 
-procedure _ProcessBitmap24(const ABitMap: TBitmap;Value: Integer;_Process:TFilterCallback); overload;
+procedure _ProcessBitmap24(const ABitMap: TBitmap; Value: Integer; _Process:TImageFilterCallback); overload;
 var
   r, g, b    : byte;
   x, y:    integer;
@@ -1464,7 +1517,7 @@ begin
   end;
 end;
 
-procedure _ProcessBitmap24(const Source, Dest: TBitmap;_Process:TFilterCallback); overload;
+procedure _ProcessBitmap24(const Source, Dest: TBitmap;_Process:TImageFilterCallback); overload;
 var
   r, g, b   : byte;
   x, y:    integer;
@@ -1643,11 +1696,13 @@ var
   br, bg, bb   : byte;
 begin
   ARGB := Value;
-  GetRGB(AColor, r,g, b);
-  GetRGB(ARGB  , br,bg, bb);
+  GetRGB(AColor, r, g, b);
+
+  GetRGB(ARGB, br, bg, bb);
   r:=(r*br) shr 8;
   g:=(g*bg) shr 8;
   b:=(b*bb) shr 8;
+
   NewColor:= RGB(r,g,b);
 end;
 
@@ -1659,7 +1714,7 @@ end;
 
 procedure _BlendMultiply32(const ABitMap: TBitmap;Value: Integer);
 begin
- _ProcessBitmap32(ABitMap, Value, _BlendMultiply);
+  _ProcessBitmap32(ABitMap, Value, _BlendMultiply);
 end;
 
 
@@ -2584,6 +2639,7 @@ constructor TAwesomeFont.Create;
 begin
   inherited;
   FFontHandle:=0;
+  FDefaultQuality := ANTIALIASED_QUALITY;
   LoadFontFromResource;
 end;
 
@@ -2680,19 +2736,21 @@ begin
   LogFont.lfCharSet := DEFAULT_CHARSET;
   LogFont.lfOutPrecision := OUT_DEFAULT_PRECIS;
   LogFont.lfClipPrecision := CLIP_DEFAULT_PRECIS;
-  LogFont.lfQuality := DEFAULT_QUALITY;
+  LogFont.lfQuality := FDefaultQuality;
   LogFont.lfPitchAndFamily := DEFAULT_PITCH;
   LogFont.lfFaceName := 'FontAwesome';
 
   LColorRef:= ColorToRGB(AColor);
 
+  //OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '1'])));
   AFont := CreateFontIndirect(LogFont);
+  //OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '2'])));
   if AFont <> 0 then
     try
       LColorRef := SetTextColor(DC, LColorRef);
       pOldFont := SelectObject(DC, AFont);
       try
-        OldMode := SetBkMode(DC, Transparent);
+        OldMode := SetBkMode(DC, TRANSPARENT);
         Winapi.Windows.DrawText(DC, AChar, 1, DestRect, DT_LEFT or DT_SINGLELINE);
         SetBkMode(DC, OldMode);
         SelectObject(DC, LColorRef);
