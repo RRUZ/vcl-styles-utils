@@ -72,12 +72,26 @@ var
   VCLStylesLock: TCriticalSection = nil;
   LSetStylePtr: TSetStyle;
 
-  TrampolineFillRect  : function(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
-  TrampolineDrawEdge  : function(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;  stdcall = nil;
-  TrampolineSetStyle  : procedure(Self: TObject; Style: TCustomStyleServices);
+  Trampoline_FillRect  : function(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
+  Trampoline_DrawEdge  : function(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;  stdcall = nil;
+  Trampoline_SetStyle  : procedure(Self: TObject; Style: TCustomStyleServices);
+  Trampoline_DrawFrameControl : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
   {$IFDEF HOOK_UXTHEME}
   TrampolineLoadImageW: function (hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall = nil;
   {$ENDIF HOOK_UXTHEME}
+
+  Trampoline_DrawTextW  : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
+
+function  Detour_DrawTextW(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
+begin
+//  if (uFormat AND DT_CALCRECT = 0) then
+//  begin
+//    OutputDebugString(PChar(Format('Detour_DrawTextW Text "%s"', [lpString])));
+//  end;
+
+  Result:= Trampoline_DrawTextW(hDC, lpString, nCount, lpRect, uFormat);
+end;
+
 
 
 function Detour_DrawEdge(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
@@ -96,17 +110,17 @@ begin
     end;
     Exit(True);
   end;
-  Exit(TrampolineDrawEdge(hDC, qrc, edge, grfFlags));
+  Exit(Trampoline_DrawEdge(hDC, qrc, edge, grfFlags));
 end;
 
 function Detour_FillRect(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
-    Exit(TrampolineFillRect(hDC, lprc, hbr))
+    Exit(Trampoline_FillRect(hDC, lprc, hbr))
   else if (hbr > 0) and (hbr < COLOR_ENDCOLORS + 1) then
-    Exit(TrampolineFillRect(hDC, lprc, GetSysColorBrush(hbr - 1)))
+    Exit(Trampoline_FillRect(hDC, lprc, GetSysColorBrush(hbr - 1)))
   else
-    Exit(TrampolineFillRect(hDC, lprc, hbr));
+    Exit(Trampoline_FillRect(hDC, lprc, hbr));
 end;
 
 function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
@@ -171,7 +185,7 @@ var
   LActiveStyle: TCustomStyleServices;
 begin
   LActiveStyle := TStyleManager.ActiveStyle;
-  TrampolineSetStyle(Self, Style);
+  Trampoline_SetStyle(Self, Style);
   if (Style <> LActiveStyle) then
   begin
     for I := 0 to Screen.FormCount - 1 do
@@ -180,9 +194,241 @@ begin
   end;
 end;
 
+//based on JvThemes.DrawThemedFrameControl
+function Detour_WinApi_DrawFrameControl(DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall;
+const
+  Mask = $00FF;
+var
+  LRect: TRect;
+  LDetails: TThemedElementDetails;
+  CanDraw : Boolean;
+
+  LThemedButton: TThemedButton;
+  LThemedComboBox: TThemedComboBox;
+  LThemedScrollBar: TThemedScrollBar;
+begin
+  Result := False;
+  CanDraw:= (not StyleServices.IsSystemStyle) and (TSysStyleManager.Enabled) and (Rect<>nil);
+  if CanDraw then
+  begin
+    LRect := Rect^;
+    case uType of
+      DFC_BUTTON:
+        case uState and Mask of
+
+          DFCS_BUTTONPUSH:
+            begin
+              if uState and (DFCS_TRANSPARENT or DFCS_FLAT) = 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedButton := tbPushButtonDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedButton := tbPushButtonPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedButton := tbPushButtonHot
+                else
+                if uState and DFCS_MONO <> 0 then
+                  LThemedButton := tbPushButtonDefaulted
+                else
+                  LThemedButton := tbPushButtonNormal;
+
+                LDetails := StyleServices.GetElementDetails(LThemedButton);
+                StyleServices.DrawElement(DC, LDetails, LRect);
+                Result := True;
+              end;
+            end;
+
+          DFCS_BUTTONCHECK:
+            begin
+              if uState and DFCS_CHECKED <> 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedButton := tbCheckBoxCheckedDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedButton := tbCheckBoxCheckedPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedButton := tbCheckBoxCheckedHot
+                else
+                  LThemedButton := tbCheckBoxCheckedNormal;
+              end
+              else
+              if uState and DFCS_MONO <> 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedButton := tbCheckBoxMixedDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedButton := tbCheckBoxMixedPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedButton := tbCheckBoxMixedHot
+                else
+                  LThemedButton := tbCheckBoxMixedNormal;
+              end
+              else
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedButton := tbCheckBoxUncheckedDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedButton := tbCheckBoxUncheckedPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedButton := tbCheckBoxUncheckedHot
+                else
+                  LThemedButton := tbCheckBoxUncheckedNormal;
+              end;
+              LDetails := StyleServices.GetElementDetails(LThemedButton);
+              StyleServices.DrawElement(DC, LDetails, LRect);
+              Result := True;
+            end;
+
+          DFCS_BUTTONRADIO:
+            begin
+              if uState and DFCS_CHECKED <> 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedButton := tbRadioButtonCheckedDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedButton := tbRadioButtonCheckedPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedButton := tbRadioButtonCheckedHot
+                else
+                  LThemedButton := tbRadioButtonCheckedNormal;
+              end
+              else
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedButton := tbRadioButtonUncheckedDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedButton := tbRadioButtonUncheckedPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedButton := tbRadioButtonUncheckedHot
+                else
+                  LThemedButton := tbRadioButtonUncheckedNormal;
+              end;
+              LDetails := StyleServices.GetElementDetails(LThemedButton);
+              StyleServices.DrawElement(DC, LDetails, LRect);
+              Result := True;
+            end;
+        end;
+
+      DFC_SCROLL:
+        begin
+          case uState and Mask of
+
+            DFCS_SCROLLCOMBOBOX:
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedComboBox := tcDropDownButtonDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedComboBox := tcDropDownButtonPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedComboBox := tcDropDownButtonHot
+                else
+                  LThemedComboBox := tcDropDownButtonNormal;
+
+                LDetails := StyleServices.GetElementDetails(LThemedComboBox);
+                StyleServices.DrawElement(DC, LDetails, LRect);
+                Result := True;
+              end;
+
+            DFCS_SCROLLUP:
+              if uState and (DFCS_TRANSPARENT {or DFCS_FLAT}) = 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedScrollBar := tsArrowBtnUpDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedScrollBar := tsArrowBtnUpPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedScrollBar := tsArrowBtnUpHot
+                else
+                  LThemedScrollBar := tsArrowBtnUpNormal;
+
+                LDetails := StyleServices.GetElementDetails(LThemedScrollBar);
+                StyleServices.DrawElement(DC, LDetails, LRect);
+                Result := True;
+              end;
+
+            DFCS_SCROLLDOWN:
+              if uState and (DFCS_TRANSPARENT {or DFCS_FLAT}) = 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedScrollBar := tsArrowBtnDownDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedScrollBar := tsArrowBtnDownPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedScrollBar := tsArrowBtnDownHot
+                else
+                  LThemedScrollBar := tsArrowBtnDownNormal;
+
+                LDetails := StyleServices.GetElementDetails(LThemedScrollBar);
+                StyleServices.DrawElement(DC, LDetails, LRect);
+                Result := True;
+              end;
+
+            DFCS_SCROLLLEFT:
+              if uState and (DFCS_TRANSPARENT {or DFCS_FLAT}) = 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedScrollBar := tsArrowBtnLeftDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedScrollBar := tsArrowBtnLeftPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedScrollBar := tsArrowBtnLeftHot
+                else
+                  LThemedScrollBar := tsArrowBtnLeftNormal;
+
+                LDetails := StyleServices.GetElementDetails(LThemedScrollBar);
+                StyleServices.DrawElement(DC, LDetails, LRect);
+                Result := True;
+              end;
+
+            DFCS_SCROLLRIGHT:
+              if uState and (DFCS_TRANSPARENT {or DFCS_FLAT}) = 0 then
+              begin
+                if uState and DFCS_INACTIVE <> 0 then
+                  LThemedScrollBar := tsArrowBtnRightDisabled
+                else
+                if uState and DFCS_PUSHED <> 0 then
+                  LThemedScrollBar := tsArrowBtnRightPressed
+                else
+                if uState and DFCS_HOT <> 0 then
+                  LThemedScrollBar := tsArrowBtnRightHot
+                else
+                  LThemedScrollBar := tsArrowBtnRightNormal;
+
+                LDetails := StyleServices.GetElementDetails(LThemedScrollBar);
+                StyleServices.DrawElement(DC, LDetails, LRect);
+                Result := True;
+              end;
+
+          end;
+        end;
+    end;
+  end;
+
+  if not Result then
+    Exit(Trampoline_DrawFrameControl(DC, Rect, uType, uState));
+end;
+
 {$IFDEF HOOK_UXTHEME}
-
-
 procedure _BlendMultiply(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
@@ -255,22 +501,62 @@ begin
   end;
 end;
 
-
-
 function Detour_LoadImageW(hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall;
 const
   ExplorerFrame = 'explorerframe.dll';
 var
   hModule : WinApi.Windows.HMODULE;
   LBitmap, LBuffer : TBitmap;
-  s       : string;
-  LRect : TRect;
+  s : string;
+  LRect, LRect2 : TRect;
   LBackColor, LColor : TColor;
+//  LIcon : TIcon;
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Exit(TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
+                                                                                                                         //w8 - W10
+  if (hInst>0) and (hInst<>HInstance) and (ImageType=IMAGE_ICON) and (X=16) and (Y=16) and IS_INTRESOURCE(ImageName) and TOSVersion.Check(6, 2) then
+  begin
+    s := IntToStr(Integer(ImageName));
 
+//    LIcon:=TIcon.Create;
+//    try
+//     LIcon.Handle:=Result;
+//     try
+//     LIcon.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+s+'.ico');
+//       except
+//
+//     end;
+//    finally
+//      LIcon.Free;
+//    end;
 
+     case Integer(ImageName) of
+        //W8, W10
+        //comctl32.dll
+        16817
+             :
+              begin
+                Exit(AwesomeFont.GetIcon(fa_arrow_up, X, Y, StyleServices.GetSystemColor(clBtnText), StyleServices.GetSystemColor(clBtnFace), 0));
+              end;
+        16818
+             :
+              begin
+                Exit(AwesomeFont.GetIcon(fa_arrow_up, X, Y, StyleServices.GetSystemColor(clGrayText), StyleServices.GetSystemColor(clBtnFace), 0));
+              end;
+        //W10
+        //shell32.dll
+        5100
+             :
+              begin
+                //OutputDebugString(PChar('GetModuleName '+GetModuleName(hInst)));
+                Exit(AwesomeFont.GetIcon(fa_thumb_tack, X, Y, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
+              end;
+     end;
+
+    Exit(TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
+  end
+  else
   if (hInst>0) and (ImageType=IMAGE_BITMAP) and (X=0) and (Y=0) and IS_INTRESOURCE(ImageName) then
   begin
     hModule:=GetModuleHandle(ExplorerFrame);
@@ -281,15 +567,58 @@ begin
       LBitmap:=TBitmap.Create;
       try
         LBitmap.Handle := Result;
+        //LBitmap.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+s+'.bmp');//SaveToFile('C:\Users\Rodrigo\Desktop\vcl-styles-utils\Vcl Styles Utils New Dialogs (Demo App)\Win32\Debug\Images\'+s+'.bmp');
 
-        //Only for Windows Vista and 7
+        //W8 - W10
+        if TOSVersion.Check(6, 2) then
+        begin
+          LBackColor:= StyleServices.GetSystemColor(clWindow);
+          LRect:=Rect(0, 0, LBitmap.Width, LBitmap.Height );
+           case Integer(ImageName) of
+             // Right Arrow, cross button, refresh, down arrow
+              288
+                      :
+                       begin
+                          LColor:= StyleServices.GetSystemColor(clBtnText);
+                          Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+
+                          LRect:=Rect(0, 0, 16, 16);
+                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+
+                          OffsetRect(LRect, 16, 0);
+                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+
+                          OffsetRect(LRect, 16, 0);
+                          LRect2:=LRect;
+                          InflateRect(LRect2, -2, -2);
+                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect2, LColor);
+
+                          OffsetRect(LRect, 16 + 2, 0);
+                          LRect2:=LRect;
+                          InflateRect(LRect2, -2, -2);
+                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect2, LColor);
+
+                          Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                       end;
+
+           else
+                 begin
+                   Bitmap32_Grayscale(LBitmap);
+                   _ProcessBitmap32(LBitmap, StyleServices.GetSystemColor(clHighlight), _BlendBurn)
+                 end;
+           end;
+        end
+        else
+        //Windows Vista - W7
         if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
         begin
           LBackColor:= StyleServices.GetSystemColor(clWindow);
           LRect:=Rect(0, 0, LBitmap.Width, LBitmap.Height );
           case Integer(ImageName) of
            //Magnifier
-           34560..34562
+           34560..34562,  // Aero Enabled
+           34563..34568   // Classic Theme
+
                     :
                      begin
                         LColor:= StyleServices.GetSystemColor(clHighlight);
@@ -300,7 +629,8 @@ begin
                      end;
 
            //cross button normal
-           34569..34571
+           34569..34571,  // Aero Enabled
+           34572..34574   // Classic Theme
                     :
                      begin
                         LColor:= StyleServices.GetSystemColor(clWindowText);
@@ -310,8 +640,9 @@ begin
                      end;
 
            //cross button hot
-           34575..34577,
-           34581..34583
+           34575..34577, // Aero Enabled
+           34581..34583, // Aero Enabled
+           34578..34580  // Classic Theme
                     :
                      begin
                         LColor:= StyleServices.GetSystemColor(clHighlight);
@@ -320,7 +651,8 @@ begin
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
 
-           //Right Arrow, cross button, refresh, down arrow
+           // Aero Enabled
+           // Right Arrow, cross button, refresh, down arrow
             288
                     :
                      begin
@@ -342,16 +674,43 @@ begin
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
 
-            //navigation buttons (arrows)
+            // Classic Theme
+            // Right Arrow, cross button, refresh, down arrow
+            289, 290
+                    :
+                     begin
+                        LColor:= StyleServices.GetSystemColor(clBtnText);
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+
+                        LRect:=Rect(0, 0, 21, 21);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+
+                        OffsetRect(LRect, 21, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+
+                        OffsetRect(LRect, 21, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect, LColor);
+
+                        OffsetRect(LRect, 21, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+            // Aero Enabled
+            // navigation buttons (arrows)
             577..579,
             581
                     :
                      begin
+
                         case Integer(ImageName) of
                           577 : LColor:= StyleServices.GetSystemColor(clBtnText);
                           578 : LColor:= StyleServices.GetSystemColor(clHighlight);
                           579 : LColor:= StyleServices.GetSystemColor(clGrayText);
                           581 : LColor:= StyleServices.GetSystemColor(clBtnText);
+                          else
+                                LColor:= StyleServices.GetSystemColor(clBtnText);
                         end;
 
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
@@ -367,7 +726,40 @@ begin
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
 
-            280     //background navigation buttons
+            //Classic Theme
+            // navigation buttons (arrows)
+            582..584
+                    :
+                     begin
+                        case Integer(ImageName) of
+                          582 : LColor:= StyleServices.GetSystemColor(clBtnText);
+                          583 : LColor:= StyleServices.GetSystemColor(clHighlight);
+                          584 : LColor:= StyleServices.GetSystemColor(clGrayText);
+                        end;
+
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
+
+                        //left arrow
+                        LRect:=Rect(0, 0, 25, 25);
+                        InflateRect(LRect, -4, -4);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
+
+                        //right arrow
+                        OffsetRect(LRect, 25 + 4, 0);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+
+                        //dropdown arrow
+                        LRect:=Rect(60, 8, 72, 20);
+                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+
+
+                        Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+
+            //Aero Enabled
+            //background navigation buttons
+            280
                     :
                      begin
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
@@ -391,6 +783,14 @@ begin
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
+                     end;
+
+            //Classic Theme
+            //background navigation buttons
+            281
+                    :
+                     begin
+                        Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
                      end;
 
           else
@@ -437,18 +837,17 @@ begin
   BeginHooks;
   @TrampolineGetSysColor := InterceptCreate(user32, 'GetSysColor', @Detour_GetSysColor);
   @TrampolineGetSysColorBrush := InterceptCreate(user32, 'GetSysColorBrush', @Detour_GetSysColorBrush);
-  @TrampolineFillRect := InterceptCreate(user32, 'FillRect', @Detour_FillRect);
-  @TrampolineDrawEdge := InterceptCreate(user32, 'DrawEdge', @Detour_DrawEdge);
-
+  @Trampoline_FillRect := InterceptCreate(user32, 'FillRect', @Detour_FillRect);
+  @Trampoline_DrawEdge := InterceptCreate(user32, 'DrawEdge', @Detour_DrawEdge);
+  @Trampoline_DrawFrameControl :=  InterceptCreate(user32, 'DrawFrameControl', @Detour_WinApi_DrawFrameControl);
+  //@Trampoline_DrawTextW :=  InterceptCreate(user32, 'DrawTextW', @Detour_DrawTextW);
 {$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
    @TrampolineLoadImageW := InterceptCreate(user32, 'LoadImageW', @Detour_LoadImageW);
-
   // @TrampolineCopyImage := InterceptCreate(user32, 'CopyImage', @Detour_CopyImage);
-
 {$ENDIF HOOK_UXTHEME}
 
-  @TrampolineSetStyle := InterceptCreate(@LSetStylePtr, @Detour_SetStyle);
+  @Trampoline_SetStyle := InterceptCreate(@LSetStylePtr, @Detour_SetStyle);
   EndHooks;
 end;
 
@@ -457,19 +856,17 @@ finalization
   BeginUnHooks;
   InterceptRemove(@TrampolineGetSysColor);
   InterceptRemove(@TrampolineGetSysColorBrush);
-  InterceptRemove(@TrampolineFillRect);
-  InterceptRemove(@TrampolineDrawEdge);
+  InterceptRemove(@Trampoline_FillRect);
+  InterceptRemove(@Trampoline_DrawEdge);
+  InterceptRemove(@Trampoline_DrawFrameControl);
+  //InterceptRemove(@Trampoline_DrawTextW);
 
 {$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
     InterceptRemove(@TrampolineLoadImageW);
-
- // InterceptRemove(@TrampolineCopyImage);
 {$ENDIF HOOK_UXTHEME}
-
-  InterceptRemove(@TrampolineSetStyle);
+  InterceptRemove(@Trampoline_SetStyle);
   EndUnHooks;
-
   VCLStylesBrush.Free;
   VCLStylesLock.Free;
   VCLStylesLock := nil;

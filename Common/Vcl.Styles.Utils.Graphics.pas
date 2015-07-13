@@ -811,6 +811,7 @@ const
   procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
   procedure DrawStyleParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
+  procedure DrawStyleParentBackgroundEx(Handle : THandle; DC: HDC; const ARect: TRect);
 
   procedure RotateBitmap(ABitMap: TBitmap; Rads: Single; AdjustSize: Boolean; BackGroundColor: TColor = clNone);
   procedure FlipBitmap24Horizontal(ABitMap : TBitmap);
@@ -1217,15 +1218,40 @@ begin
     begin
       LBuffer.SetSize(ARect.Width, ARect.Height);
       SendMessage(LParentHandle , WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
-      ClientToScreen(Handle, LPoint);
-      ScreenToClient(LParentHandle, LPoint);
 
+      //ClientToScreen(Handle, LPoint);
+      //ScreenToClient(LParentHandle, LPoint);
       //BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, LBuffer.Canvas.Handle, LPoint.X, LPoint.Y, SRCCOPY)
     end;
   finally
     LBuffer.Free;
   end;
 end;
+
+procedure DrawStyleParentBackgroundEx(Handle : THandle; DC: HDC; const ARect: TRect);
+var
+  LBuffer: TBitmap;
+  LPoint: TPoint;
+  LParentHandle : THandle;
+begin
+  if Handle=0 then exit;
+  LPoint := Point(ARect.Left, ARect.Top);
+  LBuffer := TBitmap.Create;
+  try
+    LParentHandle:=GetParent(Handle);
+    if LParentHandle<>0 then
+    begin
+      LBuffer.SetSize(ARect.Width, ARect.Height);
+      SendMessage(LParentHandle , WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
+      ClientToScreen(Handle, LPoint);
+      ScreenToClient(LParentHandle, LPoint);
+      BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, LBuffer.Canvas.Handle, LPoint.X, LPoint.Y, SRCCOPY)
+    end;
+  finally
+    LBuffer.Free;
+  end;
+end;
+
 
 procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True);
 var
@@ -2784,9 +2810,8 @@ begin
 
   LColorRef:= ColorToRGB(AColor);
 
-  //OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '1'])));
+//  OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '1'])));
   AFont := CreateFontIndirect(LogFont);
-  //OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '2'])));
   if AFont <> 0 then
     try
       LColorRef := SetTextColor(DC, LColorRef);
@@ -2803,6 +2828,7 @@ begin
     finally
       DeleteObject(AFont);
     end;
+//  OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '2'])));
 end;
 
 initialization
