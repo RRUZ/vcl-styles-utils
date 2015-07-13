@@ -576,8 +576,9 @@ type
   public
    constructor Create;
    Destructor Destroy; override;
-   procedure DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor : TColor); overload;
-   procedure DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor : TColor); overload;
+   procedure DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor : TColor; Orientation : Integer = 0); overload;
+   procedure DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor : TColor; Orientation : Integer = 0); overload;
+   function  GetIcon(const ACode: Word; Width, Height : Integer; AColor, ABackColor : TColor; Orientation : Integer = 0) : HICON; overload;
   end;
 
 
@@ -1052,13 +1053,11 @@ begin
     LRGBQuad := ABitmap.ScanLine[Y];
     for X := 0 to ABitmap.Width - 1 do
     begin
-      //if Cardinal(ColorToRGB(AColor)) = RGB(LRGBQuad.rgbRed, LRGBQuad.rgbGreen, LRGBQuad.rgbBlue ) then
-      begin
-        LRGBQuad.rgbRed   := R;
-        LRGBQuad.rgbGreen := G;
-        LRGBQuad.rgbBlue  := B;
-        LRGBQuad.rgbReserved :=  AlphaValue;
-      end;
+
+      LRGBQuad.rgbRed   := R;
+      LRGBQuad.rgbGreen := G;
+      LRGBQuad.rgbBlue  := B;
+      LRGBQuad.rgbReserved :=  AlphaValue;
       Inc(LRGBQuad);
     end;
   end;
@@ -1088,14 +1087,17 @@ var
   X: Integer;
   Y: Integer;
   LRGBQuad: PRGBQuad;
+  LColorRef : COLORREF;
 begin
   if ABitmap.PixelFormat<>pf32bit then Exit;
+
+  LColorRef:=Cardinal(ColorToRGB(AColor));
   for Y := 0 to ABitmap.Height - 1 do
   begin
     LRGBQuad := ABitmap.ScanLine[Y];
     for X := 0 to ABitmap.Width - 1 do
     begin
-      if Cardinal(ColorToRGB(AColor)) <> RGB(LRGBQuad.rgbRed, LRGBQuad.rgbGreen, LRGBQuad.rgbBlue ) then
+      if  LColorRef <> RGB(LRGBQuad.rgbRed, LRGBQuad.rgbGreen, LRGBQuad.rgbBlue) then
         LRGBQuad.rgbReserved :=  AlphaValue;
       Inc(LRGBQuad);
     end;
@@ -2652,10 +2654,6 @@ begin
 end;
 
 
-procedure TAwesomeFont.DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor: TColor);
-begin
-  DrawChar(DC, Chr(ACode), DestRect, AColor);
-end;
 
 procedure TAwesomeFont.LoadFontFromResource;
 var
@@ -2716,7 +2714,51 @@ begin
 {$ENDIF}
 end;
 
-procedure TAwesomeFont.DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor: TColor);
+procedure TAwesomeFont.DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor: TColor; Orientation : Integer = 0);
+begin
+  DrawChar(DC, Chr(ACode), DestRect, AColor, Orientation);
+end;
+
+function TAwesomeFont.GetIcon(const ACode: Word; Width, Height: Integer; AColor, ABackColor: TColor; Orientation: Integer): HICON;
+var
+  LIconInfo : TIconInfo;
+  LBitmap, LMask : TBitmap;
+  NewIcon : HICON;
+begin
+  LBitmap:=TBitmap.Create;
+  try
+    LBitmap.PixelFormat:=pf32bit;
+    LBitmap.Canvas.Brush.Color:=ABackColor;
+    LBitmap.SetSize(Width, Width);
+    //LBitmap.Canvas.FillRect(Rect(0, 0, LBitmap.Width, LBitmap.Height));
+    //Bitmap32_SetAlphaAndColor(LBitmap, 255, clFuchsia);
+
+    DrawChar(LBitmap.Canvas.Handle, ACode, Rect(0, 0, LBitmap.Width, LBitmap.Height), AColor, 0);
+    Bitmap32_SetAlphaExceptColor(LBitmap, 255, ABackColor);
+    LBitmap.AlphaFormat := afDefined;
+
+    LMask:=TBitmap.Create;
+    try
+      //LMask.Handle:=CreateBitmap(LBitmap.Width, LBitmap.Height, 1, 1, 0);
+      LMask.PixelFormat:=pf1bit;
+      LMask.SetSize(Width, Height);
+
+      LIconInfo.fIcon:=True;
+      LIconInfo.xHotspot:=Width;
+      LIconInfo.yHotspot:=Height;
+      LIconInfo.hbmMask:=LMask.Handle;
+      LIconInfo.hbmColor:=LBitmap.Handle;
+
+      NewIcon := CreateIconIndirect(LIconInfo);
+      Result  := NewIcon;
+    finally
+      LMask.Free;
+    end;
+  finally
+    LBitmap.Free;
+  end;
+end;
+procedure TAwesomeFont.DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor: TColor; Orientation : Integer = 0);
 var
   LogFont: TLogFont;
   AFont  : HFONT;
@@ -2727,8 +2769,8 @@ begin
   ZeroMemory(@LogFont, SizeOf(LogFont));
   LogFont.lfHeight := DestRect.Height;
   LogFont.lfWidth := 0;
-  LogFont.lfEscapement := 0;
-  LogFont.lfOrientation := 0;
+  LogFont.lfEscapement := Orientation * 10;
+  LogFont.lfOrientation := LogFont.lfEscapement;
   LogFont.lfWeight := FW_NORMAL;
   LogFont.lfItalic := 0;
   LogFont.lfUnderline := 0;
