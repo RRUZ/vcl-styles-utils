@@ -3534,10 +3534,20 @@ begin
                                                LDetails:=StyleServices.GetElementDetails(ttbButtonHot);
                                             end;
 
-//                            else
-//                                OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+                              TS_DISABLED        :
+                                            begin
+                                               ThemeTextColor:=StyleServices.GetSystemColor(clGrayText);
+                                               LDetails:=StyleServices.GetElementDetails(ttbButtonDisabled);
+                                            end;
+
+                            else
+                                            begin
+                                              //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+                                              Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+                                            end;
                             end;
 
+                            //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d class %s iPartId %d iStateId %d  text %s', [hTheme, LThemeClass, iPartId, iStateId, pszText])));
                             LRect:=pRect;
                             StyleServices.DrawText(hdc, LDetails, string(pszText), LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
                             Exit(S_OK);

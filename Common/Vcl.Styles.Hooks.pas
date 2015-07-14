@@ -64,7 +64,11 @@ uses
   Vcl.Themes;
 
 type
-  TListStyleBrush = TObjectDictionary<Integer, HBRUSH>;
+  TListStyleBrush  = class(TDictionary<Integer, HBRUSH>)
+  protected
+    procedure ValueNotify(const Value: HBRUSH; Action: TCollectionNotification); override;
+  end;
+
   TSetStyle = procedure(Style: TCustomStyleServices) of object;
 
 var
@@ -550,7 +554,7 @@ begin
              :
               begin
                 //OutputDebugString(PChar('GetModuleName '+GetModuleName(hInst)));
-                Exit(AwesomeFont.GetIcon(fa_thumb_tack, X, Y, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
+                Exit(AwesomeFont.GetIcon(fa_check_square_o, 16, 16, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
               end;
      end;
 
@@ -818,6 +822,16 @@ end;
 
 
 //dont hook CreateSolidBrush, because is used internally but GetSysColorBrush
+
+{ TListStyleBrush }
+
+//Delete brushes
+procedure TListStyleBrush.ValueNotify(const Value: HBRUSH; Action: TCollectionNotification);
+begin
+  inherited;
+  if Action = TCollectionNotification.cnRemoved then
+    DeleteObject(Value);
+end;
 
 initialization
 

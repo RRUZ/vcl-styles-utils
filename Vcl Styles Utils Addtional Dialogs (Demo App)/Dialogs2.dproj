@@ -96,6 +96,9 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
 			<DCCReference Include="ObjSel.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.UxTheme.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

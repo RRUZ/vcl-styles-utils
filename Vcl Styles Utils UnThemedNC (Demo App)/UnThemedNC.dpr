@@ -45,14 +45,14 @@ begin
   if Length(LFiles)>0 then
   begin
    for f in TDirectory.GetFiles(s, '*.vsf') do
-    if TStyleManager.IsValidStyle(f , StyleInfo) and SameText(StyleInfo.Name, 'Carbon') then
+    if TStyleManager.IsValidStyle(f, StyleInfo) and SameText(StyleInfo.Name, 'Carbon') then
      TStyleManager.LoadFromFile(f)
   end
   else
   begin
     s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
     for f in TDirectory.GetFiles(s, '*.vsf') do
-    if TStyleManager.IsValidStyle(f , StyleInfo) and SameText(StyleInfo.Name, 'Carbon') then
+    if TStyleManager.IsValidStyle(f, StyleInfo) and SameText(StyleInfo.Name, 'Carbon') then
       TStyleManager.LoadFromFile(f);
   end;
 end;

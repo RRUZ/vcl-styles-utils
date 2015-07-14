@@ -12,7 +12,8 @@ uses
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Themes,
   Vcl.Styles,
-  Vcl.Styles.Utils.SystemMenu in '..\Common\Vcl.Styles.Utils.SystemMenu.pas';
+  Vcl.Styles.Utils.SystemMenu in '..\Common\Vcl.Styles.Utils.SystemMenu.pas',
+  Vcl.Styles.Utils.Graphics in '..\Common\Vcl.Styles.Utils.Graphics.pas';
 
 {$R *.res}
 
@@ -34,15 +35,20 @@ begin
   s:=ExtractFilePath(ParamStr(0));
   LFiles:=TDirectory.GetFiles(s, '*.vsf');
   if Length(LFiles)>0 then
+  begin
    for f in TDirectory.GetFiles(s, '*.vsf') do
-     TStyleManager.LoadFromFile(f)
+     if TStyleManager.IsValidStyle(f) then
+       TStyleManager.LoadFromFile(f);
+  end
   else
   begin
     s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
     for f in TDirectory.GetFiles(s, '*.vsf') do
+     if TStyleManager.IsValidStyle(f) then
       TStyleManager.LoadFromFile(f);
   end;
 end;
+
 
 begin
   LoadVCLStyles;

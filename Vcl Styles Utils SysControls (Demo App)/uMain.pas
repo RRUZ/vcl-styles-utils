@@ -12,7 +12,7 @@ uses
 type
   TForm1 = class(TForm)
     LblStyles: TLabel;
-    ComboBox1: TComboBox;
+    ComboBoxStyles: TComboBox;
     Edit1: TEdit;
     BtnMsgBox: TSpeedButton;
     BtnRaiseException: TSpeedButton;
@@ -24,7 +24,7 @@ type
     BtnPrinterSetup: TSpeedButton;
     BtnOpenDialog: TSpeedButton;
     StaticText1: TStaticText;
-    CheckBox1: TCheckBox;
+    CheckBoxSysControls: TCheckBox;
     OpenDialog1: TOpenDialog;
     ColorDialog1: TColorDialog;
     FontDialog1: TFontDialog;
@@ -92,8 +92,9 @@ type
     N5: TMenuItem;
     N6: TMenuItem;
     C1: TMenuItem;
+    CheckBoxModernDialogs: TCheckBox;
     procedure FormCreate(Sender: TObject);
-    procedure ComboBox1Select(Sender: TObject);
+    procedure ComboBoxStylesSelect(Sender: TObject);
     procedure BtnOpenDialogClick(Sender: TObject);
     procedure BtnMsgBoxClick(Sender: TObject);
     procedure BtnColorDialogClick(Sender: TObject);
@@ -102,12 +103,13 @@ type
     procedure BtnFindDialogClick(Sender: TObject);
     procedure BtnPageSetupClick(Sender: TObject);
     procedure BtnPrinterSetupClick(Sender: TObject);
-    procedure CheckBox1Click(Sender: TObject);
+    procedure CheckBoxSysControlsClick(Sender: TObject);
     procedure About1Click(Sender: TObject);
     procedure C3Click(Sender: TObject);
     procedure BtnRaiseExceptionClick(Sender: TObject);
     procedure BtnSelectFolderClick(Sender: TObject);
     procedure BtnPrintDialogClick(Sender: TObject);
+    procedure CheckBoxModernDialogsClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -141,14 +143,19 @@ begin
   ShowMessage('Hi');
 end;
 
-procedure TForm1.CheckBox1Click(Sender: TObject);
+procedure TForm1.CheckBoxModernDialogsClick(Sender: TObject);
+begin
+ UseLatestCommonDialogs := CheckBoxModernDialogs.Checked;
+end;
+
+procedure TForm1.CheckBoxSysControlsClick(Sender: TObject);
 begin
   TSysStyleManager.Enabled := TCheckBox(Sender).Checked;
 end;
 
-procedure TForm1.ComboBox1Select(Sender: TObject);
+procedure TForm1.ComboBoxStylesSelect(Sender: TObject);
 begin
-  TStyleManager.SetStyle(ComboBox1.Items[ComboBox1.ItemIndex]);
+  TStyleManager.SetStyle(ComboBoxStyles.Items[ComboBoxStyles.ItemIndex]);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -159,9 +166,9 @@ begin
  //ReportMemoryLeaksOnShutdown := True;
 {$ENDIF }
   for s in TStyleManager.StyleNames do
-    ComboBox1.Items.Add(s);
+    ComboBoxStyles.Items.Add(s);
 
-  ComboBox1.ItemIndex:=ComboBox1.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+  ComboBoxStyles.ItemIndex:=ComboBoxStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
 end;
 
 procedure TForm1.BtnPrintDialogClick(Sender: TObject);

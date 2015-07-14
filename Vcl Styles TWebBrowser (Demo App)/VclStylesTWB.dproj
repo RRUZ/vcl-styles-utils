@@ -107,6 +107,7 @@
 			<DCCReference Include="Main.pas">
 				<Form>FrmMain</Form>
 			</DCCReference>
+			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.WebBrowser.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.ComCtrls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.Forms.pas"/>
@@ -115,6 +116,8 @@
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.StdCtrls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
 			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
+			<DCCReference Include="..\Common\Vcl.Styles.UxTheme.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

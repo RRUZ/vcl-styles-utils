@@ -38,19 +38,24 @@ begin
   s:=ExtractFilePath(ParamStr(0));
   LFiles:=TDirectory.GetFiles(s, '*.vsf');
   if Length(LFiles)>0 then
+  begin
    for f in TDirectory.GetFiles(s, '*.vsf') do
-     TStyleManager.LoadFromFile(f)
+     if TStyleManager.IsValidStyle(f) then
+       TStyleManager.LoadFromFile(f);
+  end
   else
   begin
     s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
     for f in TDirectory.GetFiles(s, '*.vsf') do
+     if TStyleManager.IsValidStyle(f) then
       TStyleManager.LoadFromFile(f);
   end;
 end;
 
 begin
   LoadVCLStyles;
-  TStyleManager.TrySetStyle('Auric');  Application.Initialize;
+  TStyleManager.TrySetStyle('Auric');
+  Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TFrmMain, FrmMain);
   Application.Run;

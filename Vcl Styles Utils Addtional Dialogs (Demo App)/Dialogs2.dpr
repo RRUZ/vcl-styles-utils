@@ -17,7 +17,10 @@ uses
   Vcl.Styles.Utils.StdCtrls in '..\Common\Vcl.Styles.Utils.StdCtrls.pas',
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
-  ObjSel in 'ObjSel.pas';
+  ObjSel in 'ObjSel.pas',
+  Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
+  Vcl.Styles.Utils.Graphics in '..\Common\Vcl.Styles.Utils.Graphics.pas',
+  Vcl.Styles.UxTheme in '..\Common\Vcl.Styles.UxTheme.pas';
 
 {$R *.res}
 
@@ -35,24 +38,24 @@ procedure LoadVCLStyles;
 var
   f, s : string;
   LFiles : TStringDynArray;
-  StyleInfo: TStyleInfo;
 begin
   s:=ExtractFilePath(ParamStr(0));
   LFiles:=TDirectory.GetFiles(s, '*.vsf');
   if Length(LFiles)>0 then
   begin
    for f in TDirectory.GetFiles(s, '*.vsf') do
-     if TStyleManager.IsValidStyle(f , StyleInfo) and SameText(StyleInfo.Name, 'Carbon') then
-     TStyleManager.LoadFromFile(f)
+     if TStyleManager.IsValidStyle(f) then
+       TStyleManager.LoadFromFile(f);
   end
   else
   begin
     s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
     for f in TDirectory.GetFiles(s, '*.vsf') do
-     if TStyleManager.IsValidStyle(f , StyleInfo) and SameText(StyleInfo.Name, 'Carbon') then
+     if TStyleManager.IsValidStyle(f) then
       TStyleManager.LoadFromFile(f);
   end;
 end;
+
 
 begin
   LoadVCLStyles;

@@ -103,7 +103,7 @@ object Form1: TForm1
     Caption = 'PrintDialog'
     OnClick = BtnPrintDialogClick
   end
-  object ComboBox1: TComboBox
+  object ComboBoxStyles: TComboBox
     Left = 53
     Top = 8
     Width = 244
@@ -111,7 +111,7 @@ object Form1: TForm1
     Style = csDropDownList
     Sorted = True
     TabOrder = 0
-    OnSelect = ComboBox1Select
+    OnSelect = ComboBoxStylesSelect
   end
   object Edit1: TEdit
     Left = 54
@@ -130,7 +130,7 @@ object Form1: TForm1
     PopupMenu = PopupMenu1
     TabOrder = 2
   end
-  object CheckBox1: TCheckBox
+  object CheckBoxSysControls: TCheckBox
     Left = 8
     Top = 60
     Width = 112
@@ -139,7 +139,7 @@ object Form1: TForm1
     Checked = True
     State = cbChecked
     TabOrder = 3
-    OnClick = CheckBox1Click
+    OnClick = CheckBoxSysControlsClick
   end
   object StaticText2: TStaticText
     Left = 8
@@ -158,6 +158,17 @@ object Form1: TForm1
     Caption = 'Select Folder'
     TabOrder = 5
     OnClick = BtnSelectFolderClick
+  end
+  object CheckBoxModernDialogs: TCheckBox
+    Left = 144
+    Top = 60
+    Width = 121
+    Height = 17
+    Caption = 'Use Modern Dialogs'
+    Checked = True
+    State = cbChecked
+    TabOrder = 6
+    OnClick = CheckBoxModernDialogsClick
   end
   object OpenDialog1: TOpenDialog
     Left = 160
@@ -185,8 +196,8 @@ object Form1: TForm1
     Top = 166
   end
   object PrinterSetupDialog1: TPrinterSetupDialog
-    Left = 248
-    Top = 32
+    Left = 384
+    Top = 192
   end
   object PageSetupDialog1: TPageSetupDialog
     MinMarginLeft = 0
@@ -199,15 +210,15 @@ object Form1: TForm1
     MarginBottom = 2500
     PageWidth = 21000
     PageHeight = 29700
-    Left = 320
-    Top = 32
+    Left = 336
+    Top = 184
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 168
-    Top = 38
+    Left = 392
+    Top = 65534
     Bitmap = {
-      494C01010D0024006C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010D002400700010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000002300000033000000330000
       0033000000330000003300000033000000330000003300000033000000330000
@@ -744,8 +755,8 @@ object Form1: TForm1
   end
   object PopupMenu1: TPopupMenu
     Images = ImageList1
-    Left = 88
-    Top = 54
+    Left = 128
+    Top = 142
     object I1: TMenuItem
       Caption = 'Item 1'
       ImageIndex = 2
@@ -803,8 +814,8 @@ object Form1: TForm1
     BiDiMode = bdRightToLeft
     Images = ImageList1
     ParentBiDiMode = False
-    Left = 32
-    Top = 30
+    Left = 328
+    Top = 22
     object R2: TMenuItem
       Caption = 'Right To Left Item 1'
       ImageIndex = 4
