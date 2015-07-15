@@ -84,19 +84,6 @@ var
   TrampolineLoadImageW: function (hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall = nil;
   {$ENDIF HOOK_UXTHEME}
 
-  Trampoline_DrawTextW  : function (hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
-
-function  Detour_DrawTextW(hDC: HDC; lpString: LPCWSTR; nCount: Integer;  var lpRect: TRect; uFormat: UINT): Integer; stdcall;
-begin
-//  if (uFormat AND DT_CALCRECT = 0) then
-//  begin
-//    OutputDebugString(PChar(Format('Detour_DrawTextW Text "%s"', [lpString])));
-//  end;
-
-  Result:= Trampoline_DrawTextW(hDC, lpString, nCount, lpRect, uFormat);
-end;
-
-
 
 function Detour_DrawEdge(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
 var
@@ -433,77 +420,6 @@ begin
 end;
 
 {$IFDEF HOOK_UXTHEME}
-procedure _BlendMultiply(const AColor: TColor; Value: Integer; out NewColor:TColor);
-var
-  r, g, b      : byte;
-  ARGB         : TColor;
-  br, bg, bb   : byte;
-begin
-  if AColor=clWhite then
-   NewColor:=AColor
-  else
-  begin
-    ARGB := Value;
-    GetRGB(AColor, r, g, b);
-    GetRGB(ARGB, br, bg, bb);
-    r:=(r*br) shr 8;
-    g:=(g*bg) shr 8;
-    b:=(b*bb) shr 8;
-    NewColor:= RGB(r,g,b);
-  end;
-end;
-
-function RoundIntToByte(i: integer): byte;
-begin
-  if i > 255 then Result := 255
-  else
-  if i < 0   then Result := 0
-  else
-    Result := i;
-end;
-
-procedure _BlendBurn(const AColor: TColor;Value: Integer; out NewColor:TColor);
-var
-  ARGB         : TColor;
-  r, g, b      : byte;
-  br, bg, bb   : byte;
-  c            : Integer;
-begin
-  if AColor=clWhite then
-   NewColor:=AColor
-  else
-  begin
-    GetRGB(AColor, r,g, b);
-    ARGB := Value;
-    GetRGB(ARGB, br,bg, bb);
-
-    if br=0 then
-     r:=0
-    else
-    begin
-     c:=RoundIntToByte(255-(((255-r) SHL 8) DIV br));
-     r:=c;
-    end;
-
-    if bg=0 then
-     g:=0
-    else
-    begin
-     c:=RoundIntToByte(255-(((255-g) SHL 8) DIV bg));
-     g:=c;
-    end;
-
-    if bb=0 then
-     b:=0
-    else
-    begin
-     c:=RoundIntToByte(255-(((255-b) SHL 8) DIV bb));
-     b:=c;
-    end;
-
-    NewColor:=RGB(r, g, b);
-  end;
-end;
 
 function Detour_LoadImageW(hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall;
 const
@@ -514,7 +430,6 @@ var
   s : string;
   LRect, LRect2 : TRect;
   LBackColor, LColor : TColor;
-//  LIcon : TIcon;
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Exit(TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
@@ -522,18 +437,6 @@ begin
   if (hInst>0) and (hInst<>HInstance) and (ImageType=IMAGE_ICON) and (X=16) and (Y=16) and IS_INTRESOURCE(ImageName) and TOSVersion.Check(6, 2) then
   begin
     s := IntToStr(Integer(ImageName));
-
-//    LIcon:=TIcon.Create;
-//    try
-//     LIcon.Handle:=Result;
-//     try
-//     LIcon.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+s+'.ico');
-//       except
-//
-//     end;
-//    finally
-//      LIcon.Free;
-//    end;
 
      case Integer(ImageName) of
         //W8, W10
@@ -796,17 +699,8 @@ begin
                      begin
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
                      end;
-
-          else
-               begin
-                 Bitmap32_Grayscale(LBitmap);
-                 _ProcessBitmap32(LBitmap, StyleServices.GetSystemColor(clHighlight), _BlendBurn)
-               end;
           end;
-        end
-        else
-        _BlendMultiply32(LBitmap, StyleServices.GetSystemColor(clHighlight));
-
+        end;
         LBitmap.ReleaseHandle;
       finally
         LBitmap.Free;
@@ -816,12 +710,13 @@ begin
     end;
   end;
 
-  Result:= TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
+  Exit(TrampolineLoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
 end;
 {$ENDIF HOOK_UXTHEME}
 
 
-//dont hook CreateSolidBrush, because is used internally but GetSysColorBrush
+//don't hook CreateSolidBrush, because is used internally but GetSysColorBrush
+//don't hook CopyImage
 
 { TListStyleBrush }
 
@@ -854,11 +749,9 @@ begin
   @Trampoline_FillRect := InterceptCreate(user32, 'FillRect', @Detour_FillRect);
   @Trampoline_DrawEdge := InterceptCreate(user32, 'DrawEdge', @Detour_DrawEdge);
   @Trampoline_DrawFrameControl :=  InterceptCreate(user32, 'DrawFrameControl', @Detour_WinApi_DrawFrameControl);
-  //@Trampoline_DrawTextW :=  InterceptCreate(user32, 'DrawTextW', @Detour_DrawTextW);
 {$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
    @TrampolineLoadImageW := InterceptCreate(user32, 'LoadImageW', @Detour_LoadImageW);
-  // @TrampolineCopyImage := InterceptCreate(user32, 'CopyImage', @Detour_CopyImage);
 {$ENDIF HOOK_UXTHEME}
 
   @Trampoline_SetStyle := InterceptCreate(@LSetStylePtr, @Detour_SetStyle);
@@ -873,7 +766,6 @@ finalization
   InterceptRemove(@Trampoline_FillRect);
   InterceptRemove(@Trampoline_DrawEdge);
   InterceptRemove(@Trampoline_DrawFrameControl);
-  //InterceptRemove(@Trampoline_DrawTextW);
 
 {$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then

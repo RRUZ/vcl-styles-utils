@@ -2681,7 +2681,6 @@ initialization
   end;
 
 finalization
-
   TSysStyleManager.UnRegisterSysStyleHook('#32770', TSysDialogStyleHook);
   TSysStyleManager.UnRegisterSysStyleHook('ScrollBar', TSysScrollBarStyleHook);
 end.

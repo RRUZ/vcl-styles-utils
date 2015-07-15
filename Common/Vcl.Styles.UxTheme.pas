@@ -619,12 +619,6 @@ begin
              //background
              1 :
                  begin
-                   //StyleServices.GetElementColor(=StyleServices.GetElementDetails(tpPanelBackground), ecFillColor, LColor);
-                   //DrawStyleFillRect(hdc, pRect, LColor);
-
-                   //DrawStyleFillRect(hdc, pRect, clRed);
-
-                   //DrawStyleElement(hdc, StyleServices.GetElementDetails(tpPanelBackground), pRect);
                    DrawStyleElement(hdc, StyleServices.GetElementDetails(tcpThemedHeader), pRect);
                    Exit(S_OK);
                  end;
@@ -637,10 +631,8 @@ begin
              //left border of listview
              0 :
                  begin
-                   //DrawStyleFillRect(hdc, pRect, clBlue);
                    StyleServices.GetElementColor(StyleServices.GetElementDetails(tpPanelBackground), ecFillColor, LColor);
                    DrawStyleFillRect(hdc, pRect, LColor);
-                   //DrawStyleElement(hdc, StyleServices.GetElementDetails(tpPanelBackground), pRect);
                    Exit(S_OK);
                  end;
             end;
@@ -653,10 +645,8 @@ begin
              //left border of preview pane
              0 :
                  begin
-                   //DrawStyleFillRect(hdc, pRect, clGreen);
                    StyleServices.GetElementColor(StyleServices.GetElementDetails(tpPanelBackground), ecFillColor, LColor);
                    DrawStyleFillRect(hdc, pRect, LColor);
-                   //DrawStyleElement(hdc, StyleServices.GetElementDetails(tpPanelBackground), pRect);
                    Exit(S_OK);
                  end;
             end;
@@ -1717,15 +1707,6 @@ begin
             CMDLS_DEFAULTED_ANIMATING        : LDetails:=StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
         end;
 
-//              case iStateId of
-//                  CMDLS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tbCommandLinkNormal);
-//                  CMDLS_HOT      : LDetails:=StyleServices.GetElementDetails(tbCommandLinkHot);
-//                  CMDLS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tbCommandLinkPressed);
-//                  CMDLS_DISABLED : LDetails:=StyleServices.GetElementDetails(tbCommandLinkDisabled);
-//                  CMDLS_DEFAULTED     : LDetails:=StyleServices.GetElementDetails(tbCommandLinkDefaulted);
-//                  CMDLS_DEFAULTED_ANIMATING        : LDetails:=StyleServices.GetElementDetails(tbCommandLinkDefaultedAnimating);
-//              end;
-
         SaveIndex := SaveDC(hdc);
         try
            if hwnd<>0  then
@@ -2082,8 +2063,8 @@ begin
        SCRBS_HOVER    : LScrollDetails := tsGripperVertNormal;//tsGripperVertHover; //no support for hover
      end;
     end;
-
   end;
+
   LDetails := StyleServices.GetElementDetails(LScrollDetails);
 
   if (iPartId=SBP_THUMBBTNHORZ) then
@@ -2194,13 +2175,7 @@ end;
     if Disabled then
       oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled)
     else
-    begin
       oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
-//      if isHot in State then
-//        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextHot);
-//      if isDisabled in State then
-//        oldColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled);
-    end;
 
     AFont := CreateFontIndirect(LogFont);
     if AFont <> 0 then
@@ -2326,10 +2301,6 @@ begin
 
          begin
            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupItemNormal), pRect);
-
-//             if hwnd<>0  then
-//               DrawStyleParentBackground(hwnd, hdc, pRect);
-
            DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupSeparator), pRect);
            Exit(S_OK);
          end;
@@ -2381,30 +2352,6 @@ begin
                   SetTextColor(hdc, ColorToRGB(StyleServices.GetSystemColor(clMenuText)));
                 Exit(S_OK);
             end;
-//
-//            OutputDebugString(PChar(Format('UxTheme_Menu class %s hwnd %d hTheme %d iPartId %d iStateId %d prect Left %d Top %d Width %d Height %d ',
-//            [LThemeClass, hwnd, hTheme, iPartId, iStateId, pRect.Left, pRect.Top, pRect.Width, pRect.Height])));
-
-
-//            if Foo<>nil then
-//            begin
-//              LPRect:=Foo;
-//              if (LPRect.Width>0) and (LPRect.Height>0) then
-//              begin
-//                LRect2:=LPRect^;
-//
-//                OutputDebugString(PChar(Format('UxTheme_Menu class %s hwnd %d hTheme %d iPartId %d iStateId %d LRect2 Left %d Top %d Width %d Height %d ',
-//                [LThemeClass, hwnd, hTheme, iPartId, iStateId, LRect2.Left, LRect2.Top, LRect2.Width, LRect2.Height])));
-//
-//                //DrawStyleParentBackground(hwnd, hdc, LRect2);
-//
-//                //DrawStyleFillRect(hdc, LRect2, StyleServices.GetSystemColor(clMenu));
-//                DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), LRect2);
-//                Exit(S_OK);
-//              end;
-//            end;
-
-
          end;
 
       MENU_POPUPSUBMENU :    //OK
@@ -3049,8 +2996,8 @@ begin
 end;
 
 {
- doesn't affect Menus colors
- doesn't affect compressed elemnts font color (blue)
+ Doesn't affect Menus colors
+ Doesn't affect Compressed files font color (blue)
 }
 
 function Detour_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;  stdcall;
@@ -3886,45 +3833,6 @@ begin
 
  if LThemeClass<>'' then
  begin
-     {$IFDEF HOOK_EDIT}
-//     if  SameText(LThemeClass, VSCLASS_EDIT) then  //TODO
-//     begin
-//        ThemeTextColor := clNone;
-//
-//        case iPartId of
-//              0 :
-//                   case  iStateId of
-//                       0 :
-//                           begin
-//                             ThemeTextColor:=clRed;//StyleServices.GetSystemColor(clWindowText);
-//                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
-//                           end;
-//                   end;
-//
-//
-//            EP_EDITTEXT :
-//                   case  iStateId of
-//                       ETS_DISABLED :
-//                           begin
-//                             ThemeTextColor:=clBlue;//StyleServices.GetSystemColor(clWindowText);
-//                             LDetails:=StyleServices.GetElementDetails(teEditTextNormal);
-//                           end;
-//                   end;
-//
-//
-//        end;
-//
-//        if ThemeTextColor<>clNone then
-//        begin
-//           StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
-//           Exit(S_OK);
-//        end
-//        else
-//         Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
-//
-//     end
-//     else
-     {$ENDIF}
      {$IFDEF HOOK_PopMenu}
      if  SameText(LThemeClass, VSCLASS_MENU) then
      begin

@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>TTaskDialogsDemo.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
@@ -82,6 +82,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_MapFile>3</DCC_MapFile>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -105,15 +106,15 @@
 			<DCCReference Include="uMain.pas">
 				<Form>FrmTaskDlgMain</Form>
 			</DCCReference>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.Forms.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
-			<DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
-			<DCCReference Include="..\Common\delphi-detours-library\InstDecode.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.UxTheme.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Hooks.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Forms.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Menus.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SysControls.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Graphics.pas"/>
+			<DCCReference Include="..\..\Common\delphi-detours-library\DDetours.pas"/>
+			<DCCReference Include="..\..\Common\delphi-detours-library\InstDecode.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.UxTheme.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Hooks.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -199,6 +200,12 @@
 [Exception Log]
 EurekaLog Version=7001
 Activate=0
-DeleteMapAfterCompile=1
+atVCL=1
+DeleteMapAfterCompile=0
 Encrypt Password=""
+idEurekaLog=1
+idEurekaLogDetailed=1
+idMSClassic=1
+idStepsToReproduce=1
+ProjectID="{61D75586-10EF-4ED7-91FA-3E304A887A7E}"
 EurekaLog Last Line -->
