@@ -38,10 +38,10 @@ uses
   PngFunctions,
   PngImage,
   IOUtils,
-  uHSLUtils,
   Generics.Collections,
   Vcl.Styles.Ext,
   Vcl.Styles.Utils,
+  Vcl.Styles.Utils.Graphics,
   Vcl.Themes,
   Vcl.Styles;
 
