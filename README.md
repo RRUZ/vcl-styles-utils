@@ -1,5 +1,6 @@
 # VCL Styles Utils #
-The *VCL Styles Utils* is a Delphi library which extend, fix bugs and add new features to the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview).
+
+The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview), adding unique features like the support for [Common](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls) and [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and more. 
 
 <p align="center">
   <img src="https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Images%20New%20Dialogs/Mix6.png" alt="Mix"/>
@@ -41,18 +42,18 @@ The *VCL Styles Utils* is a Delphi library which extend, fix bugs and add new fe
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFixes'>Vcl.Styles.Fixes</a> unit Fix several QC reports related to the VCL Styles.</li>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesPreview'>TVclStylesPreview</a> component to preview a VCL Style.</li>
- <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesHook'>Vcl.Styles.Hook</a> unit patch some WinApi and UxTheme functions, in order to fix the highlight colors and some visual elements.</li>
+ <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesHook'>Vcl.Styles.Hook</a> unit to enable patch Windows API and Windows Style methods.</li>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesColorTabs'>Vcl.Styles.ColorTabs</a> unit includes a new Style hook for the TPageControl and TTabSheet components.</li>
- <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/TVclStylesSystemMenu'>TVclStylesSystemMenu</a> component for select a VCL Style from the system Menu.</li>
+ <li>**<a href='https://github.com/RRUZ/vcl-styles-utils/wiki/TVclStylesSystemMenu'>TVclStylesSystemMenu</a>** component for select a VCL Style from the system Menu.</li>
 </ul>
 
 ## Installation ##
 
 <ul>
  <li>Unzip or checkout the files of the library in a writable folder.</li>
- <li>Under Tools, Environment Options, Library, add the directory where the VCL Styles Utils library have been installed (Ex : C:\Delphi\Libs\vcl-styles-utils\Common) to the Win32 and Win64 library path.<br>
+ <li>Under Tools, Environment Options, Library, add the directory where the VCL Styles Utils library have been installed Example : **C:\Delphi\Libs\vcl-styles-utils\Common** to the Win32 and Win64 library path.<br>
 </li>
 </ul>
 
-**Note** : If you want to use the Vcl.Styles.Hooks unit you must also include the [Delphi Detours Library](https://code.google.com/p/delphi-detours-library/) files in your lib/search path Ex : C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library
+**Note** : If you want to use the Vcl.Styles.Hooks unit you must also include the [Delphi Detours Library](https://github.com/MahdiSafsafi/delphi-detours-library) files in your lib/search path Example : *C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library*
 
