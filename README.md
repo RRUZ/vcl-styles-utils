@@ -2,7 +2,7 @@
 The *VCL Styles Utils* is a Delphi library which extend, fix bugs and add new features to the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview).
 
 <p align="center">
-  <img src="https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Images%20New%20Dialogs/W10%20VclStyles.png" alt="Mix"/>
+  <img src="https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Images%20New%20Dialogs/Mix6.png" alt="Mix"/>
 </p>
 
 [![](https://theroadtodelphi.files.wordpress.com/2014/07/followrruz.png)](https://twitter.com/RRUZ)
