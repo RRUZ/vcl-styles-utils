@@ -5,6 +5,8 @@ The *VCL Styles Utils* is a Delphi library which extend, fix bugs and add new fe
   <img src="https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Images%20New%20Dialogs/Mix4.png" alt="Mix"/>
 </p>
 
+![](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Images%20New%20Dialogs/Mix3.png)
+
 [![](https://theroadtodelphi.files.wordpress.com/2014/07/followrruz.png)](https://twitter.com/RRUZ)
 
 ## Features ##
