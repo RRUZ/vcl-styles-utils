@@ -44,14 +44,14 @@ The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styl
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesPreview'>TVclStylesPreview</a> component to preview a VCL Style.</li>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesHook'>Vcl.Styles.Hook</a> unit to enable patch Windows API and Windows Style methods.</li>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesColorTabs'>Vcl.Styles.ColorTabs</a> unit includes a new Style hook for the TPageControl and TTabSheet components.</li>
- <li>**<a href='https://github.com/RRUZ/vcl-styles-utils/wiki/TVclStylesSystemMenu'>TVclStylesSystemMenu</a>** component for select a VCL Style from the system Menu.</li>
+ <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/TVclStylesSystemMenu'>TVclStylesSystemMenu</a> component for select a VCL Style from the system Menu.</li>
 </ul>
 
 ## Installation ##
 
 <ul>
  <li>Unzip or checkout the files of the library in a writable folder.</li>
- <li>Under Tools, Environment Options, Library, add the directory where the VCL Styles Utils library have been installed Example : **C:\Delphi\Libs\vcl-styles-utils\Common** to the Win32 and Win64 library path.<br>
+ <li>Under Tools, Environment Options, Library, add the directory where the VCL Styles Utils library have been installed Example : C:\Delphi\Libs\vcl-styles-utils\Common to the Win32 and Win64 library path.
 </li>
 </ul>
 
