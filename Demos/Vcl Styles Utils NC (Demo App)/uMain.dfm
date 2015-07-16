@@ -2,8 +2,8 @@ object FrmMain: TFrmMain
   Left = 563
   Top = 331
   Caption = 'Sample NC Buttons'
-  ClientHeight = 151
-  ClientWidth = 462
+  ClientHeight = 239
+  ClientWidth = 308
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -25,8 +25,8 @@ object FrmMain: TFrmMain
   end
   object BtnDropDownMenu: TButton
     Left = 8
-    Top = 55
-    Width = 217
+    Top = 79
+    Width = 281
     Height = 25
     Hint = 'Sample Button with Dropdown menu'
     Caption = 'Sample Button with Dropdown menu'
@@ -36,18 +36,18 @@ object FrmMain: TFrmMain
     OnClick = BtnDropDownMenuClick
   end
   object BtnStyles: TButton
-    Left = 231
-    Top = 55
-    Width = 217
+    Left = 8
+    Top = 172
+    Width = 281
     Height = 25
     Caption = 'NC Buttons Styles'
     TabOrder = 1
     OnClick = BtnStylesClick
   end
   object BtnCustomStyle: TButton
-    Left = 231
-    Top = 86
-    Width = 217
+    Left = 8
+    Top = 203
+    Width = 281
     Height = 25
     Caption = 'Nonclient Area with custom VCL Style'
     TabOrder = 2
@@ -66,8 +66,8 @@ object FrmMain: TFrmMain
   end
   object BtnAlpha: TButton
     Left = 8
-    Top = 86
-    Width = 217
+    Top = 110
+    Width = 281
     Height = 25
     Caption = 'NC Alpha && Gradient Buttons'
     TabOrder = 4
@@ -75,8 +75,8 @@ object FrmMain: TFrmMain
   end
   object BtnStyleTabs: TButton
     Left = 8
-    Top = 117
-    Width = 217
+    Top = 141
+    Width = 281
     Height = 25
     Caption = 'NC Buttons Tabs Style'
     TabOrder = 5
@@ -94,8 +94,8 @@ object FrmMain: TFrmMain
     OnClick = CheckBoxSystemMenuClick
   end
   object CheckBoxShowCaption: TCheckBox
-    Left = 288
-    Top = 32
+    Left = 8
+    Top = 56
     Width = 97
     Height = 17
     Caption = 'Show Caption'
@@ -104,9 +104,17 @@ object FrmMain: TFrmMain
     TabOrder = 7
     OnClick = CheckBoxShowCaptionClick
   end
+  object CheckBoxAwesome: TCheckBox
+    Left = 152
+    Top = 56
+    Width = 145
+    Height = 17
+    Caption = 'Use Awesome font Icons'
+    TabOrder = 8
+    OnClick = CheckBoxAwesomeClick
+  end
   object MainMenu1: TMainMenu
-    Left = 360
-    Top = 8
+    Left = 200
     object Edit1: TMenuItem
       Caption = '&Edit'
       object Undo1: TMenuItem
@@ -219,10 +227,10 @@ object FrmMain: TFrmMain
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 248
-    Top = 120
+    Left = 120
+    Top = 24
     Bitmap = {
-      494C01010C001100400010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010C001100440010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

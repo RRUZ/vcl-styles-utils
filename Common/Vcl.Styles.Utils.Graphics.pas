@@ -574,11 +574,11 @@ type
     FDefaultQuality : DWORD;
     procedure LoadFontFromResource;
   public
-   constructor Create;
-   Destructor Destroy; override;
-   procedure DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor : TColor; Orientation : Integer = 0); overload;
-   procedure DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor : TColor; Orientation : Integer = 0); overload;
-   function  GetIcon(const ACode: Word; Width, Height : Integer; AColor, ABackColor : TColor; Orientation : Integer = 0) : HICON; overload;
+    constructor Create;
+    Destructor Destroy; override;
+    procedure DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor : TColor; Orientation : Integer = 0); overload;
+    procedure DrawChar(DC: HDC; const ACode: Word; DestRect: TRect; AColor : TColor; Orientation : Integer = 0); overload;
+    function  GetIcon(const ACode: Word; Width, Height : Integer; AColor, ABackColor : TColor; Orientation : Integer = 0) : HICON; overload;
   end;
 
 

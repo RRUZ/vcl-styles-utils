@@ -11,8 +11,10 @@ type
     ImageList1: TImageList;
     Label1: TLabel;
     cbNCBtnStyles: TComboBox;
+    CheckBoxAwesome: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure cbNCBtnStylesChange(Sender: TObject);
+    procedure CheckBoxAwesomeClick(Sender: TObject);
   private
     NCControls : TNCControls;
     procedure ButtonNCClick(Sender: TObject);
@@ -28,6 +30,7 @@ uses
  Vcl.Styles,
  Vcl.Themes,
  System.TypInfo,
+ Vcl.Styles.Utils.Graphics,
  Vcl.GraphUtil;
 
 {$R *.dfm}
@@ -44,6 +47,12 @@ begin
 end;
 
 procedure TFrmButtonsStyles.cbNCBtnStylesChange(Sender: TObject);
+begin
+ UpdateNCButtons;
+ NCControls.Invalidate;
+end;
+
+procedure TFrmButtonsStyles.CheckBoxAwesomeClick(Sender: TObject);
 begin
  UpdateNCButtons;
  NCControls.Invalidate;
@@ -70,8 +79,12 @@ const
     clWebRosyBrown, clWebYellowGreen, clGray, clWebOrange, clWebMoccasin, clWebMediumPurple,
     clWebMediumBlue, clWebMediumOrchid, clWebIvory, clWebSeashell, clWebPapayaWhip, clWebPeru);
 
+  AwesomeIcons : Array[0..11] of Word = (
+    fa_home, fa_signal, fa_search, fa_envelope_o, fa_remove, fa_gear,
+    fa_home, fa_signal, fa_gear, fa_download, fa_print, fa_camera);
+
 var
-  iLeft, iSep, i : Integer;
+  iLeft, iSep, i, LImageIndex : Integer;
   LNCControl : TNCButton;
 begin
   NCControls.ButtonsList.Clear;
@@ -83,7 +96,17 @@ begin
       LNCControl := NCControls.ButtonsList.Add();
       LNCControl.Style       := TNCButton.TNCButtonStyle(Integer(cbNCBtnStyles.Items.Objects[cbNCBtnStyles.ItemIndex]));
       LNCControl.ImageStyle  := isNormal;
-      LNCControl.ImageIndex  := i;
+
+      LNCControl.UseAwesomeFont:=CheckBoxAwesome.Checked;
+
+      if LNCControl.UseAwesomeFont then
+        LImageIndex:= AwesomeIcons[i]
+      else
+        LImageIndex:=i;
+
+      LNCControl.ImageIndex  := LImageIndex;
+
+
       LNCControl.BoundsRect  := Rect(iLeft, 2, iLeft + cWidth, 26);
 
       iSep:=5;

@@ -137,6 +137,7 @@ type
     FShowHint: Boolean;
     FName: TComponentName;
     FTag: NativeInt;
+    FUseAwesomeFont: Boolean;
     procedure DrawButton(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
     procedure SetStyle(const Value: TNCButtonStyle);
     procedure SetDisabledImageIndex(const Value: TImageIndex);
@@ -163,6 +164,7 @@ type
     procedure SetVisible(const Value: Boolean);
     procedure SetShowHint(const Value: Boolean);
     procedure SetName(const Value: TComponentName);
+    procedure SetUseAwesomeFont(const Value: Boolean);
     property TabIndex : Integer read GetTabIndex;
   protected
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); virtual;
@@ -205,6 +207,8 @@ type
     property ShowHint: Boolean read FShowHint write SetShowHint;
     property Name: TComponentName read FName write SetName stored False;
     property Tag: NativeInt read FTag write FTag default 0;
+
+    property UseAwesomeFont : Boolean read FUseAwesomeFont write SetUseAwesomeFont;
 
     property OnDropDownClick: TNotifyEvent read FOnDropDownClick write FOnDropDownClick;
     property OnClick: TNotifyEvent read FOnClick write FOnClick;
@@ -404,6 +408,7 @@ begin
   FDisabledImageIndex:=-1;
   FPressedImageIndex :=-1;
   FImageIndex        :=-1;
+  FUseAwesomeFont    :=False;
   FHotImageIndex     :=-1;
   FImageAlignment    := iaLeft;
   FStyle             := nsPushButton;
@@ -515,37 +520,38 @@ end;
 procedure TNCButton.DrawButton(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
 var
   Details:  TThemedElementDetails;
-  DrawRect, LRect : TRect;
+  DrawRect, LRect, LRectAwesome : TRect;
   IW, IH, IX, IY: Integer;
   SaveIndex: Integer;
-  X, Y, I, ImgIndex: Integer;
+  X, Y, I, LImgIndex: Integer;
   BCaption: String;
   LStyleServices : TCustomStyleServices;
   LColor, LColor1, LColor2, ThemeTextColor : TColor;
+
 begin
 
   LStyleServices:=NCControls.StyleServices;
   BCaption := FCaption;
-  ImgIndex := ImageIndex;
+  LImgIndex := FImageIndex;
   if not Enabled then
   begin
     Details := LStyleServices.GetElementDetails(tbPushButtonDisabled);
     if DisabledImageIndex<>-1 then
-      ImgIndex := DisabledImageIndex;
+      LImgIndex := FDisabledImageIndex;
   end
   else
   if Pressed then
   begin
     Details := LStyleServices.GetElementDetails(tbPushButtonPressed);
     if PressedImageIndex<>-1 then
-      ImgIndex := PressedImageIndex;
+      LImgIndex := FPressedImageIndex;
   end
   else
   if AMouseInControl then
   begin
     Details := LStyleServices.GetElementDetails(tbPushButtonHot);
     if HotImageIndex<>-1 then
-      ImgIndex := HotImageIndex;
+      LImgIndex := FHotImageIndex;
   end
   else
   if Enabled then
@@ -656,9 +662,11 @@ begin
   if (FStyle<>nsTranparent) and (FStyle<>nsSplitTrans) then
     LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
 
-  if (NCControls.FImages<>nil) and (NCControls.FImages.Handle <> 0) and
-     ImageList_GetIconSize(NCControls.FImages.Handle, IW, IH) then
+
+  if FUseAwesomeFont and (LImgIndex>=0) then
   begin
+    IW:= 16;
+    IH:= 16;
     IX := DrawRect.Left + (DrawRect.Width  - IW) div 2;
     IY := DrawRect.Top  + (DrawRect.Height - IH) div 2;
 
@@ -671,6 +679,7 @@ begin
               Dec(IY, ImageMargins.Bottom);
               Inc(DrawRect.Left, {IX +} IW + ImageMargins.Right);
             end;
+
           iaRight:
             begin
               IX := DrawRect.Right - IW - 2;
@@ -680,6 +689,7 @@ begin
               Dec(IY, ImageMargins.Bottom);
               DrawRect.Right := IX;
             end;
+
           iaTop:
             begin
               IX := {DrawRect.Left +} ({DrawRect.Width -} IW) div 2;
@@ -689,6 +699,7 @@ begin
               Inc(IY, ImageMargins.Top);
               Inc(DrawRect.Top, IY + IH + ImageMargins.Bottom);
             end;
+
           iaBottom:
             begin
               IX := {DrawRect.Left +} ({DrawRect.Width -} IW) div 2;
@@ -703,10 +714,63 @@ begin
 
 //    if AMouseInControl then
 //      Dec(IY);
-    if Enabled and (( FImageStyle=isNormal) or ((FImageStyle=isGrayHot) and AMouseInControl)) then
-     ImageList_Draw(NCControls.FImages.Handle, ImgIndex, ACanvas.Handle, IX, IY, ILD_NORMAL)
+    LRectAwesome:= Rect(IX, IY, IX + IW, IY+IH);
+  end
+  else
+  if (LImgIndex>=0) and (NCControls.FImages<>nil) and (NCControls.FImages.Handle <> 0) and
+     ImageList_GetIconSize(NCControls.FImages.Handle, IW, IH) then
+  begin
+    IX := DrawRect.Left + (DrawRect.Width  - IW) div 2;
+    IY := DrawRect.Top  + (DrawRect.Height - IH) div 2;
+
+       case ImageAlignment of
+          iaLeft:
+            begin
+              IX := DrawRect.Left + 2;
+              Inc(IX, ImageMargins.Left);
+              Inc(IY, ImageMargins.Top);
+              Dec(IY, ImageMargins.Bottom);
+              Inc(DrawRect.Left, {IX +} IW + ImageMargins.Right);
+            end;
+
+          iaRight:
+            begin
+              IX := DrawRect.Right - IW - 2;
+              Dec(IX, ImageMargins.Right);
+              Dec(IX, ImageMargins.Left);
+              Inc(IY, ImageMargins.Top);
+              Dec(IY, ImageMargins.Bottom);
+              DrawRect.Right := IX;
+            end;
+
+          iaTop:
+            begin
+              IX := {DrawRect.Left +} ({DrawRect.Width -} IW) div 2;
+              Inc(IX, ImageMargins.Left);
+              Dec(IX, ImageMargins.Right);
+              IY := DrawRect.Top + 2;
+              Inc(IY, ImageMargins.Top);
+              Inc(DrawRect.Top, IY + IH + ImageMargins.Bottom);
+            end;
+
+          iaBottom:
+            begin
+              IX := {DrawRect.Left +} ({DrawRect.Width -} IW) div 2;
+              Inc(IX, ImageMargins.Left);
+              Dec(IX, ImageMargins.Right);
+              IY := DrawRect.Bottom - IH - 2;
+              Dec(IY, ImageMargins.Bottom);
+              Dec(IY, ImageMargins.Top);
+              DrawRect.Bottom := IY;
+            end;
+       end;
+
+//    if AMouseInControl then
+//      Dec(IY);
+    if Enabled and ((FImageStyle=isNormal) or ((FImageStyle=isGrayHot) and AMouseInControl)) then
+      ImageList_Draw(NCControls.FImages.Handle, LImgIndex, ACanvas.Handle, IX, IY, ILD_NORMAL)
     else
-      DoDrawGrayImage(ACanvas.Handle, NCControls.FImages.Handle, ImgIndex, IX, IY);
+      DoDrawGrayImage(ACanvas.Handle, NCControls.FImages.Handle, LImgIndex, IX, IY);
   end;
 
     if (FStyle in [nsSplitButton, nsSplitTrans]) then
@@ -721,6 +785,12 @@ begin
        ThemeTextColor:=clNone;
 
        DrawControlText(ACanvas, Details, BCaption, DrawRect, DT_VCENTER or DT_CENTER, ThemeTextColor);
+       if FUseAwesomeFont and (FImageIndex>=0) then
+       begin
+         if ThemeTextColor=clNone then
+           LStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor);
+         AwesomeFont.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, ThemeTextColor);
+       end;
 
       if FDropDown then
       begin
@@ -791,6 +861,13 @@ begin
        ThemeTextColor:=clNone;
 
       DrawControlText(ACanvas, Details, BCaption, DrawRect, DT_VCENTER or DT_CENTER or DT_WORDBREAK, ThemeTextColor);
+
+     if FUseAwesomeFont and (FImageIndex>=0) then
+     begin
+         if ThemeTextColor=clNone then
+           LStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor);
+       AwesomeFont.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, ThemeTextColor);
+     end;
     end;
 end;
 
@@ -888,6 +965,11 @@ end;
 procedure TNCButton.SetTop(const Value: Integer);
 begin
   FTop := Value;
+end;
+
+procedure TNCButton.SetUseAwesomeFont(const Value: Boolean);
+begin
+  FUseAwesomeFont := Value;
 end;
 
 procedure TNCButton.SetVisible(const Value: Boolean);

@@ -31,12 +31,21 @@ object FrmButtonsStyles: TFrmButtonsStyles
     TabOrder = 0
     OnChange = cbNCBtnStylesChange
   end
+  object CheckBoxAwesome: TCheckBox
+    Left = 8
+    Top = 61
+    Width = 145
+    Height = 17
+    Caption = 'Use Awesome font Icons'
+    TabOrder = 1
+    OnClick = CheckBoxAwesomeClick
+  end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
-    Left = 328
-    Top = 16
+    Left = 304
+    Top = 72
     Bitmap = {
-      494C010106001100340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010106001100400010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000F3E6D7B1C78DFFD1975E0FE1974
       DEFE1773DDFE1671DBFE156FD9FE136DD8FE126CD6FE1069D5FE0F68D4FE0D66

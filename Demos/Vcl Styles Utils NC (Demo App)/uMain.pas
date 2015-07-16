@@ -55,6 +55,7 @@ type
     BtnStyleTabs: TButton;
     CheckBoxSystemMenu: TCheckBox;
     CheckBoxShowCaption: TCheckBox;
+    CheckBoxAwesome: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure BtnDropDownMenuClick(Sender: TObject);
     procedure CheckBoxNCVisibleClick(Sender: TObject);
@@ -64,6 +65,7 @@ type
     procedure BtnStyleTabsClick(Sender: TObject);
     procedure CheckBoxSystemMenuClick(Sender: TObject);
     procedure CheckBoxShowCaptionClick(Sender: TObject);
+    procedure CheckBoxAwesomeClick(Sender: TObject);
   private
     { Private declarations }
      NCControls : TNCControls;
@@ -80,6 +82,7 @@ implementation
 
 uses
  Vcl.Styles.Utils.SystemMenu,
+ Vcl.Styles.Utils.Graphics,
  uButtonsStyles, uCustomStyles, uDropdown, uAlphaGradient, uButtonsTabsStyles;
 
 {$R *.dfm}
@@ -132,6 +135,13 @@ begin
   ShowMessage(Format('You clicked the button %s', [TNCButton(Sender).Name]));
 end;
 
+procedure TFrmMain.CheckBoxAwesomeClick(Sender: TObject);
+begin
+ UpdateButtons;
+ NCControls.Invalidate;
+
+end;
+
 procedure TFrmMain.CheckBoxNCVisibleClick(Sender: TObject);
 begin
   NCControls.Visible:=CheckBoxNCVisible.Checked;
@@ -162,9 +172,13 @@ end;
 
 procedure TFrmMain.UpdateButtons;
 const
- cWidth = 20;
+  cWidth = 20;
+  AwesomeIcons : Array[0..11] of Word = (
+  fa_home, fa_signal, fa_search, fa_envelope_o, fa_remove, fa_gear,
+  fa_twitter, fa_user, fa_arrow_circle_o_down, fa_arrow_circle_o_up, fa_check, fa_power_off);
 var
- iLeft, i : integer;
+ iLeft, i, LImageIndex : integer;
+ LNCControl : TNCButton;
 begin
    iLeft:=5;
    if NCControls.ShowSystemMenu then
@@ -175,18 +189,27 @@ begin
    try
      for i:=0 to 10 do
      begin
-        NCControls.ButtonsList.Add;
-        NCControls[i].Name      := Format('NCButton%d', [i+1]);
-        NCControls[i].Hint      := Format('Hint for NCButton%d', [i+1]);
-        NCControls[i].ShowHint  := True;
-        NCControls[i].Caption   :='';
-        NCControls[i].Style     :=nsTranparent;
-        NCControls[i].ImageStyle:=isGrayHot;
-        NCControls[i].ImageIndex:=i;
-        NCControls[i].ImageAlignment := TImageAlignment.iaCenter;
-        NCControls[i].BoundsRect  := Rect(iLeft, 5, iLeft + cWidth, 25);
+        LNCControl := NCControls.ButtonsList.Add;
+        LNCControl.Name      := Format('NCButton%d', [i+1]);
+        LNCControl.Hint      := Format('Hint for NCButton%d', [i+1]);
+        LNCControl.ShowHint  := True;
+        LNCControl.Caption   :='';
+        LNCControl.Style     :=nsTranparent;
+        LNCControl.ImageStyle:=isGrayHot;
+
+        LNCControl.UseAwesomeFont:=CheckBoxAwesome.Checked;
+
+        if LNCControl.UseAwesomeFont then
+          LImageIndex:= AwesomeIcons[i]
+        else
+          LImageIndex:=i;
+
+        LNCControl.ImageIndex:=LImageIndex;
+
+        LNCControl.ImageAlignment := TImageAlignment.iaCenter;
+        LNCControl.BoundsRect  := Rect(iLeft, 5, iLeft + cWidth, 25);
         inc(iLeft, cWidth + 2);
-        NCControls[i].OnClick   := ButtonNCClick;
+        LNCControl.OnClick   := ButtonNCClick;
      end;
    finally
      NCControls.ButtonsList.EndUpdate;
