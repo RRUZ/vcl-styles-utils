@@ -42,6 +42,7 @@ implementation
 {$DEFINE HOOK_TProgressBar}
 
 
+
 uses
   DDetours,
   System.SyncObjs,

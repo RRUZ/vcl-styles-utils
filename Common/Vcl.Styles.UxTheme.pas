@@ -27,21 +27,28 @@ interface
 
 implementation
 
-{
-done   W8  Check Color text disabled on listview hot item
+{  TODO
+
+
+
+done   W8 Check Color text disabled on listview hot item
 done   Test on W10
 done   Test Task Dialogs
 done   fix preview windows background color when no elements are shown
 done   fix background of homegroup folder (and related)
-
-   done   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by GetThemColor)
-   fix related shell dialogs
-
+done   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by GetThemColor)
 done   fix navigation buttons  W8, W10
 done   improve drawing navigation buttons W7
 
+       fix related shell dialogs
+
+   Add support for custom titlebars.
+               msstyles
+
+   Add support for Classic Theme
    fix menu
       fix popup windows with trackbar
+
 
 }
 
@@ -249,6 +256,18 @@ begin
   else
     Result := StyleServices.GetSystemColor(clHighlight);
 end;
+
+function GetStyleBtnTextColor : TColor;
+begin
+  if not StyleServices.GetElementColor(StyleServices.GetElementDetails(tbPushButtonNormal), ecTextColor, Result) then
+   Result:=StyleServices.GetSystemColor(clBtnText);
+end;
+
+function GetStyleMenuTextColor : TColor;
+begin
+  Result:= StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
+end;
+
 
 
 function GetThemeClass(hTheme: HTHEME ; iPartId, iStateId: Integer) : string;
@@ -530,7 +549,7 @@ begin
           DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clWindow));
           //Windows Vista - W7
           if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
-            SetTextColor(hdc, ColorToRGB(StyleServices.GetSystemColor(clWindowText)));
+            SetTextColor(hdc, StyleServices.GetSystemColor(clMenuText));
           Exit(S_OK);
          end;
    end;
@@ -2349,7 +2368,7 @@ begin
                 DrawStyleFillRect(hdc, LRect2, StyleServices.GetSystemColor(clMenu));
                 //Windows Vista - W7
                 if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
-                  SetTextColor(hdc, ColorToRGB(StyleServices.GetSystemColor(clMenuText)));
+                  SetTextColor(hdc, ColorToRGB(GetStyleMenuTextColor));
                 Exit(S_OK);
             end;
          end;
@@ -2577,17 +2596,25 @@ begin
                        begin
 
                           //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
-                          LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          LColor := StyleServices.GetSystemColor(clHighlight);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
                           Exit(S_OK);
                        end;
 
                   //pressed
                   3:
                        begin
-                          //awStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                          //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
@@ -2596,7 +2623,11 @@ begin
                        begin
                           //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
                  end;
@@ -2617,8 +2648,12 @@ begin
                   2:
                        begin
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
-                          //awStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
                           Exit(S_OK);
                        end;
 
@@ -2626,17 +2661,24 @@ begin
                   3:
                        begin
                          LColor:=StyleServices.GetSystemColor(clHighlight);
-                         AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
-
-                       //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
-                          Exit(S_OK);
+                         //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                         DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                         LRect:=pRect;
+                         InflateRect(LRect, -1, -1);
+                         DrawStyleRectangle(hdc, LRect, LColor);
+                         //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                         Exit(S_OK);
                        end;
 
                   //focused
                   4:
                        begin
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
                           //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
                           Exit(S_OK);
                        end;
@@ -2645,14 +2687,18 @@ begin
                   5: // hot arrow button
                        begin
                          LColor:=StyleServices.GetSystemColor(clHighlight);
-                         AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
-                        //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
-                          Exit(S_OK);
+                         DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                         LRect:=pRect;
+                         InflateRect(LRect, -1, -1);
+                         DrawStyleRectangle(hdc, LRect, LColor);
+                         //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                         //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                         Exit(S_OK);
                        end;
                  end;
               end;
 
-          //narrow button with dropdown - background
+          //arrow button with dropdown - background
           5 :
               begin
                  case iStateId of
@@ -2667,7 +2713,11 @@ begin
                        begin
                           //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
@@ -2676,7 +2726,11 @@ begin
                        begin
                           //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
@@ -2685,7 +2739,11 @@ begin
                        begin
                           //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
@@ -2693,8 +2751,12 @@ begin
                   5:
                        begin
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
                           //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
@@ -2710,7 +2772,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 5;
                           LRect.Width := LRect.Width + 5;
-                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
+                          DrawStyleDownArrow(hdc, LRect, GetStyleBtnTextColor);
                           Exit(S_OK);
                        end;
 
@@ -2720,7 +2782,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 2;
                           LRect.Width := LRect.Width + 2;
-                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
+                          DrawStyleDownArrow(hdc, LRect, GetStyleBtnTextColor);
                           Exit(S_OK);
                        end;
                  end;
@@ -2736,7 +2798,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 5;
                           LRect.Width := LRect.Width + 5;
-                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
+                          DrawStyleDownArrow(hdc, LRect, GetStyleBtnTextColor);
                           Exit(S_OK);
                        end;
                   //hot
@@ -2745,7 +2807,7 @@ begin
                           LRect:=pRect;
                           LRect.Left  := LRect.Left  + 5;
                           LRect.Width := LRect.Width + 5;
-                          DrawStyleDownArrow(hdc, LRect, GetStyleHighLightColor);
+                          DrawStyleDownArrow(hdc, LRect, GetStyleBtnTextColor);
                           Exit(S_OK);
                        end;
                  end;
@@ -2766,16 +2828,22 @@ begin
                   2:
                        begin
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
-                          //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonHot), pRect);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
                   3: //pressed arrow (button down)
                        begin
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
-                          //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
@@ -2783,8 +2851,11 @@ begin
                   4:
                        begin
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
-                          //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonPressed), pRect);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 50);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
 
@@ -2793,8 +2864,11 @@ begin
                   5:
                        begin
                           LColor:=StyleServices.GetSystemColor(clHighlight);
-                          AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
-                          //DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonDefaulted), pRect);
+                          //AlphaBlendFillCanvas(hdc, LColor, pRect, 96);
+                          DrawStyleElement(hdc, StyleServices.GetElementDetails(tbPushButtonNormal), pRect);
+                          LRect:=pRect;
+                          InflateRect(LRect, -1, -1);
+                          DrawStyleRectangle(hdc, LRect, LColor);
                           Exit(S_OK);
                        end;
                  end;
@@ -3356,22 +3430,23 @@ begin
           //button with dropdown
           3 :
               case iStateId  of
-               1 :  pColor:= GetStyleHighLightColor;
-               6 :  pColor:= clYellow;//StyleServices.GetSystemColor(clBtnShadow);
+               1 :  pColor:= ColorToRGB(GetStyleBtnTextColor);//GetStyleHighLightColor;
+               6 :  pColor:= ColorToRGB(clYellow);//StyleServices.GetSystemColor(clBtnShadow);
               end;
 
-         9 :
+          9 :
               case iStateId  of
-               1 :  pColor:=ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+               1 :  pColor:= ColorToRGB(GetStyleBtnTextColor);//ColorToRGB(StyleServices.GetSystemColor(clBtnText));
                //Highlight
-               2 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText)); //OK
-               3 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText)); //OK
-               6 :  pColor:= clLime;//StyleServices.GetSystemColor(clBtnShadow);
+               2 :  pColor:= ColorToRGB(GetStyleBtnTextColor);//ColorToRGB(StyleServices.GetSystemColor(clBtnText)); //OK
+               3 :  pColor:= ColorToRGB(GetStyleBtnTextColor);//ColorToRGB(StyleServices.GetSystemColor(clBtnText)); //OK
+               6 :  pColor:= ColorToRGB(clLime);//StyleServices.GetSystemColor(clBtnShadow);
               end;
 
+          //header text
           10 :
               case iStateId  of
-               1 :  pColor:= GetStyleHighLightColor;
+               1 :  pColor:= ColorToRGB(GetStyleHighLightColor);
               end;
         end;
 

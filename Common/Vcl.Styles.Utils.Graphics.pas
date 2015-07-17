@@ -809,6 +809,7 @@ const
   procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True);
   procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
+  procedure DrawStyleRectangle(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
   procedure DrawStyleParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
   procedure DrawStyleParentBackgroundEx(Handle : THandle; DC: HDC; const ARect: TRect);
@@ -1168,6 +1169,24 @@ begin
   end;
 end;
 
+procedure DrawStyleRectangle(hdc : HDC; LRect : TRect; AColor :TColor);
+var
+ SaveIndex : Integer;
+ LCanvas : TCanvas;
+begin
+  LCanvas:=TCanvas.Create;
+  SaveIndex := SaveDC(hdc);
+  try
+    LCanvas.Handle:=hdc;
+    LCanvas.Brush.Style:=bsClear;
+    LCanvas.Pen.Color:=AColor;
+    LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left + LRect.Width,  LRect.Top + LRect.Height);
+  finally
+    LCanvas.Handle:=0;
+    LCanvas.Free;
+    RestoreDC(hdc, SaveIndex);
+  end;
+end;
 
 procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
 var
