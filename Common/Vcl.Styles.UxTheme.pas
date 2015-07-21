@@ -1100,19 +1100,21 @@ begin
                                                             LStartColor:= LCanvas.Pen.Color;
                                                             LRect:=pRect;
 
+                                                            if not SameText(LThemeClass, VSCLASS_LISTVIEW) then
+                                                             InflateRect(LRect, -1, -1);
+
 
                                                             if iStateId=LISS_HOTSELECTED then
                                                               AlphaBlendFillCanvas(LCanvas, LColor, LRect, 96)
                                                             else
                                                               AlphaBlendFillCanvas(LCanvas, LColor, LRect, 50);
 
-                                                            if SameText(LThemeClass, VSCLASS_LISTVIEW) then
-                                                            begin
-                                                              LCanvas.Pen.Color:=LColor;
-                                                              LCanvas.Brush.Style:=bsClear;
-                                                              LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-                                                              LCanvas.Pen.Color:=LStartColor;
-                                                            end;
+
+                                                            LCanvas.Pen.Color:=LColor;
+                                                            LCanvas.Brush.Style:=bsClear;
+                                                            LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+                                                            LCanvas.Pen.Color:=LStartColor;
+
 
                                                           finally
                                                             LCanvas.Handle:=0;
@@ -1139,18 +1141,20 @@ begin
                                                             LStartColor:= LCanvas.Pen.Color;
                                                             LRect:=pRect;
 
+                                                            if not SameText(LThemeClass, VSCLASS_LISTVIEW) then
+                                                             InflateRect(LRect, -1, -1);
+
+
                                                             if iStateId=LIS_HOT then
                                                               AlphaBlendFillCanvas(LCanvas, LColor, LRect, 96)
                                                             else
                                                               AlphaBlendFillCanvas(LCanvas, LColor, LRect, 50);
 
-                                                            if SameText(LThemeClass, VSCLASS_LISTVIEW) then
-                                                            begin
-                                                              LCanvas.Pen.Color:=LColor;
-                                                              LCanvas.Brush.Style:=bsClear;
-                                                              LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-                                                              LCanvas.Pen.Color:=LStartColor;
-                                                            end;
+                                                            LCanvas.Pen.Color:=LColor;
+                                                            LCanvas.Brush.Style:=bsClear;
+                                                            LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
+                                                            LCanvas.Pen.Color:=LStartColor;
+
 
                                                           finally
                                                             LCanvas.Handle:=0;
@@ -1247,9 +1251,9 @@ begin
                                                         SaveIndex := SaveDC(hdc);
                                                         try
                                                           LCanvas.Handle:=hdc;
-                                                          LCanvas.Pen.Color:=LColor;
-                                                          LCanvas.MoveTo(pRect.Left, pRect.Top);
-                                                          LCanvas.LineTo(pRect.Right, pRect.Top);
+                                                          LRect:=pRect;
+                                                          GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetSystemColor(clWindow),
+                                                          LRect, TGradientDirection.gdHorizontal);
                                                         finally
                                                           LCanvas.Handle:=0;
                                                           LCanvas.Free;
@@ -1269,9 +1273,9 @@ begin
                                                         SaveIndex := SaveDC(hdc);
                                                         try
                                                           LCanvas.Handle:=hdc;
-                                                          LCanvas.Pen.Color:=LColor;
-                                                          LCanvas.MoveTo(pRect.Left, pRect.Top);
-                                                          LCanvas.LineTo(pRect.Right, pRect.Top);
+                                                          LRect:=pRect;
+                                                          GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetSystemColor(clWindow),
+                                                          LRect, TGradientDirection.gdHorizontal);
                                                         finally
                                                           LCanvas.Handle:=0;
                                                           LCanvas.Free;
