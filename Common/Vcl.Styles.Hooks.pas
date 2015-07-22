@@ -92,7 +92,7 @@ var
 {$IFDEF HOOK_TDateTimePicker}
   {$IF CompilerVersion>=29}
   Trampoline_SetWindowTheme: function(hwnd: HWND; pszSubAppName: LPCWSTR; pszSubIdList: LPCWSTR): HRESULT; stdcall;
-  {$ENDIF CompilerVersion}
+  {$IFEND CompilerVersion}
 {$ENDIF HOOK_TDateTimePicker}
 
 
@@ -738,7 +738,7 @@ end;
      else
        Exit(Trampoline_SetWindowTheme(hwnd, pszSubAppName, pszSubIdList));
   end;
-  {$ENDIF CompilerVersion}
+  {$IFEND CompilerVersion}
 {$ENDIF HOOK_TDateTimePicker}
 
 
@@ -794,7 +794,7 @@ begin
   {$IF CompilerVersion>=29}
   //@Trampoline_TMonthCalendar_CreateWnd := InterceptCreate(@TMonthCalendarClass.CreateWnd, @Detour_TMonthCalendar_CreateWnd);
   @Trampoline_SetWindowTheme := InterceptCreate(themelib, 'SetWindowTheme', @Detour_SetWindowTheme);
-  {$ENDIF CompilerVersion}
+  {$IFEND CompilerVersion}
 {$ENDIF HOOK_TDateTimePicker}
 
   EndHooks;
@@ -818,7 +818,7 @@ finalization
 {$IFDEF HOOK_TDateTimePicker}
   {$IF CompilerVersion>=29}
   InterceptRemove(@Trampoline_SetWindowTheme);
-  {$ENDIF CompilerVersion}
+  {$IFEND CompilerVersion}
 {$ENDIF HOOK_TDateTimePicker}
 
   EndUnHooks;
