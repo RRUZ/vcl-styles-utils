@@ -806,13 +806,17 @@ const
   procedure AlphaBlendRectangle(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
   procedure AlphaBlendRectangle(const DC: HDC;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
 
+
   procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True);
   procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleRectangle(hdc : HDC; LRect : TRect; AColor :TColor);
+
+
   procedure DrawStyleArrow(hdc : HDC; Direction: TScrollDirection; Location: TPoint; Size: Integer; AColor: TColor);
   procedure DrawStyleParentBackground(Handle : THandle; DC: HDC; const ARect: TRect);
   procedure DrawStyleParentBackgroundEx(Handle : THandle; DC: HDC; const ARect: TRect);
+
 
   procedure RotateBitmap(ABitMap: TBitmap; Rads: Single; AdjustSize: Boolean; BackGroundColor: TColor = clNone);
   procedure FlipBitmap24Horizontal(ABitMap : TBitmap);
@@ -1187,6 +1191,7 @@ begin
     RestoreDC(hdc, SaveIndex);
   end;
 end;
+
 
 procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
 var

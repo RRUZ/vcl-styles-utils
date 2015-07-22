@@ -53,6 +53,7 @@ uses
   System.Generics.Collections,
   System.StrUtils,
   WinApi.Messages,
+  WinApi.UXTheme,
   Vcl.Graphics,
 {$IFDEF HOOK_UXTHEME}
   Vcl.Styles.Utils.Graphics,
@@ -60,6 +61,7 @@ uses
 {$ENDIF HOOK_UXTHEME}
   Vcl.Styles.Utils.SysControls,
   Vcl.Forms,
+  Vcl.Controls,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
   Vcl.Themes;
@@ -71,6 +73,8 @@ type
   end;
 
   TSetStyle = procedure(Style: TCustomStyleServices) of object;
+  TMonthCalendarClass  =  class(TMonthCalendar);
+  TCommonCalendarClass =  class(TCommonCalendar);
 
 var
   VCLStylesBrush: TObjectDictionary<string, TListStyleBrush>;
@@ -84,6 +88,12 @@ var
   {$IFDEF HOOK_UXTHEME}
   TrampolineLoadImageW: function (hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall = nil;
   {$ENDIF HOOK_UXTHEME}
+
+{$IFDEF HOOK_TDateTimePicker}
+  {$IF CompilerVersion>=29}
+  Trampoline_SetWindowTheme: function(hwnd: HWND; pszSubAppName: LPCWSTR; pszSubIdList: LPCWSTR): HRESULT; stdcall;
+  {$ENDIF CompilerVersion}
+{$ENDIF HOOK_TDateTimePicker}
 
 
 function Detour_DrawEdge(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
@@ -716,6 +726,22 @@ end;
 {$ENDIF HOOK_UXTHEME}
 
 
+{$IFDEF HOOK_TDateTimePicker}
+  {$IF CompilerVersion>=29}
+  function Detour_SetWindowTheme(hwnd: HWND; pszSubAppName: LPCWSTR; pszSubIdList: LPCWSTR): HRESULT; stdcall;
+  var
+    LControl : TWinControl;
+  begin
+     LControl:= FindControl(hwnd);
+     if (pszSubAppName='') and (pszSubIdList='') and TStyleManager.IsCustomStyleActive and (LControl<>nil) and (LControl is TMonthCalendar) then
+       Exit(S_OK)
+     else
+       Exit(Trampoline_SetWindowTheme(hwnd, pszSubAppName, pszSubIdList));
+  end;
+  {$ENDIF CompilerVersion}
+{$ENDIF HOOK_TDateTimePicker}
+
+
 //don't hook CreateSolidBrush, because is used internally but GetSysColorBrush
 //don't hook CopyImage
 
@@ -729,16 +755,23 @@ begin
     DeleteObject(Value);
 end;
 
+const
+  themelib = 'uxtheme.dll';
+
 initialization
+
 
  VCLStylesLock  := TCriticalSection.Create;
  VCLStylesBrush := TObjectDictionary<string, TListStyleBrush>.Create([doOwnsValues]);
 
 if StyleServices.Available then
 begin
+
 {$IFDEF HOOK_TDateTimePicker}
   TCustomStyleEngine.RegisterStyleHook(TDateTimePicker, TStyleHook);
 {$ENDIF HOOK_TDateTimePicker}
+
+
 {$IFDEF HOOK_TProgressBar}
   TCustomStyleEngine.RegisterStyleHook(TProgressBar, TStyleHook);
 {$ENDIF HOOK_TProgressBar}
@@ -756,6 +789,14 @@ begin
 {$ENDIF HOOK_UXTHEME}
 
   @Trampoline_SetStyle := InterceptCreate(@LSetStylePtr, @Detour_SetStyle);
+
+{$IFDEF HOOK_TDateTimePicker}
+  {$IF CompilerVersion>=29}
+  //@Trampoline_TMonthCalendar_CreateWnd := InterceptCreate(@TMonthCalendarClass.CreateWnd, @Detour_TMonthCalendar_CreateWnd);
+  @Trampoline_SetWindowTheme := InterceptCreate(themelib, 'SetWindowTheme', @Detour_SetWindowTheme);
+  {$ENDIF CompilerVersion}
+{$ENDIF HOOK_TDateTimePicker}
+
   EndHooks;
 end;
 
@@ -773,6 +814,13 @@ finalization
     InterceptRemove(@TrampolineLoadImageW);
 {$ENDIF HOOK_UXTHEME}
   InterceptRemove(@Trampoline_SetStyle);
+
+{$IFDEF HOOK_TDateTimePicker}
+  {$IF CompilerVersion>=29}
+  InterceptRemove(@Trampoline_SetWindowTheme);
+  {$ENDIF CompilerVersion}
+{$ENDIF HOOK_TDateTimePicker}
+
   EndUnHooks;
   VCLStylesBrush.Free;
   VCLStylesLock.Free;

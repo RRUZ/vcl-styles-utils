@@ -1093,35 +1093,16 @@ begin
                                 LIS_SELECTED          :
                                                         begin
                                                           LColor := StyleServices.GetSystemColor(clHighlight);
-                                                          LCanvas:=TCanvas.Create;
-                                                          SaveIndex := SaveDC(hdc);
-                                                          try
-                                                            LCanvas.Handle:=hdc;
-                                                            LStartColor:= LCanvas.Pen.Color;
-                                                            LRect:=pRect;
-
-                                                            if not SameText(LThemeClass, VSCLASS_LISTVIEW) then
+                                                          LRect  := pRect;
+                                                          if not SameText(LThemeClass, VSCLASS_LISTVIEW) then
                                                              InflateRect(LRect, -1, -1);
 
+                                                          if iStateId=LISS_HOTSELECTED then
+                                                           AlphaBlendRectangle(hdc, LColor, LRect, 96)
+                                                          else
+                                                           AlphaBlendRectangle(hdc, LColor, LRect, 50);
 
-                                                            if iStateId=LISS_HOTSELECTED then
-                                                              AlphaBlendFillCanvas(LCanvas, LColor, LRect, 96)
-                                                            else
-                                                              AlphaBlendFillCanvas(LCanvas, LColor, LRect, 50);
-
-
-                                                            LCanvas.Pen.Color:=LColor;
-                                                            LCanvas.Brush.Style:=bsClear;
-                                                            LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-                                                            LCanvas.Pen.Color:=LStartColor;
-
-
-                                                          finally
-                                                            LCanvas.Handle:=0;
-                                                            LCanvas.Free;
-                                                            RestoreDC(hdc, SaveIndex);
-                                                          end;
-                                                         Exit(S_OK);
+                                                          Exit(S_OK);
                                                         end;
                             end;
                         end;
@@ -1134,33 +1115,15 @@ begin
                                 LIS_HOT             :
                                                         begin
                                                           LColor := StyleServices.GetSystemColor(clHighlight);
-                                                          LCanvas:=TCanvas.Create;
-                                                          SaveIndex := SaveDC(hdc);
-                                                          try
-                                                            LCanvas.Handle:=hdc;
-                                                            LStartColor:= LCanvas.Pen.Color;
-                                                            LRect:=pRect;
-
-                                                            if not SameText(LThemeClass, VSCLASS_LISTVIEW) then
+                                                          LRect  := pRect;
+                                                          if not SameText(LThemeClass, VSCLASS_LISTVIEW) then
                                                              InflateRect(LRect, -1, -1);
 
+                                                          if iStateId=LIS_HOT then
+                                                           AlphaBlendRectangle(hdc, LColor, LRect, 96)
+                                                          else
+                                                           AlphaBlendRectangle(hdc, LColor, LRect, 50);
 
-                                                            if iStateId=LIS_HOT then
-                                                              AlphaBlendFillCanvas(LCanvas, LColor, LRect, 96)
-                                                            else
-                                                              AlphaBlendFillCanvas(LCanvas, LColor, LRect, 50);
-
-                                                            LCanvas.Pen.Color:=LColor;
-                                                            LCanvas.Brush.Style:=bsClear;
-                                                            LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-                                                            LCanvas.Pen.Color:=LStartColor;
-
-
-                                                          finally
-                                                            LCanvas.Handle:=0;
-                                                            LCanvas.Free;
-                                                            RestoreDC(hdc, SaveIndex);
-                                                          end;
                                                           Exit(S_OK);
                                                         end;
                             end;
@@ -1223,7 +1186,9 @@ begin
                              LVGH_CLOSEMIXEDSELECTIONHOT,
                              LVGH_OPENHOT         :
                                                    begin
-                                                      AlphaBlendRectangle(hdc, StyleServices.GetSystemColor(clHighlight), pRect, 96);
+                                                      LRect:=pRect;
+                                                      InflateRect(LRect, -1, -1);
+                                                      AlphaBlendRectangle(hdc, StyleServices.GetSystemColor(clHighlight), LRect, 96);
                                                       Exit(S_OK);
                                                    end;
                             end;
