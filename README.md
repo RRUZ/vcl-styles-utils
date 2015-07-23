@@ -30,7 +30,7 @@ The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styl
 </ul>  
 ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/DialogsMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/DialogsMain.png)
 <ul>
- <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFormStyleHooks'>Vcl.Styles.FormStyleHooks</a> unit includes some additional Style Hooks for TForms.</li>
+ <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFormStyleHooks'>Vcl.Styles.FormStyleHooks</a> unit add support for use images and solid colors in the title and background of the TForms.</li>
 </ul>   
  ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png)
 <ul>
