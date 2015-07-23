@@ -97,9 +97,9 @@ begin
       LNCControl.Style       := TNCButton.TNCButtonStyle(Integer(cbNCBtnStyles.Items.Objects[cbNCBtnStyles.ItemIndex]));
       LNCControl.ImageStyle  := isNormal;
 
-      LNCControl.UseAwesomeFont:=CheckBoxAwesome.Checked;
+      LNCControl.UseFontAwesome:=CheckBoxAwesome.Checked;
 
-      if LNCControl.UseAwesomeFont then
+      if LNCControl.UseFontAwesome then
         LImageIndex:= AwesomeIcons[i]
       else
         LImageIndex:=i;

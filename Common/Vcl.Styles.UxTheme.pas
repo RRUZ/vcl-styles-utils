@@ -192,17 +192,17 @@ type
   TFuncDrawThemeBackground  =  function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
 
 var
-  TrampolineOpenThemeDataEx       : function(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall = nil;
-  TrampolineOpenThemeData         : function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall =  nil;
-  TrampolineCloseThemeData        : function(hTheme: HTHEME): HRESULT; stdcall =  nil;
-  TrampolineDrawThemeBackground   : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall =  nil;
-  TrampolineDrawThemeBackgroundEx : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pOptions: Pointer): HResult; stdcall =  nil;
-  TrampolineGetThemeColor         : function(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT; stdcall = nil;
-  TrampolineGetThemeSysColor      : function(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall =  nil;
-  TrampolineGetThemeSysColorBrush : function(hTheme: HTHEME; iColorId: Integer): HBRUSH; stdcall =  nil;
-  TrampolineDrawThemeText         : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
-  TrampolineDrawThemeTextEx       : function(hTheme: HTHEME; hdc: HDC; iPartId: Integer; iStateId: Integer; pszText: LPCWSTR; cchText: Integer; dwTextFlags: DWORD; pRect: PRect; var pOptions: TDTTOpts): HResult; stdcall = nil;
-  TrampolineDrawThemeEdge         : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pDestRect: TRect; uEdge, uFlags: UINT; pContentRect: PRECT): HRESULT; stdcall = nil;
+  Trampoline_UxTheme_OpenThemeDataEx       : function(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall = nil;
+  Trampoline_UxTheme_OpenThemeData         : function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall =  nil;
+  Trampoline_UxTheme_CloseThemeData        : function(hTheme: HTHEME): HRESULT; stdcall =  nil;
+  Trampoline_UxTheme_DrawThemeBackground   : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall =  nil;
+  Trampoline_UxTheme_DrawThemeBackgroundEx : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pOptions: Pointer): HResult; stdcall =  nil;
+  Trampoline_UxTheme_GetThemeColor         : function(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT; stdcall = nil;
+  Trampoline_UxTheme_GetThemeSysColor      : function(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall =  nil;
+  Trampoline_UxTheme_GetThemeSysColorBrush : function(hTheme: HTHEME; iColorId: Integer): HBRUSH; stdcall =  nil;
+  Trampoline_UxTheme_DrawThemeText         : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  pszText: LPCWSTR; iCharCount: Integer; dwTextFlags, dwTextFlags2: DWORD; const pRect: TRect): HRESULT; stdcall = nil;
+  Trampoline_UxTheme_DrawThemeTextEx       : function(hTheme: HTHEME; hdc: HDC; iPartId: Integer; iStateId: Integer; pszText: LPCWSTR; cchText: Integer; dwTextFlags: DWORD; pRect: PRect; var pOptions: TDTTOpts): HResult; stdcall = nil;
+  Trampoline_UxTheme_DrawThemeEdge         : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pDestRect: TRect; uEdge, uFlags: UINT; pContentRect: PRECT): HRESULT; stdcall = nil;
 
   THThemesClasses  : TDictionary<HTHEME, string>;
   THThemesHWND     : TDictionary<HTHEME, HWND>;
@@ -216,7 +216,7 @@ function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME
 begin
   VCLStylesLock.Enter;
   try
-    Result:=TrampolineOpenThemeData(hwnd, pszClassList);
+    Result:=Trampoline_UxTheme_OpenThemeData(hwnd, pszClassList);
     if THThemesClasses.ContainsKey(Result) then
       THThemesClasses.Remove(Result);
     THThemesClasses.Add(Result, pszClassList);
@@ -234,7 +234,7 @@ function Detour_UxTheme_OpenThemeDataEx(hwnd: HWND; pszClassList: LPCWSTR; dwFla
 begin
   VCLStylesLock.Enter;
   try
-    Result:=TrampolineOpenThemeDataEx(hwnd, pszClassList, dwFlags);
+    Result:=Trampoline_UxTheme_OpenThemeDataEx(hwnd, pszClassList, dwFlags);
     if THThemesClasses.ContainsKey(Result) then
       THThemesClasses.Remove(Result);
     THThemesClasses.Add(Result, pszClassList);
@@ -275,43 +275,43 @@ var
   hThemeNew : WinApi.UxTheme.HTHEME;
 begin
   Result:='';
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_SCROLLBAR);
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_SCROLLBAR);
   if hThemeNew=hTheme then
     Exit(VSCLASS_SCROLLBAR)
   else
     CloseThemeData(hThemeNew);
 
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_LISTVIEW);
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_LISTVIEW);
   if hThemeNew=hTheme then
     Exit(VSCLASS_LISTVIEW)
   else
     CloseThemeData(hThemeNew);
 
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_EDIT);
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_EDIT);
   if hThemeNew=hTheme then
     Exit(VSCLASS_EDIT)
   else
     CloseThemeData(hThemeNew);
 
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_LISTBOX);
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_LISTBOX);
   if hThemeNew=hTheme then
     Exit(VSCLASS_LISTBOX)
   else
     CloseThemeData(hThemeNew);
 
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_BUTTON);
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_BUTTON);
   if hThemeNew=hTheme then
     Exit(VSCLASS_BUTTON)
   else
     CloseThemeData(hThemeNew);
 
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_MENU);
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_MENU);
   if hThemeNew=hTheme then
     Exit(VSCLASS_MENU)
   else
     CloseThemeData(hThemeNew);
 
-  hThemeNew := TrampolineOpenThemeData(0, VSCLASS_MENUBAND);
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_MENUBAND);
   if hThemeNew=hTheme then
     Exit(VSCLASS_MENUBAND)
   else
@@ -895,19 +895,21 @@ begin
 
 
      MC_COLHEADERSPLITTER  : begin
-                                LStartColor := StyleServices.GetSystemColor(clBtnShadow);
-                                LEndColor   := StyleServices.GetSystemColor(clBtnHighlight);
+                                LStartColor := StyleServices.GetSystemColor(clWindow);
+                                LEndColor   := StyleServices.GetSystemColor(clHighlight);
 
                                 LCanvas:=TCanvas.Create;
                                 SaveIndex := SaveDC(hdc);
                                 try
                                   LCanvas.Handle:=hdc;
-                                  LCanvas.Pen.Color:=LStartColor;
-                                  LCanvas.MoveTo(pRect.Left, pRect.Top);
-                                  LCanvas.LineTo(pRect.Right, pRect.Top);
-                                  LCanvas.Pen.Color:=LEndColor;
-                                  LCanvas.MoveTo(pRect.Left, pRect.Top+1);
-                                  LCanvas.LineTo(pRect.Right, pRect.Top+1);
+                                  LRect:=pRect;
+
+                                  GradientFillCanvas(LCanvas, LStartColor, LEndColor,
+                                  Rect(LRect.Left, LRect.Top, LRect.Width div 2, LRect.Bottom), TGradientDirection.gdHorizontal);
+
+                                  GradientFillCanvas(LCanvas, LEndColor, LStartColor,
+                                  Rect(LRect.Width div 2, LRect.Top, LRect.Width, LRect.Bottom), TGradientDirection.gdHorizontal);
+
                                 finally
                                   LCanvas.Handle:=0;
                                   LCanvas.Free;
@@ -919,44 +921,11 @@ begin
 
      MC_GRIDCELLBACKGROUND : begin
 
-//                                   case iStateId of
-//                                    MCGCB_SELECTED : LDetails:=StyleServices.GetElementDetails(tgCellSelected);
-//                                    MCGCB_HOT :LDetails:=StyleServices.GetElementDetails(tgFixedCellHot);
-//                                    MCGCB_SELECTEDHOT :LDetails:=StyleServices.GetElementDetails(tgCellSelected);
-//                                    MCGCB_SELECTEDNOTFOCUSED :LDetails:=StyleServices.GetElementDetails(tgCellSelected);
-//                                    MCGCB_TODAY :LDetails:=StyleServices.GetElementDetails(tgFixedCellHot);
-//                                    else
-//                                      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
-//                                   end;
-//
-//                                    SaveIndex := SaveDC(hdc);
-//                                    try
-//                                       StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-//                                    finally
-//                                      RestoreDC(hdc, SaveIndex);
-//                                    end;
-
-                                    SaveIndex := SaveDC(hdc);
-                                    LCanvas:=TCanvas.Create;
-                                    try
-                                      LCanvas.Handle:=hdc;
-                                      LStartColor:= StyleServices.GetSystemColor(clHighlight);
-                                      //GradientRoundedFillCanvas(LCanvas, LStartColor, LEndColor, pRect, gdVertical, 4);
-                                      if iStateId=MCGCB_TODAY then
-                                       AlphaBlendFillCanvas(LCanvas, LStartColor, pRect, 200)
-                                      else
-                                       AlphaBlendFillCanvas(LCanvas, LStartColor, pRect, 96);
-
-                                      LCanvas.Pen.Color:=LStartColor;
-                                      LCanvas.Brush.Style:=bsClear;
-                                      LRect:=pRect;
-                                      //LCanvas.RoundRect(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height, 6, 6);
-                                      LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
-                                    finally
-                                      LCanvas.Handle:=0;
-                                      LCanvas.Free;
-                                      RestoreDC(hdc, SaveIndex);
-                                    end;
+                                  LStartColor:= StyleServices.GetSystemColor(clHighlight);
+                                  if iStateId=MCGCB_TODAY then
+                                    AlphaBlendRectangle(hdc, LStartColor, pRect, 200)
+                                  else
+                                    AlphaBlendRectangle(hdc, LStartColor, pRect, 96);
 
                                   Exit(S_OK);
                              end;
@@ -1210,7 +1179,6 @@ begin
                              LVGHL_CLOSEMIXEDSELECTIONHOT,
                              LVGHL_OPENSELECTEDHOT :
                                                     begin
-                                                        //LColor := StyleServices.GetSystemColor(clHighlight);
                                                         LColor := StyleServices.GetSystemColor(clWindowText);
                                                         LCanvas:=TCanvas.Create;
                                                         SaveIndex := SaveDC(hdc);
@@ -3004,38 +2972,38 @@ end;
 function Detour_UxTheme_DrawThemeBackgroundEx(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pOptions: Pointer): HRESULT; stdcall;
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
-    Exit(TrampolineDrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions))
+    Exit(Trampoline_UxTheme_DrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions))
   else
-    Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pOptions, TrampolineDrawThemeBackgroundEx));
+    Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pOptions, Trampoline_UxTheme_DrawThemeBackgroundEx));
 end;
 
 function Detour_UxTheme_DrawThemeBackground(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall;
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
-    Exit(TrampolineDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect))
+    Exit(Trampoline_UxTheme_DrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect))
   else
-    Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pClipRect, TrampolineDrawThemeBackground));
+    Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pClipRect, Trampoline_UxTheme_DrawThemeBackground));
 end;
 
 
 function Detour_UxTheme_DrawThemeEdge(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pDestRect: TRect; uEdge, uFlags: UINT; pContentRect: PRECT): HRESULT; stdcall;
 begin
  //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeEdge  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
- Exit(TrampolineDrawThemeEdge(hTheme, hdc, iPartId, iStateId, pDestRect, uEdge, uFlags, pContentRect));
+ Exit(Trampoline_UxTheme_DrawThemeEdge(hTheme, hdc, iPartId, iStateId, pDestRect, uEdge, uFlags, pContentRect));
 end;
 
-function Detour_GetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
+function Detour_UxTheme_GetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
 begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
-   Result:= TrampolineGetThemeSysColor(hTheme, iColorId)
+   Result:= Trampoline_UxTheme_GetThemeSysColor(hTheme, iColorId)
   else
    Result:= StyleServices.GetSystemColor(iColorId or Integer($FF000000));
 end;
 
-function Detour_GetThemeSysColorBrush(hTheme: HTHEME; iColorId: Integer): HBRUSH; stdcall;
+function Detour_UxTheme_GetThemeSysColorBrush(hTheme: HTHEME; iColorId: Integer): HBRUSH; stdcall;
 begin
   //OutputDebugString(PChar(Format('GetThemeSysColorBrush hTheme %d iColorId %d', [hTheme, iColorId])));
-  Exit(TrampolineGetThemeSysColorBrush(hTheme, iColorId));
+  Exit(Trampoline_UxTheme_GetThemeSysColorBrush(hTheme, iColorId));
 end;
 
 {
@@ -3043,7 +3011,7 @@ end;
  Doesn't affect Compressed files font color (blue)
 }
 
-function Detour_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;  stdcall;
+function Detour_UxTheme_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;  stdcall;
 var
   LThemeClass : string;
 begin
@@ -3051,7 +3019,7 @@ begin
      VCLStylesLock.Enter;
      try
       if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not THThemesClasses.ContainsKey(hTheme) then
-       Exit(TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
+       Exit(Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
        LThemeClass:=THThemesClasses.Items[hTheme];
      finally
        VCLStylesLock.Leave;
@@ -3061,7 +3029,7 @@ begin
 
          TMT_TEXTCOLOR :
          begin
-           Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
            if (Result=S_OK) and (@TrampolineGetSysColor<>nil) and (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) then
            begin
              //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
@@ -3132,7 +3100,7 @@ begin
 
        if TColor(pColor)=clNone then
        begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3153,7 +3121,7 @@ begin
 
        if TColor(pColor)=clNone then
        begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3174,7 +3142,7 @@ begin
 
        if TColor(pColor)=clNone then
        begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3196,7 +3164,7 @@ begin
 
        if TColor(pColor)=clNone then
        begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3226,7 +3194,7 @@ begin
 
        if TColor(pColor)=clNone then
        begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3268,7 +3236,7 @@ begin
 
        if TColor(pColor)=clNone then
        begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3300,7 +3268,7 @@ begin
                                       end;
          else
           begin
-           Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
            //pColor:=clRed;
            //Result:=S_OK;
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Theme Class %LThemeClass hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
@@ -3331,7 +3299,7 @@ begin
 
        if TColor(pColor)=clNone then
        begin
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3382,7 +3350,7 @@ begin
        if TColor(pColor)=clNone then
        begin
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
-         Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
        end
        else
          Result:= S_OK;
@@ -3426,7 +3394,7 @@ begin
       else
      {$ENDIF}
       begin
-       Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+       Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
       // pColor:=clRed;
        //Result:=S_OK;
        //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
@@ -3434,7 +3402,7 @@ begin
     end
     else
     begin
-     Result:=TrampolineGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+     Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
      //pColor:=clFuchsia;
      //Result:=S_OK;
      //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
@@ -3471,7 +3439,7 @@ begin
    VCLStylesLock.Enter;
    try
      if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or (dwTextFlags and DT_CALCRECT <> 0) or not THThemesClasses.ContainsKey(hTheme) then
-      Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+      Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
 
      LThemeClass:=THThemesClasses.Items[hTheme];
      ExtractStrings([';'], [], PChar(LThemeClass), LThemeClasses);
@@ -3534,7 +3502,7 @@ begin
                             else
                                             begin
                                               //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-                                              Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+                                              Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
                                             end;
                             end;
 
@@ -3544,7 +3512,7 @@ begin
                             Exit(S_OK);
                           end;
        else
-           Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+           Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
        end;
      end
      else
@@ -3553,77 +3521,69 @@ begin
      if  SameText(LThemeClass, VSCLASS_COMMANDMODULE) then
      begin
         //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-        Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+        Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
      end
      else
      {$ENDIF}
      {$IFDEF HOOK_Menu}
-//     if  SameText(LThemeClass, VSCLASS_MENU) then
-//     begin
-//        case iPartId of
-//
-//           MENU_POPUPITEM      :
-//                                   begin
-//                                     SaveIndex := SaveDC(hdc);
-//                                     try
-//                                      case iStateId of
-//                                        MPI_NORMAL         : LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
-//                                        MPI_HOT            : LDetails:=StyleServices.GetElementDetails(tmPopupItemHot);
-//                                        //MPI_PUSHED         : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemPushed);
-//                                        MPI_DISABLED       : LDetails:=StyleServices.GetElementDetails(tmPopupItemDisabled);
-//                                        MPI_DISABLEDHOT    : LDetails:=StyleServices.GetElementDetails(tmPopupItemDisabledHot);
-//                                        //MPI_DISABLEDPUSHED : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed);
-//                                      end;
-//
-//                                      LRect:=pRect;
-//                                      StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-//                                      LText :=  string(pszText);
-//
-//                                      //SetTextColor(hdc, ColorToRGB(clred));
-//
-////                                      LCanvas:= TCanvas.Create;
-////                                      try
-////                                        LCanvas.Handle:=hdc;
-////                                        LCanvas.Brush.Style:=bsClear;
-////                                        _DrawControlText(LCanvas, LText, LRect, TTextFormatFlags(dwTextFlags), clred);
-////                                      finally
-////                                        LCanvas.Handle:=0;
-////                                        LCanvas.Free;
-////                                      end;
-//                                      StyleServices.DrawText(hdc, LDetails, LText, LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
-//                                      Exit(S_OK);
-//                                     finally
-//                                       RestoreDC(hdc, SaveIndex);
-//                                     end;
-//                                   end;
-//
-//           MENU_BARITEM      :
-//                                   begin
-//                                     SaveIndex := SaveDC(hdc);
-//                                     try
-//                                      case iStateId of
-//                                        MBI_NORMAL         : LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
-//                                        MBI_HOT            : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemHot);
-//                                        MBI_PUSHED         : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemPushed);
-//                                        MBI_DISABLED       : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabled);
-//                                        MBI_DISABLEDHOT    : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledHot);
-//                                        MBI_DISABLEDPUSHED : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed);
-//                                      end;
-//
-//                                      LRect:=pRect;
-//                                      StyleServices.DrawText(hdc, LDetails, string(pszText), LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
-//                                      Exit(S_OK);
-//                                     finally
-//                                       RestoreDC(hdc, SaveIndex);
-//                                     end;
-//                                   end;
-//         else
-//         begin
-//            Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
-//         end;
-//        end;
-//     end
-//     else
+     if  SameText(LThemeClass, VSCLASS_MENU) then
+     begin
+        case iPartId of
+
+           MENU_POPUPITEM      :
+                                   begin
+                                     SaveIndex := SaveDC(hdc);
+                                     try
+                                      case iStateId of
+                                        MPI_NORMAL         : LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
+                                        MPI_HOT            : LDetails:=StyleServices.GetElementDetails(tmPopupItemHot);
+                                        //MPI_PUSHED         : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemPushed);
+                                        MPI_DISABLED       : LDetails:=StyleServices.GetElementDetails(tmPopupItemDisabled);
+                                        MPI_DISABLEDHOT    : LDetails:=StyleServices.GetElementDetails(tmPopupItemDisabledHot);
+                                        //MPI_DISABLEDPUSHED : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed);
+                                      else
+                                       LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
+                                      end;
+
+                                      LRect:=pRect;
+                                      StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+                                      LText :=  string(pszText);
+
+                                      StyleServices.DrawText(hdc, LDetails, LText, LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+                                      Exit(S_OK);
+                                     finally
+                                       RestoreDC(hdc, SaveIndex);
+                                     end;
+                                   end;
+
+           MENU_BARITEM      :
+                                   begin
+                                     SaveIndex := SaveDC(hdc);
+                                     try
+                                      case iStateId of
+                                        MBI_NORMAL         : LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
+                                        MBI_HOT            : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemHot);
+                                        MBI_PUSHED         : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemPushed);
+                                        MBI_DISABLED       : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabled);
+                                        MBI_DISABLEDHOT    : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledHot);
+                                        MBI_DISABLEDPUSHED : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed);
+                                      end;
+
+                                      LRect:=pRect;
+                                      StyleServices.DrawText(hdc, LDetails, string(pszText), LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+                                      Exit(S_OK);
+                                     finally
+                                       RestoreDC(hdc, SaveIndex);
+                                     end;
+                                   end;
+         else
+         begin
+            //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+            Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+         end;
+        end;
+     end
+     else
      {$ENDIF}
      {$IFDEF  HOOK_DateTimePicker}
      if SameText(LThemeClass, VSCLASS_DATEPICKER) then
@@ -3651,7 +3611,7 @@ begin
                             Exit(S_OK);
                           end;
        else
-           Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+           Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
        end;
      end
      else
@@ -3744,7 +3704,7 @@ begin
        else
        begin
          //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-         Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+         Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
        end;
        end;
      end
@@ -3830,7 +3790,7 @@ begin
               else
               begin
                  //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-                 Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+                 Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
               end;
           end;
      end
@@ -3838,11 +3798,11 @@ begin
      {$ENDIF}
      begin
       //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeText hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-      Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+      Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
      end;
    end
    else
-     Exit(TrampolineDrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+     Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
  finally
    LThemeClasses.Free;
  end;
@@ -3857,61 +3817,18 @@ var
   LThemeClass : string;
   plf: LOGFONTW;
 begin
-
- //Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
  VCLStylesLock.Enter;
  try
    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or (dwTextFlags and DT_CALCRECT <> 0) or not THThemesClasses.ContainsKey(hTheme) then
-    Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+    Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
 
    LThemeClass:= THThemesClasses.Items[hTheme];
  finally
    VCLStylesLock.Leave;
  end;
-//
-//  if Pos('Search', pszText)>0 then
-//   OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-
-//   if not SameText(LThemeClass, VSCLASS_TREEVIEW) then
-//     OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d class %s iPartId %d iStateId %d  text "%s"', [hTheme, LThemeClass, iPartId, iStateId, pszText])));
 
  if LThemeClass<>'' then
  begin
-     {$IFDEF HOOK_PopMenu}
-     if  SameText(LThemeClass, VSCLASS_MENU) then
-     begin
-        case iPartId of
-
-           MENU_POPUPITEM      :
-                                   begin
-                                     SaveIndex := SaveDC(hdc);
-                                     try
-
-                                      case iStateId of
-                                        MPI_NORMAL         : LDetails:=StyleServices.GetElementDetails(tmPopupItemNormal);
-                                        MPI_HOT            : LDetails:=StyleServices.GetElementDetails(tmPopupItemHot);
-                                        //MPI_PUSHED         : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemPushed);
-                                        MPI_DISABLED       : LDetails:=StyleServices.GetElementDetails(tmPopupItemDisabled);
-                                        MPI_DISABLEDHOT    : LDetails:=StyleServices.GetElementDetails(tmPopupItemDisabledHot);
-                                        //MPI_DISABLEDPUSHED : LDetails:=StyleServices.GetElementDetails(tmMenuBarItemDisabledPushed);
-                                      end;
-
-
-                                      StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
-                                      Result:=S_OK;
-                                     finally
-                                       RestoreDC(hdc, SaveIndex);
-                                     end;
-                                   end;
-        else
-         begin
-             //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-             Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
-         end;
-        end;
-     end
-     else
-     {$ENDIF}
    {$IFDEF HOOK_ListView}
    if SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) then
    begin
@@ -3948,14 +3865,14 @@ begin
                              else
                              begin
                                  //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-                                 Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+                                 Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
                              end;
                            end;
 
         else
           begin
              //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-             Exit(TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+             Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
           end;
         end;
    end
@@ -4005,15 +3922,15 @@ begin
               Result:=S_OK;
             end
             else
-               Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+               Result:=Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
         end;
    end
    else
    {$ENDIF}
-    Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+    Result:=Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
  end
  else
-   Result:=TrampolineDrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
+   Result:=Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
 end;
 
 
@@ -4120,30 +4037,30 @@ initialization
     {$ENDIF}
 
 
-    @TrampolineOpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
-    @TrampolineOpenThemeDataEx        := InterceptCreate(themelib, 'OpenThemeDataEx', @Detour_UxTheme_OpenThemeDataEx);
-    @TrampolineDrawThemeBackground    := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
-    @TrampolineDrawThemeBackgroundEx  := InterceptCreate(themelib, 'DrawThemeBackgroundEx', @Detour_UxTheme_DrawThemeBackgroundEx);
-    @TrampolineDrawThemeEdge          := InterceptCreate(themelib, 'DrawThemeEdge', @Detour_UxTheme_DrawThemeEdge);
+    @Trampoline_UxTheme_OpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
+    @Trampoline_UxTheme_OpenThemeDataEx        := InterceptCreate(themelib, 'OpenThemeDataEx', @Detour_UxTheme_OpenThemeDataEx);
+    @Trampoline_UxTheme_DrawThemeBackground    := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
+    @Trampoline_UxTheme_DrawThemeBackgroundEx  := InterceptCreate(themelib, 'DrawThemeBackgroundEx', @Detour_UxTheme_DrawThemeBackgroundEx);
+    @Trampoline_UxTheme_DrawThemeEdge          := InterceptCreate(themelib, 'DrawThemeEdge', @Detour_UxTheme_DrawThemeEdge);
 
-    @TrampolineDrawThemeText          := InterceptCreate(themelib, 'DrawThemeText', @Detour_UxTheme_DrawThemeText);
-    @TrampolineDrawThemeTextEx        := InterceptCreate(themelib, 'DrawThemeTextEx', @Detour_UxTheme_DrawThemeTextEx);
-    @TrampolineGetThemeSysColor       := InterceptCreate(themelib, 'GetThemeSysColor', @Detour_GetThemeSysColor);
-    @TrampolineGetThemeSysColorBrush  := InterceptCreate(themelib, 'GetThemeSysColorBrush', @Detour_GetThemeSysColorBrush);
-    @TrampolineGetThemeColor          := InterceptCreate(themelib, 'GetThemeColor', @Detour_GetThemeColor);
+    @Trampoline_UxTheme_DrawThemeText          := InterceptCreate(themelib, 'DrawThemeText', @Detour_UxTheme_DrawThemeText);
+    @Trampoline_UxTheme_DrawThemeTextEx        := InterceptCreate(themelib, 'DrawThemeTextEx', @Detour_UxTheme_DrawThemeTextEx);
+    @Trampoline_UxTheme_GetThemeSysColor       := InterceptCreate(themelib, 'GetThemeSysColor', @Detour_UxTheme_GetThemeSysColor);
+    @Trampoline_UxTheme_GetThemeSysColorBrush  := InterceptCreate(themelib, 'GetThemeSysColorBrush', @Detour_UxTheme_GetThemeSysColorBrush);
+    @Trampoline_UxTheme_GetThemeColor          := InterceptCreate(themelib, 'GetThemeColor', @Detour_UxTheme_GetThemeColor);
  end;
 
 finalization
-  InterceptRemove(@TrampolineGetThemeSysColor);
-  InterceptRemove(@TrampolineGetThemeSysColorBrush);
-  InterceptRemove(@TrampolineOpenThemeData);
-  InterceptRemove(@TrampolineOpenThemeDataEx);
-  InterceptRemove(@TrampolineGetThemeColor);
-  InterceptRemove(@TrampolineDrawThemeBackground);
-  InterceptRemove(@TrampolineDrawThemeText);
-  InterceptRemove(@TrampolineDrawThemeTextEx);
-  InterceptRemove(@TrampolineDrawThemeBackgroundEx);
-  InterceptRemove(@TrampolineDrawThemeEdge);
+  InterceptRemove(@Trampoline_UxTheme_GetThemeSysColor);
+  InterceptRemove(@Trampoline_UxTheme_GetThemeSysColorBrush);
+  InterceptRemove(@Trampoline_UxTheme_OpenThemeData);
+  InterceptRemove(@Trampoline_UxTheme_OpenThemeDataEx);
+  InterceptRemove(@Trampoline_UxTheme_GetThemeColor);
+  InterceptRemove(@Trampoline_UxTheme_DrawThemeBackground);
+  InterceptRemove(@Trampoline_UxTheme_DrawThemeText);
+  InterceptRemove(@Trampoline_UxTheme_DrawThemeTextEx);
+  InterceptRemove(@Trampoline_UxTheme_DrawThemeBackgroundEx);
+  InterceptRemove(@Trampoline_UxTheme_DrawThemeEdge);
 
   THThemesClasses.Free;
   THThemesHWND.Free;

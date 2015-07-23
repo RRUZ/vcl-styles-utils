@@ -193,13 +193,14 @@ begin
         LNCControl.Name      := Format('NCButton%d', [i+1]);
         LNCControl.Hint      := Format('Hint for NCButton%d', [i+1]);
         LNCControl.ShowHint  := True;
-        LNCControl.Caption   :='';
-        LNCControl.Style     :=nsTranparent;
-        LNCControl.ImageStyle:=isGrayHot;
+        LNCControl.Caption   := '';
+        LNCControl.Style     := nsTranparent;
+        LNCControl.ImageStyle:= isGrayHot;
+        LNCControl.ImageAlignment := TImageAlignment.iaCenter;
 
-        LNCControl.UseAwesomeFont:=CheckBoxAwesome.Checked;
+        LNCControl.UseFontAwesome:=CheckBoxAwesome.Checked;
 
-        if LNCControl.UseAwesomeFont then
+        if LNCControl.UseFontAwesome then
           LImageIndex:= AwesomeIcons[i]
         else
           LImageIndex:=i;
