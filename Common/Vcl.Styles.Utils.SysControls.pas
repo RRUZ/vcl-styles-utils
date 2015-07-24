@@ -74,6 +74,7 @@ type
     FChildRegSysStylesList: TObjectDictionary<HWND, TChildControlInfo>;
     FHookVclControls: Boolean;
     FUseStyleColorsChildControls: Boolean;
+    class var FHookDialogIcons: Boolean;
   protected
     /// <summary>
     /// Install the Hook
@@ -121,6 +122,10 @@ type
     /// Allow disable or enable the hook of VCL Controls
     /// </summary>
     class property HookVclControls: Boolean read FHookVclControls write FHookVclControls;
+    /// <summary>
+    /// Allow disable or enable the hook of the icons dialogs
+    /// </summary>
+    class property HookDialogIcons: Boolean read FHookDialogIcons write FHookDialogIcons;
     /// <summary>
     /// Collection of Styled (Hooked) Controls
     /// </summary>
@@ -650,6 +655,7 @@ begin
   FSysHookNotificationProc := @HookNotification;
   FUseStyleColorsChildControls := True;
   FEnabled := True;
+  FHookDialogIcons := False;
   FHookVclControls := False;
   FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
   FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;

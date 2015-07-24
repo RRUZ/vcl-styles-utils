@@ -1391,8 +1391,6 @@ begin
 end;
 
 
-
-
 procedure _ProcessBitmap32(const Dest: TBitmap; Value: Integer; _Process:TImageFilterCallback); overload;
 var
   r, g, b, a   : byte;

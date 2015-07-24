@@ -170,6 +170,15 @@ object Form1: TForm1
     TabOrder = 6
     OnClick = CheckBoxModernDialogsClick
   end
+  object CheckBoxHookDialogIcons: TCheckBox
+    Left = 280
+    Top = 60
+    Width = 121
+    Height = 17
+    Caption = 'Hook dialog icons'
+    TabOrder = 7
+    OnClick = CheckBoxHookDialogIconsClick
+  end
   object OpenDialog1: TOpenDialog
     Left = 160
     Top = 166
@@ -218,7 +227,7 @@ object Form1: TForm1
     Left = 392
     Top = 65534
     Bitmap = {
-      494C01010D002400740010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010D0024007C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000002300000033000000330000
       0033000000330000003300000033000000330000003300000033000000330000

@@ -105,7 +105,7 @@ object FrmTaskDlgMain: TFrmTaskDlgMain
     TabOrder = 0
     OnSelect = ComboBox1Select
   end
-  object CheckBox1: TCheckBox
+  object CheckBoxEnableSysControls: TCheckBox
     Left = 8
     Top = 37
     Width = 112
@@ -114,7 +114,7 @@ object FrmTaskDlgMain: TFrmTaskDlgMain
     Checked = True
     State = cbChecked
     TabOrder = 1
-    OnClick = CheckBox1Click
+    OnClick = CheckBoxEnableSysControlsClick
   end
   object BrnRadioButtons: TButton
     Left = 115
@@ -142,5 +142,16 @@ object FrmTaskDlgMain: TFrmTaskDlgMain
     Caption = 'Marquee'
     TabOrder = 4
     OnClick = BtnMarqueeClick
+  end
+  object CheckBoxHookDialogsIcons: TCheckBox
+    Left = 126
+    Top = 37
+    Width = 112
+    Height = 17
+    Caption = 'Hook Dialog Icons'
+    Checked = True
+    State = cbChecked
+    TabOrder = 5
+    OnClick = CheckBoxHookDialogsIconsClick
   end
 end

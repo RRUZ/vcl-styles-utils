@@ -21,14 +21,15 @@ type
     BtnExpamdButton: TSpeedButton;
     BtnCheckBox: TSpeedButton;
     BtnCustomButtons: TSpeedButton;
-    CheckBox1: TCheckBox;
+    CheckBoxEnableSysControls: TCheckBox;
     BrnRadioButtons: TButton;
     BtnHello: TSpeedButton;
     BtnProgress: TButton;
     BtnMarquee: TButton;
+    CheckBoxHookDialogsIcons: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ComboBox1Select(Sender: TObject);
-    procedure CheckBox1Click(Sender: TObject);
+    procedure CheckBoxEnableSysControlsClick(Sender: TObject);
     procedure BtnHelloClick(Sender: TObject);
     procedure BtnQuestionClick(Sender: TObject);
     procedure BtnCustomButtonsClick(Sender: TObject);
@@ -41,6 +42,7 @@ type
     procedure BrnRadioButtonsClick(Sender: TObject);
     procedure BtnProgressClick(Sender: TObject);
     procedure BtnMarqueeClick(Sender: TObject);
+    procedure CheckBoxHookDialogsIconsClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -127,9 +129,14 @@ with TTaskDialog.Create(self) do
 end;
 
 
-procedure TFrmTaskDlgMain.CheckBox1Click(Sender: TObject);
+procedure TFrmTaskDlgMain.CheckBoxEnableSysControlsClick(Sender: TObject);
 begin
   TSysStyleManager.Enabled := TCheckBox(Sender).Checked;
+end;
+
+procedure TFrmTaskDlgMain.CheckBoxHookDialogsIconsClick(Sender: TObject);
+begin
+  TSysStyleManager.HookDialogIcons := TCheckBox(Sender).Checked;
 end;
 
 procedure TFrmTaskDlgMain.ComboBox1Select(Sender: TObject);
@@ -148,6 +155,10 @@ begin
     ComboBox1.Items.Add(s);
 
   ComboBox1.ItemIndex:=ComboBox1.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+
+  CheckBoxEnableSysControls.Checked := TSysStyleManager.Enabled;
+  CheckBoxHookDialogsIcons.Checked  := TSysStyleManager.HookDialogIcons;
+
 end;
 
 procedure TFrmTaskDlgMain.BtnHelloClick(Sender: TObject);
@@ -328,7 +339,7 @@ with TTaskDialog.Create(self) do
       Caption := 'Keep';
       ModalResult := mrNo;
     end;
-    MainIcon := tdiNone;
+    MainIcon := tdiError;
     if Execute then
       if ModalResult = mrYes then
         ;

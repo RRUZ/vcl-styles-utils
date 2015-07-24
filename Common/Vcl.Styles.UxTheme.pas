@@ -3030,7 +3030,7 @@ begin
          TMT_TEXTCOLOR :
          begin
            Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-           if (Result=S_OK) and (@TrampolineGetSysColor<>nil) and (pColor=TrampolineGetSysColor(COLOR_WINDOWTEXT)) then
+           if (Result=S_OK) and (@Trampoline_user32_GetSysColor<>nil) and (pColor=Trampoline_user32_GetSysColor(COLOR_WINDOWTEXT)) then
            begin
              //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
              pColor:=ColorToRGB(StyleServices.GetSystemColor(clWindowText));

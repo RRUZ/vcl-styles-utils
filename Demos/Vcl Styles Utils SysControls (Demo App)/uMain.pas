@@ -93,6 +93,7 @@ type
     N6: TMenuItem;
     C1: TMenuItem;
     CheckBoxModernDialogs: TCheckBox;
+    CheckBoxHookDialogIcons: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ComboBoxStylesSelect(Sender: TObject);
     procedure BtnOpenDialogClick(Sender: TObject);
@@ -110,6 +111,7 @@ type
     procedure BtnSelectFolderClick(Sender: TObject);
     procedure BtnPrintDialogClick(Sender: TObject);
     procedure CheckBoxModernDialogsClick(Sender: TObject);
+    procedure CheckBoxHookDialogIconsClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -143,6 +145,11 @@ begin
   ShowMessage('Hi');
 end;
 
+procedure TForm1.CheckBoxHookDialogIconsClick(Sender: TObject);
+begin
+  TSysStyleManager.HookDialogIcons := TCheckBox(Sender).Checked;
+end;
+
 procedure TForm1.CheckBoxModernDialogsClick(Sender: TObject);
 begin
  UseLatestCommonDialogs := CheckBoxModernDialogs.Checked;
@@ -169,11 +176,15 @@ begin
     ComboBoxStyles.Items.Add(s);
 
   ComboBoxStyles.ItemIndex:=ComboBoxStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+
+ CheckBoxModernDialogs.Checked:= UseLatestCommonDialogs;
+ CheckBoxSysControls.Checked:=  TSysStyleManager.Enabled;
+ CheckBoxHookDialogIcons.Checked:=  TSysStyleManager.HookDialogIcons;
 end;
 
 procedure TForm1.BtnPrintDialogClick(Sender: TObject);
 begin
-PrintDialog1.Execute(Handle);
+  PrintDialog1.Execute(Handle);
 end;
 
 procedure TForm1.BtnMsgBoxClick(Sender: TObject);
