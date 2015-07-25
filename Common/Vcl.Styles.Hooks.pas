@@ -510,13 +510,6 @@ begin
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Exit(Trampoline_user32_LoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
 
-  if IS_INTRESOURCE(ImageName) then
-    s := IntToStr(Integer(ImageName))
-  else
-    s:= ImageName;
-
-  OutputDebugString(PChar('Detour_LoadImageW '+s));
-
                                                                                                                          //w8 - W10
   if (hInst>0) and (hInst<>HInstance) and (ImageType=IMAGE_ICON) and (X=16) and (Y=16) and IS_INTRESOURCE(ImageName) and TOSVersion.Check(6, 2) then
   begin

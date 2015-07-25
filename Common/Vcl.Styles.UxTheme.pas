@@ -549,7 +549,7 @@ begin
           DrawStyleFillRect(hdc, pRect, StyleServices.GetSystemColor(clWindow));
           //Windows Vista - W7
           if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
-            SetTextColor(hdc, StyleServices.GetSystemColor(clMenuText));
+            SetTextColor(hdc, StyleServices.GetSystemColor(clWindowText));
           Exit(S_OK);
          end;
    end;
