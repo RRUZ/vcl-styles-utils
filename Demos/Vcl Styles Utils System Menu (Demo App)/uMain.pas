@@ -27,8 +27,12 @@ uses
 {$R *.dfm}
 
 procedure TForm25.FormCreate(Sender: TObject);
+var
+  LVclStylesSystemMenu : TVclStylesSystemMenu;
 begin
-  TVclStylesSystemMenu.Create(Self);
+  LVclStylesSystemMenu:=TVclStylesSystemMenu.Create(Self);
+  LVclStylesSystemMenu.MenuCaption:='Choose a VCL Style';
+
   ReportMemoryLeaksOnShutdown:=True;
 end;
 
