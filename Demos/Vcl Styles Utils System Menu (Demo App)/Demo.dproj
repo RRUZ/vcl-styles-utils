@@ -99,11 +99,11 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="uMain.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SystemMenu.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Menus.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SysControls.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SystemMenu.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Graphics.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
