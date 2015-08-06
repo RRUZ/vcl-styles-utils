@@ -965,7 +965,6 @@ end;
 function UxTheme_DatePicker(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
-  SaveIndex : Integer;
   LRect : TRect;
   LColor : TColor;
 begin
