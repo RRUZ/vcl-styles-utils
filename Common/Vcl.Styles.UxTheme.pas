@@ -257,6 +257,8 @@ begin
     Result := StyleServices.GetSystemColor(clHighlight);
 end;
 
+
+
 function GetStyleBtnTextColor : TColor;
 begin
   if not StyleServices.GetElementColor(StyleServices.GetElementDetails(tbPushButtonNormal), ecTextColor, Result) then
@@ -1001,12 +1003,12 @@ begin
 
             DPSCBR_HOT      :
                              begin
-                               LColor:=GetStyleHighLightColor;
+                               LColor:= GetStyleHighLightColor;
                              end;
 
             DPSCBR_PRESSED  :
                              begin
-                               LColor:=GetStyleHighLightColor;
+                               LColor:= GetStyleHighLightColor;
                              end;
 
             DPSCBR_DISABLED :

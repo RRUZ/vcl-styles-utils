@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles.NC, Vcl.ImgList, Vcl.ComCtrls,
-  Vcl.ExtCtrls;
+  Vcl.ExtCtrls, Vcl.StdCtrls;
 
 type
   TFrmButtonsTabsStyle = class(TForm)
@@ -22,36 +22,42 @@ implementation
 {$R *.dfm}
 
 procedure TFrmButtonsTabsStyle.FormCreate(Sender: TObject);
+var
+  LNCControl : TNCButton;
 begin
   NCControls:=TNCControls.Create(Self);
   NCControls.Images      := ImageList1;
-  NCControls.ButtonsList.Add;
-  NCControls[0].Style       := nsTab;
-  NCControls[0].ImageStyle  := isGrayHot;
-  NCControls[0].ImageIndex  := 0;
-  NCControls[0].BoundsRect  := Rect(30, 5, 140, 26);
-  NCControls[0].Caption     := 'Text Tab1';
-  NCControls[0].Name        := 'nsTab1';
-  //NCControls[0].OnClick     := ButtonNCClick;
-  //NCControls[0].OnDropDownClick := ButtonNCDropDownClick;
+  LNCControl:=NCControls.ButtonsList.Add;
+  LNCControl.Style       := nsTab;
+  LNCControl.ImageStyle  := isGrayHot;
+  LNCControl.ImageIndex  := 0;
+  LNCControl.BoundsRect  := Rect(30, 5, 140, 26);
+  LNCControl.Caption     := 'Text Tab1';
+  LNCControl.Name        := 'nsTab1';
+  //LNCControl.OnClick     := ButtonNCClick;
+  //LNCControl.OnDropDownClick := ButtonNCDropDownClick;
 
-  NCControls.ButtonsList.Add;
-  NCControls[1].Style       := nsTab;
-  NCControls[1].ImageStyle  := isGrayHot;
-  NCControls[1].ImageIndex  := 1;
-  NCControls[1].BoundsRect  := Rect(141, 5, 251, 26);
-  NCControls[1].Caption     := 'Text Tab2';
-  NCControls[1].Name        := 'nsTab2';
-  //NCControls[1].OnClick     := ButtonNCClick;
+  LNCControl:=NCControls.ButtonsList.Add;
+  LNCControl.Style       := nsTab;
+  LNCControl.ImageStyle  := isGrayHot;
+  LNCControl.ImageIndex  := 1;
+  LNCControl.BoundsRect  := Rect(141, 5, 251, 26);
+  LNCControl.Caption     := 'Text Tab2';
+  LNCControl.Name        := 'nsTab2';
+  //LNCControl.OnClick     := ButtonNCClick;
 
-  NCControls.ButtonsList.Add;
-  NCControls[2].Style       := nsTab;
-  NCControls[2].ImageStyle  := isGrayHot;
-  NCControls[2].ImageIndex  := 3;
-  NCControls[2].BoundsRect  := Rect(252, 5, 362, 26);
-  NCControls[2].Caption     := 'Text Tab3';
-  NCControls[2].Name        := 'nsTab3';
-  //NCControls[2].OnClick     := ButtonNCClick;
+  LNCControl:=NCControls.ButtonsList.Add;
+  LNCControl.Style       := nsTab;
+  LNCControl.ImageStyle  := isGrayHot;
+  LNCControl.ImageIndex  := 3;
+  LNCControl.BoundsRect  := Rect(252, 5, 362, 26);
+  LNCControl.Caption     := 'Text Tab3';
+  LNCControl.Name        := 'nsTab3';
+  //LNCControl.OnClick     := ButtonNCClick;
+
+
+  //Set the Index for the active tab button
+  NCControls.ActiveTabButtonIndex := 1;
 end;
 
 end.
