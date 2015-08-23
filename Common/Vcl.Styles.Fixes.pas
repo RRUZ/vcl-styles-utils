@@ -176,7 +176,7 @@ begin
     if Pressed then
     begin
       LDetails := StyleServices.GetElementDetails(tbPushButtonPressed);
-      LImageIndex := PBS_DISABLED;
+      LImageIndex := PBS_PRESSED;
     end
     else
     if MouseInControl then
