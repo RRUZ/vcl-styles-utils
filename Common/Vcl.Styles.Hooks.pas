@@ -716,10 +716,13 @@ begin
             582..584
                     :
                      begin
+
                         case Integer(ImageName) of
                           582 : LColor:= StyleServices.GetSystemColor(clBtnText);
                           583 : LColor:= StyleServices.GetSystemColor(clHighlight);
                           584 : LColor:= StyleServices.GetSystemColor(clGrayText);
+                        else
+                          LColor:= StyleServices.GetSystemColor(clBtnText);
                         end;
 
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);

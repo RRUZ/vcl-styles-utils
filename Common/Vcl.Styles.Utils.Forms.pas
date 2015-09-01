@@ -2674,6 +2674,11 @@ initialization
  //UseLatestCommonDialogs := False;
  {$ENDIF}
 
+{$IF CompilerVersion >= 30}
+ TStyleManager.SystemHooks := TStyleManager.SystemHooks - [shDialogs];
+{$ENDIF}
+
+
   if StyleServices.Available then
   begin
     TSysStyleManager.RegisterSysStyleHook('#32770', TSysDialogStyleHook);

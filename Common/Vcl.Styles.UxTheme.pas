@@ -2025,6 +2025,8 @@ begin
   if (iPartId=SBP_THUMBBTNVERT) then
     StyleServices.DrawElement(hdc, StyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect, nil);
 
+    //OutputDebugString(PChar(Format('UxTheme_ScrollBar class %s hTheme %d iPartId %d iStateId %d Left %d Top %d Width %d Height %d',
+    //[THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId, PRect.Left, prect.Top, prect.Width, prect.Height])));
   StyleServices.DrawElement(hdc, LDetails, pRect, nil);
   Exit(S_OK);
 end;
