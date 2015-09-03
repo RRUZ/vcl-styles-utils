@@ -163,6 +163,8 @@ var
  uIDNewItem, LSubMenuIndex : Integer;
  LMethodInfo : TMethodInfo;
  s : string;
+ LStyleNames: TArray<string>;
+
 begin
   LSysMenu := GetSystemMenu(FForm.Handle, False);
 
@@ -184,11 +186,19 @@ begin
   InsertMenuItem(LSysMenu, GetMenuItemCount(LSysMenu), True, LMenuItem);
   inc(uIDNewItem);
   LSubMenuIndex:=0;
-  for s in TStyleManager.StyleNames do
+
+  LStyleNames:=TStyleManager.StyleNames;
+  TArray.Sort<String>(LStyleNames);
+
+  for s in LStyleNames do
   begin
     InsertMenuHelper(FVCLStylesMenu, LSubMenuIndex, uIDNewItem,  PChar(s), nil);
     if SameText(TStyleManager.ActiveStyle.Name, s) then
       CheckMenuItem(FVCLStylesMenu, LSubMenuIndex, MF_BYPOSITION or MF_CHECKED);
+
+    if SameText('Windows', s) then
+     AddMenuSeparatorHelper(FVCLStylesMenu,  LSubMenuIndex);
+
     inc(LSubMenuIndex);
     inc(uIDNewItem);
     LMethodInfo:=TMethodInfo.Create;
