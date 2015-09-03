@@ -1,6 +1,6 @@
 # VCL Styles Utils #
 
-The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview), adding unique features like the support for [Common](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls) and [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and more. 
+The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview), adding unique features like the support for [Classic and New Common dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls), [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and much more. 
 
 <p align="center">
   <img src="https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Images%20New%20Dialogs/Mix6.png" alt="Mix" title="TOpenDialog using the Glow Vcl Style and the Vcl Styles Utils project running on Windows 10"/>
