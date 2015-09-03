@@ -107,9 +107,9 @@
 			</DCCReference>
 			<DCCReference Include="..\..\Common\delphi-detours-library\DDetours.pas"/>
 			<DCCReference Include="..\..\Common\delphi-detours-library\InstDecode.pas"/>
-			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Graphics.pas"/>
 			<DCCReference Include="..\..\Common\Vcl.Styles.Hooks.pas"/>
 			<DCCReference Include="..\..\Common\Vcl.Styles.UxTheme.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Graphics.pas"/>
 			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Menus.pas"/>
 			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Forms.pas"/>
 			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.StdCtrls.pas"/>

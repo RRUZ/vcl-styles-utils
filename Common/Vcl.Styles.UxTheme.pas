@@ -1573,7 +1573,8 @@ begin
          begin
             LColor:= StyleServices.GetSystemColor(clWindowText);
             LRect:= pRect;
-            LRect.Top :=  LRect.Top + 5;
+            LRect.Top  :=  LRect.Top + 5;
+            LRect.Left :=  LRect.Left + 5;
 
             if (iStateId=GLPS_OPENED) or (iStateId=HGLPS_OPENED) then
              DrawStyleArrow(hdc, TScrollDirection.sdDown, LRect.Location, 3, LColor)
@@ -1587,7 +1588,8 @@ begin
          begin
             LColor:= StyleServices.GetSystemColor(clHighlightText);
             LRect:= pRect;
-            LRect.Top :=  LRect.Top + 5;
+            LRect.Top  :=  LRect.Top + 5;
+            LRect.Left :=  LRect.Left + 5;
 
             if (iStateId=HGLPS_OPENED) then
               DrawStyleArrow(hdc, TScrollDirection.sdDown, LRect.Location, 3, LColor)

@@ -2676,7 +2676,7 @@ initialization
 
 {$IF CompilerVersion >= 30}
  TStyleManager.SystemHooks := TStyleManager.SystemHooks - [shDialogs];
-{$ENDIF}
+{$IFEND}
 
 
   if StyleServices.Available then
