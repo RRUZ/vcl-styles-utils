@@ -813,6 +813,7 @@ begin
     Color := StyleServices.GetStyleColor(scTreeView)
   else
     Color := clWhite;
+
   if OverrideFont then
     FontColor := StyleServices.GetSystemColor(clWindowText)
   else
@@ -825,12 +826,9 @@ begin
     WM_ERASEBKGND:
       begin
         UpdateColors;
-        if (TreeView_GetBkColor(Handle) <> COLORREF(Color)) then
-        begin
           // SetWindowTheme(Handle, '', '');
-          TreeView_SetBkColor(Handle, ColorToRGB(Color));
-          TreeView_SetTextColor(Handle, ColorToRGB(FontColor));
-        end;
+        TreeView_SetBkColor(Handle, ColorToRGB(Color));
+        TreeView_SetTextColor(Handle, ColorToRGB(FontColor));
         Message.Result := CallDefaultProc(Message);
         Exit;
       end;
