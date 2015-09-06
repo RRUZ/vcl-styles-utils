@@ -194,6 +194,11 @@ type
 var
   Trampoline_UxTheme_OpenThemeDataEx       : function(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall = nil;
   Trampoline_UxTheme_OpenThemeData         : function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall =  nil;
+{$IF CompilerVersion >= 30}
+  Trampoline_UxTheme_OpenThemeDataForDPI   : function(hwnd: HWND; pszClassList: LPCWSTR; hwnd2: HWND): HTHEME; stdcall =  nil;
+{$IFEND}
+
+
   Trampoline_UxTheme_CloseThemeData        : function(hTheme: HTHEME): HRESULT; stdcall =  nil;
   Trampoline_UxTheme_DrawThemeBackground   : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall =  nil;
   Trampoline_UxTheme_DrawThemeBackgroundEx : function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; pOptions: Pointer): HResult; stdcall =  nil;
@@ -214,6 +219,7 @@ var
 
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 begin
+  //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList));
   VCLStylesLock.Enter;
   try
     Result:=Trampoline_UxTheme_OpenThemeData(hwnd, pszClassList);
@@ -230,8 +236,28 @@ begin
   //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList+' hTheme '+IntToStr(Result)+' Handle '+IntToHex(hwnd, 8)));
 end;
 
+{$IF CompilerVersion >= 30}
+function Detour_UxTheme_OpenThemeDataForDPI(hwnd: HWND; pszClassList: LPCWSTR; hwnd2: HWND): HTHEME; stdcall;
+begin
+  VCLStylesLock.Enter;
+  try
+    Result:=Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, hwnd2);
+    if THThemesClasses.ContainsKey(Result) then
+      THThemesClasses.Remove(Result);
+    THThemesClasses.Add(Result, pszClassList);
+
+    if THThemesHWND.ContainsKey(Result) then
+      THThemesHWND.Remove(Result);
+    THThemesHWND.Add(Result, hwnd);
+  finally
+    VCLStylesLock.Leave;
+  end;
+end;
+{$IFEND}
+
 function Detour_UxTheme_OpenThemeDataEx(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall;
 begin
+  //OutputDebugString(PChar('Detour_UxTheme_OpenThemeDataEx '+pszClassList));
   VCLStylesLock.Enter;
   try
     Result:=Trampoline_UxTheme_OpenThemeDataEx(hwnd, pszClassList, dwFlags);
@@ -288,6 +314,26 @@ begin
     Exit(VSCLASS_LISTVIEW)
   else
     CloseThemeData(hThemeNew);
+
+
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_ITEMSVIEW_HEADER);
+  if hThemeNew=hTheme then
+    Exit(VSCLASS_ITEMSVIEW_HEADER)
+  else
+    CloseThemeData(hThemeNew);
+
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_NAVIGATION);
+  if hThemeNew=hTheme then
+    Exit(VSCLASS_NAVIGATION)
+  else
+    CloseThemeData(hThemeNew);
+
+  hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_COMMANDMODULE);
+  if hThemeNew=hTheme then
+    Exit(VSCLASS_COMMANDMODULE)
+  else
+    CloseThemeData(hThemeNew);
+
 
   hThemeNew := Trampoline_UxTheme_OpenThemeData(0, VSCLASS_EDIT);
   if hThemeNew=hTheme then
@@ -1212,9 +1258,18 @@ begin
                             end;
 
                          end;
+
+    LVP_COLUMNDETAIL  :
+                         begin
+                            LColor := StyleServices.GetSystemColor(clWindow);
+                            DrawStyleFillRect(hdc, pRect, LColor);
+                            Exit(S_OK)
+                         end;
   end;
 
   //OutputDebugString(PChar(Format('UxTheme_ListView hTheme %d iPartId %d iStateId %d', [hTheme, iPartId, iStateId])));
+  //DrawStyleFillRect(hdc, pRect, clYellow);
+  //Exit(S_OK)
   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
@@ -1759,7 +1814,10 @@ begin
         TDLG_PRIMARYPANEL  :
         begin
           //LDetails:=StyleServices.GetElementDetails(ttdPrimaryPanel);   //ttdPrimaryPanel  this element is not included in the VCL Styles yet
+
           LColor:=StyleServices.GetStyleColor(scEdit);
+          if LColor=StyleServices.GetStyleColor(scBorder)  then
+            LColor:=StyleServices.GetStyleColor(scPanel);//GetShadowColor(LColor, -10);
           DrawStyleFillRect(hdc, pRect, LColor);
           Exit(S_OK);
         end;
@@ -2960,8 +3018,8 @@ begin
    else
    begin
 //    OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-//    DrawStyleFillRect(hdc, pRect, clPurple);
-//    Exit(S_OK);
+//   DrawStyleFillRect(hdc, pRect, clPurple);
+//   Exit(S_OK);
     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
    end;
   finally
@@ -3014,6 +3072,7 @@ end;
 function Detour_UxTheme_GetThemeColor(hTheme: HTHEME; iPartId, iStateId, iPropId: Integer; var pColor: COLORREF): HRESULT;  stdcall;
 var
   LThemeClass : string;
+  LColor : TColor;
 begin
 
      VCLStylesLock.Enter;
@@ -3135,7 +3194,10 @@ begin
 
           TEXT_MAININSTRUCTION :
               case iStateId  of
-               0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlightText));
+                 0 :  begin
+                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlightText));
+                      end;
+
               end;
 
         end;
@@ -3249,8 +3311,10 @@ begin
       begin
          case iPartId of
            TDLG_MAININSTRUCTIONPANE : begin
-                                       pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
-                                       Result:= S_OK;
+                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+                                        if StyleServices.GetStyleColor(scEdit)=StyleServices.GetStyleColor(scBorder)  then
+                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+                                        Result:= S_OK;
                                       end;
 
            TDLG_CONTENTPANE         : begin
@@ -3933,6 +3997,27 @@ begin
    Result:=Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
 end;
 
+{$IF CompilerVersion >= 30}
+function InterceptCreateOrdinal(const Module : string; MethodName: integer; const InterceptProc: Pointer; ForceLoadModule: Boolean = True;
+  Options: Byte = v1compatibility): Pointer;
+
+var
+  pOrgPointer: Pointer;
+  LModule: THandle;
+begin
+  Result := nil;
+  LModule := GetModuleHandle(PChar(Module));
+  if (LModule = 0) and ForceLoadModule then
+    LModule := LoadLibrary(PChar(Module));
+
+  if LModule <> 0 then
+  begin
+    pOrgPointer := GetProcAddress(LModule, PChar(MethodName));
+    if Assigned(pOrgPointer) then
+      Result := DDetours.InterceptCreate(pOrgPointer, InterceptProc, Options);
+  end;
+end;
+{$IFEND}
 
 const
   themelib = 'uxtheme.dll';
@@ -4038,6 +4123,10 @@ initialization
 
 
     @Trampoline_UxTheme_OpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
+    {$IF CompilerVersion >= 30}
+    if TOSVersion.Check(10) then
+     @Trampoline_UxTheme_OpenThemeDataForDPI    := InterceptCreateOrdinal(themelib, 129, @Detour_UxTheme_OpenThemeDataForDPI);
+    {$IFEND}
     @Trampoline_UxTheme_OpenThemeDataEx        := InterceptCreate(themelib, 'OpenThemeDataEx', @Detour_UxTheme_OpenThemeDataEx);
     @Trampoline_UxTheme_DrawThemeBackground    := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
     @Trampoline_UxTheme_DrawThemeBackgroundEx  := InterceptCreate(themelib, 'DrawThemeBackgroundEx', @Detour_UxTheme_DrawThemeBackgroundEx);
@@ -4048,12 +4137,17 @@ initialization
     @Trampoline_UxTheme_GetThemeSysColor       := InterceptCreate(themelib, 'GetThemeSysColor', @Detour_UxTheme_GetThemeSysColor);
     @Trampoline_UxTheme_GetThemeSysColorBrush  := InterceptCreate(themelib, 'GetThemeSysColorBrush', @Detour_UxTheme_GetThemeSysColorBrush);
     @Trampoline_UxTheme_GetThemeColor          := InterceptCreate(themelib, 'GetThemeColor', @Detour_UxTheme_GetThemeColor);
+
  end;
 
 finalization
   InterceptRemove(@Trampoline_UxTheme_GetThemeSysColor);
   InterceptRemove(@Trampoline_UxTheme_GetThemeSysColorBrush);
   InterceptRemove(@Trampoline_UxTheme_OpenThemeData);
+  {$IF CompilerVersion >= 30}
+  if TOSVersion.Check(10) then
+    InterceptRemove(@Trampoline_UxTheme_OpenThemeDataForDPI);
+  {$IFEND}
   InterceptRemove(@Trampoline_UxTheme_OpenThemeDataEx);
   InterceptRemove(@Trampoline_UxTheme_GetThemeColor);
   InterceptRemove(@Trampoline_UxTheme_DrawThemeBackground);
