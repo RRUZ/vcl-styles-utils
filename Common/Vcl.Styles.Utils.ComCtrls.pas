@@ -826,9 +826,13 @@ begin
     WM_ERASEBKGND:
       begin
         UpdateColors;
-          // SetWindowTheme(Handle, '', '');
-        TreeView_SetBkColor(Handle, ColorToRGB(Color));
-        TreeView_SetTextColor(Handle, ColorToRGB(FontColor));
+
+        if (Longint(TreeView_GetBkColor(Handle))<>ColorToRGB(Color)) then
+          TreeView_SetBkColor(Handle, ColorToRGB(Color));
+
+        if (Longint(TreeView_GetTextColor(Handle))<>ColorToRGB(FontColor)) then
+         TreeView_SetTextColor(Handle, ColorToRGB(FontColor));
+
         Message.Result := CallDefaultProc(Message);
         Exit;
       end;
