@@ -21,7 +21,7 @@
 unit Vcl.Styles.Utils.Forms;
 
 
-{$DEFINE USE_Vcl.Styles.Hooks}
+{$I VCL.Styles.Utils.inc}
 
 interface
 

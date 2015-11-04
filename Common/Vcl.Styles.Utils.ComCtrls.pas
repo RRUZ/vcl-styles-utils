@@ -20,8 +20,7 @@
 //************************************************************************************************
 unit Vcl.Styles.Utils.ComCtrls;
 
-
-{$DEFINE USE_Vcl.Styles.Hooks}
+{$I VCL.Styles.Utils.inc}
 
 interface
 

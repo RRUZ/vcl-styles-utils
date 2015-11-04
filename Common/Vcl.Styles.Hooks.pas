@@ -55,8 +55,8 @@ uses
   WinApi.Messages,
   WinApi.UXTheme,
   Vcl.Graphics,
-{$IFDEF HOOK_UXTHEME}
   Vcl.Styles.Utils.Graphics,
+{$IFDEF HOOK_UXTHEME}
   Vcl.Styles.UxTheme,
 {$ENDIF HOOK_UXTHEME}
   Vcl.Styles.Utils.SysControls,
