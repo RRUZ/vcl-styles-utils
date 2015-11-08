@@ -37,11 +37,7 @@ var
 
 implementation
 
-{$DEFINE HOOK_UXTHEME}
-{$DEFINE HOOK_TDateTimePicker}
-{$DEFINE HOOK_TProgressBar}
-
-
+{$I VCL.Styles.Utils.inc}
 
 uses
   DDetours,
