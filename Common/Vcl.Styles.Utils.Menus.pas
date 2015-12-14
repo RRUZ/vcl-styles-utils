@@ -513,6 +513,7 @@ begin
     Exit;
   end;
 
+
   if (LParentMenu <> nil) and (LParentMenu.OwnerDraw) and (LMenuItem <> nil) and (@LMenuItem.OnAdvancedDrawItem <> nil) then
   begin
     LOwnerDrawState := [];
@@ -534,8 +535,7 @@ begin
   begin
     { Draw Vcl PopupMenu Bitmap }
     ImageIndex := LMenuItem.ImageIndex;
-    with LMenuItem.GetParentMenu do
-    begin
+
       if (ImageIndex < 0) and (LMenuItem.Bitmap <> nil) then
       begin
         Bmp := LMenuItem.Bitmap;
@@ -582,18 +582,19 @@ begin
         end;
 
       end
-      else if (LMenuItem.GetParentMenu.Images <> nil) and (ImageIndex > -1) then
+      else
+      if (LParentMenu.Images <> nil) and (ImageIndex > -1) then
       begin
-        LImageWidth := Images.Width;
+        LImageWidth := LParentMenu.Images.Width;
         DisplayCheckedGlyph := False;
-        LImageRect := Rect(0, 0, Images.Width, Images.Height);
+        LImageRect := Rect(0, 0, LParentMenu.Images.Width, LParentMenu.Images.Height);
         RectVCenter(LImageRect, ItemRect);
 
         if not RightToLeft then
           OffsetRect(LImageRect, 4, 0)
         else
         begin
-          LImageRect.Left := ItemRect.Right - Images.Width - 4;
+          LImageRect.Left := ItemRect.Right - LParentMenu.Images.Width - 4;
           LImageRect.Right := ItemRect.Right;
         end;
 
@@ -606,9 +607,36 @@ begin
          Canvas.Rectangle(R);
         end;
 
-        Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
+        LParentMenu.Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
+      end
+      else
+      if (LMenuItem.Parent<>nil) and (LMenuItem.Parent.SubMenuImages <> nil) and (ImageIndex > -1) then
+      begin
+        LImageWidth := LMenuItem.Parent.SubMenuImages.Width;
+        DisplayCheckedGlyph := False;
+        LImageRect := Rect(0, 0, LMenuItem.Parent.SubMenuImages.Width, LMenuItem.Parent.SubMenuImages.Height);
+        RectVCenter(LImageRect, ItemRect);
+
+        if not RightToLeft then
+          OffsetRect(LImageRect, 4, 0)
+        else
+        begin
+          LImageRect.Left := ItemRect.Right - LMenuItem.Parent.SubMenuImages.Width - 4;
+          LImageRect.Right := ItemRect.Right;
+        end;
+
+        if (SysItem.Checked) and (not SysItem.RadioCheck)  then
+        begin
+         R:=LImageRect;
+         InflateRect(R, 2, 2);
+         Canvas.Brush.Style:=bsClear;
+         Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+         Canvas.Rectangle(R);
+        end;
+
+        LMenuItem.Parent.SubMenuImages.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
       end;
-    end;
+
   end
   else if SysItem.Bitmap > 0 then
   begin
