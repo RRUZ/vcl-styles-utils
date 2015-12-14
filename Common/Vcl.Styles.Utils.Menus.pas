@@ -37,7 +37,6 @@ uses
   Winapi.UxTheme,
   Vcl.Themes,
   Vcl.Graphics,
-  Vcl.Forms,
   Vcl.ImgList,
   Vcl.GraphUtil,
   Vcl.Controls,
@@ -131,6 +130,8 @@ type
     FMenu: HMENU;
     FVCLMenuItems: TMenuItem;
     FNCRect : TRect;
+    FEnterWithKeyboard : Boolean;
+    FMenuBarHook : TObject;
     function GetMenuFromHandle(AHandle: HWND): HMENU;
     function GetItemsCount: integer;
     procedure MNSELECTITEM(var Message: TMessage); message MN_SELECTITEM;
@@ -163,6 +164,7 @@ implementation
 {$R-,WARN IMPLICIT_STRING_CAST_LOSS OFF}
 
 uses
+  Vcl.Forms,
   Vcl.Styles.Utils.SysControls,
   Vcl.Styles.Utils.Graphics;
 
@@ -254,7 +256,8 @@ begin
   FSysPopupItem := nil;
   FVCLMenuItems := nil;
   FOffset := 0;
-
+  FEnterWithKeyboard  := False;
+  FMenuBarHook := nil;
   // Font := Screen.MenuFont;
 end;
 
@@ -367,6 +370,11 @@ var
   sShortCut: String;
   Bmp: TBitmap;
   LParentMenu: TMenu;
+
+//  LForm : TCustomForm;
+  s : String;
+//  LField : TRttiField;
+//  LType : TRttiType;
 
   procedure DrawSubMenu(const ItemRect: TRect);
   var
@@ -700,11 +708,15 @@ begin
 
   { Draw Text }
   LTextFormat := [tfLeft, tfVerticalCenter, tfSingleLine, tfExpandTabs, tfHidePrefix];
+  if FEnterWithKeyboard then
+    Exclude(LTextFormat, tfHidePrefix);
+
+
   if not RightToLeft then
     inc(LTextRect.Left, 30)
   else
   begin
-    LTextRect.Left := ItemRect.Left;
+    LTextRect.Left  := ItemRect.Left;
     LTextRect.Right := ItemRect.Right - 30;
     Exclude(LTextFormat, tfLeft);
     Include(LTextFormat, tfRtlReading);
@@ -714,7 +726,7 @@ begin
   if LImageWidth > 0 then
   begin
     if not RightToLeft then
-      LTextRect.Left := ItemRect.Left + LImageWidth + 4 + 4
+      LTextRect.Left := ItemRect.Left + LImageWidth + 8 + 4
     else
     begin
       LTextRect.Left := ItemRect.Left;
@@ -1025,6 +1037,8 @@ begin
       ReleaseDC(Handle, DC);
   end;
 
+   FEnterWithKeyboard := (GetKeyState(VK_MENU) < 0);
+
   if Count > -1 then
   begin
     //exit;
@@ -1147,6 +1161,7 @@ begin
         FMenu := GetMenuFromHandle(Handle);
         if FPreviousHotItemIndex <> -1 then
           FKeyIndex := FPreviousHotItemIndex;
+
         case Message.WParam of
 
           VK_DOWN:
@@ -1615,6 +1630,8 @@ begin
       Result := (pMenuItemInfo.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
   end;
 end;
+
+
 
 initialization
 
