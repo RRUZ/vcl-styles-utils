@@ -1467,7 +1467,7 @@ begin
         end;
    end;
 
-  OutputDebugString(PChar(Format('UxTheme_Spin  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
+  //OutputDebugString(PChar(Format('UxTheme_Spin  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 

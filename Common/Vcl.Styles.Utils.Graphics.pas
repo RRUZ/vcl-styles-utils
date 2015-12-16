@@ -2760,8 +2760,8 @@ begin
 
   FFontHandle := AddFontMemResourceEx(Pointer(ResAddr), ResSize, nil, @NbFontAdded);
 
-  if FFontHandle = 0 then
-    RaiseLastOSError;
+//  if FFontHandle = 0 then
+//    RaiseLastOSError;
 {$ENDIF}
 end;
 
@@ -2827,6 +2827,8 @@ var
   OldMode: integer;
   uFormat : Cardinal;
 begin
+  if FFontHandle = 0 then exit;
+
   ZeroMemory(@LogFont, SizeOf(LogFont));
   LogFont.lfHeight := DestRect.Height;
   LogFont.lfWidth := 0;
