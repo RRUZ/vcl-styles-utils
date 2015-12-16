@@ -1409,53 +1409,65 @@ end;
 function UxTheme_Spin(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND = 0): HRESULT; stdcall;
 var
   LDetails  : TThemedElementDetails;
-  SaveIndex : Integer;
+  LRect : TRect;
+  LColor : TColor;
 begin
    case iPartId of
       SPNP_UP :
         begin
           case iStateId of
-            UPS_NORMAL   :LDetails:=StyleServices.GetElementDetails(tsUpNormal);
-            UPS_HOT      :LDetails:=StyleServices.GetElementDetails(tsUpHot);
-            UPS_PRESSED  :LDetails:=StyleServices.GetElementDetails(tsUpPressed);
-            UPS_DISABLED :LDetails:=StyleServices.GetElementDetails(tsUpDisabled);
+            UPS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tsUpNormal);
+            UPS_HOT      : LDetails:=StyleServices.GetElementDetails(tsUpHot);
+            UPS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tsUpPressed);
+            UPS_DISABLED : LDetails:=StyleServices.GetElementDetails(tsUpDisabled);
           end;
 
-          SaveIndex := SaveDC(hdc);
-          try
-           if hwnd<>0  then
-             DrawStyleParentBackground(hwnd, hdc, pRect);
-
-           StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-          finally
-            RestoreDC(hdc, SaveIndex);
+          case iStateId of
+            UPS_NORMAL   : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
+            UPS_HOT      : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextHot);
+            UPS_PRESSED  : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextPressed);
+            UPS_DISABLED : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextDisabled);
           end;
+
+
+          DrawStyleElement(hdc, LDetails, pRect);
+          LRect:= pRect;
+          LRect.Top  :=  LRect.Top + 3;
+          LRect.Left :=  LRect.Left + 5;
+          DrawStyleArrow(hdc, TScrollDirection.sdUp, LRect.Location, 2, LColor);
+
+
+
           Exit(S_OK);
         end;
 
       SPNP_DOWN :
         begin
           case iStateId of
-            DNS_NORMAL   :LDetails:=StyleServices.GetElementDetails(tsDownNormal);
-            DNS_HOT      :LDetails:=StyleServices.GetElementDetails(tsDownHot);
-            DNS_PRESSED  :LDetails:=StyleServices.GetElementDetails(tsDownPressed);
-            DNS_DISABLED :LDetails:=StyleServices.GetElementDetails(tsDownDisabled);
+            DNS_NORMAL   : LDetails:=StyleServices.GetElementDetails(tsDownNormal);
+            DNS_HOT      : LDetails:=StyleServices.GetElementDetails(tsDownHot);
+            DNS_PRESSED  : LDetails:=StyleServices.GetElementDetails(tsDownPressed);
+            DNS_DISABLED : LDetails:=StyleServices.GetElementDetails(tsDownDisabled);
           end;
 
-          SaveIndex := SaveDC(hdc);
-          try
-           if hwnd<>0  then
-             DrawStyleParentBackground(hwnd, hdc, pRect);
-
-           StyleServices.DrawElement(hdc, LDetails, pRect, nil);
-          finally
-            RestoreDC(hdc, SaveIndex);
+          case iStateId of
+            DNS_NORMAL   : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
+            DNS_HOT      : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextHot);
+            DNS_PRESSED  : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextPressed);
+            DNS_DISABLED : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextDisabled);
           end;
+
+
+          DrawStyleElement(hdc, LDetails, pRect);
+          LRect:= pRect;
+          LRect.Top  :=  LRect.Top + 3;
+          LRect.Left :=  LRect.Left + 5;
+          DrawStyleArrow(hdc, TScrollDirection.sdDown, LRect.Location, 2, LColor);
           Exit(S_OK);
         end;
    end;
 
-  //OutputDebugString(PChar(Format('UxTheme_Spin  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
+  OutputDebugString(PChar(Format('UxTheme_Spin  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 
