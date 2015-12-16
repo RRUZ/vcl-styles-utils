@@ -131,6 +131,8 @@ type
     FVCLMenuItems: TMenuItem;
     FNCRect : TRect;
     FEnterWithKeyboard : Boolean;
+    FPersistentHotKeys : Boolean;
+
     FMenuBarHook : TObject;
     function GetMenuFromHandle(AHandle: HWND): HMENU;
     function GetItemsCount: integer;
@@ -239,6 +241,18 @@ begin
   end;
 end;
 
+function IsItemHILITE(Menu: HMENU; const ItemIndex: integer): Boolean;
+var
+  pMenuItemInfo: TMenuItemInfo;
+begin
+  Result := False;
+  FillChar(pMenuItemInfo, sizeof(pMenuItemInfo), Char(0));
+  pMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+  pMenuItemInfo.fMask := MIIM_STATE;
+  if GetMenuItemInfo(Menu, ItemIndex, True, pMenuItemInfo) then
+    Result := (pMenuItemInfo.fState and MFS_HILITE) = MFS_HILITE;
+end;
+
 { TSysPopupStyleHook }
 constructor TSysPopupStyleHook.Create(AHandle: THandle);
 begin
@@ -257,6 +271,7 @@ begin
   FVCLMenuItems := nil;
   FOffset := 0;
   FEnterWithKeyboard  := False;
+  FPersistentHotKeys  := False;
   FMenuBarHook := nil;
   // Font := Screen.MenuFont;
 end;
@@ -370,11 +385,7 @@ var
   sShortCut: String;
   Bmp: TBitmap;
   LParentMenu: TMenu;
-
-//  LForm : TCustomForm;
   s : String;
-//  LField : TRttiField;
-//  LType : TRttiType;
 
   procedure DrawSubMenu(const ItemRect: TRect);
   var
@@ -736,16 +747,19 @@ begin
 
   { Draw Text }
   LTextFormat := [tfLeft, tfVerticalCenter, tfSingleLine, tfExpandTabs, tfHidePrefix];
-  if FEnterWithKeyboard then
-    Exclude(LTextFormat, tfHidePrefix);
 
+//  if (LMenuItem.Parent<>nil) then
+//   OutputDebugString(PChar(Format('LMenuItem.Parent %s IsItemHILITE %s', [LMenuItem.Parent.Caption, BoolToStr(IsItemHILITE(LMenuItem.Parent.Handle, LMenuItem.Parent.MenuIndex), True)])));
+
+//  if FEnterWithKeyboard then
+//    Exclude(LTextFormat, tfHidePrefix);
 
   if not RightToLeft then
-    inc(LTextRect.Left, 30)
+    inc(LTextRect.Left, 28)
   else
   begin
     LTextRect.Left  := ItemRect.Left;
-    LTextRect.Right := ItemRect.Right - 30;
+    LTextRect.Right := ItemRect.Right - 28;
     Exclude(LTextFormat, tfLeft);
     Include(LTextFormat, tfRtlReading);
     Include(LTextFormat, tfRight);
@@ -1065,7 +1079,7 @@ begin
       ReleaseDC(Handle, DC);
   end;
 
-   FEnterWithKeyboard := (GetKeyState(VK_MENU) < 0);
+  FEnterWithKeyboard := (GetKeyState(VK_MENU) < 0);
 
   if Count > -1 then
   begin
@@ -1100,6 +1114,9 @@ begin
     Result := (pMenuItemInfo.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
 end;
 
+
+
+
 procedure TSysPopupStyleHook.WndProc(var Message: TMessage);
 var
   i: integer;
@@ -1109,7 +1126,15 @@ begin
 //  AddToLog(Message);
 //  Message.Result := CallDefaultProc(Message);
 //  Exit;
+{
 
+  case Message.Msg of
+            WM_KEYFIRST..WM_KEYLAST:
+            begin
+              FEnterWithKeyboard := True;
+            end;
+  end;
+}
   case Message.Msg of
 //
 //    MN_BUTTONDOWN:
@@ -1186,6 +1211,9 @@ begin
           Message.Result := CallDefaultProc(Message);
           Exit;
         end;
+
+        FEnterWithKeyboard := True;
+
         FMenu := GetMenuFromHandle(Handle);
         if FPreviousHotItemIndex <> -1 then
           FKeyIndex := FPreviousHotItemIndex;
