@@ -584,7 +584,7 @@ type
   end;
 
 
-  TImageFilterCallback  = procedure (const AColor: TColor;Value: Integer; out NewColor:TColor);
+  TImageFilterCallback  = procedure (const AColor: TColor; Value: Integer; out NewColor:TColor);
 
 const
   MaxHue = 180;
@@ -599,7 +599,7 @@ const
   MinLig = -255;
   DefLig = 0;
 
-  procedure _ProcessBitmap32(const Dest: TBitmap;Value: Integer;_Process:TImageFilterCallback); overload;
+  procedure _ProcessBitmap32(const Dest: TBitmap; Value: Integer;_Process:TImageFilterCallback); overload;
   procedure _ProcessBitmap24(const ABitMap: TBitmap; Value: Integer; _Process:TImageFilterCallback); overload;
 
 
@@ -607,68 +607,68 @@ const
   function  _HSLtoRGB(HueValue, SaturationValue, LightValue: Double): TColor;
   procedure _RGBtoHSL(RGB: TColor; var HueValue, SaturationValue, LightValue: Double);
 
-  procedure _Hue(const AColor: TColor;Value: Integer; out NewColor:TColor);
+  procedure _Hue(const AColor: TColor; Value: Integer; out NewColor:TColor);
   procedure _Hue24(var ABitMap: TBitmap; Value: integer);
   procedure _Hue32(const ABitMap: TBitmap; Value: integer);
 
-  procedure _Sepia(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _Sepia24(const ABitMap: TBitmap;Value : Byte=32);
-  procedure _Sepia32(const ABitMap: TBitmap;Value : Byte=32);
+  procedure _Sepia(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _Sepia24(const ABitMap: TBitmap; Value : Byte=32);
+  procedure _Sepia32(const ABitMap: TBitmap; Value : Byte=32);
 
-  procedure _BlendMultiply(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendMultiply24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendMultiply32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendMultiply(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendMultiply24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendMultiply32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _Lightness(const AColor: TColor;Value: Integer; out NewColor:TColor);
+  procedure _Lightness(const AColor: TColor; Value: Integer; out NewColor:TColor);
   procedure _Lightness24(var ABitMap: TBitmap; Value: integer);
   procedure _Lightness32(const ABitMap: TBitmap; Value: integer);
 
-  procedure _Darkness(const AColor: TColor;Value: Integer; out NewColor:TColor);
+  procedure _Darkness(const AColor: TColor; Value: Integer; out NewColor:TColor);
   procedure _Darkness24(var ABitMap: TBitmap; Value: integer);
   procedure _Darkness32(const ABitMap: TBitmap; Value: integer);
 
-  procedure _Saturation(const AColor: TColor;Value: Integer; out NewColor:TColor);
+  procedure _Saturation(const AColor: TColor; Value: Integer; out NewColor:TColor);
   procedure _Saturation24(var ABitMap: TBitmap; Value: integer);
   procedure _Saturation32(const ABitMap: TBitmap; Value: integer);
 
-  procedure _SetRComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _SetGComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _SetBComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
+  procedure _SetRComponent(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _SetGComponent(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _SetBComponent(const AColor: TColor; Value: Integer; out NewColor:TColor);
 
   procedure _SetRGB24(const ABitMap: TBitmap; DR,DG,DB: Integer);
   procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Integer);
 
-  procedure _BlendBurn(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendBurn24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendBurn32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendBurn(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendBurn24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendBurn32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _BlendAdditive(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendAdditive24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendAdditive32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendAdditive(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendAdditive24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendAdditive32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _BlendDodge(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendDodge24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendDodge32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendDodge(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendDodge24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendDodge32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _BlendOverlay(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendOverlay24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendOverlay32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendOverlay(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendOverlay24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendOverlay32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _BlendDifference(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendDifference24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendDifference32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendDifference(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendDifference24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendDifference32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _BlendLighten(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendLighten24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendLighten32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendLighten(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendLighten24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendLighten32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _BlendDarken(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendDarken24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendDarken32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendDarken(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendDarken24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendDarken32(const ABitMap: TBitmap; Value: Integer);
 
-  procedure _BlendScreen(const AColor: TColor;Value: Integer; out NewColor:TColor);
-  procedure _BlendScreen24(const ABitMap: TBitmap;Value: Integer);
-  procedure _BlendScreen32(const ABitMap: TBitmap;Value: Integer);
+  procedure _BlendScreen(const AColor: TColor; Value: Integer; out NewColor:TColor);
+  procedure _BlendScreen24(const ABitMap: TBitmap; Value: Integer);
+  procedure _BlendScreen32(const ABitMap: TBitmap; Value: Integer);
 
   procedure Bitmap24_Grayscale(ABitmap: TBitmap);
   procedure Bitmap32_Grayscale(ABitmap: TBitmap);
@@ -1630,7 +1630,7 @@ end;
 
 
 
-procedure _Sepia(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _Sepia(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   ARGB         : TColor;
   r, g, b      : byte;
@@ -1650,17 +1650,17 @@ begin
   NewColor:= RGB(r, g, b);
 end;
 
-procedure _Sepia24(const ABitMap: TBitmap;Value : Byte);
+procedure _Sepia24(const ABitMap: TBitmap; Value : Byte);
 begin
   _ProcessBitmap24(ABitMap, Value, _Sepia);
 end;
 
-procedure _Sepia32(const ABitMap: TBitmap;Value : Byte);
+procedure _Sepia32(const ABitMap: TBitmap; Value : Byte);
 begin
   _ProcessBitmap32(ABitMap, Value, _Sepia);
 end;
 
-procedure _Hue(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _Hue(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   ARGB         : TColor;
   H, S, L      : double;
@@ -1690,7 +1690,7 @@ else begin
 end;
 }
 
-procedure _BlendBurn(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendBurn(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   ARGB         : TColor;
   r, g, b      : byte;
@@ -1728,13 +1728,13 @@ begin
   NewColor:=RGB(r, g, b);
 end;
 
-procedure _BlendBurn24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendBurn24(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap24(ABitMap, Value, _BlendBurn);
 end;
 
 
-procedure _BlendBurn32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendBurn32(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap32(ABitMap, Value, _BlendBurn);
 end;
@@ -1742,7 +1742,7 @@ end;
 
 {result := (a*b) SHR 8;}
 
-procedure _BlendMultiply(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendMultiply(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -1760,12 +1760,12 @@ begin
 end;
 
 
-procedure _BlendMultiply24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendMultiply24(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap24(ABitMap, Value, _BlendMultiply);
 end;
 
-procedure _BlendMultiply32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendMultiply32(const ABitMap: TBitmap; Value: Integer);
 begin
   _ProcessBitmap32(ABitMap, Value, _BlendMultiply);
 end;
@@ -1775,7 +1775,7 @@ end;
 c := a+b;
 if c > 255 then result := 255 else result := c;
 }
-procedure _BlendAdditive(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendAdditive(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -1796,13 +1796,13 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _BlendAdditive24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendAdditive24(const ABitMap: TBitmap; Value: Integer);
 begin
   _ProcessBitmap24(ABitMap, Value, _BlendAdditive);
 end;
 
 
-procedure _BlendAdditive32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendAdditive32(const ABitMap: TBitmap; Value: Integer);
 begin
   _ProcessBitmap32(ABitMap, Value, _BlendAdditive);
 end;
@@ -1815,7 +1815,7 @@ else begin
   if c > 255 then result := 255 else result := c;
 end;
 }
-procedure _BlendDodge(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendDodge(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -1854,13 +1854,13 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _BlendDodge24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDodge24(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap24(ABitMap, Value, _BlendDodge);
 end;
 
 
-procedure _BlendDodge32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDodge32(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap32(ABitMap, Value, _BlendDodge);
 end;
@@ -1871,7 +1871,7 @@ if a < 128 then
 else
   result := 255 - ((255-a) * (255-b) SHR 7);
 }
-procedure _BlendOverlay(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendOverlay(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -1909,13 +1909,13 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _BlendOverlay24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendOverlay24(const ABitMap: TBitmap; Value: Integer);
 begin
   _ProcessBitmap24(ABitMap, Value, _BlendOverlay);
 end;
 
 
-procedure _BlendOverlay32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendOverlay32(const ABitMap: TBitmap; Value: Integer);
 begin
   _ProcessBitmap32(ABitMap, Value, _BlendOverlay);
 end;
@@ -1924,7 +1924,7 @@ end;
 result := abs(a-b);
 }
 
-procedure _BlendDifference(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendDifference(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -1940,12 +1940,12 @@ begin
 end;
 
 
-procedure _BlendDifference24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDifference24(const ABitMap: TBitmap; Value: Integer);
 begin
   _ProcessBitmap24(ABitMap, Value, _BlendDifference);
 end;
 
-procedure _BlendDifference32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDifference32(const ABitMap: TBitmap; Value: Integer);
 begin
   _ProcessBitmap32(ABitMap, Value, _BlendDifference);
 end;
@@ -1956,7 +1956,7 @@ if a > b then
 else
   result := b;
 }
-procedure _BlendLighten(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendLighten(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -1974,12 +1974,12 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _BlendLighten24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendLighten24(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap24(ABitMap, Value, _BlendLighten);
 end;
 
-procedure _BlendLighten32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendLighten32(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap32(ABitMap, Value, _BlendLighten);
 end;
@@ -1990,7 +1990,7 @@ if a < b then
 else
   result := b;
 }
-procedure _BlendDarken(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendDarken(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -2005,12 +2005,12 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _BlendDarken24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDarken24(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap24(ABitMap, Value, _BlendDarken);
 end;
 
-procedure _BlendDarken32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendDarken32(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap32(ABitMap, Value, _BlendDarken);
 end;
@@ -2018,7 +2018,7 @@ end;
 {
 result := 255 - ((255-a) * (255-b) SHR 8);
 }
-procedure _BlendScreen(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _BlendScreen(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   ARGB         : TColor;
@@ -2042,19 +2042,19 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _BlendScreen24(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendScreen24(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap24(ABitMap, Value, _BlendScreen);
 end;
 
 
-procedure _BlendScreen32(const ABitMap: TBitmap;Value: Integer);
+procedure _BlendScreen32(const ABitMap: TBitmap; Value: Integer);
 begin
  _ProcessBitmap32(ABitMap, Value, _BlendScreen);
 end;
 
 
-procedure _SetRComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _SetRComponent(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
 begin
@@ -2063,7 +2063,7 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _SetGComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _SetGComponent(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
 begin
@@ -2072,7 +2072,7 @@ begin
   NewColor:= RGB(r,g,b);
 end;
 
-procedure _SetBComponent(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _SetBComponent(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
 begin
@@ -2131,7 +2131,7 @@ begin
 end;
 
 
-procedure _Saturation(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _Saturation(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
   Gray         : Integer;
@@ -2156,7 +2156,7 @@ begin
 end;
 
 
-procedure _Lightness(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _Lightness(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
 begin
@@ -2177,7 +2177,7 @@ begin
  _ProcessBitmap32(ABitMap, Value, _Lightness);
 end;
 
-procedure _Darkness(const AColor: TColor;Value: Integer; out NewColor:TColor);
+procedure _Darkness(const AColor: TColor; Value: Integer; out NewColor:TColor);
 var
   r, g, b      : byte;
 begin
