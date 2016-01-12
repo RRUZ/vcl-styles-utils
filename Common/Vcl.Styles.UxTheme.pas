@@ -1422,6 +1422,7 @@ begin
             UPS_DISABLED : LDetails:=StyleServices.GetElementDetails(tsUpDisabled);
           end;
 
+          LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
           case iStateId of
             UPS_NORMAL   : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
             UPS_HOT      : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextHot);
@@ -1450,6 +1451,7 @@ begin
             DNS_DISABLED : LDetails:=StyleServices.GetElementDetails(tsDownDisabled);
           end;
 
+          LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
           case iStateId of
             DNS_NORMAL   : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextNormal);
             DNS_HOT      : LColor:=StyleServices.GetStyleFontColor(TStyleFont.sfButtonTextHot);
