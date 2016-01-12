@@ -378,7 +378,7 @@ procedure TNCControls.SetActiveTabButtonIndex(const Value: Integer);
  end;
 
 var
-  lmax, i : Integer;
+  lmax : Integer;
 begin
    lmax:=GetMaxTabIndex;
    if (Value<>FActiveTabButtonIndex) and (Value>=0) and (lmax>=0) and (Value<=lmax) then
