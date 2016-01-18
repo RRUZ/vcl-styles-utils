@@ -1,7 +1,7 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{C0444D63-2BC1-4F0B-BB45-624085E166DB}</ProjectGuid>
-			<ProjectVersion>15.4</ProjectVersion>
+			<ProjectVersion>16.1</ProjectVersion>
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>Demo.dpr</MainSource>
 			<Base>True</Base>
@@ -108,9 +108,9 @@
 				<Form>FrmMain</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
-			<DCCReference Include="..\Common\Vcl.Styles.FormStyleHooks.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.NC.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SystemMenu.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.FormStyleHooks.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.NC.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SystemMenu.pas"/>
 			<DCCReference Include="uDropdown.pas">
 				<Form>FrmDropDown</Form>
 			</DCCReference>
@@ -120,11 +120,11 @@
 			<DCCReference Include="uCustomStyles.pas">
 				<Form>FrmCustomStyles</Form>
 			</DCCReference>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.Menus.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
-			<DCCReference Include="..\Common\Vcl.Styles.Utils.Graphics.pas"/>
-			<DCCReference Include="..\Common\delphi-detours-library\DDetours.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Menus.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SysControls.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
+			<DCCReference Include="..\..\Common\Vcl.Styles.Utils.Graphics.pas"/>
+			<DCCReference Include="..\..\Common\delphi-detours-library\DDetours.pas"/>
 			<DCCReference Include="uAlphaGradient.pas">
 				<Form>FrmAlphaGradient</Form>
 				<FormType>dfm</FormType>
@@ -203,13 +203,6 @@
 [Exception Log]
 EurekaLog Version=7001
 Activate=0
-atVCL=1
-DeleteMapAfterCompile=0
+DeleteMapAfterCompile=1
 Encrypt Password=""
-idEurekaLog=1
-idEurekaLogDetailed=1
-idMSClassic=1
-idStepsToReproduce=1
-loResCatchLeaks=1
-ProjectID="{6A3DC018-3634-42B8-9302-92D64717AD2D}"
 EurekaLog Last Line -->

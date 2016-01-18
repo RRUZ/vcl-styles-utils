@@ -482,7 +482,6 @@ var
   sShortCut: String;
   LBitmap: TBitmap;
   LParentMenu: TMenu;
-  s : String;
 
 
 begin

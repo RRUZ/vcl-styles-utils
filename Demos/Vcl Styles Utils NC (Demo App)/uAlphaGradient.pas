@@ -41,7 +41,7 @@ begin
   NCControls[0].Style       := nsAlpha;
   NCControls[0].ImageStyle  := isNormal;
   NCControls[0].ImageIndex  := 0;
-  NCControls[0].BoundsRect  := Rect(30, 1, 120, 26);
+  NCControls[0].BoundsRect  := Rect(30, 5, 120, 26);
   NCControls[0].Caption     := 'nsAlpha1';
   NCControls[0].Name        := 'nsAlpha1';
   NCControls[0].AlphaColor   := clWebLavender;
@@ -54,7 +54,7 @@ begin
   NCControls[1].Style       := nsAlpha;
   NCControls[1].ImageStyle  := isGrayHot;
   NCControls[1].ImageIndex  := 1;
-  NCControls[1].BoundsRect  := Rect(125, 1, 215, 26);
+  NCControls[1].BoundsRect  := Rect(125, 5, 215, 26);
   NCControls[1].Caption     := 'nsAlpha2';
   NCControls[1].Name        := 'nsAlpha2';
   NCControls[1].AlphaColor   := clWebOrange;
@@ -68,7 +68,7 @@ begin
   NCControls[2].Style       := nsAlpha;
   NCControls[2].ImageStyle  := isGrayHot;
   NCControls[2].ImageIndex  := 2;
-  NCControls[2].BoundsRect  := Rect(220, 1, 310, 26);
+  NCControls[2].BoundsRect  := Rect(220, 5, 310, 26);
   NCControls[2].Caption     := 'nsAlpha3';
   NCControls[2].Name        := 'nsAlpha3';
   NCControls[2].AlphaColor   := clWebGreenYellow;
@@ -86,7 +86,7 @@ begin
   NCControls[3].HotFontColor := clYellow;
   NCControls[3].ImageStyle  := isGrayHot;
   NCControls[3].ImageIndex  := 3;
-  NCControls[3].BoundsRect  := Rect(315, 1, 415, 26);
+  NCControls[3].BoundsRect  := Rect(315, 5, 415, 26);
   NCControls[3].Caption     := 'nsGradient1';
   NCControls[3].Name        := 'nsGradient1';
   NCControls[3].OnClick     := ButtonNCClick;
@@ -100,7 +100,7 @@ begin
   NCControls[4].HotFontColor:= clYellow;
   NCControls[4].ImageStyle  := isGrayHot;
   NCControls[4].ImageIndex  := 7;
-  NCControls[4].BoundsRect  := Rect(420, 1, 520, 26);
+  NCControls[4].BoundsRect  := Rect(420, 5, 520, 26);
   NCControls[4].Caption     := 'nsGradient2';
   NCControls[4].Name        := 'nsGradient2';
   NCControls[4].OnClick     := ButtonNCClick;
@@ -115,7 +115,7 @@ begin
   NCControls[5].HotFontColor := clYellow;
   NCControls[5].ImageStyle   := isGrayHot;
   NCControls[5].ImageIndex   := 8;
-  NCControls[5].BoundsRect   := Rect(525, 1, 625, 26);
+  NCControls[5].BoundsRect   := Rect(525, 5, 625, 26);
   NCControls[5].Caption      := 'nsGradient3';
   NCControls[5].Name         := 'nsGradient3';
   NCControls[5].OnClick      := ButtonNCClick;

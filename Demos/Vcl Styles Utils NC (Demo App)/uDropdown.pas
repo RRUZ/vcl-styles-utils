@@ -3,7 +3,8 @@ unit uDropdown;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Styles.NC, Vcl.Dialogs, Vcl.ImgList, Vcl.Menus,
   Vcl.StdCtrls;
 
@@ -43,7 +44,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-     NCControls : TNCControls;
+    NCControls: TNCControls;
   public
     { Public declarations }
     procedure ButtonNCClick(Sender: TObject);
@@ -55,25 +56,25 @@ implementation
 
 procedure TFrmDropDown.ButtonNCClick(Sender: TObject);
 begin
- ShowMessage('Hello');
+  ShowMessage('Hello');
 end;
 
 procedure TFrmDropDown.FormCreate(Sender: TObject);
 var
-  LNCButton : TNCButton;
+  LNCButton: TNCButton;
 begin
-  NCControls:=TNCControls.Create(Self);
-  NCControls.Images      := ImageList1;
-  NCControls.ShowSystemMenu:=False;
+  NCControls := TNCControls.Create(Self);
+  NCControls.Images := ImageList1;
+  NCControls.ShowSystemMenu := False;
 
-  LNCButton:= NCControls.ButtonsList.Add();
-  LNCButton.Style       := nsSplitButton;
-  LNCButton.ImageStyle  := isGrayHot;
-  LNCButton.ImageIndex  := 3;
-  LNCButton.BoundsRect  := Rect(5,0,85,25);
-  LNCButton.Caption     := 'Menu';
-  LNCButton.DropDownMenu:= PopupMenu1;
-  LNCButton.OnClick     := ButtonNCClick;
+  LNCButton := NCControls.ButtonsList.Add();
+  LNCButton.Style := nsSplitButton;
+  LNCButton.ImageStyle := isGrayHot;
+  LNCButton.ImageIndex := 3;
+  LNCButton.BoundsRect := Rect(5, 5, 85, 25);
+  LNCButton.Caption := 'Menu';
+  LNCButton.DropDownMenu := PopupMenu1;
+  LNCButton.OnClick := ButtonNCClick;
 end;
 
 end.

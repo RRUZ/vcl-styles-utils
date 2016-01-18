@@ -107,7 +107,7 @@ begin
       LNCControl.ImageIndex  := LImageIndex;
 
 
-      LNCControl.BoundsRect  := Rect(iLeft, 2, iLeft + cWidth, 26);
+      LNCControl.BoundsRect  := Rect(iLeft, 5, iLeft + cWidth, 26);
 
       iSep:=5;
       if LNCControl.Style=nsTab then
