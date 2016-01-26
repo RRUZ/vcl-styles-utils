@@ -40,14 +40,13 @@ done   remove unused code of DrawThemeText and DrawThemeTextEx, (replaced by Get
 done   fix navigation buttons  W8, W10
 done   improve drawing navigation buttons W7
 
-       fix related shell dialogs
+fix related shell dialogs
+Add support for custom titlebars.
+msstyles
 
-   Add support for custom titlebars.
-               msstyles
-
-   Add support for Classic Theme
-   fix menu
-      fix popup windows with trackbar
+Add support for Classic Theme
+fix menu
+fix popup windows with trackbar
 
 
 }

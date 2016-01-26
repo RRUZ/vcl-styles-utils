@@ -53,8 +53,11 @@ type
     procedure WndProc(var Message: TMessage);
   private
     FMenuCaption: string;
+    FShowNativeStyle: Boolean;
     procedure SetMenuCaption(const Value: string);
+    procedure SetShowNativeStyle(const Value: Boolean);
   public
+    property ShowNativeStyle : Boolean read FShowNativeStyle write SetShowNativeStyle;
     property MenuCaption : string read FMenuCaption write SetMenuCaption;
     constructor Create(AOwner: TForm); reintroduce;
     destructor Destroy; override;
@@ -109,6 +112,7 @@ end;
 constructor TVclStylesSystemMenu.Create(AOwner: TForm);
 begin
   inherited Create(AOwner);
+  FShowNativeStyle := True;
   FMenuCaption:='VCL Styles';
   FForm:=AOwner;
   FMethodsDict:=TObjectDictionary<NativeUInt, TMethodInfo>.Create([doOwnsValues]);
@@ -130,6 +134,13 @@ procedure TVclStylesSystemMenu.SetMenuCaption(const Value: string);
 begin
   DeleteMenus;
   FMenuCaption := Value;
+  CreateMenus;
+end;
+
+procedure TVclStylesSystemMenu.SetShowNativeStyle(const Value: Boolean);
+begin
+  DeleteMenus;
+  FShowNativeStyle := Value;
   CreateMenus;
 end;
 
@@ -192,6 +203,10 @@ begin
 
   for s in LStyleNames do
   begin
+
+    if not FShowNativeStyle and SameText('Windows', s) then
+      Continue;
+
     InsertMenuHelper(FVCLStylesMenu, LSubMenuIndex, uIDNewItem,  PChar(s), nil);
     if SameText(TStyleManager.ActiveStyle.Name, s) then
       CheckMenuItem(FVCLStylesMenu, LSubMenuIndex, MF_BYPOSITION or MF_CHECKED);
