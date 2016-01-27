@@ -28,8 +28,6 @@ type
   private
     { Private declarations }
     NCControls : TNCControls;
-    procedure ButtonNCClick(Sender: TObject);
-    procedure ButtonNCDropDownClick(Sender: TObject);
   public
     { Public declarations }
   end;
@@ -40,17 +38,6 @@ uses
  Vcl.Themes;
 
 {$R *.dfm}
-
-procedure TFrmCustomStyles.ButtonNCClick(Sender: TObject);
-begin
- if Sender is TNCButton then
-  ShowMessage(Format('You clicked the %s button', [TNCButton(Sender).Name]));
-end;
-
-procedure TFrmCustomStyles.ButtonNCDropDownClick(Sender: TObject);
-begin
-  ShowMessage(Format('you clicked the DropDown of the %s button', [TNCButton(Sender).Name]));
-end;
 
 procedure TFrmCustomStyles.ComboBox1Change(Sender: TObject);
 begin
