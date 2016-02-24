@@ -1318,14 +1318,17 @@ var
   LCurrent : Integer;
   LNCButton : TNCButton;
 begin
-
-  if (NCControls<>nil) and (NCControls.ButtonsCount>0) and (NCControls.Visible) and (NCControls.Form.Visible) and (NCControls.ButtonsList.UpdateCount=0) then
+  if (NCControls<>nil) and (NCControls.ButtonsCount>0) and (NCControls.Visible) {and (NCControls.Form.Visible)} and (NCControls.ButtonsList.UpdateCount=0) then
    for LCurrent:=0 to NCControls.ButtonsCount-1 do
    begin
     LNCButton:=NCControls.ButtonsList[LCurrent];
-    if LNCButton.Visible and (LNCButton.BoundsRect.Right<= ARect.Right) then
+    if LNCButton.Visible and (LNCButton.BoundsRect.Right<=ARect.Right) then
+    begin
      LNCButton.DrawButton(Canvas, FHotNCBtnIndex=LCurrent, FPressedNCBtnIndex=LCurrent);
-   end;
+    end;
+   end
+  else
+    ;
 end;
 
 
@@ -1465,7 +1468,11 @@ begin
           LNCButtton.FDropDownMenu.Popup(Form.Left + LNCButtton.BoundsRect.Left, Form.Top + LNCButtton.BoundsRect.Bottom)
         else
         if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnClick) then
+        begin
+            if LNCButtton.ShowHint then
+              LNCButtton.HideHintWindow();
             LNCButtton.FOnClick(LNCButtton);
+        end;
       end;
     end;
 
@@ -1838,7 +1845,7 @@ begin
        Inc(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount-1].BoundsRect.Right - NCControls.ButtonsList[0].BoundsRect.Left + 10);
 
       //text
-      if (NCControls<>nil) and  (NCControls.ShowCaption) then
+      if (NCControls<>nil) and (NCControls.ShowCaption) then
       begin
 
         TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
