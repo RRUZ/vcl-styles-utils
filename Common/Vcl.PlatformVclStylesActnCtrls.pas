@@ -305,9 +305,9 @@ var
   LFormats: TTextFormat;
   LColor: TColor;
   LDetails: TThemedElementDetails;
-  LNativeStyle : TCustomStyleServices;
+  //LNativeStyle : TCustomStyleServices;
 begin
-  LNativeStyle:=TStyleManager.SystemStyle;
+  //LNativeStyle:=TStyleManager.SystemStyle;
 
   LFormats := TTextFormatFlags(Flags);
   if Enabled then
@@ -331,7 +331,8 @@ begin
   if Enabled then
     LDetails := StyleServices.GetElementDetails(MenuStates[Selected or MouseInControl]);
 
-  LNativeStyle.DrawText(Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
+  //LNativeStyle.DrawText(Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
+  InternalDrawText(Canvas.Handle, LDetails, LCaption, Rect, LFormats, LColor);
 end;
 
 procedure TThemedMenuButtonEx.DrawBackground(var PaintRect: TRect);
