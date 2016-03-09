@@ -650,7 +650,6 @@ var
   begin
     if (NCControls.Form.WindowState = wsMaximized) and (TCustomFormClass(NCControls.Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0) then
     begin
-      OutputDebugString(PChar(Format('AButtonRect Before Top %d Left %d Right %d Bottom %d', [AButtonRect.Top, AButtonRect.Left, AButtonRect.Right, AButtonRect.Bottom])));
       BS := GetBorderSize;
       TopOffset := GetTopOffset;
       LeftOffset := BS.Left;
@@ -662,7 +661,6 @@ var
         if TopOffset > 0 then
           OffsetRect(ButtonRect, 0, -TopOffset);
       end;
-      OutputDebugString(PChar(Format('AButtonRect After Top %d Left %d Right %d Bottom %d', [AButtonRect.Top, AButtonRect.Left, AButtonRect.Right, AButtonRect.Bottom])));
     end;
   end;
 

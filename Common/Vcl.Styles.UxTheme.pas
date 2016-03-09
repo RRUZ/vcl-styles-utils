@@ -3033,10 +3033,12 @@ begin
    end
    else
    begin
-//    OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-//   DrawStyleFillRect(hdc, pRect, clPurple);
-//   Exit(S_OK);
-    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+
+//     OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+//     DrawStyleFillRect(hdc, pRect, clPurple);
+//     Exit(S_OK);
+
+     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
    end;
   finally
     VCLStylesLock.Leave;

@@ -670,6 +670,7 @@ const
   procedure _BlendScreen24(const ABitMap: TBitmap; Value: Integer);
   procedure _BlendScreen32(const ABitMap: TBitmap; Value: Integer);
 
+  procedure Bitmap8_Grayscale(ABitmap: TBitmap);
   procedure Bitmap24_Grayscale(ABitmap: TBitmap);
   procedure Bitmap32_Grayscale(ABitmap: TBitmap);
   //Set the Alpha and Color of a 32 bit Bitmap
@@ -1021,6 +1022,40 @@ begin
   finally
     LBuffer.Free;
   end;
+end;
+
+procedure Bitmap8_Grayscale(ABitmap: TBitmap);
+var
+  LPalette: HPalette;
+  LMaxLogPalette: TMaxLogPalette;
+  Lbyte: integer;
+  LColors: array [0..255] of TRGBQuad;
+begin
+  if ABitmap.PixelFormat <> pf8bit then Exit;
+  LPalette := ABitmap.Palette;
+  if LPalette = 0 then Exit;
+
+  if GetPaletteEntries(LPalette, 0, 256, LColors) = 0 then Exit;
+  Lbyte := 0;
+
+  while
+    (LColors [Lbyte].rgbBlue = Lbyte) and (LColors [Lbyte].rgbGreen = Lbyte) and (LColors[Lbyte].rgbRed = Lbyte)
+  do Inc (Lbyte);
+  if Lbyte > 256 then Exit;
+  LMaxLogPalette.palVersion := $0300;
+  LMaxLogPalette.palNumEntries := 256;
+  for Lbyte := 0 to 255 do
+    with LMaxLogPalette.palPalEntry[Lbyte] do
+      begin
+        peBlue := Lbyte;
+        peGreen := Lbyte;
+        peRed := Lbyte;
+        peFlags := 0;
+      end;
+
+  LPalette := CreatePalette (PLogPalette (@LMaxLogPalette)^);
+  ABitmap.Palette := LPalette;
+  ABitmap.Modified := True;
 end;
 
 procedure Bitmap24_Grayscale(ABitmap: TBitmap);
