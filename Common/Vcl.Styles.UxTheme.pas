@@ -608,14 +608,46 @@ end;
 
 
 function UxTheme_ToolTip(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; stdcall;
+var
+  LStartColor, LEndColor : TColor;
+  LCanvas : TCanvas;
+  SaveIndex : Integer;
 begin
    case iPartId of
+
        TTP_STANDARD :
          begin
           DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
           Exit(S_OK);
          end;
 
+       TTP_BALLOON :
+         begin
+           //DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
+           LStartColor := StyleServices.GetStyleColor(TStyleColor.scPanel);
+           LEndColor   := GetHighLightColor(LStartColor, 10);
+
+            LCanvas:=TCanvas.Create;
+            SaveIndex := SaveDC(hdc);
+            try
+              LCanvas.Handle:=hdc;
+
+              GradientFillCanvas(LCanvas, LStartColor, LEndColor,
+              Rect(pRect.Left, pRect.Top, pRect.Width, pRect.Bottom), TGradientDirection.gdVertical);
+            finally
+              LCanvas.Handle:=0;
+              LCanvas.Free;
+              RestoreDC(hdc, SaveIndex);
+            end;
+           Exit(S_OK);
+         end;
+
+       TTP_BALLOONSTEM :
+         begin
+          //if iStateId = 0 then
+          DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
+          Exit(S_OK);
+         end;
    end;
    //OutputDebugString(PChar(Format('UxTheme_ToolTip class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
@@ -3025,7 +3057,7 @@ begin
 //
     LHWND := THThemesHWND.Items[hTheme];
 
-   //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+//   OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    if FuncsDrawThemeBackground.ContainsKey(LThemeClass) then
    begin
      LFuncDrawThemeBackground := FuncsDrawThemeBackground.Items[LThemeClass];
@@ -3126,10 +3158,30 @@ begin
 //Debug Output: Intercepted Detour_GetThemeColor Class CPLCommandModule::CommandModule hTheme 65575 iPartId 3 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 //Debug Output: Intercepted Detour_GetThemeColor Class InfoBar hTheme 65576 iPartId 2 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 
+//OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 
     if LThemeClass<>'' then
     begin
+      if SameText(LThemeClass, 'Tooltip') then
+      begin
+          pColor:=clNone;
+          case iPartId of
+            4 :
+                case iStateId  of
+                 0 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+                end;
+          end;
 
+         if TColor(pColor)=clNone then
+         begin
+           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+         end
+         else
+           Result:=S_OK;
+
+      end
+      ELSE
       if SameText(LThemeClass, VSCLASS_CONTROLPANELSTYLE) then
       begin
           pColor:=clNone;

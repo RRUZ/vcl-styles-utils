@@ -54,6 +54,7 @@ implementation
 
 uses
   Winapi.CommCtrl,
+  Vcl.SysStyles,
   Vcl.Styles.Utils.SysControls;
 
 { TSysTooltipsStyleHook }
@@ -104,7 +105,10 @@ end;
 procedure TSysTooltipsStyleHook.WMPaint(var Message: TMessage);
 begin
   CallDefaultProc(Message);
-  inherited;
+  if (GetWindowLong(Handle, GWL_STYLE) and TTS_BALLOON) = TTS_BALLOON then
+    Handled := True
+  else
+    inherited;
 end;
 
 procedure TSysTooltipsStyleHook.WndProc(var Message: TMessage);
@@ -141,11 +145,13 @@ end;
 
 initialization
 
+  TCustomStyleEngine.UnRegisterSysStyleHook('tooltips_class32', Vcl.SysStyles.TSysTooltipsStyleHook);
+
+
 if StyleServices.Available then
   TSysStyleManager.RegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
 
 finalization
-
-TSysStyleManager.UnRegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
+  TSysStyleManager.UnRegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
 
 end.
