@@ -624,8 +624,8 @@ begin
        TTP_BALLOON :
          begin
            //DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
-           LStartColor := StyleServices.GetStyleColor(TStyleColor.scPanel);
-           LEndColor   := GetHighLightColor(LStartColor, 10);
+           LStartColor := GetHighLightColor(StyleServices.GetStyleColor(TStyleColor.scPanel), 10);
+           LEndColor   := StyleServices.GetStyleColor(TStyleColor.scPanel);
 
             LCanvas:=TCanvas.Create;
             SaveIndex := SaveDC(hdc);
@@ -645,7 +645,7 @@ begin
        TTP_BALLOONSTEM :
          begin
           //if iStateId = 0 then
-          DrawStyleFillRect(hdc, pRect, StyleServices.GetStyleColor(TStyleColor.scPanel));
+          DrawStyleFillRect(hdc, pRect, GetHighLightColor(StyleServices.GetStyleColor(TStyleColor.scPanel), 10));
           Exit(S_OK);
          end;
    end;
