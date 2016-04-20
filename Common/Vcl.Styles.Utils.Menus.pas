@@ -625,7 +625,7 @@ begin
           LImageRect.Right := ItemRect.Right;
         end;
 
-        if (LSysPopupItem.Checked) and (not LSysPopupItem.RadioCheck)  then
+        if (LMenuItem.Parent<>nil) and (LMenuItem.Parent.SubMenuImages <> nil) and (ImageIndex > -1) then
         begin
          R:=LImageRect;
          InflateRect(R, 2, 2);
@@ -637,7 +637,7 @@ begin
         LParentMenu.Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
       end
       else
-      if (LMenuItem.Parent<>nil) and (LMenuItem.Parent.SubMenuImages <> nil) and (ImageIndex > -1) then
+      if (LParentMenu.Images <> nil) and (ImageIndex > -1) then
       begin
         LImageWidth := LMenuItem.Parent.SubMenuImages.Width;
         DisplayCheckedGlyph := False;
