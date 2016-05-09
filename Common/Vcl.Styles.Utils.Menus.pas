@@ -634,7 +634,7 @@ begin
          Canvas.Rectangle(R);
         end;
 
-        LParentMenu.Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
+        LParentMenu.Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex, not LSysPopupItem.Disabled);
       end
       else
       if (LMenuItem.Parent<>nil) and (LMenuItem.Parent.SubMenuImages <> nil) and (ImageIndex > -1) then
