@@ -1,6 +1,7 @@
 unit Vcl.Styles.Utils.Shadow;
 
 interface
+{$LEGACYIFEND ON}
 
 {$IF (CompilerVersion >= 31)}
 

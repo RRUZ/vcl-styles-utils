@@ -23,7 +23,9 @@
 unit Vcl.Styles.FormStyleHooks;
 
 interface
-
+{$IF RTLVersion>=24}
+  {$LEGACYIFEND ON}
+{$IFEND}
 uses
   Winapi.Windows,
   Winapi.Messages,

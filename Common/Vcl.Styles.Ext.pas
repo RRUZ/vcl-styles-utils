@@ -23,6 +23,9 @@ unit Vcl.Styles.Ext;
 
 interface
 
+{$IF RTLVersion>=24}
+  {$LEGACYIFEND ON}
+{$IFEND}
 {$DEFINE USE_VCL_STYLESAPI}
 
 
@@ -333,6 +336,8 @@ end;
 
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
 {$IF (CompilerVersion >= 31)}
+const
+ Offset = SizeOf(Pointer) * 3;
 var
   p : Pointer;
 {$IFEND}
@@ -352,11 +357,7 @@ begin
    0065103C D037             shl [edi],1
     }
   //Use the address of the Self.FRegSysStylesList property to calculate the offset of the FRegisteredStyleHooks
-  {$IFDEF CPUX64}
-   p      := Pointer(PByte(@Self.FRegSysStylesList) - 24);
-  {$ELSE}
-   p      := Pointer(PByte(@Self.FRegSysStylesList) - 12);
-  {$ENDIF CPUX64}
+   p      := Pointer(PByte(@Self.FRegSysStylesList) - Offset);
   Result := TStyleHookDictionary(p^);
   {$IFEND}
 end;
@@ -364,6 +365,10 @@ end;
 
 { TStyleManagerHelper }
 class function TStyleManagerHelper.RegisteredStyles: TDictionary<string, TSourceInfo>;
+{$IF (CompilerVersion >= 31)}
+const
+ Offset = SizeOf(Pointer) * 3;
+{$IFEND}
 var
   t            : TPair<string, TStyleManager.TSourceInfo>;
   SourceInfo   : TSourceInfo;

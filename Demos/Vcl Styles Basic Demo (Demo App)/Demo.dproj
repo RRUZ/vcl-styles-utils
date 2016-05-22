@@ -93,6 +93,7 @@
 			<AppEnableHighDPI>true</AppEnableHighDPI>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_MapFile>3</DCC_MapFile>
 			<DCC_Define>madExcept;LeakChecking;$(DCC_Define)</DCC_Define>
 			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -420,17 +421,17 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
-					<DeployClass Name="ProjectOSXResource">
-						<Platform Name="OSX32">
-							<RemoteDir>Contents\Resources</RemoteDir>
-							<Operation>1</Operation>
-						</Platform>
-					</DeployClass>
 					<DeployClass Name="ProjectiOSDeviceResourceRules">
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice32">
+							<Operation>1</Operation>
+						</Platform>
+					</DeployClass>
+					<DeployClass Name="ProjectOSXResource">
+						<Platform Name="OSX32">
+							<RemoteDir>Contents\Resources</RemoteDir>
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>

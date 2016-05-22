@@ -23,7 +23,9 @@
 unit Vcl.Styles.NC;
 
 interface
-
+{$IF RTLVersion>=24}
+  {$LEGACYIFEND ON}
+{$IFEND}
 uses
   System.Classes,
   System.Generics.Collections,
@@ -48,7 +50,6 @@ type
   TNCButton      = class;
   //TListNCButtons = TObjectList<TNCButton>;
   TNCControls     = class;
-
 
   TListNCButtons = class(TCollection)
   private
@@ -290,6 +291,8 @@ var
 
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
 {$IF (CompilerVersion >= 31)}
+const
+ Offset = SizeOf(Pointer) * 3;
 var
   p : Pointer;
 {$IFEND}
@@ -309,11 +312,7 @@ begin
    0065103C D037             shl [edi],1
     }
   //Use the address of the Self.FRegSysStylesList property to calculate the offset of the FRegisteredStyleHooks
-  {$IFDEF CPUX64}
-   p      := Pointer(PByte(@Self.FRegSysStylesList) - 24);
-  {$ELSE}
-   p      := Pointer(PByte(@Self.FRegSysStylesList) - 12);
-  {$ENDIF CPUX64}
+   p      := Pointer(PByte(@Self.FRegSysStylesList) - Offset);
   Result := TStyleHookDictionary(p^);
   {$IFEND}
 end;
