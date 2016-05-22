@@ -2,6 +2,11 @@
 program Demo;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Windows,
   SysUtils,
   System.IOUtils,

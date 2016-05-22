@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.NC.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2014-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2014-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -39,6 +39,9 @@ uses
   Vcl.Menus,
   Vcl.StdCtrls,
   Vcl.GraphUtil,
+{$IF (CompilerVersion >= 31)}
+  Vcl.Styles.Utils.Shadow,
+{$IFEND}
   Vcl.Forms;
 
 type
@@ -221,7 +224,7 @@ type
     property OnClick: TNotifyEvent read FOnClick write FOnClick;
   end;
 
-  TFormStyleNCControls = class(TFormStyleHook)
+  TFormStyleNCControls = class({$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook)
   strict private
     FHotNCBtnIndex     : Integer;
     FPressedNCBtnIndex : Integer;
@@ -256,7 +259,6 @@ type
    Add more buttons styles  (colors, gradient, glow, link)
    Add hot effects (glow, menu sel)
    Add support for TAction
-
 }
 
 implementation
@@ -272,7 +274,7 @@ uses
 type
   THintWindowClass = class(THintWindow);
   TCustomFormClass = class(TCustomForm);
-  TFormStyleHookClass = class(TFormStyleHook);
+  TFormStyleHookClass = class({$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook);
   TStyleHookList = TList<TStyleHookClass>;
 
   TStyleHookDictionary = TDictionary<TClass, TStyleHookList>;
@@ -283,13 +285,40 @@ type
 
 
 var
-  Trampoline_TFormStyleHook_GetBorderSize : function (Self : TFormStyleHook) : TRect;
-  Trampoline_TFormStyleHook_GetRegion     : function (Self : TFormStyleHook) : HRgn;
+  Trampoline_TFormStyleHook_GetBorderSize : function (Self : {$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook) : TRect;
+  Trampoline_TFormStyleHook_GetRegion     : function (Self : {$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook) : HRgn;
 
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
+{$IF (CompilerVersion >= 31)}
+var
+  p : Pointer;
+{$IFEND}
 begin
+  {$IF (CompilerVersion <31)}
   Result:= Self.FRegisteredStyleHooks;
+  {$ELSE}
+   {
+   TCustomStyleEngine.FRegisteredStyleHooks:
+   00651030 3052AA           xor [edx-$56],dl
+   00651033 02F7             add dh,bh
+   00651035 097623           or [esi+$23],esi
+   TCustomStyleEngine.$ClassInitFlag:
+   00651038 FFFF             db $ff $ff
+   0065103A FFFF             db $ff $ff
+   TCustomStyleEngine.FRegSysStylesList:
+   0065103C D037             shl [edi],1
+    }
+  //Use the address of the Self.FRegSysStylesList property to calculate the offset of the FRegisteredStyleHooks
+  {$IFDEF CPUX64}
+   p      := Pointer(PByte(@Self.FRegSysStylesList) - 24);
+  {$ELSE}
+   p      := Pointer(PByte(@Self.FRegSysStylesList) - 12);
+  {$ENDIF CPUX64}
+  Result := TStyleHookDictionary(p^);
+  {$IFEND}
 end;
+
+
 
 function  IsStyleHookRegistered(ControlClass: TClass; StyleHookClass: TStyleHookClass) : Boolean;
 var
@@ -319,11 +348,11 @@ begin
   FForm  := TCustomForm(AOwner);
   FButtons  :=TListNCButtons.Create(Self);
 
-  FStyleServices:=nil;
-  FImages  :=nil;
-  FVisible:=True;
-  FShowCaption   :=True;
-  FShowSystemMenu:=True;
+  FStyleServices := nil;
+  FImages  := nil;
+  FVisible := True;
+  FShowCaption    := True;
+  FShowSystemMenu := True;
   if not IsStyleHookRegistered(AOwner.ClassType, TFormStyleNCControls) then
     TStyleManager.Engine.RegisterStyleHook(AOwner.ClassType, TFormStyleNCControls);
   FForm.Perform(CM_RECREATEWND, 0, 0);
@@ -355,7 +384,7 @@ end;
 function TNCControls.GetStyleServices: TCustomStyleServices;
 begin
  Result:= FStyleServices;
- if Result=nil then
+ if (Result = nil) then
   Result:=Vcl.Themes.StyleServices;
 end;
 
@@ -367,25 +396,26 @@ end;
 
 procedure TNCControls.SetActiveTabButtonIndex(const Value: Integer);
 
- function GetMaxTabIndex : Integer;
- var
-   i : integer;
- begin
-    Result:=-1;
-    For i:=0 to FButtons.Count-1 do
-     if FButtons[i].Style=nsTab then
-      Inc(Result);
- end;
+  function GetMaxTabIndex: Integer;
+  var
+    i: Integer;
+  begin
+    Result := -1;
+    For i := 0 to (FButtons.Count - 1) do
+      if (FButtons[i].Style = nsTab) then
+        Inc(Result);
+  end;
 
 var
-  lmax : Integer;
+  lmax: Integer;
 begin
-   lmax:=GetMaxTabIndex;
-   if (Value<>FActiveTabButtonIndex) and (Value>=0) and (lmax>=0) and (Value<=lmax) then
-   begin
-     FActiveTabButtonIndex:=Value;
-     Invalidate;
-   end;
+  lmax := GetMaxTabIndex;
+  if (Value <> FActiveTabButtonIndex) and (Value >= 0) and (lmax >= 0) and
+    (Value <= lmax) then
+  begin
+    FActiveTabButtonIndex := Value;
+    Invalidate;
+  end;
 
 end;
 
@@ -1420,10 +1450,11 @@ end;
 
 procedure TFormStyleNCControls.WMNCLButtonUp(var Message: TWMNCHitMessage);
 var
-  I, OldIndex : Integer;
+  I, OldIndex, X, Y : Integer;
   P : TPoint;
   LRect : TRect;
   LNCButtton : TNCButton;
+//  LPoint : TPoint;
 begin
   inherited;
 
@@ -1463,7 +1494,20 @@ begin
           LNCButtton.FOnDropDownClick(LNCButtton)
         else
         if (LNCButtton.Enabled) and Assigned(LNCButtton.FDropDownMenu) and PtInRect(LRect, P) then
-          LNCButtton.FDropDownMenu.Popup(Form.Left + LNCButtton.BoundsRect.Left, Form.Top + LNCButtton.BoundsRect.Bottom)
+        begin
+          X := Form.Left + LNCButtton.BoundsRect.Left;
+          Y := Form.Top + LNCButtton.BoundsRect.Bottom;
+          //OutputDebugString(PChar(Format('Popup X %d Y %d', [X, Y])));
+
+          LNCButtton.FDropDownMenu.Popup(X, Y);
+//          if LNCButtton.FDropDownMenu.BiDiMode = bdLeftToRight then
+//           LNCButtton.FDropDownMenu.Popup(X, Y)
+//          else
+//          begin
+//            LPoint := Point(X, Y);
+//            TrackPopupMenu(LNCButtton.FDropDownMenu.Handle, TPM_RIGHTALIGN or TPM_TOPALIGN, LPoint.X, LPoint.Y, 0, PopupList.Window, nil);
+//          end;
+        end
         else
         if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnClick) then
         begin
@@ -1950,7 +1994,8 @@ begin
 end;
 
 
-function Detour_TFormStyleHook_GetBorderSize (Self : TFormStyleHook) : TRect;
+//This custom GetBorderSize method is necessary to allow to the NC controls use a custom Style in the title and border area.
+function Detour_TFormStyleHook_GetBorderSize (Self : {$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook) : TRect;
 var
   Size: TSize;
   Details: TThemedElementDetails;
@@ -1960,55 +2005,56 @@ var
 begin
   if (Self is TFormStyleNCControls)  and (TFormStyleNCControls(Self).NCControls<>nil) then
   begin
-      LStylesServices:= TFormStyleNCControls(Self).NCControls.StyleServices;
-      LForm := TFormStyleHookClass(Self)._Form;
-      Result := Rect(0, 0, 0, 0);
-      if LForm.BorderStyle = bsNone then Exit;
+    LStylesServices:= TFormStyleNCControls(Self).NCControls.StyleServices;
+    LForm := TFormStyleHookClass(Self)._Form;
+    Result := Rect(0, 0, 0, 0);
+    if LForm.BorderStyle = bsNone then Exit;
 
-      if not LStylesServices.Available then Exit;
-      {caption height}
-      if (LForm.BorderStyle <> bsToolWindow) and
-         (LForm.BorderStyle <> bsSizeToolWin) then
-        Detail := twCaptionActive
-      else
-        Detail := twSmallCaptionActive;
-      Details := LStylesServices.GetElementDetails(Detail);
-      LStylesServices.GetElementSize(0, Details, esActual, Size);
-      Result.Top := Size.cy;
-      {left border width}
-      if (LForm.BorderStyle <> bsToolWindow) and
-         (LForm.BorderStyle <> bsSizeToolWin) then
-        Detail := twFrameLeftActive
-      else
-        Detail := twSmallFrameLeftActive;
-      Details := LStylesServices.GetElementDetails(Detail);
-      LStylesServices.GetElementSize(0, Details, esActual, Size);
-      Result.Left := Size.cx;
-      {right border width}
-      if (LForm.BorderStyle <> bsToolWindow) and
-         (LForm.BorderStyle <> bsSizeToolWin) then
-        Detail := twFrameRightActive
-      else
-        Detail := twSmallFrameRightActive;
-      Details := LStylesServices.GetElementDetails(Detail);
-      LStylesServices.GetElementSize(0, Details, esActual, Size);
-      Result.Right := Size.cx;
-      {bottom border height}
-      if (LForm.BorderStyle <> bsToolWindow) and
-         (LForm.BorderStyle <> bsSizeToolWin) then
-        Detail := twFrameBottomActive
-      else
-        Detail := twSmallFrameBottomActive;
-      Details := LStylesServices.GetElementDetails(Detail);
-      LStylesServices.GetElementSize(0, Details, esActual, Size);
-      Result.Bottom := Size.cy;
+    if not LStylesServices.Available then Exit;
+    {caption height}
+    if (LForm.BorderStyle <> bsToolWindow) and
+       (LForm.BorderStyle <> bsSizeToolWin) then
+      Detail := twCaptionActive
+    else
+      Detail := twSmallCaptionActive;
+    Details := LStylesServices.GetElementDetails(Detail);
+    LStylesServices.GetElementSize(0, Details, esActual, Size);
+    Result.Top := Size.cy;
+    {left border width}
+    if (LForm.BorderStyle <> bsToolWindow) and
+       (LForm.BorderStyle <> bsSizeToolWin) then
+      Detail := twFrameLeftActive
+    else
+      Detail := twSmallFrameLeftActive;
+    Details := LStylesServices.GetElementDetails(Detail);
+    LStylesServices.GetElementSize(0, Details, esActual, Size);
+    Result.Left := Size.cx;
+    {right border width}
+    if (LForm.BorderStyle <> bsToolWindow) and
+       (LForm.BorderStyle <> bsSizeToolWin) then
+      Detail := twFrameRightActive
+    else
+      Detail := twSmallFrameRightActive;
+    Details := LStylesServices.GetElementDetails(Detail);
+    LStylesServices.GetElementSize(0, Details, esActual, Size);
+    Result.Right := Size.cx;
+    {bottom border height}
+    if (LForm.BorderStyle <> bsToolWindow) and
+       (LForm.BorderStyle <> bsSizeToolWin) then
+      Detail := twFrameBottomActive
+    else
+      Detail := twSmallFrameBottomActive;
+    Details := LStylesServices.GetElementDetails(Detail);
+    LStylesServices.GetElementSize(0, Details, esActual, Size);
+    Result.Bottom := Size.cy;
   end
   else
    Exit(Trampoline_TFormStyleHook_GetBorderSize(Self));
 end;
 
 
-function Detour_TFormStyleHook_GetRegion(Self : TFormStyleHook): HRgn;
+//This custom GetRegion method is necessary to allow to the NC controls use a custom Style in the title and border area.
+function Detour_TFormStyleHook_GetRegion(Self : {$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook): HRgn;
 var
   R: TRect;
   Details: TThemedElementDetails;
@@ -2036,7 +2082,6 @@ begin
   else
      Exit(Trampoline_TFormStyleHook_GetRegion(Self));
 end;
-
 
 { TListNCButtons }
 constructor TListNCButtons.Create(AOwner: TPersistent);

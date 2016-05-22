@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 679
   Top = 314
   BorderStyle = bsSingle
-  Caption = 'Form1'
+  Caption = 'Demo'
   ClientHeight = 81
   ClientWidth = 292
   Color = clBtnFace
@@ -12,6 +12,7 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
   object SpeedButton1: TSpeedButton

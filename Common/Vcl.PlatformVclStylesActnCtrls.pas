@@ -15,7 +15,7 @@
 // The Original Code is Vcl.PlatformVclStylesActnCtrls                                              
 //                                                                                                  
 // The Initial Developer of the Original Code is Rodrigo Ruz V.                                     
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2015 Rodrigo Ruz V.                         
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2016 Rodrigo Ruz V.
 // All Rights Reserved.                                                                             
 //                                                                                                  
 //**************************************************************************************************
@@ -43,6 +43,7 @@ implementation
 
 uses
   System.SysUtils,
+  System.Classes,
   System.UITypes,
   Winapi.UxTheme,
   Winapi.Windows,
@@ -92,6 +93,17 @@ type
     procedure DrawBackground(var PaintRect: TRect); override;
   end;
 
+ {$IF (CompilerVersion >=31))}
+ {$HINTS OFF}
+  TShadowClassThemedMenuItem = class(TCustomMenuItem)
+  private
+    FCheckRect: TRect;
+    FGutterRect: TRect;
+    FPaintRect: TRect;
+  end;
+ {$HINTS ON}
+ {$IFEND}
+
 function DoDrawText(DC: HDC; Details: TThemedElementDetails;
   const S: string; var R: TRect; Flags: TTextFormat; Options: TStyleTextOptions): Boolean;
 var
@@ -128,7 +140,11 @@ end;
 { TThemedMenuItemHelper }
 function TThemedMenuItemHelper.GetPaintRect: TRect;
 begin
- Result:=Self.FPaintRect;
+ {$IF (CompilerVersion <31))}
+ Result := Self.FPaintRect;
+ {$ELSE}
+  Result := TShadowClassThemedMenuItem(Self).FPaintRect;
+ {$IFEND}
 end;
 
 function GetActionControlStyle: TActionControlStyle;

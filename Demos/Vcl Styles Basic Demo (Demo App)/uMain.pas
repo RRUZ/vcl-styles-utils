@@ -40,7 +40,6 @@ Uses
   Vcl.Styles.Utils,
   Vcl.Styles.Utils.Graphics;
 
-
 {$R *.dfm}
 
 procedure TFrmMain.Button1Click(Sender: TObject);
@@ -53,42 +52,41 @@ end;
 }
 procedure TFrmMain.Button2Click(Sender: TObject);
 begin
- TCustomStyleExt(TStyleManager.ActiveStyle).SetStyleColor(scEdit, clRed);
- TStyleManager.RefreshCurrentTheme;
+  TCustomStyleExt(TStyleManager.ActiveStyle).SetStyleColor(scEdit, clRed);
+  TStyleManager.RefreshCurrentTheme;
 end;
 
 procedure TFrmMain.Button3Click(Sender: TObject);
 var
-  VclStylesUtils : TVclStylesUtils;
-  Filters        : TObjectList<TBitmapFilter>;
+  VclStylesUtils: TVclStylesUtils;
+  Filters: TObjectList<TBitmapFilter>;
 begin
-  //create the instance to the  TVclStylesUtils using the carbon vcl style
-  VclStylesUtils:=TVclStylesUtils.Create('Carbon');
-  //create the filter list to apply
-  Filters:=TObjectList<TBitmapFilter>.Create;
+  // create the instance to the  TVclStylesUtils using the carbon vcl style
+  VclStylesUtils := TVclStylesUtils.Create('Carbon');
+  // create the filter list to apply
+  Filters := TObjectList<TBitmapFilter>.Create;
   try
-    //create a TBitmap32BlendOverlay filter and add to the list
+    // create a TBitmap32BlendOverlay filter and add to the list
     Filters.Add(TBitmap32BlendOverlay.Create(clGreen));
-    //set the elements to be affected
-    VclStylesUtils.Elements:=VclStylesUtils.Elements + [vseBitmaps ,vseSysColors, vseStyleColors];
-    //set the filters
+    // set the elements to be affected
+    VclStylesUtils.Elements := VclStylesUtils.Elements + [vseBitmaps, vseSysColors, vseStyleColors];
+    // set the filters
     VclStylesUtils.SetFilters(Filters);
-    //Apply the changes to the style
+    // Apply the changes to the style
     VclStylesUtils.ApplyChanges;
-    //reload the modified style
+    // reload the modified style
     TStyleManager.ReloadStyle('Carbon');
   finally
     VclStylesUtils.Free;
     Filters.Free;
   end;
-  TButton(Sender).Enabled:=False;
+  TButton(Sender).Enabled := False;
 end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 begin
-  ReportMemoryLeaksOnShutdown:=True;
+  //ReportMemoryLeaksOnShutdown := True;
   TStyleManager.ReloadStyle('Carbon');
 end;
-
 
 end.

@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.ColorTabs                                                        
 //                                                                                                  
 // The Initial Developer of the Original Code is Rodrigo Ruz V.                                     
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2015 Rodrigo Ruz V.                         
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2016 Rodrigo Ruz V.
 // All Rights Reserved.                                                                             
 //                                                                                                  
 //**************************************************************************************************
@@ -52,6 +52,7 @@ uses
  System.Classes,
  System.SysUtils,
  System.Types,
+ System.Rtti,
  System.Generics.Collections,
  Winapi.Windows,
  Vcl.Styles,
@@ -82,8 +83,30 @@ type
 
 
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
+var
+  p : Pointer;
 begin
+  {$IF (CompilerVersion <31)}
   Result:= Self.FRegisteredStyleHooks;
+  {$ELSE}
+   {
+   TCustomStyleEngine.FRegisteredStyleHooks:
+   00651030 3052AA           xor [edx-$56],dl
+   00651033 02F7             add dh,bh
+   00651035 097623           or [esi+$23],esi
+   TCustomStyleEngine.$ClassInitFlag:
+   00651038 FFFF             db $ff $ff
+   0065103A FFFF             db $ff $ff
+   TCustomStyleEngine.FRegSysStylesList:
+   0065103C D037             shl [edi],1
+    }
+  {$IFDEF CPUX64}
+   p      := Pointer(PByte(@Self.FRegSysStylesList) - 24);
+  {$ELSE}
+   p      := Pointer(PByte(@Self.FRegSysStylesList) - 12);
+  {$ENDIF CPUX64}
+  Result := TStyleHookDictionary(p^);
+  {$IFEND}
 end;
 
 
@@ -182,7 +205,11 @@ end;
 
 procedure TPageControlHelper.UpdateTab2(Page: Vcl.ComCtrls.TTabSheet);
 begin
+  {$IF (CompilerVersion <31)}
   Self.UpdateTab(Page);
+  {$ELSE}
+  Self.Tabs[Page.TabIndex] := Page.Caption;
+  {$IFEND}
 end;
 
 { TTabControlStyleHookHelper }

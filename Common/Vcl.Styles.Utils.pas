@@ -70,7 +70,6 @@ uses
 
 
 { TVclStylesUtils }
-
 constructor TVclStylesUtils.Create(const  StyleName : string;Clone:Boolean=False);
 var
   FSourceInfo: TSourceInfo;
