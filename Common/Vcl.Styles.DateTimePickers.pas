@@ -1,28 +1,34 @@
 //**************************************************************************************************
-//                                                                                                  
-// Unit Vcl.Styles.DateTimePickers                                                                  
-// unit for the VCL Styles Utils                                                                    
-// https://github.com/RRUZ/vcl-styles-utils/                                                       
-//                                                                                                  
-// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); 
-// you may not use this file except in compliance with the License. You may obtain a copy of the    
-// License at http://www.mozilla.org/MPL/                                                           
-//                                                                                                  
-// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF   
-// ANY KIND, either express or implied. See the License for the specific language governing rights  
-// and limitations under the License.                                                               
-//                                                                                                  
-// The Original Code is Vcl.Styles.DateTimePickers                                                  
-//                                                                                                  
-// The Initial Developer of the Original Code is Rodrigo Ruz V.                                     
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2015 Rodrigo Ruz V.                         
-// All Rights Reserved.                                                                             
-//                                                                                                  
+//
+// Unit Vcl.Styles.DateTimePickers
+// unit for the VCL Styles Utils
+// https://github.com/RRUZ/vcl-styles-utils/
+//
+// The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License");
+// you may not use this file except in compliance with the License. You may obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
+// ANY KIND, either express or implied. See the License for the specific language governing rights
+// and limitations under the License.
+//
+// The Original Code is Vcl.Styles.DateTimePickers
+//
+// The Initial Developer of the Original Code is Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2016 Rodrigo Ruz V.
+// All Rights Reserved.
+//
 //**************************************************************************************************
 unit Vcl.Styles.DateTimePickers;
 
 interface
 
+{$IF RTLVersion>=24}
+  {$LEGACYIFEND ON}
+{$IFEND}
+{$IF (CompilerVersion >= 31)}
+    {$MESSAGE ERROR 'This unit is deprecated, Use the Vcl.Styles.Hooks unit Instead'}
+{$ELSE}
 uses
   Winapi.CommCtrl,
   Winapi.Messages,
@@ -32,7 +38,7 @@ uses
   Vcl.Controls;
 
 type
- TDateTimePickerStyleHookFix= class(TDateTimePickerStyleHook)
+ TDateTimePickerStyleHookFix = class(TDateTimePickerStyleHook)
  private
     procedure CNNotify(var Message: TWMNotify); message CN_NOTIFY;
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
@@ -217,5 +223,5 @@ begin
   end;
   Handled := True;
 end;
-
+{$IFEND}
 end.
