@@ -1230,7 +1230,7 @@ end;
 
 procedure TNCButton.ShowHintWindow(X, Y : Integer);
 begin
-  if THintWindowClass(FHintWindow).WindowHandle=0 then
+  if (THintWindowClass(FHintWindow).WindowHandle = 0) then
   begin
     FHintWindow.Visible := False;
     FHintWindow.Color       := NCControls.StyleServices.GetSystemColor(clInfoBk);
@@ -1512,7 +1512,9 @@ begin
         begin
             if LNCButtton.ShowHint then
               LNCButtton.HideHintWindow();
-            LNCButtton.FOnClick(LNCButtton);
+
+            if not IsIconic(TCustomFormClass(Form).Handle) then
+               LNCButtton.FOnClick(LNCButtton);
         end;
       end;
     end;
@@ -1552,8 +1554,9 @@ begin
           if (FHotNCBtnIndex<>I) and NCControls.ButtonsList[I].ShowHint then
               NCControls.ButtonsList[I].HideHintWindow();
 
-        if NCControls.ButtonsList[FHotNCBtnIndex].ShowHint then
-          NCControls.ButtonsList[FHotNCBtnIndex].ShowHintWindow(Message.XCursor, Message.YCursor);
+        if not IsIconic(TCustomFormClass(Form).Handle) then
+          if NCControls.ButtonsList[FHotNCBtnIndex].ShowHint  then
+             NCControls.ButtonsList[FHotNCBtnIndex].ShowHintWindow(Message.XCursor, Message.YCursor);
 
         InvalidateNC;
       end;
@@ -1657,7 +1660,7 @@ begin
   if not LStyleServices.Available then
     Exit;
   R := _GetBorderSize;
-  if NCControls<>nil then
+  if (NCControls <> nil) then
     NCControls.FormBorderSize := R;
 
   if (Form.BorderStyle <> bsToolWindow) and
@@ -1886,7 +1889,7 @@ begin
        Inc(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount-1].BoundsRect.Right - NCControls.ButtonsList[0].BoundsRect.Left + 10);
 
       //text
-      if (NCControls<>nil) and (NCControls.ShowCaption) then
+      if (NCControls <> nil) and ( IsIconic(TCustomFormClass(Form).Handle) or (NCControls.ShowCaption)) then
       begin
 
         TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
@@ -1911,7 +1914,9 @@ begin
        Dec(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount-1].BoundsRect.Right - NCControls.ButtonsList[0].BoundsRect.Left + 10);
 
       _FCaptionRect := TextRect;
-      PaintNCControls(CaptionBuffer.Canvas, R2);
+
+      if not IsIconic(TCustomFormClass(Form).Handle) then
+       PaintNCControls(CaptionBuffer.Canvas, R2);
 
       //caption
       Canvas.Draw(0, 0, CaptionBuffer);
