@@ -43,7 +43,7 @@ var
   f, s : string;
   LFiles : TStringDynArray;
 begin
-  s:=ExtractFilePath(ParamStr(0));
+  s := ExtractFilePath(ParamStr(0));
   LFiles:=TDirectory.GetFiles(s, '*.vsf');
   if Length(LFiles)>0 then
   begin
@@ -53,7 +53,7 @@ begin
   end
   else
   begin
-    s:=ResolvePath('..\..\..\Styles',ExtractFilePath(ParamStr(0)));
+    s:=ResolvePath('..\..\..\Styles', ExtractFilePath(ParamStr(0)));
     for f in TDirectory.GetFiles(s, '*.vsf') do
      if TStyleManager.IsValidStyle(f) then
       TStyleManager.LoadFromFile(f);

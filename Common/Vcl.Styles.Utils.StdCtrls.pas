@@ -2414,6 +2414,8 @@ begin
 end;
 
 function TSysStaticStyleHook.GetTextFormat: TTextFormat;
+const
+ SS_EDITCONTROL = $2000;
 begin
   Result := [tfHidePrefix];
   with SysControl do
@@ -2436,6 +2438,9 @@ begin
 
     if Style and SS_NOPREFIX = SS_NOPREFIX then
       include(Result, tfNoPrefix);
+
+    if Style and SS_EDITCONTROL = SS_EDITCONTROL then
+      include(Result, tfEditControl);
 
     if not(Style and SS_ENDELLIPSIS = SS_ENDELLIPSIS) and
       not(Style and SS_PATHELLIPSIS = SS_PATHELLIPSIS) and
