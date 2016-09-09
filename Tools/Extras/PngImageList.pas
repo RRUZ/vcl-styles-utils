@@ -167,7 +167,7 @@ begin
     Move(PByte(OldPtr)^, Patch.OldBody[0], SizeOf(Patch.OldBody));
     if VirtualProtect(OldPtr, 16, PAGE_EXECUTE_READWRITE, @Access) then begin
       PByte(OldPtr)^ := $E9; // Near jump
-      PCardinal(Cardinal(OldPtr) + 1)^ := Cardinal(NewPtr) - Cardinal(OldPtr) - 5;
+      PCardinal(NativeInt(OldPtr) + 1)^ := NativeInt(NewPtr) - NativeInt(OldPtr) - 5;
       VirtualProtect(OldPtr, 16, Access, @Access);
       Result := True;
     end;
