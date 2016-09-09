@@ -1432,10 +1432,10 @@ var
   r, g, b, a   : byte;
   x, y:    integer;
   ARGB:    TColor;
-  Line, Delta: integer;
+  Line, Delta: NativeInt;
 begin
-  Line  := integer(Dest.ScanLine[0]);
-  Delta := integer(Dest.ScanLine[1]) - Line;
+  Line  := NativeInt(Dest.ScanLine[0]);
+  Delta := NativeInt(Dest.ScanLine[1]) - Line;
   for y := 0 to Dest.Height - 1 do
   begin
     for x := 0 to Dest.Width - 1 do
@@ -1480,8 +1480,8 @@ var
   r, g, b, a   : byte;
   x, y:    integer;
   ARGB:    TColor;
-  LineDest, DeltaDest: integer;
-  LineSource, DeltaSource: integer;
+  LineDest, DeltaDest: NativeInt;
+  LineSource, DeltaSource: NativeInt;
   Value : TColor;
   SourceN : TBitmap;
 begin
@@ -1502,11 +1502,11 @@ begin
       y := y + Source.Height;
     end;
 
-    LineDest  := integer(Dest.ScanLine[0]);
-    DeltaDest := integer(Dest.ScanLine[1]) - LineDest;
+    LineDest  := NativeInt(Dest.ScanLine[0]);
+    DeltaDest := NativeInt(Dest.ScanLine[1]) - LineDest;
 
-    LineSource  := integer(SourceN.ScanLine[0]);
-    DeltaSource := integer(SourceN.ScanLine[1]) - LineSource;
+    LineSource  := NativeInt(SourceN.ScanLine[0]);
+    DeltaSource := NativeInt(SourceN.ScanLine[1]) - LineSource;
 
     for y := 0 to Dest.Height - 1 do
     begin
@@ -1562,10 +1562,10 @@ var
   r, g, b    : byte;
   x, y:    integer;
   ARGB:    TColor;
-  Line, Delta: integer;
+  Line, Delta: NativeInt;
 begin
-  Line  := integer(ABitMap.ScanLine[0]);
-  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  Line  := NativeInt(ABitMap.ScanLine[0]);
+  Delta := NativeInt(ABitMap.ScanLine[1]) - Line;
   for y := 0 to ABitMap.Height - 1 do
   begin
     for x := 0 to ABitMap.Width - 1 do
@@ -1610,8 +1610,8 @@ var
   r, g, b   : byte;
   x, y:    integer;
   ARGB:    TColor;
-  LineDest, DeltaDest: integer;
-  LineSource, DeltaSource: integer;
+  LineDest, DeltaDest: NativeInt;
+  LineSource, DeltaSource: NativeInt;
   Value : TColor;
   SourceN : TBitmap;
 begin
@@ -1632,11 +1632,11 @@ begin
       y := y + Source.Height;
     end;
 
-    LineDest  := integer(Dest.ScanLine[0]);
-    DeltaDest := integer(Dest.ScanLine[1]) - LineDest;
+    LineDest  := NativeInt(Dest.ScanLine[0]);
+    DeltaDest := NativeInt(Dest.ScanLine[1]) - LineDest;
 
-    LineSource  := integer(SourceN.ScanLine[0]);
-    DeltaSource := integer(SourceN.ScanLine[1]) - LineSource;
+    LineSource  := NativeInt(SourceN.ScanLine[0]);
+    DeltaSource := NativeInt(SourceN.ScanLine[1]) - LineSource;
 
     for y := 0 to Dest.Height - 1 do
     begin
@@ -2120,10 +2120,10 @@ procedure _SetRGB24(const ABitMap: TBitmap; DR,DG,DB: Integer);
 var
   r, g, b : byte;
   x, y:    integer;
-  Line, Delta: integer;
+  Line, Delta: NativeInt;
 begin
-  Line  := integer(ABitMap.ScanLine[0]);
-  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  Line  := NativeInt(ABitMap.ScanLine[0]);
+  Delta := NativeInt(ABitMap.ScanLine[1]) - Line;
   for y := 0 to ABitMap.Height - 1 do
   begin
     for x := 0 to ABitMap.Width - 1 do
@@ -2144,10 +2144,10 @@ procedure _SetRGB32(const ABitMap: TBitmap; DR,DG,DB: Integer);
 var
   r, g, b, a: byte;
   x, y:    integer;
-  Line, Delta: integer;
+  Line, Delta: NativeInt;
 begin
-  Line  := integer(ABitMap.ScanLine[0]);
-  Delta := integer(ABitMap.ScanLine[1]) - Line;
+  Line  := NativeInt(ABitMap.ScanLine[0]);
+  Delta := NativeInt(ABitMap.ScanLine[1]) - Line;
   for y := 0 to ABitMap.Height - 1 do
   begin
     for x := 0 to ABitMap.Width - 1 do

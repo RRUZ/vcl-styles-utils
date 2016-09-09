@@ -461,10 +461,10 @@ begin
         LHandle:=Trampoline_user32_LoadIconW(_hInstance, lpIconName);
         LIcon.Handle := LHandle;
         Result := LHandle;
-        s := IntToStr(Integer(lpIconName));
+        s := IntToStr(NativeUInt(lpIconName));
 
         //OutputDebugString(PChar('Detour_LoadIconW '+s+ ' Module Name '+GetModuleName(_hInstance)+' _hInstance '+IntToHex(_hInstance, 8) ));
-        case Integer(lpIconName) of
+        case NativeUInt(lpIconName) of
          78: DrawIcon(fa_shield);
          81: DrawIcon(fa_info_circle);
          84: DrawIcon(fa_warning);
@@ -473,7 +473,7 @@ begin
         end;
 
         if _hInstance=0 then
-        case Integer(lpIconName) of
+        case NativeUInt(lpIconName) of
          32518 : DrawIcon(fa_shield);
          32516 : DrawIcon(fa_info_circle);
          32515 : DrawIcon(fa_warning);
@@ -509,9 +509,9 @@ begin
                                                                                                                          //w8 - W10
   if (hInst>0) and (hInst<>HInstance) and (ImageType=IMAGE_ICON) and (X=16) and (Y=16) and IS_INTRESOURCE(ImageName) and TOSVersion.Check(6, 2) then
   begin
-    s := IntToStr(Integer(ImageName));
+    s := IntToStr(NativeUInt(ImageName));
 
-     case Integer(ImageName) of
+     case NativeUInt(ImageName) of
         //W8, W10
         //comctl32.dll
         16817
@@ -543,7 +543,7 @@ begin
     hModule:=GetModuleHandle(ExplorerFrame);
     if (hModule = hInst) then
     begin
-      s := IntToStr(Integer(ImageName));
+      s := IntToStr(NativeUInt(ImageName));
       Result:= Trampoline_user32_LoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
       LBitmap:=TBitmap.Create;
       try
@@ -555,7 +555,7 @@ begin
         begin
           LBackColor:= StyleServices.GetSystemColor(clWindow);
           LRect:=Rect(0, 0, LBitmap.Width, LBitmap.Height );
-           case Integer(ImageName) of
+           case NativeUInt(ImageName) of
              // Right Arrow, cross button, refresh, down arrow
               288
                       :
@@ -595,7 +595,7 @@ begin
         begin
           LBackColor:= StyleServices.GetSystemColor(clWindow);
           LRect:=Rect(0, 0, LBitmap.Width, LBitmap.Height );
-          case Integer(ImageName) of
+          case NativeUInt(ImageName) of
            //Magnifier
            34560..34562,  // Aero Enabled
            34563..34568   // Classic Theme
@@ -685,7 +685,7 @@ begin
                     :
                      begin
 
-                        case Integer(ImageName) of
+                        case NativeUInt(ImageName) of
                           577 : LColor:= StyleServices.GetSystemColor(clBtnText);
                           578 : LColor:= StyleServices.GetSystemColor(clHighlight);
                           579 : LColor:= StyleServices.GetSystemColor(clGrayText);
@@ -713,7 +713,7 @@ begin
                     :
                      begin
 
-                        case Integer(ImageName) of
+                        case NativeUInt(ImageName) of
                           582 : LColor:= StyleServices.GetSystemColor(clBtnText);
                           583 : LColor:= StyleServices.GetSystemColor(clHighlight);
                           584 : LColor:= StyleServices.GetSystemColor(clGrayText);
