@@ -145,7 +145,9 @@ end;
 
 initialization
 
+{$IF CompilerVersion >= 30.0}  //DX Seattle and UP.
   TCustomStyleEngine.UnRegisterSysStyleHook('tooltips_class32', Vcl.SysStyles.TSysTooltipsStyleHook);
+{$IFEND}
 
 
 if StyleServices.Available then
