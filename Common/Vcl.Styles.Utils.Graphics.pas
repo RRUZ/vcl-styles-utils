@@ -46,6 +46,8 @@ uses
 
 //http://fortawesome.github.io/Font-Awesome/cheatsheet/
 //http://prettyprinter.de/index.php
+
+//version 4.7.0
 const
   fa_glass = $F000;
   fa_music = $F001;
@@ -174,6 +176,8 @@ const
   fa_key = $F084;
   fa_gears = $F085;
   fa_comments = $F086;
+  fa_commenting  = $F27a;
+  fa_commenting_o = $f27b;
   fa_thumbs_o_up = $F087;
   fa_thumbs_o_down = $F088;
   fa_star_half = $F089;
@@ -389,6 +393,7 @@ const
   fa_long_arrow_right = $F178;
   fa_apple = $F179;
   fa_windows = $F17A;
+  fa_window_maximize = $f2d0;
   fa_android = $F17B;
   fa_linux = $F17C;
   fa_dribbble = $F17D;

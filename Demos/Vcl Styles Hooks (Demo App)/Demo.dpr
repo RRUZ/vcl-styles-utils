@@ -54,9 +54,9 @@ end;
 
 begin
   LoadVCLStyles;
-  TStyleManager.TrySetStyle('Auric');
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TFrmMain, FrmMain);
+  TStyleManager.TrySetStyle('Auric');
   Application.Run;
 end.
