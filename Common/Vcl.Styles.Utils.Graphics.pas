@@ -2761,15 +2761,15 @@ var
 {$ENDIF}
 begin
 {$IFDEF USE_ZIP}
-  LResCompressed:=TResourceStream.Create(HInstance, 'fontawesome_zip', RT_RCDATA);
+  LResCompressed := TResourceStream.Create(HInstance, 'fontawesome_zip', RT_RCDATA);
   try
-    LZipFile:=TZipFile.Create;
+    LZipFile := TZipFile.Create;
     try
-      LResCompressed.Position:=0;
+      LResCompressed.Position := 0;
       LZipFile.Open(LResCompressed, TZipMode.zmRead);
       LZipFile.Read(0, LStream, LocalHeader);
       try
-        LMemoryStream:=TMemoryStream.Create;
+        LMemoryStream := TMemoryStream.Create;
         try
            LMemoryStream.CopyFrom(LStream, LStream.Size);
            FFontHandle := AddFontMemResourceEx(LMemoryStream.Memory, LMemoryStream.Size, nil, @NbFontAdded);
@@ -2818,30 +2818,30 @@ var
   LBitmap, LMask : TBitmap;
   NewIcon : HICON;
 begin
-  LBitmap:=TBitmap.Create;
+  LBitmap := TBitmap.Create;
   try
-    LBitmap.PixelFormat:=pf32bit;
-    LBitmap.Canvas.Brush.Color:=ABackColor;
+    LBitmap.PixelFormat := pf32bit;
+    LBitmap.Canvas.Brush.Color := ABackColor;
     LBitmap.SetSize(Width, Width);
     //LBitmap.Canvas.FillRect(Rect(0, 0, LBitmap.Width, LBitmap.Height));
     //Bitmap32_SetAlphaAndColor(LBitmap, 255, clFuchsia);
 
     //DrawChar(LBitmap.Canvas.Handle, ACode, Rect(0, 0, LBitmap.Width, LBitmap.Height), AColor, Orientation, ImageAlignment);
-    DrawChar(LBitmap.Canvas.Handle, ACode, Rect(0, 0, CharX, CharY), AColor, Orientation, ImageAlignment);
+    DrawChar(LBitmap.Canvas.Handle, ACode, Rect(0, 0, CharX{ - 4}, CharY{ - 4}), AColor, Orientation, ImageAlignment);
     Bitmap32_SetAlphaExceptColor(LBitmap, 255, ABackColor);
     LBitmap.AlphaFormat := afDefined;
 
-    LMask:=TBitmap.Create;
+    LMask := TBitmap.Create;
     try
       //LMask.Handle:=CreateBitmap(LBitmap.Width, LBitmap.Height, 1, 1, 0);
-      LMask.PixelFormat:=pf1bit;
+      LMask.PixelFormat := pf1bit;
       LMask.SetSize(Width, Height);
 
-      LIconInfo.fIcon:=True;
-      LIconInfo.xHotspot:=Width;
-      LIconInfo.yHotspot:=Height;
-      LIconInfo.hbmMask:=LMask.Handle;
-      LIconInfo.hbmColor:=LBitmap.Handle;
+      LIconInfo.fIcon := True;
+      LIconInfo.xHotspot := Width;
+      LIconInfo.yHotspot := Height;
+      LIconInfo.hbmMask  := LMask.Handle;
+      LIconInfo.hbmColor := LBitmap.Handle;
 
       NewIcon := CreateIconIndirect(LIconInfo);
       Result  := NewIcon;
@@ -2856,7 +2856,7 @@ end;
 
 function TAwesomeFont.GetIcon(const ACode: Word; Width, Height: Integer; AColor, ABackColor: TColor; Orientation: Integer = 0; ImageAlignment: TImageAlignment = iaLeft): HICON;
 begin
-  Result:=GetIcon(ACode, Width, Height, Width, Height, AColor, ABackColor, Orientation, ImageAlignment);
+  Result := GetIcon(ACode, Width, Height, Width, Height, AColor, ABackColor, Orientation, ImageAlignment);
 end;
 procedure TAwesomeFont.DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor: TColor; Orientation : Integer = 0; ImageAlignment: TImageAlignment = iaLeft);
 var

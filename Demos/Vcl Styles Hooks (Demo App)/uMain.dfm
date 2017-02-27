@@ -120,7 +120,7 @@ object FrmMain: TFrmMain
           Left = 8
           Top = 268
           Width = 409
-          Height = 215
+          Height = 181
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -129,6 +129,8 @@ object FrmMain: TFrmMain
           HideSelection = False
           ParentFont = False
           TabOrder = 7
+          StyleElements = [seClient, seBorder]
+          Zoom = 100
         end
         object CheckBox1: TCheckBox
           Left = 12
@@ -155,10 +157,6 @@ object FrmMain: TFrmMain
       object TabSheet2: TTabSheet
         Caption = 'ListView'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Panel2: TPanel
           Left = 0
           Top = 49
@@ -177,10 +175,6 @@ object FrmMain: TFrmMain
             TabOrder = 0
             object TabSheet6: TTabSheet
               Caption = 'Report View'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object ListView1: TListView
                 Left = 0
                 Top = 0
@@ -214,10 +208,6 @@ object FrmMain: TFrmMain
             object TabSheet7: TTabSheet
               Caption = 'Groups'
               ImageIndex = 1
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object ListView2: TListView
                 Left = 0
                 Top = 0
@@ -362,7 +352,7 @@ object FrmMain: TFrmMain
           Width = 225
           Height = 160
           MultiSelect = True
-          Date = 41947.505859050930000000
+          Date = 41947.754500787030000000
           EndDate = 41947.000000000000000000
           TabOrder = 1
         end
@@ -380,10 +370,6 @@ object FrmMain: TFrmMain
       object TabSheet5: TTabSheet
         Caption = 'ProgressBar'
         ImageIndex = 4
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label7: TLabel
           Left = 3
           Top = 2
@@ -432,7 +418,7 @@ object FrmMain: TFrmMain
     Left = 360
     Top = 229
     Bitmap = {
-      494C010107000900400010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010107000900440010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       00000000000000000000000000000000000000000005000000150000001A0000
       001A0000001A0000001A0000001A0000001A0000001A0000001A0000001A0000

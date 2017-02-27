@@ -71,7 +71,7 @@ uses
 {$R *.dfm}
 
 type
-  TListViewClass= class(TListView);
+  TListViewClass = class(TListView);
 
 procedure TFrmMain.CheckBox1Click(Sender: TObject);
 begin
@@ -98,7 +98,7 @@ begin
   for s in TStyleManager.StyleNames do
     ComboBoxStyles.Items.Add(s);
 
-  ComboBoxStyles.ItemIndex:=ComboBoxStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+  ComboBoxStyles.ItemIndex := ComboBoxStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
 
 
   for i := 1 to 20 do
@@ -146,41 +146,41 @@ begin
     ListItem:=ListView1.Items.Add;
     ListItem.Caption:=Format('Item %d',[i+1]);
     ListItem.Checked:=Odd(i);
-    ListItem.SubItems.Add(Format('SubItem %d.%d',[i+1, 1]));
-    ListItem.SubItems.Add(Format('SubItem %d.%d',[i+1, 2]));
-    ListItem.SubItems.Add(Format('SubItem %d.%d',[i+1, 3]));
+    ListItem.SubItems.Add(Format('SubItem %d.%d',[i + 1, 1]));
+    ListItem.SubItems.Add(Format('SubItem %d.%d',[i + 1, 2]));
+    ListItem.SubItems.Add(Format('SubItem %d.%d',[i + 1, 3]));
   end;
 
  for i := 0 to 99 do
   begin
-    ListItem:=ListView2.Items.Add;
-    ListItem.Caption:=Format('Item %d',[i+1]);
-    ListItem.Checked:=Odd(i);
-    ListItem.SubItems.Add(Format('SubItem %d.%d',[i+1, 1]));
-    ListItem.SubItems.Add(Format('SubItem %d.%d',[i+1, 2]));
-    ListItem.SubItems.Add(Format('SubItem %d.%d',[i+1, 3]));
+    ListItem := ListView2.Items.Add();
+    ListItem.Caption := Format('Item %d',[i+1]);
+    ListItem.Checked := Odd(i);
+    ListItem.SubItems.Add(Format('SubItem %d.%d',[i + 1, 1]));
+    ListItem.SubItems.Add(Format('SubItem %d.%d',[i + 1, 2]));
+    ListItem.SubItems.Add(Format('SubItem %d.%d',[i + 1, 3]));
     if Odd(i) then
-     ListItem.GroupID:=0
+     ListItem.GroupID := 0
     else
-     ListItem.GroupID:=1;
+     ListItem.GroupID := 1;
   end;
 
 
     TreeView1.Items.Clear;
     MyTreeNode1 := TreeView1.Items.Add(nil, 'Root');
     for i := 0 to 5 do
-     TreeView1.Items.AddChild(MyTreeNode1,Format('ChildNode Root %d',[i+1]));
+     TreeView1.Items.AddChild(MyTreeNode1,Format('ChildNode Root %d', [i + 1]));
 
     MyTreeNode2 := TreeView1.Items.Add(MyTreeNode1, 'Root 2');
     for i := 0 to 5 do
-     TreeView1.Items.AddChild(MyTreeNode2,Format('ChildNode Root2 %d',[i+1]));
+     TreeView1.Items.AddChild(MyTreeNode2,Format('ChildNode Root2 %d', [i + 1]));
 
     for i := 0 to 99 do
     begin
-     MyTreeNode2 := TreeView1.Items.Add(MyTreeNode1, 'Root '+IntToStr(3+i));
+     MyTreeNode2 := TreeView1.Items.Add(MyTreeNode1, 'Root ' + IntToStr(3 + i));
 
       for j := 0 to 5 do
-       TreeView1.Items.AddChild(MyTreeNode2,Format('ChildNode %d',[j+1]));
+       TreeView1.Items.AddChild(MyTreeNode2,Format('ChildNode %d', [j + 1]));
     end;
 end;
 
