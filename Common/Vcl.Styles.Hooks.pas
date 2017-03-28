@@ -16,7 +16,7 @@
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
 //
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2017 Rodrigo Ruz V.
 //
 // Contributor(s): Mahdi Safsafi.
 //
@@ -124,10 +124,14 @@ end;
 
 function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
+  //OutputDebugString(PChar(Format('Detour_GetSysColor %d', [nIndex])));
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Result := Trampoline_user32_GetSysColor(nIndex)
   else if nIndex = COLOR_HOTLIGHT then
     Result := DWORD(StyleServices.GetSystemColor(clHighlight))
+//  else
+//  if nIndex = COLOR_HIGHLIGHTTEXT then
+//    Result := clRed
   else
     Result := DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
 end;
@@ -165,7 +169,12 @@ begin
           Exit(LCurrentStyleBrush[nIndex])
         else
         begin
-          LColor := StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
+          //OutputDebugString(PChar(Format('Detour_GetSysColorBrush %d', [nIndex])));
+          if nIndex = COLOR_HOTLIGHT then
+            LColor := StyleServices.GetSystemColor(clHighlight)
+          else
+            LColor := StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
+
           LBrush := CreateSolidBrush(LColor);
           LCurrentStyleBrush.Add(nIndex, LBrush);
           Exit(LBrush);

@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.Utils.Graphics.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -217,6 +217,7 @@ const
   fa_wrench = $F0AD;
   fa_tasks = $F0AE;
   fa_filter = $F0B0;
+  fa_clone = $F24D;
   fa_briefcase = $F0B1;
   fa_arrows_alt = $F0B2;
   fa_group = $F0C0;
@@ -571,6 +572,7 @@ const
   fa_train = $F238;
   fa_subway = $F239;
   fa_medium = $F23A;
+
 
 type
   //http://fortawesome.github.io/Font-Awesome/cheatsheet/
@@ -1181,35 +1183,33 @@ var
   LCanvas   : TCanvas;
 begin
   SaveIndex := SaveDC(hdc);
-  LCanvas:=TCanvas.Create;
+  LCanvas := TCanvas.Create;
   try
-    LCanvas.Handle:=hdc;
-    LCanvas.Pen.Color:=AColor;
-    LCanvas.Brush.Style:=bsClear;
+    LCanvas.Handle := hdc;
+    LCanvas.Pen.Color := AColor;
+    LCanvas.Brush.Style := bsClear;
     DrawArrow(LCanvas, Direction, Location, Size);
   finally
-    LCanvas.Handle:=0;
+    LCanvas.Handle := 0;
     LCanvas.Free;
     RestoreDC(hdc, SaveIndex);
   end;
 end;
-
-
 
 procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
 var
  SaveIndex : Integer;
  LCanvas : TCanvas;
 begin
-  LCanvas:=TCanvas.Create;
+  LCanvas := TCanvas.Create;
   SaveIndex := SaveDC(hdc);
   try
-    LCanvas.Handle:=hdc;
-    LCanvas.Brush.Color:=AColor;
+    LCanvas.Handle := hdc;
+    LCanvas.Brush.Color := AColor;
     //LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left +  LRect.Width,  LRect.Top + LRect.Height);
     LCanvas.FillRect(LRect);
   finally
-    LCanvas.Handle:=0;
+    LCanvas.Handle := 0;
     LCanvas.Free;
     RestoreDC(hdc, SaveIndex);
   end;
@@ -1220,15 +1220,15 @@ var
  SaveIndex : Integer;
  LCanvas : TCanvas;
 begin
-  LCanvas:=TCanvas.Create;
+  LCanvas := TCanvas.Create;
   SaveIndex := SaveDC(hdc);
   try
-    LCanvas.Handle:=hdc;
-    LCanvas.Brush.Style:=bsClear;
-    LCanvas.Pen.Color:=AColor;
+    LCanvas.Handle := hdc;
+    LCanvas.Brush.Style := bsClear;
+    LCanvas.Pen.Color := AColor;
     LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left + LRect.Width,  LRect.Top + LRect.Height);
   finally
-    LCanvas.Handle:=0;
+    LCanvas.Handle := 0;
     LCanvas.Free;
     RestoreDC(hdc, SaveIndex);
   end;
@@ -1242,7 +1242,7 @@ var
  LCanvas : TCanvas;
 begin
   SaveIndex := SaveDC(hdc);
-  LCanvas:=TCanvas.Create;
+  LCanvas := TCanvas.Create;
   try
     LCanvas.Handle:=hdc;
     with LCanvas do
@@ -1344,10 +1344,10 @@ var
   LRgn : THandle;
   LPoint : TPoint;
 begin
-  LBuffer:=TBitmap.Create;
+  LBuffer := TBitmap.Create;
   try
-    LBuffer.Width:=1;
-    LBuffer.Height:=ARect.Height;
+    LBuffer.Width := 1;
+    LBuffer.Height := ARect.Height;
     LRect.Create(0, 0, 1, ARect.Height);
     GradientFillCanvas(LBuffer.Canvas, AStartColor, AEndColor, LRect, Direction);
 
@@ -1368,7 +1368,7 @@ begin
 end;
 
 
-procedure AlphaBlendRectangle(const ACanvas: TCanvas;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
+procedure AlphaBlendRectangle(const ACanvas: TCanvas;  const AColor : TColor; const ARect: TRect; SourceConstantAlpha : Byte); overload;
 begin
   AlphaBlendRectangle(ACanvas.Handle, AColor, ARect, SourceConstantAlpha);
 end;
@@ -1380,16 +1380,16 @@ var
    LRect      : TRect;
 begin
   SaveIndex := SaveDC(DC);
-  LCanvas:=TCanvas.Create;
+  LCanvas := TCanvas.Create;
   try
-    LCanvas.Handle:=DC;
+    LCanvas.Handle := DC;
     AlphaBlendFillCanvas(LCanvas, AColor, ARect, SourceConstantAlpha);
-    LCanvas.Pen.Color:=AColor;
-    LCanvas.Brush.Style:=bsClear;
-    LRect:=ARect;
+    LCanvas.Pen.Color := AColor;
+    LCanvas.Brush.Style := bsClear;
+    LRect := ARect;
     LCanvas.Rectangle(LRect.Left, LRect.Top, LRect.Left + LRect.Width,  LRect.Top + LRect.Height);
   finally
-    LCanvas.Handle:=0;
+    LCanvas.Handle := 0;
     LCanvas.Free;
     RestoreDC(DC, SaveIndex);
   end;
@@ -1435,7 +1435,7 @@ end;
 procedure _ProcessBitmap32(const Dest: TBitmap; Value: Integer; _Process:TImageFilterCallback); overload;
 var
   r, g, b, a   : byte;
-  x, y:    integer;
+  x, y:    Integer;
   ARGB:    TColor;
   Line, Delta: NativeInt;
 begin
@@ -1522,7 +1522,8 @@ begin
         {$R-}
       {$ELSE}
         {$UNDEF RANGEON}
-      {$ENDIF}        r    := PRGBArray32(LineDest)[x].rgbRed;
+      {$ENDIF}
+        r    := PRGBArray32(LineDest)[x].rgbRed;
         g    := PRGBArray32(LineDest)[x].rgbGreen;
         b    := PRGBArray32(LineDest)[x].rgbBlue;
         a    := PRGBArray32(LineDest)[x].rgbReserved;
@@ -2692,10 +2693,10 @@ begin
   if FUseBitmap then
   begin
     if ABitMap.PixelFormat=pf32bit then
-     _ProcessBitmap32(FSourceBitmap , ABitMap , _BlendDifference)
+     _ProcessBitmap32(FSourceBitmap, ABitMap , _BlendDifference)
     else
     if ABitMap.PixelFormat=pf24bit then
-     _ProcessBitmap24(FSourceBitmap , ABitMap , _BlendDifference)
+     _ProcessBitmap24(FSourceBitmap, ABitMap , _BlendDifference)
   end
   else
   if ABitMap.PixelFormat=pf32bit then
@@ -2715,15 +2716,15 @@ end;
 constructor TBitmapFilter.CreateBitMap(ASourceBitmap: TBitmap);
 begin
   inherited Create (clNone);
-  FSourceBitmap:=ASourceBitmap;
-  FUseBitmap:=True;
+  FSourceBitmap := ASourceBitmap;
+  FUseBitmap := True;
 end;
 
 constructor TBitmapFilter.Create(AColorValue: Integer);
 begin
   inherited Create(AColorValue);
-  FUseBitmap:=False;
-  FSourceBitmap:=nil;
+  FUseBitmap := False;
+  FSourceBitmap := nil;
 end;
 
 { TFontLoader }
@@ -2731,7 +2732,7 @@ end;
 constructor TAwesomeFont.Create;
 begin
   inherited;
-  FFontHandle:=0;
+  FFontHandle := 0;
   FDefaultQuality := ANTIALIASED_QUALITY;
   LoadFontFromResource;
 end;
@@ -2885,9 +2886,8 @@ begin
   LogFont.lfPitchAndFamily := DEFAULT_PITCH;
   LogFont.lfFaceName := 'FontAwesome';
 
-  LColorRef:= ColorToRGB(AColor);
+  LColorRef := ColorToRGB(AColor);
 
-//  OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '1'])));
   AFont := CreateFontIndirect(LogFont);
   if AFont <> 0 then
     try
@@ -2915,7 +2915,6 @@ begin
     finally
       DeleteObject(AFont);
     end;
-//  OutputDebugString(PChar(Format('%s %s', [formatDateTime('hh:nn:ss.zzz', Now), '2'])));
 end;
 
 initialization
