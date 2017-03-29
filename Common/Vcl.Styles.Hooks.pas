@@ -124,14 +124,10 @@ end;
 
 function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
-  //OutputDebugString(PChar(Format('Detour_GetSysColor %d', [nIndex])));
   if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
     Result := Trampoline_user32_GetSysColor(nIndex)
   else if nIndex = COLOR_HOTLIGHT then
     Result := DWORD(StyleServices.GetSystemColor(clHighlight))
-//  else
-//  if nIndex = COLOR_HIGHLIGHTTEXT then
-//    Result := clRed
   else
     Result := DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
 end;
@@ -169,7 +165,6 @@ begin
           Exit(LCurrentStyleBrush[nIndex])
         else
         begin
-          //OutputDebugString(PChar(Format('Detour_GetSysColorBrush %d', [nIndex])));
           if nIndex = COLOR_HOTLIGHT then
             LColor := StyleServices.GetSystemColor(clHighlight)
           else
@@ -216,7 +211,7 @@ var
   LThemedScrollBar: TThemedScrollBar;
 begin
   Result := False;
-  CanDraw:= (not StyleServices.IsSystemStyle) and (TSysStyleManager.Enabled) and (Rect<>nil);
+  CanDraw:= (not StyleServices.IsSystemStyle) and (TSysStyleManager.Enabled) and (Rect <> nil);
   if CanDraw then
   begin
     LRect := Rect^;
@@ -464,10 +459,10 @@ begin
 
    if {(_hInstance>0) and (_hInstance<>HInstance) and} IS_INTRESOURCE(lpIconName) then
    begin
-      LIcon:=TIcon.Create;
+      LIcon := TIcon.Create;
       try
-        MustRelease:=True;
-        LHandle:=Trampoline_user32_LoadIconW(_hInstance, lpIconName);
+        MustRelease := True;
+        LHandle := Trampoline_user32_LoadIconW(_hInstance, lpIconName);
         LIcon.Handle := LHandle;
         Result := LHandle;
         s := IntToStr(NativeUInt(lpIconName));
@@ -516,7 +511,7 @@ begin
     Exit(Trampoline_user32_LoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
 
                                                                                                                          //w8 - W10
-  if (hInst>0) and (hInst<>HInstance) and (ImageType=IMAGE_ICON) and (X=16) and (Y=16) and IS_INTRESOURCE(ImageName) and TOSVersion.Check(6, 2) then
+  if (hInst > 0) and (hInst <> HInstance) and (ImageType = IMAGE_ICON) and (X = 16) and (Y = 16) and IS_INTRESOURCE(ImageName) and TOSVersion.Check(6, 2) then
   begin
     s := IntToStr(NativeUInt(ImageName));
 
@@ -538,8 +533,8 @@ begin
         5100
              :
               begin
-                //OutputDebugString(PChar('GetModuleName '+GetModuleName(hInst)));
-                Exit(AwesomeFont.GetIcon(fa_thumb_tack, 16, 16, 12, 12, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
+                //OutputDebugString(PChar('GetModuleName ' + GetModuleName(hInst)));
+                Exit(AwesomeFont.GetIcon(fa_thumb_tack, 16, 16, 12, 12, StyleServices.GetSystemColor(clGrayText), StyleServices.GetSystemColor(clWindow), -22, iaRight));
                 //Exit(AwesomeFont.GetIcon(fa_check_square_o, 16, 16, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
               end;
      end;
@@ -549,12 +544,12 @@ begin
   else
   if (hInst>0) and (ImageType=IMAGE_BITMAP) and (X=0) and (Y=0) and IS_INTRESOURCE(ImageName) then
   begin
-    hModule:=GetModuleHandle(ExplorerFrame);
+    hModule := GetModuleHandle(ExplorerFrame);
     if (hModule = hInst) then
     begin
       s := IntToStr(NativeUInt(ImageName));
-      Result:= Trampoline_user32_LoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
-      LBitmap:=TBitmap.Create;
+      Result  := Trampoline_user32_LoadImageW(hInst, ImageName, ImageType, X, Y, Flags);
+      LBitmap := TBitmap.Create;
       try
         LBitmap.Handle := Result;
         //LBitmap.SaveToFile(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+s+'.bmp');//SaveToFile('C:\Users\Rodrigo\Desktop\vcl-styles-utils\Vcl Styles Utils New Dialogs (Demo App)\Win32\Debug\Images\'+s+'.bmp');
@@ -562,14 +557,14 @@ begin
         //W8 - W10
         if TOSVersion.Check(6, 2) then
         begin
-          LBackColor:= StyleServices.GetSystemColor(clWindow);
-          LRect:=Rect(0, 0, LBitmap.Width, LBitmap.Height );
+          LBackColor := StyleServices.GetSystemColor(clWindow);
+          LRect := Rect(0, 0, LBitmap.Width, LBitmap.Height );
            case NativeUInt(ImageName) of
              // Right Arrow, cross button, refresh, down arrow
               288
                       :
                        begin
-                          LColor:= StyleServices.GetSystemColor(clBtnText);
+                          LColor := StyleServices.GetSystemColor(clBtnText);
                           Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
                           LRect:=Rect(0, 0, 16, 16);
@@ -602,8 +597,8 @@ begin
         //Windows Vista - W7
         if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
         begin
-          LBackColor:= StyleServices.GetSystemColor(clWindow);
-          LRect:=Rect(0, 0, LBitmap.Width, LBitmap.Height );
+          LBackColor := StyleServices.GetSystemColor(clWindow);
+          LRect := Rect(0, 0, LBitmap.Width, LBitmap.Height );
           case NativeUInt(ImageName) of
            //Magnifier
            34560..34562,  // Aero Enabled
@@ -611,7 +606,7 @@ begin
 
                     :
                      begin
-                        LColor:= StyleServices.GetSystemColor(clHighlight);
+                        LColor := StyleServices.GetSystemColor(clHighlight);
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_search, LRect, LColor);
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
@@ -635,7 +630,7 @@ begin
            34578..34580  // Classic Theme
                     :
                      begin
-                        LColor:= StyleServices.GetSystemColor(clHighlight);
+                        LColor := StyleServices.GetSystemColor(clHighlight);
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
@@ -646,7 +641,7 @@ begin
             288
                     :
                      begin
-                        LColor:= StyleServices.GetSystemColor(clBtnText);
+                        LColor := StyleServices.GetSystemColor(clBtnText);
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
                         LRect:=Rect(0, 0, 16, 16);
@@ -669,7 +664,7 @@ begin
             289, 290
                     :
                      begin
-                        LColor:= StyleServices.GetSystemColor(clBtnText);
+                        LColor := StyleServices.GetSystemColor(clBtnText);
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
                         LRect:=Rect(0, 0, 21, 21);
@@ -695,17 +690,17 @@ begin
                      begin
 
                         case NativeUInt(ImageName) of
-                          577 : LColor:= StyleServices.GetSystemColor(clBtnText);
-                          578 : LColor:= StyleServices.GetSystemColor(clHighlight);
-                          579 : LColor:= StyleServices.GetSystemColor(clGrayText);
-                          581 : LColor:= StyleServices.GetSystemColor(clBtnText);
+                          577 : LColor := StyleServices.GetSystemColor(clBtnText);
+                          578 : LColor := StyleServices.GetSystemColor(clHighlight);
+                          579 : LColor := StyleServices.GetSystemColor(clGrayText);
+                          581 : LColor := StyleServices.GetSystemColor(clBtnText);
                           else
                                 LColor:= StyleServices.GetSystemColor(clBtnText);
                         end;
 
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
-                        LRect:=Rect(0, 0, 27, 27);
+                        LRect := Rect(0, 0, 27, 27);
                         InflateRect(LRect, -4, -4);
 
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
@@ -723,17 +718,17 @@ begin
                      begin
 
                         case NativeUInt(ImageName) of
-                          582 : LColor:= StyleServices.GetSystemColor(clBtnText);
-                          583 : LColor:= StyleServices.GetSystemColor(clHighlight);
-                          584 : LColor:= StyleServices.GetSystemColor(clGrayText);
+                          582 : LColor := StyleServices.GetSystemColor(clBtnText);
+                          583 : LColor := StyleServices.GetSystemColor(clHighlight);
+                          584 : LColor := StyleServices.GetSystemColor(clGrayText);
                         else
-                          LColor:= StyleServices.GetSystemColor(clBtnText);
+                          LColor := StyleServices.GetSystemColor(clBtnText);
                         end;
 
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
                         //left arrow
-                        LRect:=Rect(0, 0, 25, 25);
+                        LRect := Rect(0, 0, 25, 25);
                         InflateRect(LRect, -4, -4);
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
 
@@ -742,7 +737,7 @@ begin
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
 
                         //dropdown arrow
-                        LRect:=Rect(60, 8, 72, 20);
+                        LRect := Rect(60, 8, 72, 20);
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
 
@@ -757,9 +752,9 @@ begin
                      begin
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
-                        LRect:=Rect(0, 8, 12, 20);
+                        LRect := Rect(0, 8, 12, 20);
 
-                        LColor:= StyleServices.GetSystemColor(clGrayText);
+                        LColor := StyleServices.GetSystemColor(clGrayText);
                         OffsetRect(LRect, 58, 0);
                         AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
@@ -808,7 +803,7 @@ end;
     LControl : TWinControl;
   begin
      LControl:= FindControl(hwnd);
-     if (pszSubAppName='') and (pszSubIdList='') and TStyleManager.IsCustomStyleActive and (LControl<>nil) and (LControl is TMonthCalendar) then
+     if (pszSubAppName = '') and (pszSubIdList = '') and TStyleManager.IsCustomStyleActive and (LControl<>nil) and (LControl is TMonthCalendar) then
        Exit(S_OK)
      else
        Exit(Trampoline_SetWindowTheme(hwnd, pszSubAppName, pszSubIdList));

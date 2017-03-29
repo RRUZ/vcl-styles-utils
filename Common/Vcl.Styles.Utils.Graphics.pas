@@ -1301,12 +1301,12 @@ var
   LPoint: TPoint;
   LParentHandle : THandle;
 begin
-  if (Handle=0) or (ARect.Width<=0) or (ARect.Height<=0) then exit;
+  if (Handle = 0) or (ARect.Width <= 0) or (ARect.Height <= 0) then exit;
   LPoint := Point(ARect.Left, ARect.Top);
   LBuffer := TBitmap.Create;
   try
-    LParentHandle:=GetParent(Handle);
-    if LParentHandle<>0 then
+    LParentHandle := GetParent(Handle);
+    if (LParentHandle <> 0) then
     begin
       LBuffer.SetSize(ARect.Width, ARect.Height);
       SendMessage(LParentHandle , WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
@@ -1330,7 +1330,7 @@ begin
   try
      StyleServices.DrawElement(hdc, LDetails, pRect, nil);
   finally
-    if (SaveIndex>0) and  RestoreDC then
+    if (SaveIndex > 0) and  RestoreDC then
       Winapi.Windows.RestoreDC(hdc, SaveIndex);
   end;
 end;
