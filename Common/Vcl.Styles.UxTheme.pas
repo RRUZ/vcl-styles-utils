@@ -3838,6 +3838,8 @@ begin
      if SameText(LThemeClass, VSCLASS_MONTHCAL) then
      begin
        case iPartId of
+          MC_TRAILINGGRIDCELLUPPER,
+          MC_GRIDCELLUPPER,
           MC_GRIDCELL  : begin
   //                          case iStateId of
   //                           MCGCB_SELECTED           :   LDetails := StyleServices.GetElementDetails(tgCellSelected);
@@ -3854,26 +3856,26 @@ begin
                             if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
                               ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
 
-                              LCanvas:=TCanvas.Create;
+                              LCanvas := TCanvas.Create;
                               SaveIndex := SaveDC(hdc);
                               try
-                                LCanvas.Handle:=hdc;
+                                LCanvas.Handle := hdc;
                                 ZeroMemory(@plf, SizeOf(plf));
                                 plf.lfHeight := 13;
                                 plf.lfCharSet := DEFAULT_CHARSET;
                                 StrCopy(plf.lfFaceName, 'Tahoma');
                                 LCanvas.Font.Handle := CreateFontIndirect(plf);
 
-                                LText :=  string(pszText);
-                                p:=Pos(Chr($A), LText);
-                                if p>1 then
-                                   LText:=Copy(LText, 1, p-1);
+                                LText := string(pszText);
+                                p := Pos(Chr($A), LText);
+                                if p > 1 then
+                                   LText := Copy(LText, 1, p-1);
 
-                                LRect:=pRect;
+                                LRect := pRect;
                                 StyleServices.DrawText(LCanvas.Handle, LDetails, LText, LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
                               finally
                                 DeleteObject(LCanvas.Font.Handle);
-                                LCanvas.Handle:=0;
+                                LCanvas.Handle := 0;
                                 LCanvas.Free;
                                 RestoreDC(hdc, SaveIndex);
                               end;
@@ -3907,9 +3909,9 @@ begin
                                 LCanvas.Font.Handle := CreateFontIndirect(plf);
 
                                 LText :=  string(pszText);
-                                p:=Pos(Chr($A), LText);
-                                if p>1 then
-                                   LText:=Copy(LText, 1, p-1);
+                                p := Pos(Chr($A), LText);
+                                if p > 1 then
+                                   LText:=Copy(LText, 1, p - 1);
 
                                 LRect:=pRect;
                                 StyleServices.DrawText(LCanvas.Handle, LDetails, LText, LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
