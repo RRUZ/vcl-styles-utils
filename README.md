@@ -10,29 +10,38 @@ The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styl
 
 ## Features ##
 <ul>
- <li>Works in Delphi XE2-XE8, 10 Seattle, 10.1 Berlin</li>
+ <li>Works in Delphi XE2-XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokio</li>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesExt'>Vcl.Styles.Ext</a> unit extended the VCL Styles adding new properties and methods to list, remove and reload VCL Styles.</li>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesUtils'>Vcl.Styles.Utils</a> unit, allows modify the VCL Styles manipulating the visual elements and fonts colors.</li>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC'>TNCControls</a> component which allow you add controls to the Non Client area of the form</li>
 </ul> 
+
 ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/NCButtonsMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/NCButtonsMain.png)
 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesWebBrowser'> Vcl.Styles.WebBrowser</a> unit, add support for style the scrollbars and dialogs of the TWebBrowser component.</li>
 </ul>  
+
 ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/WebBrowserStyledMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/WebBrowserStyledMain.png)
+
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus'>Vcl.Styles.Utils.Menus </a> unit, add support for style the VCL popup menus, system and Shell menus.</li>
 </ul> 
+
 ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/VCLStyles%20PopUp/Menu.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/VCLStyles%20PopUp/Menu.png)
+
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls'>Vcl.Styles.SysControls </a> add support for style the Standard Windows dialogs.</li>
 </ul>  
+
 ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/DialogsMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/DialogsMain.png)
+
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFormStyleHooks'>Vcl.Styles.FormStyleHooks</a> unit add support for use images and solid colors in the title and background of the TForms.</li>
 </ul>   
+
  ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png)
+ 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme'>Task Dialogs</a> support.</li>
 </ul>
