@@ -23,8 +23,6 @@ unit Vcl.Styles.UxTheme;
 
 interface
 
-
-
 implementation
 
 {  TODO
@@ -196,7 +194,7 @@ var
   Trampoline_UxTheme_OpenThemeDataEx       : function(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall = nil;
   Trampoline_UxTheme_OpenThemeData         : function(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall =  nil;
 {$IF CompilerVersion >= 30}
-  Trampoline_UxTheme_OpenThemeDataForDPI   : function(hwnd: HWND; pszClassList: LPCWSTR; hwnd2: HWND): HTHEME; stdcall =  nil;
+  Trampoline_UxTheme_OpenThemeDataForDPI   : function(hwnd: HWND; pszClassList: LPCWSTR; dpi: UINT): HTHEME; stdcall =  nil;
 {$IFEND}
 
 
@@ -238,11 +236,12 @@ begin
 end;
 
 {$IF CompilerVersion >= 30}
-function Detour_UxTheme_OpenThemeDataForDPI(hwnd: HWND; pszClassList: LPCWSTR; hwnd2: HWND): HTHEME; stdcall;
+//HTHEME WINAPI OpenThemeDataForDpi(HWDN   hwnd, PCWSTR pszClassIdList, UINT   dpi);
+function Detour_UxTheme_OpenThemeDataForDPI(hwnd: HWND; pszClassList: LPCWSTR; dpi: UINT): HTHEME; stdcall;
 begin
   VCLStylesLock.Enter;
   try
-    Result := Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, hwnd2);
+    Result := Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, dpi);
     if THThemesClasses.ContainsKey(Result) then
       THThemesClasses.Remove(Result);
     THThemesClasses.Add(Result, pszClassList);
@@ -3898,10 +3897,10 @@ begin
                             if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
                               ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
 
-                              LCanvas:=TCanvas.Create;
+                              LCanvas := TCanvas.Create;
                               SaveIndex := SaveDC(hdc);
                               try
-                                LCanvas.Handle:=hdc;
+                                LCanvas.Handle := hdc;
                                 ZeroMemory(@plf, SizeOf(plf));
                                 plf.lfHeight := 13;
                                 plf.lfCharSet := DEFAULT_CHARSET;
@@ -4275,14 +4274,18 @@ initialization
     FuncsDrawThemeBackground.Add(VSCLASS_TREEVIEW, @UxTheme_TreeView);
     {$ENDIF}
     {$IFDEF HOOK_Navigation}
-    if TOSVersion.Check(6,2) then //Windows 8
+    if TOSVersion.Check(6, 2) then //Windows 8
       FuncsDrawThemeBackground.Add(VSCLASS_NAVIGATION, @UxTheme_Navigation);
     {$ENDIF}
 
     @Trampoline_UxTheme_OpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
     {$IF CompilerVersion >= 30}
     if TOSVersion.Check(10) then
-     @Trampoline_UxTheme_OpenThemeDataForDPI    := InterceptCreateOrdinal(themelib, 129, @Detour_UxTheme_OpenThemeDataForDPI);
+    begin
+     @Trampoline_UxTheme_OpenThemeDataForDPI    := InterceptCreate(themelib, 'OpenThemeDataForDpi', @Detour_UxTheme_OpenThemeDataForDPI);
+     if (@Trampoline_UxTheme_OpenThemeDataForDPI = nil) and (TOSVersion.Build < 15063) then //W10 Creators Update?
+       @Trampoline_UxTheme_OpenThemeDataForDPI    := InterceptCreateOrdinal(themelib, 129, @Detour_UxTheme_OpenThemeDataForDPI);
+    end;
     {$IFEND}
     @Trampoline_UxTheme_OpenThemeDataEx        := InterceptCreate(themelib, 'OpenThemeDataEx', @Detour_UxTheme_OpenThemeDataEx);
     @Trampoline_UxTheme_DrawThemeBackground    := InterceptCreate(themelib, 'DrawThemeBackground', @Detour_UxTheme_DrawThemeBackground);
