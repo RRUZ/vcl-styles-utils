@@ -1948,7 +1948,7 @@ begin
           //LDetails := StyleServices.GetElementDetails(ttdPrimaryPanel);   //ttdPrimaryPanel  this element is not included in the VCL Styles yet
 
           LColor := StyleServices.GetStyleColor(scEdit);
-          if LColor=StyleServices.GetStyleColor(scBorder)  then
+          if LColor = StyleServices.GetStyleColor(scBorder)  then
             LColor := StyleServices.GetStyleColor(scPanel);//GetShadowColor(LColor, -10);
           DrawStyleFillRect(hdc, pRect, LColor);
           Exit(S_OK);
@@ -1976,7 +1976,7 @@ begin
 
           SaveIndex := SaveDC(hdc);
           try
-             if hwnd<>0  then
+             if (hwnd <> 0)  then
                DrawStyleParentBackground(hwnd, hdc, pRect);
              StyleServices.DrawElement(hdc, LDetails, pRect, nil);
           finally
@@ -3163,7 +3163,7 @@ begin
 		 if not SameText(LThemeClass, VSCLASS_TASKDIALOGSTYLE) then
          begin
              Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-             if (Result=S_OK) and (@Trampoline_user32_GetSysColor<>nil) and (pColor=Trampoline_user32_GetSysColor(COLOR_WINDOWTEXT)) then
+             if (Result = S_OK) and (@Trampoline_user32_GetSysColor <> nil) and (pColor = Trampoline_user32_GetSysColor(COLOR_WINDOWTEXT)) then
              begin
                //OutputDebugString(PChar(Format('Intercepted Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
                //pColor := ColorToRGB(clRed);
@@ -3180,7 +3180,7 @@ begin
 //Debug Output: Intercepted Detour_GetThemeColor Class CPLCommandModule::CommandModule hTheme 65575 iPartId 3 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 //Debug Output: Intercepted Detour_GetThemeColor Class InfoBar hTheme 65576 iPartId 2 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 
-//OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 
     if LThemeClass<>'' then
     begin
@@ -3352,9 +3352,9 @@ begin
 
           end;
 
-         if TColor(pColor)=clNone then
+         if TColor(pColor) = clNone then
          begin
-           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
@@ -3402,7 +3402,7 @@ begin
               end;
         end;
 
-       if TColor(pColor)=clNone then
+       if TColor(pColor) = clNone then
        begin
          Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
@@ -3413,7 +3413,7 @@ begin
       else
       if  SameText(LThemeClass, VSCLASS_PREVIEWPANE) then
       begin
-        pColor:=clNone;
+        pColor := clNone;
         case iPartId of
 
           5 :
@@ -3444,9 +3444,9 @@ begin
               end;
         end;
 
-       if TColor(pColor)=clNone then
+       if TColor(pColor) = clNone then
        begin
-         Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+         Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
@@ -3460,15 +3460,15 @@ begin
          pColor := clNone;
          case iPartId of
            TDLG_MAININSTRUCTIONPANE : begin
-                                        pColor:= ColorToRGB(StyleServices.GetSystemColor(clHighlight));
-                                        if StyleServices.GetStyleColor(scEdit)=StyleServices.GetStyleColor(scBorder)  then
-                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+                                        pColor := ColorToRGB(GetStyleHighLightColor());
+                                        if StyleServices.GetStyleColor(scEdit) = StyleServices.GetStyleColor(scBorder)  then
+                                          pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
                                       end;
 
            TDLG_CONTENTPANE         : begin
-                                        pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                                        pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
                                         if StyleServices.GetStyleColor(scEdit)=StyleServices.GetStyleColor(scBorder)  then
-                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+                                          pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
                                       end;
           TDLG_EXPANDOTEXT,
           TDLG_EXPANDEDFOOTERAREA,
@@ -3476,15 +3476,16 @@ begin
           TDLG_VERIFICATIONTEXT,
           //TDLG_RADIOBUTTONPANE,
           TDLG_EXPANDEDCONTENT      : begin
-                                        pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+                                        pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
                                         if StyleServices.GetStyleColor(scEdit)=StyleServices.GetStyleColor(scBorder)  then
-                                          pColor:= ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+                                          pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
                                       end;
          end;
 
-         if TColor(pColor)=clNone then
+
+         if TColor(pColor) = clNone then
          begin
-           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
