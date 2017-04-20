@@ -99,6 +99,28 @@ type
   end;
 {$IFEND}
 
+{$IF CompilerVersion <= 26.0}
+  /// <summary> The <c>TComboBoxStyleHookFix</c> vcl style hook fix the QC #114632 for Delphi XE5 and earlier
+  /// </summary>
+  /// <remarks>
+  /// Use this hook in this way
+  /// <code>
+  /// TStyleManager.Engine.RegisterStyleHook(TComboBox, TComboBoxStyleHookFix);
+  /// </code>
+  /// </remarks>
+  TComboBoxStyleHookFix = class(TComboBoxStyleHook)
+  strict private
+    FTempItemIndex: Integer;
+    procedure WMCommand(var Message: TWMCommand); message WM_COMMAND;
+    procedure CNCommand(var Message: TWMCommand); message CN_COMMAND;
+  strict protected
+    procedure DrawItem(Canvas: TCanvas; Index: Integer;
+      const R: TRect; Selected: Boolean); override;
+  public
+    constructor Create(AControl: TWinControl); override;
+  end;
+{$IFEND}
+
 implementation
 
 uses
@@ -133,6 +155,15 @@ type
 {$IF CompilerVersion <= 24.0}
   TComboBoxExStyleHookHelper = class helper for TComboBoxExStyleHook
     function DroppedDown: Boolean;
+  end;
+{$IFEND}
+
+{$IF CompilerVersion <= 26.0}
+  TComboBoxStyleHookHelper = class helper for TComboBoxStyleHook
+  strict private
+    function _getDroppedDown: Boolean;
+  private
+    property _DroppedDown : Boolean read _getDroppedDown;
   end;
 {$IFEND}
 
@@ -746,5 +777,50 @@ begin
 end;
 {$IFEND}
 
+{$IF CompilerVersion <= 26.0}
+constructor TComboBoxStyleHookFix.Create(AControl: TWinControl);
+begin
+  inherited;
+  FTempItemIndex := -1;
+end;
+
+procedure TComboBoxStyleHookFix.WMCommand(var Message: TWMCommand);
+begin
+  if (Message.NotifyCode = CBN_SELENDCANCEL) or (Message.NotifyCode = CBN_SELENDOK) or
+     (Message.NotifyCode = CBN_CLOSEUP) or (Message.NotifyCode = CBN_DROPDOWN) or
+     (Message.NotifyCode = CBN_SELCHANGE) then
+  begin
+    if (Message.NotifyCode = CBN_DROPDOWN) or (Message.NotifyCode = CBN_SELCHANGE) then
+      FTempItemIndex := TComboBox(Control).ItemIndex;
+  end;
+  inherited;
+end;
+
+procedure TComboBoxStyleHookFix.CNCommand(var Message: TWMCommand);
+begin
+  if (Message.NotifyCode = CBN_SELENDCANCEL) or (Message.NotifyCode = CBN_SELENDOK) or
+     (Message.NotifyCode = CBN_CLOSEUP) or (Message.NotifyCode = CBN_DROPDOWN) or
+     (Message.NotifyCode = CBN_SELCHANGE)  then
+  begin
+    if (Message.NotifyCode = CBN_DROPDOWN) or (Message.NotifyCode = CBN_SELCHANGE) then
+      FTempItemIndex := TComboBox(Control).ItemIndex;
+  end;
+  inherited;
+end;
+
+procedure TComboBoxStyleHookFix.DrawItem(Canvas: TCanvas; Index: Integer;
+      const R: TRect; Selected: Boolean);
+begin
+  if _DroppedDown then
+    inherited DrawItem(Canvas, FTempItemIndex, R, Selected)
+  else
+    inherited;
+end;
+
+function TComboBoxStyleHookHelper._getDroppedDown: Boolean;
+begin
+  Result := Self.DroppedDown;
+end;
+{$IFEND}
 
 end.
