@@ -1077,7 +1077,7 @@ begin
                                   Rect(LRect.Width div 2, LRect.Top, LRect.Width, LRect.Bottom), TGradientDirection.gdHorizontal);
 
                                 finally
-                                  LCanvas.Handle:=0;
+                                  LCanvas.Handle := 0;
                                   LCanvas.Free;
                                   RestoreDC(hdc, SaveIndex);
                                 end;
@@ -1344,7 +1344,7 @@ begin
                                                           GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetStyleColor(TStyleColor.scEdit){StyleServices.GetSystemColor(clWindow)},
                                                           LRect, TGradientDirection.gdHorizontal);
                                                         finally
-                                                          LCanvas.Handle:=0;
+                                                          LCanvas.Handle := 0;
                                                           LCanvas.Free;
                                                           RestoreDC(hdc, SaveIndex);
                                                         end;
@@ -1366,7 +1366,7 @@ begin
                                                           GradientFillCanvas(LCanvas, StyleServices.GetSystemColor(LColor), StyleServices.GetStyleColor(TStyleColor.scEdit),
                                                           LRect, TGradientDirection.gdHorizontal);
                                                         finally
-                                                          LCanvas.Handle:=0;
+                                                          LCanvas.Handle := 0;
                                                           LCanvas.Free;
                                                           RestoreDC(hdc, SaveIndex);
                                                         end;
@@ -1696,7 +1696,7 @@ begin
                        LCanvas.Handle:=hdc;
                        LCanvas.Draw(pRect.Left, pRect.Top, LBitmap);
                      finally
-                       LCanvas.Handle:=0;
+                       LCanvas.Handle := 0;
                        LCanvas.Free;
                      end;
 
@@ -2002,7 +2002,7 @@ begin
             LCanvas.MoveTo(pRect.Left, pRect.Top+1);
             LCanvas.LineTo(pRect.Right, pRect.Top+1);
           finally
-            LCanvas.Handle:=0;
+            LCanvas.Handle := 0;
             LCanvas.Free;
             RestoreDC(hdc, SaveIndex);
           end;
@@ -2064,7 +2064,7 @@ begin
   finally
     RestoreDC(hdc, SaveIndex);
   end;
-  Result:=S_OK;
+  Result := S_OK;
 end;
 
 
@@ -3180,7 +3180,7 @@ begin
 //Debug Output: Intercepted Detour_GetThemeColor Class CPLCommandModule::CommandModule hTheme 65575 iPartId 3 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 //Debug Output: Intercepted Detour_GetThemeColor Class InfoBar hTheme 65576 iPartId 2 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 
-OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+//OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 
     if LThemeClass<>'' then
     begin
@@ -3200,7 +3200,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
 
       end
       ELSE
@@ -3220,7 +3220,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       if SameText(LThemeClass, VSCLASS_EDIT) then
@@ -3239,7 +3239,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       if SameText(LThemeClass, VSCLASS_TRYHARDER) then
@@ -3264,7 +3264,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       if SameText(LThemeClass, VSCLASS_MENU) then
@@ -3289,18 +3289,18 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
   //
   //        end;
 
-         if TColor(pColor)=clNone then
+         if TColor(pColor) = clNone then
          begin
-           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       if SameText(VSCLASS_SEARCHEDITBOX, LThemeClass) then
       begin
-          pColor:=clNone;
+          pColor := clNone;
           case iPartId of
                 1  :    case iStateId of
                           2 :  pColor:= ColorToRGB(StyleServices.GetSystemColor(clWindowText));
@@ -3309,11 +3309,11 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
 
          if TColor(pColor)=clNone then
          begin
-           Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+           Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       if SameText(LThemeClass, VSCLASS_TOOLTIP) then
@@ -3334,7 +3334,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       if SameText(LThemeClass, VSCLASS_TEXTSTYLE) then
@@ -3358,7 +3358,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       {$IFDEF HOOK_ListView}
@@ -3380,7 +3380,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       {$ENDIF}
@@ -3408,7 +3408,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
-         Result:=S_OK;
+         Result := S_OK;
       end
       else
       if  SameText(LThemeClass, VSCLASS_PREVIEWPANE) then
@@ -3450,7 +3450,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
-         Result:=S_OK;
+         Result := S_OK;
       end
       else
       {$ENDIF}
@@ -3489,7 +3489,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
            //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
          end
          else
-           Result:=S_OK;
+           Result := S_OK;
       end
       else
       {$ENDIF}
@@ -3512,7 +3512,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
        end
        else
-         Result:=S_OK;
+         Result := S_OK;
       end
       else
      {$ENDIF}
@@ -3607,7 +3607,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
               end;
         end;
 
-       Result:=S_OK;
+       Result := S_OK;
        //if pColor=clNone then
          //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
       end
@@ -3616,7 +3616,7 @@ OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId 
       begin
        Result:=Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
        //pColor:=ColorToRGB(clRed);
-       //Result:=S_OK;
+       //Result := S_OK;
        //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
       end;
     end
@@ -3917,7 +3917,7 @@ begin
                                 StyleServices.DrawText(LCanvas.Handle, LDetails, LText, LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
                               finally
                                 DeleteObject(LCanvas.Font.Handle);
-                                LCanvas.Handle:=0;
+                                LCanvas.Handle := 0;
                                 LCanvas.Free;
                                 RestoreDC(hdc, SaveIndex);
                               end;
@@ -4002,7 +4002,7 @@ begin
                                     StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), LRect, TTextFormatFlags(dwTextFlags), ThemeTextColor);
                                   finally
                                     DeleteObject(LCanvas.Font.Handle);
-                                    LCanvas.Handle:=0;
+                                    LCanvas.Handle := 0;
                                     LCanvas.Free;
                                     RestoreDC(hdc, SaveIndex);
                                   end;
@@ -4077,12 +4077,12 @@ begin
                                   finally
                                     if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
                                       DeleteObject(LCanvas.Font.Handle);
-                                    LCanvas.Handle:=0;
+                                    LCanvas.Handle := 0;
                                     LCanvas.Free;
                                     RestoreDC(hdc, SaveIndex);
                                   end;
 
-                                  Result:=S_OK;
+                                  Result := S_OK;
                              end
                              else
                              begin
@@ -4119,10 +4119,10 @@ begin
               if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
                 ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
 
-              LCanvas:=TCanvas.Create;
+              LCanvas := TCanvas.Create;
               SaveIndex := SaveDC(hdc);
               try
-                LCanvas.Handle:=hdc;
+                LCanvas.Handle := hdc;
                 if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
                 begin
                   //GetThemeSysFont(hTheme, pOptions.iFontPropId, plf);  // is not working
@@ -4136,12 +4136,12 @@ begin
               finally
                 if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
                   DeleteObject(LCanvas.Font.Handle);
-                LCanvas.Handle:=0;
+                LCanvas.Handle := 0;
                 LCanvas.Free;
                 RestoreDC(hdc, SaveIndex);
               end;
 
-              Result:=S_OK;
+              Result := S_OK;
             end
             else
                Result:=Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions);
