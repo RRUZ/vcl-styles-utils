@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls, Vcl.ImgList,
-  Vcl.ComCtrls, Vcl.ToolWin, Vcl.Styles.NC, Vcl.ExtCtrls;
+  Vcl.ComCtrls, Vcl.ToolWin, Vcl.Styles.NC, Vcl.ExtCtrls, System.ImageList;
 
 type
   TFrmMain = class(TForm)
@@ -68,8 +68,8 @@ type
     procedure CheckBoxAwesomeClick(Sender: TObject);
   private
     { Private declarations }
-     NCControls : TNCControls;
-     procedure UpdateButtons;
+    NCControls: TNCControls;
+    procedure UpdateButtons;
   public
     { Public declarations }
     procedure ButtonNCClick(Sender: TObject);
@@ -81,140 +81,141 @@ var
 implementation
 
 uses
- Vcl.Styles.Utils.SystemMenu,
- Vcl.Styles.Utils.Graphics,
- uButtonsStyles, uCustomStyles, uDropdown, uAlphaGradient, uButtonsTabsStyles;
+  Vcl.Themes,
+  Vcl.Styles,
+  Vcl.Styles.Utils.SystemMenu,
+  Vcl.Styles.Utils.Graphics,
+  uButtonsStyles, uCustomStyles, uDropdown, uAlphaGradient, uButtonsTabsStyles;
 
 {$R *.dfm}
 
-
 procedure TFrmMain.BtnDropDownMenuClick(Sender: TObject);
 var
- LForm : TFrmDropDown;
+  LForm: TFrmDropDown;
 begin
-   LForm:= TFrmDropDown.Create(Self);
-   LForm.Show();
+  LForm := TFrmDropDown.Create(Self);
+  LForm.Show();
 end;
 
 procedure TFrmMain.BtnStylesClick(Sender: TObject);
 var
- LForm : TFrmButtonsStyles;
+  LForm: TFrmButtonsStyles;
 begin
-   LForm:= TFrmButtonsStyles.Create(Self);
-   LForm.Show();
+  LForm := TFrmButtonsStyles.Create(Self);
+  LForm.Show();
 end;
-
 
 procedure TFrmMain.BtnStyleTabsClick(Sender: TObject);
 var
- LForm : TFrmButtonsTabsStyle;
+  LForm: TFrmButtonsTabsStyle;
 begin
-   LForm:= TFrmButtonsTabsStyle.Create(Self);
-   LForm.Show();
+  LForm := TFrmButtonsTabsStyle.Create(Self);
+  LForm.Show();
 end;
 
 procedure TFrmMain.BtnAlphaClick(Sender: TObject);
 var
- LForm : TFrmAlphaGradient;
+  LForm: TFrmAlphaGradient;
 begin
-   LForm:= TFrmAlphaGradient.Create(Self);
-   LForm.Show();
+  LForm := TFrmAlphaGradient.Create(Self);
+  LForm.Show();
 end;
 
 procedure TFrmMain.BtnCustomStyleClick(Sender: TObject);
 var
- LForm : TFrmCustomStyles;
+  LForm: TFrmCustomStyles;
 begin
-   LForm:= TFrmCustomStyles.Create(Self);
-   LForm.Show();
+  LForm := TFrmCustomStyles.Create(Self);
+  LForm.Show();
 end;
 
 procedure TFrmMain.ButtonNCClick(Sender: TObject);
 begin
- if Sender is TNCButton then
-  ShowMessage(Format('You clicked the button %s', [TNCButton(Sender).Name]));
+  if Sender is TNCButton then
+    ShowMessage(Format('You clicked the button %s', [TNCButton(Sender).Name]));
 end;
 
 procedure TFrmMain.CheckBoxAwesomeClick(Sender: TObject);
 begin
- UpdateButtons;
- NCControls.Invalidate;
-
+  UpdateButtons;
+  NCControls.Invalidate;
 end;
 
 procedure TFrmMain.CheckBoxNCVisibleClick(Sender: TObject);
 begin
-  NCControls.Visible:=CheckBoxNCVisible.Checked;
+  NCControls.Visible := CheckBoxNCVisible.Checked;
 end;
 
 procedure TFrmMain.CheckBoxShowCaptionClick(Sender: TObject);
 begin
-  NCControls.ShowCaption:=CheckBoxShowCaption.Checked;
+  NCControls.ShowCaption := CheckBoxShowCaption.Checked;
 
 end;
 
 procedure TFrmMain.CheckBoxSystemMenuClick(Sender: TObject);
 begin
-  NCControls.ShowSystemMenu:=CheckBoxSystemMenu.Checked;
+  NCControls.ShowSystemMenu := CheckBoxSystemMenu.Checked;
   UpdateButtons;
   NCControls.Invalidate;
 end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 begin
- // ReportMemoryLeaksOnShutdown:=True;
+  // ReportMemoryLeaksOnShutdown:=True;
   TVclStylesSystemMenu.Create(Self);
-  NCControls:=TNCControls.Create(Self);
-  NCControls.Images    :=ImageList1;
+  NCControls := TNCControls.Create(Self);
+  NCControls.Images := ImageList1;
   UpdateButtons;
 end;
-
 
 procedure TFrmMain.UpdateButtons;
 const
   cWidth = 20;
-  AwesomeIcons : Array[0..11] of Word = (
-  fa_home, fa_signal, fa_search, fa_envelope_o, fa_remove, fa_gear,
-  fa_twitter, fa_user, fa_arrow_circle_o_down, fa_arrow_circle_o_up, fa_check, fa_power_off);
+  AwesomeIcons: Array [0 .. 11] of Word = (fa_home, fa_signal, fa_search, fa_envelope_o, fa_remove, fa_gear, fa_twitter,
+    fa_user, fa_arrow_circle_o_down, fa_arrow_circle_o_up, fa_check, fa_power_off);
 var
- iLeft, i, LImageIndex : integer;
- LNCControl : TNCButton;
+  iLeft, i, LImageIndex: integer;
+  LNCControl: TNCButton;
 begin
-   iLeft:=5;
-   if NCControls.ShowSystemMenu then
-    iLeft:=30;
+  iLeft := 5;
+  if NCControls.ShowSystemMenu then
+    iLeft := 30;
 
-   NCControls.ButtonsList.Clear;
-   NCControls.ButtonsList.BeginUpdate;
-   try
-     for i:=0 to 10 do
-     begin
-        LNCControl := NCControls.ButtonsList.Add;
-        LNCControl.Name      := Format('NCButton%d', [i+1]);
-        LNCControl.Hint      := Format('Hint for NCButton%d', [i+1]);
-        LNCControl.ShowHint  := True;
-        LNCControl.Caption   := '';
-        LNCControl.Style     := nsTranparent;
-        LNCControl.ImageStyle:= isGrayHot;
-        LNCControl.ImageAlignment := TImageAlignment.iaCenter;
+  NCControls.ButtonsList.Clear;
+  NCControls.ButtonsList.BeginUpdate;
+  try
+    for i := 0 to 10 do
+    begin
+      LNCControl := NCControls.ButtonsList.Add;
+      LNCControl.Name := Format('NCButton%d', [i + 1]);
+      LNCControl.Hint := Format('Hint for NCButton%d', [i + 1]);
+      LNCControl.ShowHint := True;
+      LNCControl.Caption := '';
+      LNCControl.Style := nsTranparent;
+      LNCControl.ImageStyle := isGrayHot;
+      LNCControl.ImageAlignment := TImageAlignment.iaCenter;
 
-        LNCControl.UseFontAwesome:=CheckBoxAwesome.Checked;
+      LNCControl.UseFontAwesome := CheckBoxAwesome.Checked;
 
-        if LNCControl.UseFontAwesome then
-          LImageIndex:= AwesomeIcons[i]
-        else
-          LImageIndex:=i;
+      if LNCControl.UseFontAwesome then
+      begin
+        LNCControl.AwesomeFontColor := StyleServices.GetSystemColor(clBtnText);
+        LNCControl.AwesomeHotFontColor := StyleServices.GetSystemColor(clHighlight);
+        LImageIndex := AwesomeIcons[i]
+      end
+      else
+        LImageIndex := i;
 
-        LNCControl.ImageIndex:=LImageIndex;
+      LNCControl.ImageIndex := LImageIndex;
 
-        LNCControl.ImageAlignment := TImageAlignment.iaCenter;
-        LNCControl.BoundsRect  := Rect(iLeft, 5, iLeft + cWidth, 25);
-        inc(iLeft, cWidth + 2);
-        LNCControl.OnClick   := ButtonNCClick;
-     end;
-   finally
-     NCControls.ButtonsList.EndUpdate;
-   end;
+      LNCControl.ImageAlignment := TImageAlignment.iaCenter;
+      LNCControl.BoundsRect := Rect(iLeft, 5, iLeft + cWidth, 25);
+      inc(iLeft, cWidth + 2);
+      LNCControl.OnClick := ButtonNCClick;
+    end;
+  finally
+    NCControls.ButtonsList.EndUpdate;
+  end;
 
 end;
 

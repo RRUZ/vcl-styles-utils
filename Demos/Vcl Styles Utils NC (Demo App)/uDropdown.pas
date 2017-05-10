@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Styles.NC, Vcl.Dialogs, Vcl.ImgList, Vcl.Menus,
-  Vcl.StdCtrls;
+  Vcl.StdCtrls, System.ImageList;
 
 type
   TFrmDropDown = class(TForm)
@@ -52,6 +52,9 @@ type
 
 implementation
 
+uses
+ Vcl.Themes;
+
 {$R *.dfm}
 
 procedure TFrmDropDown.ButtonNCClick(Sender: TObject);
@@ -75,6 +78,9 @@ begin
   LNCButton.Caption := 'Menu';
   LNCButton.DropDownMenu := PopupMenu1;
   LNCButton.OnClick := ButtonNCClick;
+
+  LNCButton.FontColor := StyleServices.GetSystemColor(clBtnText);
+  LNCButton.HotFontColor := StyleServices.GetSystemColor(clHighlightText);
 end;
 
 end.

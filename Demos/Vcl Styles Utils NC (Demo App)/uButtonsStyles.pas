@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles.NC, Vcl.ImgList, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles.NC, Vcl.ImgList, Vcl.StdCtrls,
+  System.ImageList;
 
 type
   TFrmButtonsStyles = class(TForm)
@@ -115,8 +116,8 @@ begin
 
       inc(iLeft, cWidth + iSep);
 
-      LNCControl.Caption     := 'NCButton '+IntToStr(i);
-      LNCControl.Name        := 'NcButton'+IntToStr(i);
+      LNCControl.Caption     := 'NCButton ' + IntToStr(i);
+      LNCControl.Name        := 'NcButton' + IntToStr(i);
 
       LNCControl.FontColor     := StyleServices.GetSystemColor(clBtnText);
       LNCControl.HotFontColor  := StyleServices.GetSystemColor(clHighlight);
@@ -124,18 +125,24 @@ begin
       LNCControl.OnClick     := ButtonNCClick;
       LNCControl.OnDropDownClick := ButtonNCDropDownClick;
 
-
-      if LNCControl.Style=nsAlpha then
+      if LNCControl.Style in [nsPushButton, nsSplitButton, nsSplitTrans] then
       begin
-        LNCControl.AlphaColor    := ColorsPalette[i];
-        LNCControl.AlphaHotColor := ColorsPalette[i+2];
-        LNCControl.FontColor     := clWhite;
+        LNCControl.FontColor := StyleServices.GetSystemColor(clBtnText);
+        LNCControl.HotFontColor := StyleServices.GetSystemColor(clHighlightText);
       end
       else
-      if LNCControl.Style=nsGradient then
+      if LNCControl.Style = nsAlpha then
+      begin
+        LNCControl.AlphaColor    := ColorsPalette[i];
+        LNCControl.AlphaHotColor := ColorsPalette[i + 2];
+        LNCControl.FontColor     := clWhite;
+        LNCControl.HotFontColor  := clBlack;
+      end
+      else
+      if LNCControl.Style = nsGradient then
       begin
         LNCControl.StartColor    := ColorsPalette[i];
-        LNCControl.EndColor      := ColorsPalette[i+1];
+        LNCControl.EndColor      := ColorsPalette[i + 1];
         LNCControl.FontColor     := clWhite;
         LNCControl.HotFontColor  := clBlack;
       end

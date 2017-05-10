@@ -2859,6 +2859,7 @@ function TAwesomeFont.GetIcon(const ACode: Word; Width, Height: Integer; AColor,
 begin
   Result := GetIcon(ACode, Width, Height, Width, Height, AColor, ABackColor, Orientation, ImageAlignment);
 end;
+
 procedure TAwesomeFont.DrawChar(DC: HDC; const AChar: Char; DestRect: TRect; AColor: TColor; Orientation : Integer = 0; ImageAlignment: TImageAlignment = iaLeft);
 var
   LogFont: TLogFont;
@@ -2880,7 +2881,7 @@ begin
   LogFont.lfUnderline := 0;
   LogFont.lfStrikeOut := 0;
   LogFont.lfCharSet := DEFAULT_CHARSET;
-  LogFont.lfOutPrecision := OUT_DEFAULT_PRECIS;
+  LogFont.lfOutPrecision := OUT_STROKE_PRECIS;
   LogFont.lfClipPrecision := CLIP_DEFAULT_PRECIS;
   LogFont.lfQuality := FDefaultQuality;
   LogFont.lfPitchAndFamily := DEFAULT_PITCH;
@@ -2898,12 +2899,14 @@ begin
         uFormat := DT_SINGLELINE;
 
         case ImageAlignment of
-         iaLeft   : uFormat:= uFormat or DT_LEFT;
-         iaRight  : uFormat:= uFormat or DT_RIGHT;
-         iaCenter : uFormat:= uFormat or DT_CENTER;
-         iaTop    : uFormat:= uFormat or DT_TOP;
-         iaBottom : uFormat:= uFormat or DT_BOTTOM;
+         iaLeft   : uFormat := uFormat or DT_LEFT;
+         iaRight  : uFormat := uFormat or DT_RIGHT;
+         iaCenter : uFormat := uFormat or DT_CENTER;
+         iaTop    : uFormat := uFormat or DT_TOP;
+         iaBottom : uFormat := uFormat or DT_BOTTOM;
         end;
+
+        uFormat := uFormat or DT_NOCLIP;
 
         Winapi.Windows.DrawText(DC, AChar, 1, DestRect, uFormat);
         SetBkMode(DC, OldMode);
