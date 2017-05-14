@@ -88,13 +88,13 @@ var
   iLeft, iSep, i, LImageIndex : Integer;
   LNCControl : TNCButton;
 begin
-  NCControls.ButtonsList.Clear;
-  NCControls.ButtonsList.BeginUpdate;
+  NCControls.Controls.Clear;
+  NCControls.Controls.BeginUpdate;
   try
     iLeft:=30;
     for i := 0 to 5 do
     begin
-      LNCControl := NCControls.ButtonsList.Add();
+      LNCControl := NCControls.Controls.AddEx<TNCButton>;
       LNCControl.Style       := TNCButton.TNCButtonStyle(Integer(cbNCBtnStyles.Items.Objects[cbNCBtnStyles.ItemIndex]));
       LNCControl.ImageStyle  := isNormal;
 
@@ -148,7 +148,7 @@ begin
       end
     end;
   finally
-    NCControls.ButtonsList.EndUpdate;
+    NCControls.Controls.EndUpdate;
   end;
 end;
 

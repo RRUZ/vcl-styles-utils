@@ -47,40 +47,42 @@ uses
   Vcl.Forms;
 
 type
-  TNCButton      = class;
+  TNCControl      = class;
   //TListNCButtons = TObjectList<TNCButton>;
   TNCControls     = class;
 
-  TListNCButtons = class(TCollection)
+  TListNCControls = class(TCollection)
   private
     FOwner: TNCControls;
-    function GetItem(Index: Integer): TNCButton;
-    procedure SetItem(Index: Integer; Value: TNCButton);
+    function GetItem(Index: Integer): TNCControl;
+    procedure SetItem(Index: Integer; Value: TNCControl);
+    function Add: TNCControl;
   protected
     function GetOwner: TPersistent; override;
   public
     constructor Create(AOwner: TPersistent);
     destructor Destroy; override;
-    function Add: TNCButton;
-    function Insert(Index: Integer): TNCButton;
-    property Items[Index: Integer]: TNCButton read GetItem write SetItem; default;
+    function AddEx<T : TCollectionItem>: T;
+    function Insert(Index: Integer): TNCControl;
+    property Items[Index: Integer]: TNCControl read GetItem write SetItem; default;
   end;
 
   TNCControls = class(TComponent)
   private
-    FButtons: TListNCButtons;
+    FControls: TListNCControls;
     FStyleServices: TCustomStyleServices;
     FVisible: Boolean;
     FForm: TCustomForm;
     FShowSystemMenu: Boolean;
     FFormBorderSize: TRect;
-    FActiveTabButtonIndex: Integer;
     FImages: TCustomImageList;
     FShowCaption: Boolean;
+    FLastPoint : TPoint;
+    FActiveTabControlIndex, FHotControlIndex, FPressedControlIndex, FControlUpIndex : Integer;
     function GetStyleServices: TCustomStyleServices;
     procedure SetStyleServices(const Value: TCustomStyleServices);
     procedure SetVisible(const Value: Boolean);
-    function GetButton(Index: Integer): TNCButton;
+    function GetControl(Index: Integer): TNCControl;
     function GetCount: Integer;
     procedure SetImages(const Value: TCustomImageList);
     procedure SetShowSystemMenu(const Value: Boolean);
@@ -89,26 +91,85 @@ type
     procedure SetActiveTabButtonIndex(const Value: Integer);
     property FormBorderSize : TRect read FFormBorderSize write FFormBorderSize;
     property Form : TCustomForm read FForm;
+  protected
+     function  GetNCControlIndex(P: TPoint) : Integer;
+     function  PointInNCControl(P: TPoint)  : Boolean;
+     property LastPoint : TPoint read FLastPoint;
   public
-    property Buttons[index : Integer] : TNCButton read GetButton; default;
-    property ButtonsCount  : Integer read GetCount;
+    property Controls : TListNCControls read FControls;
+    property ControlsList[index : Integer] : TNCControl read GetControl; default;
+    property ControlsCount  : Integer read GetCount;
     property StyleServices : TCustomStyleServices read GetStyleServices write SetStyleServices;
-    //function Add(AButton : TNCButton) : Integer;
     procedure Invalidate;
     constructor Create(AOwner: TComponent);override;
     destructor Destroy; override;
   published
-
     property ActiveTabButtonIndex : Integer read GetActiveTabButtonIndex write SetActiveTabButtonIndex;
-
-    property ButtonsList : TListNCButtons read FButtons;
+    property LNCControl : TListNCControls read FControls;
     property Visible : Boolean read FVisible write SetVisible default True;
     property Images: TCustomImageList read FImages write SetImages;
     property ShowSystemMenu : Boolean read FShowSystemMenu write SetShowSystemMenu default True;
     property ShowCaption  : Boolean read FShowCaption  write SetShowCaption default True;
   end;
 
-  TNCButton  = class(TCollectionItem)
+  TNCControl = class(TCollectionItem)
+  private
+    FFont: TFont;
+    FEnabled: Boolean;
+    FWidth: Integer;
+    FVisible: Boolean;
+    FTop: Integer;
+    FHeight: Integer;
+    FLeft : Integer;
+    FNCControls  :  TNCControls;
+    FCaption: string;
+    FHint: string;
+    FShowHint: Boolean;
+    FName: TComponentName;
+    FTag: NativeInt;
+    FCaptionAligmentFlags: Cardinal;
+    function GetEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
+    function GetBoundsRect: TRect;
+    procedure SetBoundsRect(const Value: TRect);
+    procedure SetHeight(const Value: Integer);
+    procedure SetLeft(const Value: Integer);
+    procedure SetTop(const Value: Integer);
+    procedure SetWidth(const Value: Integer);
+    procedure SetVisible(const Value: Boolean);
+    procedure SetFont(const Value: TFont);
+    procedure SetShowHint(const Value: Boolean);
+    procedure SetName(const Value: TComponentName);
+    procedure DrawControl(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean); virtual;
+  protected
+     procedure Handle_WMNCLButtonDown(var Message: TWMNCHitMessage); virtual;
+     procedure Handle_WMNCLButtonUp(var Message: TWMNCHitMessage); virtual;
+     procedure Handle_WMNCMouseMove(var Message: TWMNCHitMessage); virtual;
+  published
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); virtual;
+    property Left: Integer read FLeft write SetLeft;
+    property Top: Integer read FTop write SetTop;
+    property Width: Integer read FWidth write SetWidth;
+    property Height: Integer read FHeight write SetHeight;
+    property Font: TFont read FFont write SetFont;
+    property Enabled: Boolean read GetEnabled write SetEnabled default True;
+    property Visible: Boolean read FVisible write SetVisible default True;
+    property Hint: string read FHint write FHint;
+    property ShowHint: Boolean read FShowHint write SetShowHint;
+    property Name: TComponentName read FName write SetName stored False;
+    property Tag: NativeInt read FTag write FTag default 0;
+    property CaptionAligmentFlags : Cardinal read FCaptionAligmentFlags write FCaptionAligmentFlags;
+    property Caption :  string read FCaption write FCaption;
+    function GetAs<T> : T;
+  public
+    constructor Create(Collection: TCollection); override;
+    destructor Destroy; override;
+    property NCControls: TNCControls read FNCControls;
+    property BoundsRect: TRect read GetBoundsRect write SetBoundsRect;
+  end;
+
+
+  TNCButton  = class(TNCControl)
   public type
     TNCButtonStyle = (nsPushButton, nsTranparent, nsSplitButton, nsSplitTrans, nsAlpha, nsGradient, nsTab, nsEdge, nsFrame);
     TNCImageStyle  = (isNormal, isGray, isGrayHot);
@@ -125,7 +186,6 @@ type
     FHotImageIndex: TImageIndex;
     FImageStyle: TNCImageStyle;
     FOnClick: TNotifyEvent;
-    FNCControls  :  TNCControls;
     FHintWindow : THintWindow;
     FAlphaColor: TColor;
     FAlphaHotColor: TColor;
@@ -134,23 +194,11 @@ type
     FStartColor: TColor;
     FEndColor: TColor;
     FDirection: TGradientDirection;
-    FCaption: string;
-    FFont: TFont;
-    FEnabled: Boolean;
-    FWidth: Integer;
-    FTop: Integer;
-    FHeight: Integer;
-    FLeft, FDefaultFontAwesomeSize: Integer;
-    FHint: string;
-    FVisible: Boolean;
-    FShowHint: Boolean;
-    FName: TComponentName;
-    FTag: NativeInt;
+    FDefaultFontAwesomeSize: Integer;
     FUseFontAwesome: Boolean;
-    FCaptionAligmentFlags: Cardinal;
     FAwesomeHotFontColor: TColor;
     FAwesomeFontColor: TColor;
-    procedure DrawButton(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
+    procedure DrawControl(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean); override;
     procedure SetStyle(const Value: TNCButtonStyle);
     procedure SetDisabledImageIndex(const Value: TImageIndex);
     procedure SetDropDownMenu(const Value: TPopupMenu);
@@ -164,35 +212,17 @@ type
     procedure ShowHintWindow(X, Y : Integer);
     procedure HideHintWindow;
     function GetTabIndex: Integer;
-    procedure SetFont(const Value: TFont);
-    function GetEnabled: Boolean;
-    procedure SetEnabled(const Value: Boolean);
-    function GetBoundsRect: TRect;
-    procedure SetBoundsRect(const Value: TRect);
-    procedure SetHeight(const Value: Integer);
-    procedure SetLeft(const Value: Integer);
-    procedure SetTop(const Value: Integer);
-    procedure SetWidth(const Value: Integer);
-    procedure SetVisible(const Value: Boolean);
-    procedure SetShowHint(const Value: Boolean);
-    procedure SetName(const Value: TComponentName);
     procedure SetUseFontAwesome(const Value: Boolean);
   protected
-    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); virtual;
+    procedure Handle_WMNCLButtonDown(var Message: TWMNCHitMessage); override;
+    procedure Handle_WMNCLButtonUp(var Message: TWMNCHitMessage); override;
+    procedure Handle_WMNCMouseMove(var Message: TWMNCHitMessage); override;
   public
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
-
-    property Left: Integer read FLeft write SetLeft;
-    property Top: Integer read FTop write SetTop;
-    property Width: Integer read FWidth write SetWidth;
-    property Height: Integer read FHeight write SetHeight;
-    property NCControls: TNCControls read FNCControls;
-    property BoundsRect: TRect read GetBoundsRect write SetBoundsRect;
     property TabIndex : Integer read GetTabIndex;
   published
     property Style: TNCButtonStyle read FStyle write SetStyle;
-
     property ImageStyle: TNCImageStyle read FImageStyle write SetImageStyle;
     property DisabledImageIndex: TImageIndex read FDisabledImageIndex write SetDisabledImageIndex;
     property DropDownMenu: TPopupMenu read FDropDownMenu write SetDropDownMenu;
@@ -207,38 +237,21 @@ type
     property FontColor : TColor read FFontColor write FFontColor;
     property HotFontColor : TColor read FHotFontColor write FHotFontColor;
 
-    property CaptionAligmentFlags : Cardinal read FCaptionAligmentFlags write FCaptionAligmentFlags;
-
     property StartColor : TColor read FStartColor write FStartColor;
     property EndColor : TColor read FEndColor write FEndColor;
-
     property Direction : TGradientDirection read FDirection write FDirection;
-    property Caption :  string read FCaption write FCaption;
-    property Font: TFont read FFont write SetFont;
-    property Enabled: Boolean read GetEnabled write SetEnabled default True;
-    property Visible: Boolean read FVisible write SetVisible default True;
-    property Hint: string read FHint write FHint;
-    property ShowHint: Boolean read FShowHint write SetShowHint;
-    property Name: TComponentName read FName write SetName stored False;
-    property Tag: NativeInt read FTag write FTag default 0;
-
 
     property UseFontAwesome : Boolean read FUseFontAwesome write SetUseFontAwesome;
     property DefaultFontAwesomeSize : Integer read FDefaultFontAwesomeSize write FDefaultFontAwesomeSize;
     property AwesomeFontColor : TColor read FAwesomeFontColor write FAwesomeFontColor;
     property AwesomeHotFontColor : TColor read FAwesomeHotFontColor write FAwesomeHotFontColor;
-
     property OnDropDownClick: TNotifyEvent read FOnDropDownClick write FOnDropDownClick;
     property OnClick: TNotifyEvent read FOnClick write FOnClick;
   end;
 
   TFormStyleNCControls = class({$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook)
   strict private
-    FHotNCBtnIndex     : Integer;
-    FPressedNCBtnIndex : Integer;
     FNCControls : TNCControls;
-    function  GetButtonIndex(P: TPoint) : Integer;
-    function  PointInButton(P: TPoint)  : Boolean;
   private
     function GetNCControls : TNCControls;
   protected
@@ -282,8 +295,8 @@ uses
  DDetours,
  Winapi.CommCtrl,
  System.SysUtils,
+ System.Rtti,
  Winapi.UxTheme,
-
  Vcl.Styles.Utils.Graphics,
  Vcl.Styles.FormStyleHooks;
 
@@ -360,7 +373,11 @@ begin
   if not (AOwner is TCustomForm) then Raise EAbort.Create('TNCControls only must be created in forms');
   inherited Create(AOwner);
   FForm  := TCustomForm(AOwner);
-  FButtons  :=TListNCButtons.Create(Self);
+  FControls  := TListNCControls.Create(Self);
+
+  FHotControlIndex := -1;
+  FControlUpIndex := -1;
+  FPressedControlIndex := -1;
 
   FStyleServices := nil;
   FImages  := nil;
@@ -370,29 +387,29 @@ begin
   if not IsStyleHookRegistered(AOwner.ClassType, TFormStyleNCControls) then
     TStyleManager.Engine.RegisterStyleHook(AOwner.ClassType, TFormStyleNCControls);
   FForm.Perform(CM_RECREATEWND, 0, 0);
-  FActiveTabButtonIndex := 0;
+  FActiveTabControlIndex := 0;
 end;
 
 destructor TNCControls.Destroy;
 begin
-  FButtons.Free;
+  FControls.Free;
   inherited;
 end;
 
 
 function TNCControls.GetActiveTabButtonIndex: Integer;
 begin
- Result:= FActiveTabButtonIndex;
+ Result:= FActiveTabControlIndex;
 end;
 
-function TNCControls.GetButton(Index: Integer): TNCButton;
+function TNCControls.GetControl(Index: Integer): TNCControl;
 begin
-  Result := FButtons[Index];
+  Result := FControls[Index];
 end;
 
 function TNCControls.GetCount: Integer;
 begin
-  Result := FButtons.Count;
+  Result := FControls.Count;
 end;
 
 function TNCControls.GetStyleServices: TCustomStyleServices;
@@ -410,13 +427,14 @@ end;
 
 procedure TNCControls.SetActiveTabButtonIndex(const Value: Integer);
 
+  //Refactor This -> TNCButton can't be called from here
   function GetMaxTabIndex: Integer;
   var
     i: Integer;
   begin
     Result := -1;
-    For i := 0 to (FButtons.Count - 1) do
-      if (FButtons[i].Style = nsTab) then
+    For i := 0 to (FControls.Count - 1) do
+      if (FControls[i] is TNCButton) and (FControls[i].GetAs<TNCButton>.Style = nsTab) then
         Inc(Result);
   end;
 
@@ -424,9 +442,9 @@ var
   lmax: Integer;
 begin
   lmax := GetMaxTabIndex;
-  if (Value <> FActiveTabButtonIndex) and (Value >= 0) and (lmax >= 0) and (Value <= lmax) then
+  if (Value <> FActiveTabControlIndex) and (Value >= 0) and (lmax >= 0) and (Value <= lmax) then
   begin
-    FActiveTabButtonIndex := Value;
+    FActiveTabControlIndex := Value;
     Invalidate;
   end;
 
@@ -476,16 +494,28 @@ begin
   end;
 end;
 
+function  TNCControls.GetNCControlIndex(P: TPoint) : Integer;
+var
+  i: Integer;
+begin
+ Result := -1;
+  for i := 0 to FControls.Count - 1 do
+    if FControls[i].Visible and PtInRect(FControls[i].BoundsRect, P) then
+      Exit(i);
+end;
+
+function  TNCControls.PointInNCControl(P: TPoint)  : Boolean;
+begin
+  Result := GetNCControlIndex(P) >= 0;
+end;
+
 { TNCButton }
 
 constructor TNCButton.Create(Collection: TCollection);
 begin
-  FNCControls := TNCControls(Collection.Owner);
+  inherited Create(Collection);
   FDropDown := False;
   FImageMargins := TImageMargins.Create;
-
-  FCaptionAligmentFlags := DT_VCENTER or DT_CENTER or DT_WORDBREAK;
-
   FDisabledImageIndex:= -1;
   FPressedImageIndex := -1;
   FImageIndex        := -1;
@@ -496,13 +526,6 @@ begin
   FStyle             := nsPushButton;
   FImageStyle        := isNormal;
   FDropDownMenu      := nil;
-  FEnabled           :=True;
-  FVisible           :=True;
-  FFont := TFont.Create;
-
-  FWidth             := 80;
-  FTop               := 5;
-
   FOnDropDownClick   := nil;
   FOnClick           := nil;
   FHintWindow        := THintWindow.Create(nil);
@@ -522,7 +545,6 @@ destructor TNCButton.Destroy;
 begin
   FreeAndNil(FHintWindow);
   FreeAndNil(FImageMargins);
-  FreeAndNil(FFont);
   inherited;
 end;
 
@@ -551,27 +573,16 @@ begin
   end;
 end;
 
-function TNCButton.GetBoundsRect: TRect;
-begin
-  Result.Left := Left;
-  Result.Top := Top;
-  Result.Right := Left + Width;
-  Result.Bottom := Top + Height;
-end;
-
-function TNCButton.GetEnabled: Boolean;
-begin
- Result:=FEnabled;
-end;
 
 function TNCButton.GetTabIndex: Integer;
 var
   i : Integer;
 begin
-  Result:=-1;
-  for i := 0 to NCControls.ButtonsCount-1 do
+  Result := -1;
+  for i  := 0 to NCControls.ControlsCount-1 do
+  if NCControls.LNCControl[i] is TNCButton then
   begin
-   if NCControls.ButtonsList[i].Style=nsTab then
+   if NCControls.LNCControl[i].GetAs<TNCButton>.Style = nsTab then
     Inc(Result);
 
    if NCControls[i] = Self then
@@ -606,7 +617,113 @@ begin
 end;
 
 
-procedure TNCButton.DrawButton(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
+procedure TNCButton.Handle_WMNCLButtonDown(var Message: TWMNCHitMessage);
+var
+  i : Integer;
+begin
+  // process click on buttton  with the nstab style
+  if (FNCControls.FPressedControlIndex >= 0) and  (FNCControls[FNCControls.FPressedControlIndex] is TNCButton) and (FNCControls[FNCControls.FPressedControlIndex].GetAs<TNCButton>.Style = nsTab) then
+  begin
+    FNCControls.FActiveTabControlIndex := -1;
+    For i := 0 to FNCControls.FPressedControlIndex do
+      if  (FNCControls[i] is TNCButton) and (FNCControls[i].GetAs<TNCButton>.Style = nsTab) then
+        Inc(FNCControls.FActiveTabControlIndex);
+  end;
+end;
+
+procedure TNCButton.Handle_WMNCLButtonUp(var Message: TWMNCHitMessage);
+var
+  LNCButtton : TNCButton;
+  LRect : TRect;
+  P : TPoint;
+  i, X, Y : Integer;
+begin
+  i := FNCControls.FControlUpIndex;
+
+  if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and (i >= 0)  and (NCControls.LNCControl[i] is TNCButton) then
+  begin
+    LRect := Rect(0, 0, 0, 0);
+    if (NCControls <> nil) then
+    begin
+      LRect := NCControls.LNCControl[i].BoundsRect;
+      LRect.Left := LRect.Right - 15;
+    end;
+
+    P := NCControls.LastPoint;
+    LNCButtton := NCControls.LNCControl[i].GetAs<TNCButton>;
+
+    if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnDropDownClick) and
+      (LNCButtton.Style in [nsSplitButton, nsSplitTrans]) and PtInRect(LRect, P) then
+      LNCButtton.FOnDropDownClick(LNCButtton)
+    else if (LNCButtton.Enabled) and Assigned(LNCButtton.FDropDownMenu) and PtInRect(LRect, P) then
+    begin
+      X := NCControls.Form.Left + LNCButtton.BoundsRect.Left;
+      if NCControls.Form.BiDiMode = TBiDiMode.bdRightToLeft then
+       Inc(X, 250);
+
+      Y := NCControls.Form.Top + LNCButtton.BoundsRect.Bottom;
+      // OutputDebugString(PChar(Format('Popup X %d Y %d', [X, Y])));
+
+      LNCButtton.FDropDownMenu.Popup(X, Y);
+      // if LNCButtton.FDropDownMenu.BiDiMode = bdLeftToRight then
+      // LNCButtton.FDropDownMenu.Popup(X, Y)
+      // else
+      // begin
+      // LPoint := Point(X, Y);
+      // TrackPopupMenu(LNCButtton.FDropDownMenu.Handle, TPM_RIGHTALIGN or TPM_TOPALIGN, LPoint.X, LPoint.Y, 0, PopupList.Window, nil);
+      // end;
+    end
+    else if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnClick) then
+    begin
+      if LNCButtton.ShowHint then
+        LNCButtton.HideHintWindow();
+
+      if not IsIconic(TCustomFormClass(NCControls.Form).Handle) then
+        LNCButtton.FOnClick(LNCButtton);
+    end;
+  end;
+end;
+
+procedure TNCButton.Handle_WMNCMouseMove(var Message: TWMNCHitMessage);
+var
+  P : TPoint;
+  I : Integer;
+begin
+  P := NCControls.LastPoint;
+
+  if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION) or
+    (not NCControls.ShowSystemMenu and (Message.HitTest = HTSYSMENU))) and NCControls.PointInNCControl(P) then
+  begin
+
+    if NCControls.FHotControlIndex <> NCControls.GetNCControlIndex(P) then
+    begin
+      NCControls.FHotControlIndex := NCControls.GetNCControlIndex(P);
+
+      for i := 0 to NCControls.ControlsCount - 1 do
+        if (NCControls.FHotControlIndex <> i) and NCControls.LNCControl[i].ShowHint and (NCControls.LNCControl[i] is TNCButton) then
+          NCControls.LNCControl[i].GetAs<TNCButton>.HideHintWindow();
+
+      if not IsIconic(TCustomFormClass(NCControls.Form).Handle) then
+        if NCControls.LNCControl[NCControls.FHotControlIndex].ShowHint and (NCControls.LNCControl[NCControls.FHotControlIndex] is TNCButton) then
+          NCControls.LNCControl[NCControls.FHotControlIndex].GetAs<TNCButton>.ShowHintWindow(Message.XCursor, Message.YCursor);
+
+      NCControls.Invalidate();
+    end;
+  end
+  else
+  //if NCControls.FHotControlIndex <> -1 then
+  begin
+    for i := 0 to NCControls.ControlsCount - 1 do
+      if NCControls.LNCControl[i].ShowHint and (NCControls.LNCControl[i] is TNCButton) then
+        NCControls.LNCControl[i].GetAs<TNCButton>.HideHintWindow();
+
+    NCControls.FHotControlIndex := -1;
+    NCControls.Invalidate();
+    //OutputDebugString(PChar('Ping '+FormatDateTime('hh:nn:ss.zzz', Now)));
+  end;
+end;
+
+procedure TNCButton.DrawControl(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
 var
   Details:  TThemedElementDetails;
   ButtonRect, DrawRect, LRect, LRectAwesome : TRect;
@@ -825,7 +942,7 @@ begin
     // if AMouseInControl then
     // Details := LStyleServices.GetElementDetails(ttTabItemHot)
     // else
-    if Pressed or (NCControls.FActiveTabButtonIndex = TabIndex) then
+    if Pressed or (NCControls.FActiveTabControlIndex = TabIndex) then
       Details := LStyleServices.GetElementDetails(ttTabItemSelected)
     else if not Enabled then
       Details := LStyleServices.GetElementDetails(ttTabItemDisabled)
@@ -1137,19 +1254,6 @@ begin
 end;
 
 
-procedure TNCButton.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
-begin
-  FLeft := ALeft;
-  FTop := ATop;
-  FWidth := AWidth;
-  FHeight := AHeight;
-end;
-
-procedure TNCButton.SetBoundsRect(const Value: TRect);
-begin
-  with Value do SetBounds(Left, Top, Right - Left, Bottom - Top);
-end;
-
 procedure TNCButton.SetDisabledImageIndex(const Value: TImageIndex);
 begin
   FDisabledImageIndex := Value;
@@ -1158,22 +1262,6 @@ end;
 procedure TNCButton.SetDropDownMenu(const Value: TPopupMenu);
 begin
   FDropDownMenu := Value;
-end;
-
-procedure TNCButton.SetEnabled(const Value: Boolean);
-begin
-  if Value <> FEnabled then
-    FEnabled := Value;
-end;
-
-procedure TNCButton.SetFont(const Value: TFont);
-begin
-  FFont := Value;
-end;
-
-procedure TNCButton.SetHeight(const Value: Integer);
-begin
-  FHeight := Value;
 end;
 
 procedure TNCButton.SetHotImageIndex(const Value: TImageIndex);
@@ -1202,24 +1290,9 @@ begin
   FImageStyle := Value;
 end;
 
-procedure TNCButton.SetLeft(const Value: Integer);
-begin
-  FLeft := Value;
-end;
-
-procedure TNCButton.SetName(const Value: TComponentName);
-begin
-  FName := Value;
-end;
-
 procedure TNCButton.SetPressedImageIndex(const Value: TImageIndex);
 begin
   FPressedImageIndex := Value;
-end;
-
-procedure TNCButton.SetShowHint(const Value: Boolean);
-begin
-  FShowHint := Value;
 end;
 
 procedure TNCButton.SetStyle(const Value: TNCButtonStyle);
@@ -1227,26 +1300,9 @@ begin
   FStyle := Value;
 end;
 
-procedure TNCButton.SetTop(const Value: Integer);
-begin
-  FTop := Value;
-end;
-
 procedure TNCButton.SetUseFontAwesome(const Value: Boolean);
 begin
   FUseFontAwesome := Value;
-end;
-
-procedure TNCButton.SetVisible(const Value: Boolean);
-begin
-  if FVisible <> Value then
-    FVisible := Value;
-  // TODO : Add parent notification
-end;
-
-procedure TNCButton.SetWidth(const Value: Integer);
-begin
-  FWidth := Value;
 end;
 
 procedure TNCButton.ShowHintWindow(X, Y : Integer);
@@ -1274,25 +1330,12 @@ end;
 constructor TFormStyleNCControls.Create(AControl: TWinControl);
 begin
   inherited;
-  FHotNCBtnIndex := -1;
-  FPressedNCBtnIndex := -1;
   FNCControls := nil;
 end;
 
 destructor TFormStyleNCControls.Destroy;
 begin
   inherited;
-end;
-
-function TFormStyleNCControls.GetButtonIndex(P: TPoint): Integer;
-var
-  i: Integer;
-begin
-  Result := -1;
-  if (NCControls <> nil) then
-    for i := 0 to FNCControls.ButtonsCount - 1 do
-      if FNCControls[i].Visible and PtInRect(FNCControls[i].BoundsRect, P) then
-        Exit(i);
 end;
 
 function TFormStyleNCControls.GetNCControls: TNCControls;
@@ -1309,17 +1352,12 @@ begin
       end;
 end;
 
-function TFormStyleNCControls.PointInButton(P: TPoint): Boolean;
-begin
-  Result := GetButtonIndex(P) >= 0;
-end;
-
 procedure TFormStyleNCControls.Maximize;
 begin
   if Handle <> 0 then
   begin
-    FPressedNCBtnIndex := -1;
-    FHotNCBtnIndex := -1;
+    FNCControls.FPressedControlIndex := -1;
+    FNCControls.FHotControlIndex := -1;
   end;
   inherited;
 end;
@@ -1328,8 +1366,8 @@ procedure TFormStyleNCControls.Minimize;
 begin
   if Handle <> 0 then
   begin
-    FPressedNCBtnIndex := -1;
-    FHotNCBtnIndex := -1;
+    FNCControls.FPressedControlIndex := -1;
+    FNCControls.FHotControlIndex := -1;
   end;
   inherited;
 end;
@@ -1337,16 +1375,16 @@ end;
 procedure TFormStyleNCControls.MouseEnter;
 begin
   inherited;
-  FPressedNCBtnIndex := -1;
+  FNCControls.FPressedControlIndex := -1;
 end;
 
 procedure TFormStyleNCControls.MouseLeave;
 begin
   inherited;
-  if FHotNCBtnIndex <> -1 then
+  if FNCControls.FHotControlIndex <> -1 then
   begin
-    FHotNCBtnIndex := -1;
-    FPressedNCBtnIndex := -1;
+    FNCControls.FHotControlIndex := -1;
+    FNCControls.FPressedControlIndex := -1;
     if Form.BorderStyle <> bsNone then
       InvalidateNC;
   end;
@@ -1354,25 +1392,22 @@ end;
 
 procedure TFormStyleNCControls.Restore;
 begin
-  FPressedNCBtnIndex := -1;
-  FHotNCBtnIndex := -1;
+  FNCControls.FPressedControlIndex := -1;
+  FNCControls.FHotControlIndex := -1;
   inherited;
 end;
 
 procedure TFormStyleNCControls.PaintNCControls(Canvas: TCanvas; ARect: TRect);
 var
   LCurrent: Integer;
-  LNCButton: TNCButton;
+  LNCControl: TNCControl;
 begin
-  if (NCControls <> nil) and (NCControls.ButtonsCount > 0) and (NCControls.Visible)
-  { and (NCControls.Form.Visible) } and (NCControls.ButtonsList.UpdateCount = 0) then
-    for LCurrent := 0 to NCControls.ButtonsCount - 1 do
+  if (NCControls <> nil) and (NCControls.ControlsCount > 0) and (NCControls.Visible){ and (NCControls.Form.Visible) } and (NCControls.FControls.UpdateCount = 0) then
+    for LCurrent := 0 to NCControls.ControlsCount - 1 do
     begin
-      LNCButton := NCControls.ButtonsList[LCurrent];
-      if LNCButton.Visible and (LNCButton.BoundsRect.Right <= ARect.Right) then
-      begin
-        LNCButton.DrawButton(Canvas, FHotNCBtnIndex = LCurrent, FPressedNCBtnIndex = LCurrent);
-      end;
+      LNCControl := NCControls.Controls[LCurrent];
+      if LNCControl.Visible and (LNCControl.BoundsRect.Right <= ARect.Right) then
+        LNCControl.DrawControl(Canvas, FNCControls.FHotControlIndex = LCurrent, FNCControls.FPressedControlIndex = LCurrent);
     end
   else;
 end;
@@ -1415,7 +1450,7 @@ begin
   if (NCControls <> nil) and (NCControls.Visible) then
   begin
     P := _NormalizePoint(Point(Message.XCursor, Message.YCursor));
-    if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and PointInButton(P) then
+    if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and NCControls.PointInNCControl(P) then
     begin
       Message.Result := 0;
       Message.Msg := WM_NULL;
@@ -1429,7 +1464,6 @@ end;
 procedure TFormStyleNCControls.WMNCLButtonDown(var Message: TWMNCHitMessage);
 var
   P: TPoint;
-  i: Integer;
 begin
   inherited;
 {$IF CompilerVersion>23}
@@ -1442,18 +1476,12 @@ begin
   if (NCControls <> nil) and (NCControls.Visible) then
   begin
     P := _NormalizePoint(Point(Message.XCursor, Message.YCursor));
-    if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and PointInButton(P) then
+    if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and FNCControls.PointInNCControl(P) then
     begin
-      FPressedNCBtnIndex := GetButtonIndex(P);
+      FNCControls.FPressedControlIndex := FNCControls.GetNCControlIndex(P);
 
-      // process click on buttton  with the nstab style
-      if (FPressedNCBtnIndex >= 0) and (FNCControls <> nil) and (FNCControls[FPressedNCBtnIndex].Style = nsTab) then
-      begin
-        FNCControls.FActiveTabButtonIndex := -1;
-        For i := 0 to FPressedNCBtnIndex do
-          if FNCControls[i].Style = nsTab then
-            Inc(FNCControls.FActiveTabButtonIndex);
-      end;
+      if (FNCControls.FPressedControlIndex >= 0)  then
+       FNCControls[FNCControls.FPressedControlIndex].Handle_WMNCLButtonDown(Message);
 
       InvalidateNC;
       Message.Result := 0;
@@ -1466,11 +1494,9 @@ end;
 
 procedure TFormStyleNCControls.WMNCLButtonUp(var Message: TWMNCHitMessage);
 var
-  i, OldIndex, X, Y: Integer;
+  OldIndex: Integer;
   P: TPoint;
-  LRect: TRect;
-  LNCButtton: TNCButton;
-  // LPoint : TPoint;
+  LNCControl: TNCControl;
 begin
   inherited;
 
@@ -1483,57 +1509,23 @@ begin
       Exit;
     end;
 {$IFEND}
-    OldIndex := FPressedNCBtnIndex;
+    OldIndex := FNCControls.FPressedControlIndex;
 
-    if FPressedNCBtnIndex <> -1 then
+    if FNCControls.FPressedControlIndex <> -1 then
     begin
-      FPressedNCBtnIndex := -1;
+      FNCControls.FPressedControlIndex := -1;
       InvalidateNC;
     end;
 
-    if OldIndex = FHotNCBtnIndex then
+    if OldIndex = FNCControls.FHotControlIndex then
     begin
       P := _NormalizePoint(Point(Message.XCursor, Message.YCursor));
-      i := GetButtonIndex(P);
-      if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION)) and (i >= 0) then
+      NCControls.FLastPoint := P;
+      NCControls.FControlUpIndex := NCControls.GetNCControlIndex(P);
+      if NCControls.FControlUpIndex > -1 then
       begin
-        LRect := Rect(0, 0, 0, 0);
-        if (NCControls <> nil) then
-        begin
-          LRect := NCControls.ButtonsList[i].BoundsRect;
-          LRect.Left := LRect.Right - 15;
-        end;
-
-        LNCButtton := NCControls.ButtonsList[i];
-        if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnDropDownClick) and
-          (LNCButtton.Style in [nsSplitButton, nsSplitTrans]) and PtInRect(LRect, P) then
-          LNCButtton.FOnDropDownClick(LNCButtton)
-        else if (LNCButtton.Enabled) and Assigned(LNCButtton.FDropDownMenu) and PtInRect(LRect, P) then
-        begin
-          X := Form.Left + LNCButtton.BoundsRect.Left;
-          if Form.BiDiMode = TBiDiMode.bdRightToLeft then
-           Inc(X, 250);
-
-          Y := Form.Top + LNCButtton.BoundsRect.Bottom;
-          // OutputDebugString(PChar(Format('Popup X %d Y %d', [X, Y])));
-
-          LNCButtton.FDropDownMenu.Popup(X, Y);
-          // if LNCButtton.FDropDownMenu.BiDiMode = bdLeftToRight then
-          // LNCButtton.FDropDownMenu.Popup(X, Y)
-          // else
-          // begin
-          // LPoint := Point(X, Y);
-          // TrackPopupMenu(LNCButtton.FDropDownMenu.Handle, TPM_RIGHTALIGN or TPM_TOPALIGN, LPoint.X, LPoint.Y, 0, PopupList.Window, nil);
-          // end;
-        end
-        else if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnClick) then
-        begin
-          if LNCButtton.ShowHint then
-            LNCButtton.HideHintWindow();
-
-          if not IsIconic(TCustomFormClass(Form).Handle) then
-            LNCButtton.FOnClick(LNCButtton);
-        end;
+        LNCControl := NCControls.Controls[NCControls.FControlUpIndex];
+        LNCControl.Handle_WMNCLButtonUp(Message);
       end;
     end;
 
@@ -1546,12 +1538,12 @@ end;
 procedure TFormStyleNCControls.WMNCMouseMove(var Message: TWMNCHitMessage);
 var
   i: Integer;
-  P: TPoint;
+  LNCControl : TNCControl;
 begin
   inherited;
   if (NCControls <> nil) and (NCControls.Visible) then
   begin
-    P := _NormalizePoint(Point(Message.XCursor, Message.YCursor));
+    NCControls.FLastPoint := _NormalizePoint(Point(Message.XCursor, Message.YCursor));
     // OutputDebugString(PChar(Format('Message.HitTest %d XCursor %d YCursor %d  P.X %d  P.Y %d',[Message.HitTest, Message.XCursor, Message.YCursor, P.X, P.Y])));
 
 {$IF CompilerVersion>23}
@@ -1561,33 +1553,20 @@ begin
       Exit;
     end;
 {$IFEND}
-    if ((Message.HitTest = HTTOP) or (Message.HitTest = HTCAPTION) or
-      (not NCControls.ShowSystemMenu and (Message.HitTest = HTSYSMENU))) and PointInButton(P) then
+    i := NCControls.GetNCControlIndex(NCControls.LastPoint);
+    if (i >= 0) then
     begin
-      if FHotNCBtnIndex <> GetButtonIndex(P) then
-      begin
-        FHotNCBtnIndex := GetButtonIndex(P);
-
-        for i := 0 to NCControls.ButtonsCount - 1 do
-          if (FHotNCBtnIndex <> i) and NCControls.ButtonsList[i].ShowHint then
-            NCControls.ButtonsList[i].HideHintWindow();
-
-        if not IsIconic(TCustomFormClass(Form).Handle) then
-          if NCControls.ButtonsList[FHotNCBtnIndex].ShowHint then
-            NCControls.ButtonsList[FHotNCBtnIndex].ShowHintWindow(Message.XCursor, Message.YCursor);
-
-        InvalidateNC;
-      end;
+      LNCControl := NCControls[i];
+      LNCControl.Handle_WMNCMouseMove(Message);
     end
-    else if FHotNCBtnIndex <> -1 then
+    else
+    //notify to the controls the mouse leave.
+    if NCControls.ControlsCount > 0 then
     begin
-      for i := 0 to NCControls.ButtonsCount - 1 do
-        if NCControls.ButtonsList[i].ShowHint then
-          NCControls.ButtonsList[i].HideHintWindow();
-
-      FHotNCBtnIndex := -1;
-      InvalidateNC;
+      LNCControl := NCControls[0];
+      LNCControl.Handle_WMNCMouseMove(Message);
     end;
+
   end;
 end;
 
@@ -1886,9 +1865,8 @@ begin
 
     R2 := TextRect;
 
-    if (NCControls <> nil) and (NCControls.ButtonsCount > 0) and (NCControls.Visible) then
-      Inc(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount - 1].BoundsRect.Right - NCControls.ButtonsList
-        [0].BoundsRect.Left + 10);
+    if (NCControls <> nil) and (NCControls.ControlsCount > 0) and (NCControls.Visible) then
+      Inc(TextRect.Left, NCControls.Controls[NCControls.ControlsCount - 1].BoundsRect.Right - NCControls.Controls[0].BoundsRect.Left + 10);
 
     // text
     if (NCControls <> nil) and (IsIconic(TCustomFormClass(Form).Handle) or (NCControls.ShowCaption)) then
@@ -1912,9 +1890,8 @@ begin
         LStyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
     end;
 
-    if (NCControls <> nil) and (NCControls.ButtonsCount > 0) and (NCControls.Visible) then
-      Dec(TextRect.Left, NCControls.ButtonsList[NCControls.ButtonsCount - 1].BoundsRect.Right - NCControls.ButtonsList
-        [0].BoundsRect.Left + 10);
+    if (NCControls <> nil) and (NCControls.ControlsCount > 0) and (NCControls.Visible) then
+      Dec(TextRect.Left, NCControls.Controls[NCControls.ControlsCount - 1].BoundsRect.Right - NCControls.Controls[0].BoundsRect.Left + 10);
 
     _FCaptionRect := TextRect;
 
@@ -2097,46 +2074,221 @@ begin
 end;
 
 { TListNCButtons }
-constructor TListNCButtons.Create(AOwner: TPersistent);
+function TListNCControls.Add: TNCControl;
+begin
+  Result := TNCControl(inherited Add);
+end;
+
+
+function RttiMethodInvokeEx(const MethodName:string; RttiType : TRttiType; Instance: TValue; const Args: array of TValue): TValue;
+var
+ Found   : Boolean;
+ LMethod : TRttiMethod;
+ LIndex  : Integer;
+ LParams : TArray<TRttiParameter>;
+begin
+  Result:=nil;
+  LMethod:=nil;
+  Found:=False;
+  for LMethod in RttiType.GetMethods do
+   if SameText(LMethod.Name, MethodName) then
+   begin
+     LParams:=LMethod.GetParameters;
+     if Length(Args)=Length(LParams) then
+     begin
+       Found:=True;
+       for LIndex:=0 to Length(LParams)-1 do
+       if LParams[LIndex].ParamType.Handle<>Args[LIndex].TypeInfo then
+       begin
+         Found:=False;
+         Break;
+       end;
+     end;
+
+     if Found then Break;
+   end;
+
+   if (LMethod<>nil) and Found then
+     Result:=LMethod.Invoke(Instance, Args)
+   else
+     raise Exception.CreateFmt('method %s not found',[MethodName]);
+end;
+
+function TListNCControls.AddEx<T>: T;
+var
+  LRttiContext : TRttiContext;
+  LRttiType : TRttiType;
+  LRttiInstanceType : TRttiInstanceType;
+  LValue : TValue;
+begin
+  LRttiContext := TRttiContext.Create;
+  LRttiType := LRttiContext.GetType(TypeInfo(T));
+  if (LRttiType <> nil) then
+  begin
+    LRttiInstanceType := LRttiType.AsInstance;
+    LValue := LRttiInstanceType.GetMethod('Create').Invoke(LRttiInstanceType.MetaclassType, [Self]);
+    //LValue := RttiMethodInvokeEx('Create', LRttiInstanceType, LRttiInstanceType.MetaclassType, [Self]);
+  end;
+
+  Result := LValue.AsType<T>;
+end;
+
+constructor TListNCControls.Create(AOwner: TPersistent);
 begin
   FOwner := TNCControls(AOwner);
-  inherited Create(TNCButton);
+  inherited Create(TNCControl);
 end;
 
-function TListNCButtons.Add: TNCButton;
-begin
-  Result := TNCButton(inherited Add);
-end;
 
-destructor TListNCButtons.Destroy;
+destructor TListNCControls.Destroy;
 begin
   inherited;
 end;
 
-function TListNCButtons.GetItem(Index: Integer): TNCButton;
+function TListNCControls.GetItem(Index: Integer): TNCControl;
 begin
-  Result := TNCButton(inherited GetItem(Index));
+  Result := TNCControl(inherited GetItem(Index));
 end;
 
-function TListNCButtons.GetOwner: TPersistent;
+function TListNCControls.GetOwner: TPersistent;
 begin
   Result := FOwner;
 end;
 
-function TListNCButtons.Insert(Index: Integer): TNCButton;
+function TListNCControls.Insert(Index: Integer): TNCControl;
 begin
-  Result := TNCButton(inherited Insert(Index));
+  Result := TNCControl(inherited Insert(Index));
 end;
 
-procedure TListNCButtons.SetItem(Index: Integer; Value: TNCButton);
+procedure TListNCControls.SetItem(Index: Integer; Value: TNCControl);
 begin
   inherited SetItem(Index, Value);
 end;
 
+{ TNCControl }
+
+constructor TNCControl.Create(Collection: TCollection);
+begin
+  inherited;
+  FNCControls := TNCControls(Collection.Owner);
+  FEnabled := True;
+  FVisible := True;
+  FFont := TFont.Create;
+  FWidth := 80;
+  FTop := 5;
+  FCaptionAligmentFlags := DT_VCENTER or DT_CENTER or DT_WORDBREAK;
+end;
+
+destructor TNCControl.Destroy;
+begin
+  FreeAndNil(FFont);
+  inherited;
+end;
+
+function TNCControl.GetAs<T>: T;
+var
+ LValue: TValue;
+begin
+ LValue := TValue.From(Self);
+ Result := LValue.AsType<T>;
+end;
+
+function TNCControl.GetBoundsRect: TRect;
+begin
+  Result.Left := Left;
+  Result.Top := Top;
+  Result.Right := Left + Width;
+  Result.Bottom := Top + Height;
+end;
+
+function TNCControl.GetEnabled: Boolean;
+begin
+ Result := FEnabled;
+end;
+
+procedure TNCControl.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
+begin
+  FLeft := ALeft;
+  FTop := ATop;
+  FWidth := AWidth;
+  FHeight := AHeight;
+end;
+
+procedure TNCControl.SetBoundsRect(const Value: TRect);
+begin
+  with Value do SetBounds(Left, Top, Right - Left, Bottom - Top);
+end;
+
+
+procedure TNCControl.SetEnabled(const Value: Boolean);
+begin
+  if Value <> FEnabled then
+    FEnabled := Value;
+end;
+
+procedure TNCControl.SetFont(const Value: TFont);
+begin
+  FFont := Value;
+end;
+
+procedure TNCControl.SetHeight(const Value: Integer);
+begin
+  FHeight := Value;
+end;
+
+procedure TNCControl.SetLeft(const Value: Integer);
+begin
+  FLeft := Value;
+end;
+
+procedure TNCControl.SetName(const Value: TComponentName);
+begin
+  FName := Value;
+
+end;
+
+procedure TNCControl.SetShowHint(const Value: Boolean);
+begin
+  FShowHint := Value;
+end;
+
+procedure TNCControl.SetTop(const Value: Integer);
+begin
+  FTop := Value;
+end;
+
+procedure TNCControl.SetVisible(const Value: Boolean);
+begin
+  if FVisible <> Value then
+    FVisible := Value;
+  // TODO : Add parent notification
+end;
+
+procedure TNCControl.SetWidth(const Value: Integer);
+begin
+  FWidth := Value;
+end;
+
+procedure TNCControl.DrawControl(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
+begin
+end;
+
+procedure TNCControl.Handle_WMNCLButtonDown(var Message: TWMNCHitMessage);
+begin
+end;
+
+procedure TNCControl.Handle_WMNCLButtonUp(var Message: TWMNCHitMessage);
+begin
+end;
+
+procedure TNCControl.Handle_WMNCMouseMove(var Message: TWMNCHitMessage);
+begin
+end;
+
+
 initialization
 
  TFormStyleNCSettings.UseThinBorder := false;
-
 {$IFDEF CPUX86}
   Trampoline_TFormStyleHook_GetBorderSize := InterceptCreate(TFormStyleHookClass(nil)._GetBorderSizeAddr,
   @Detour_TFormStyleHook_GetBorderSize);

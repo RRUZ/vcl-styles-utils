@@ -70,7 +70,7 @@ begin
   NCControls.Images := ImageList1;
   NCControls.ShowSystemMenu := False;
 
-  LNCButton := NCControls.ButtonsList.Add();
+  LNCButton := NCControls.Controls.AddEx<TNCButton>;
   LNCButton.Style := nsSplitButton;
   LNCButton.ImageStyle := isGrayHot;
   LNCButton.ImageIndex := 3;

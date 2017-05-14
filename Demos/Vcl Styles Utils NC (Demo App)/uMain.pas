@@ -181,12 +181,12 @@ begin
   if NCControls.ShowSystemMenu then
     iLeft := 30;
 
-  NCControls.ButtonsList.Clear;
-  NCControls.ButtonsList.BeginUpdate;
+  NCControls.Controls.Clear;
+  NCControls.Controls.BeginUpdate;
   try
     for i := 0 to 10 do
     begin
-      LNCControl := NCControls.ButtonsList.Add;
+      LNCControl := NCControls.Controls.AddEx<TNCButton>;
       LNCControl.Name := Format('NCButton%d', [i + 1]);
       LNCControl.Hint := Format('Hint for NCButton%d', [i + 1]);
       LNCControl.ShowHint := True;
@@ -214,7 +214,7 @@ begin
       LNCControl.OnClick := ButtonNCClick;
     end;
   finally
-    NCControls.ButtonsList.EndUpdate;
+    NCControls.Controls.EndUpdate;
   end;
 
 end;

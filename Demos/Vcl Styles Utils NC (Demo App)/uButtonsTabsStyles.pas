@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Styles.NC, Vcl.ImgList, Vcl.ComCtrls,
-  Vcl.ExtCtrls, Vcl.StdCtrls;
+  Vcl.ExtCtrls, Vcl.StdCtrls, System.ImageList;
 
 type
   TFrmButtonsTabsStyle = class(TForm)
@@ -25,9 +25,9 @@ procedure TFrmButtonsTabsStyle.FormCreate(Sender: TObject);
 var
   LNCControl : TNCButton;
 begin
-  NCControls:=TNCControls.Create(Self);
+  NCControls := TNCControls.Create(Self);
   NCControls.Images      := ImageList1;
-  LNCControl:=NCControls.ButtonsList.Add;
+  LNCControl:= NCControls.Controls.AddEx<TNCButton>;
   LNCControl.Style       := nsTab;
   LNCControl.ImageStyle  := isGrayHot;
   LNCControl.ImageIndex  := 0;
@@ -37,7 +37,7 @@ begin
   //LNCControl.OnClick     := ButtonNCClick;
   //LNCControl.OnDropDownClick := ButtonNCDropDownClick;
 
-  LNCControl:=NCControls.ButtonsList.Add;
+  LNCControl := NCControls.Controls.AddEx<TNCButton>;
   LNCControl.Style       := nsTab;
   LNCControl.ImageStyle  := isGrayHot;
   LNCControl.ImageIndex  := 1;
@@ -46,7 +46,7 @@ begin
   LNCControl.Name        := 'nsTab2';
   //LNCControl.OnClick     := ButtonNCClick;
 
-  LNCControl:=NCControls.ButtonsList.Add;
+  LNCControl := NCControls.Controls.AddEx<TNCButton>;
   LNCControl.Style       := nsTab;
   LNCControl.ImageStyle  := isGrayHot;
   LNCControl.ImageIndex  := 3;
