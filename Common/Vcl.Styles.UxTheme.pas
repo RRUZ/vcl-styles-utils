@@ -105,6 +105,7 @@ uses
   Vcl.Imaging.pngimage,
   Vcl.Styles.Hooks,
   Vcl.Styles.Utils.Graphics,
+  Vcl.Styles.FontAwesome,
   Vcl.Styles.Utils.SysControls;
 
 type
@@ -1023,7 +1024,7 @@ begin
 
               1:  //normal
                    begin
-                     AwesomeFont.DrawChar(hdc, fa_search, pRect, StyleServices.GetSystemColor(clHighlight));
+                     FontAwesome.DrawChar(hdc, fa_search, pRect, StyleServices.GetSystemColor(clHighlight));
                      Exit(S_OK);
                    end;
              end;
@@ -1190,7 +1191,7 @@ begin
           LRect:=Rect(0, 0, 14, 14);
           RectVCenter(LRect, pRect);
           OffsetRect(LRect, (pRect.Width - LRect.Width) div 2, 0);
-          AwesomeFont.DrawChar(hdc, fa_calendar_o, LRect, LColor);
+          FontAwesome.DrawChar(hdc, fa_calendar_o, LRect, LColor);
 
           Exit(S_OK);
         end;
@@ -1656,7 +1657,7 @@ begin
                              LRect := Rect(0, 0, 16, 16);
                              RectVCenter(LRect, pRect);
                              OffsetRect(LRect, (pRect.Width - LRect.Width) div 2, 0);
-                             AwesomeFont.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clBtnText));
+                             FontAwesome.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clBtnText));
                           end;
                       2 :
                           begin
@@ -1665,7 +1666,7 @@ begin
                              LRect := Rect(0, 0, 16, 16);
                              RectVCenter(LRect, pRect);
                              OffsetRect(LRect, (pRect.Width - LRect.Width) div 2, 0);
-                             AwesomeFont.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clHighlight));
+                             FontAwesome.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clHighlight));
                           end;
 
                       3 :
@@ -1675,7 +1676,7 @@ begin
                              LRect := Rect(0, 0, 16, 16);
                              RectVCenter(LRect, pRect);
                              OffsetRect(LRect, (pRect.Width - LRect.Width) div 2, 0);
-                             AwesomeFont.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clHighlight));
+                             FontAwesome.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clHighlight));
                           end;
 
                       4 :
@@ -1685,15 +1686,15 @@ begin
                              LRect := Rect(0, 0, 16, 16);
                              RectVCenter(LRect, pRect);
                              OffsetRect(LRect, (pRect.Width - LRect.Width) div 2, 0);
-                             AwesomeFont.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clGrayText));
+                             FontAwesome.DrawChar(LBitmap.Canvas.Handle, LIcon, LRect,  StyleServices.GetSystemColor(clGrayText));
                           end;
                      end;
 
 
                      //FlipBitmap24Horizontal(LBitmap);
-                     LCanvas:=TCanvas.Create;
+                     LCanvas := TCanvas.Create;
                      try
-                       LCanvas.Handle:=hdc;
+                       LCanvas.Handle := hdc;
                        LCanvas.Draw(pRect.Left, pRect.Top, LBitmap);
                      finally
                        LCanvas.Handle := 0;
@@ -2560,28 +2561,28 @@ begin
               MC_CHECKMARKNORMAL : //OK
                   begin
                     //DrawStyleFillRect(hdc, pRect, clFuchsia);
-                    AwesomeFont.DrawChar(hdc, fa_check, pRect, StyleServices.GetSystemColor(clMenuText));
+                    FontAwesome.DrawChar(hdc, fa_check, pRect, StyleServices.GetSystemColor(clMenuText));
                     Exit(S_OK);
                   end;
 
               MC_CHECKMARKDISABLED :  //OK
                   begin
                     //DrawStyleFillRect(hdc, pRect, clBlue);
-                    AwesomeFont.DrawChar(hdc, fa_check, pRect, StyleServices.GetSystemColor(clGrayText));
+                    FontAwesome.DrawChar(hdc, fa_check, pRect, StyleServices.GetSystemColor(clGrayText));
                     Exit(S_OK);
                   end;
 
               MC_BULLETNORMAL  :   //OK
                   begin
                     //DrawStyleFillRect(hdc, pRect, clGreen);
-                    AwesomeFont.DrawChar(hdc, fa_circle, pRect, StyleServices.GetSystemColor(clMenuText));
+                    FontAwesome.DrawChar(hdc, fa_circle, pRect, StyleServices.GetSystemColor(clMenuText));
                     Exit(S_OK);
                   end;
 
               MC_BULLETDISABLED  : //OK
                   begin
                     //DrawStyleFillRect(hdc, pRect, clGreen);
-                    AwesomeFont.DrawChar(hdc, fa_circle, pRect, StyleServices.GetSystemColor(clGrayText));
+                    FontAwesome.DrawChar(hdc, fa_circle, pRect, StyleServices.GetSystemColor(clGrayText));
                     Exit(S_OK);
                   end;
             end;
@@ -2643,20 +2644,20 @@ begin
             case iStateId of
               MSYSMX_NORMAL :
                   begin
-                    LRect:=pRect;
-                    LRect.Top:= LRect.Top + 3;
-                    LRect.Width:=10;
-                    LRect.Height:=10;
+                    LRect := pRect;
+                    LRect.Top := LRect.Top + 3;
+                    LRect.Width := 10;
+                    LRect.Height := 10;
                     DrawMenuSpecialChar(hdc, MARLETT_MAXIMIZE_CHAR, LRect, False, False);
                     Exit(S_OK);
                   end;
 
               MSYSMX_DISABLED :
                   begin
-                    LRect:=pRect;
-                    LRect.Top:= LRect.Top + 3;
-                    LRect.Width:=10;
-                    LRect.Height:=10;
+                    LRect := pRect;
+                    LRect.Top := LRect.Top + 3;
+                    LRect.Width :=10;
+                    LRect.Height :=10;
                     DrawMenuSpecialChar(hdc, MARLETT_MAXIMIZE_CHAR, LRect, False, True);
                     Exit(S_OK);
                   end;

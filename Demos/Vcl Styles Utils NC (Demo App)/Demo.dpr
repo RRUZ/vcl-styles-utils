@@ -1,11 +1,6 @@
 program Demo;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   uMain in 'uMain.pas' {FrmMain},
   System.IOUtils,

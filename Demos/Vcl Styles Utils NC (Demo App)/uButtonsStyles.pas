@@ -31,6 +31,7 @@ uses
  Vcl.Styles,
  Vcl.Themes,
  System.TypInfo,
+ Vcl.Styles.FontAwesome,
  Vcl.Styles.Utils.Graphics,
  Vcl.GraphUtil;
 

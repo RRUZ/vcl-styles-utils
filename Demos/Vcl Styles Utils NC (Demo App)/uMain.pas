@@ -84,8 +84,13 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Styles.Utils.SystemMenu,
+  Vcl.Styles.FontAwesome,
   Vcl.Styles.Utils.Graphics,
-  uButtonsStyles, uCustomStyles, uDropdown, uAlphaGradient, uButtonsTabsStyles;
+  uButtonsStyles,
+  uCustomStyles,
+  uDropdown,
+  uAlphaGradient,
+  uButtonsTabsStyles;
 
 {$R *.dfm}
 

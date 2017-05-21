@@ -298,6 +298,7 @@ uses
  System.Rtti,
  Winapi.UxTheme,
  Vcl.Styles.Utils.Graphics,
+ Vcl.Styles.FontAwesome,
  Vcl.Styles.FormStyleHooks;
 
 type
@@ -1012,8 +1013,8 @@ begin
   if FUseFontAwesome and (LImgIndex >= 0) then
   begin
 
-    IW:= FDefaultFontAwesomeSize;
-    IH:= FDefaultFontAwesomeSize;
+    IW := FDefaultFontAwesomeSize;
+    IH := FDefaultFontAwesomeSize;
 
     ButtonRect := DrawRect;
     {$IF CompilerVersion > 23}if not StyleServices.HasElementFixedPosition(Details) then {$IFEND}
@@ -1072,7 +1073,7 @@ begin
 
 //    if AMouseInControl then
 //      Dec(IY);
-    LRectAwesome:= Rect(IX, IY, IX + IW, IY + IH);
+    LRectAwesome := Rect(IX, IY, IX + IW + 2, IY + IH + 2);
   end
   else
   if (LImgIndex >= 0) and (NCControls.FImages <> nil) and (NCControls.FImages.Handle <> 0) and
@@ -1165,7 +1166,7 @@ begin
         else
          ThemeTextColor := FAwesomeFontColor;
 
-         AwesomeFont.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, ThemeTextColor, 0, FImageAlignment);
+         FontAwesome.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, FDefaultFontAwesomeSize, ThemeTextColor, 0, FImageAlignment);
        end;
 
       if FDropDown then
@@ -1240,7 +1241,7 @@ begin
 
       DrawControlText(ACanvas, Details, BCaption, DrawRect, FCaptionAligmentFlags, ThemeTextColor);
 
-     if FUseFontAwesome and (FImageIndex>=0) then
+     if FUseFontAwesome and (FImageIndex >= 0) then
      begin
         if AMouseInControl  then
          ThemeTextColor := FAwesomeHotFontColor
@@ -1248,7 +1249,7 @@ begin
          ThemeTextColor := FAwesomeFontColor;
 
        //InflateRect(LRectAwesome, 2, 2);
-       AwesomeFont.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, ThemeTextColor, 0, FImageAlignment);
+       FontAwesome.DrawChar(ACanvas.Handle, LImgIndex, LRectAwesome, FDefaultFontAwesomeSize, ThemeTextColor, 0, FImageAlignment);
      end;
     end;
 end;

@@ -56,6 +56,7 @@ uses
   Vcl.Styles.UxTheme,
 {$ENDIF HOOK_UXTHEME}
   Vcl.Styles.Utils.SysControls,
+  Vcl.Styles.FontAwesome,
   Vcl.Forms,
   Vcl.Controls,
   Vcl.StdCtrls,
@@ -449,7 +450,7 @@ var
    procedure DrawIcon(const ACode: Word);
    begin
      //DestroyIcon(LHandle);
-     Result:=AwesomeFont.GetIcon(ACode, LIcon.Width, LIcon.Height, GetStyleHighLightColor, StyleServices.GetSystemColor(clBtnFace), 0);
+     Result := FontAwesome.GetIcon(ACode, LIcon.Width, LIcon.Height, GetStyleHighLightColor, StyleServices.GetSystemColor(clBtnFace), 0);
      MustRelease:=False;
    end;
 
@@ -518,31 +519,28 @@ begin
      case NativeUInt(ImageName) of
         //W8, W10
         //comctl32.dll
-        16817
-             :
+        16817:
               begin
-                Exit(AwesomeFont.GetIcon(fa_arrow_up, X, Y, StyleServices.GetSystemColor(clBtnText), StyleServices.GetSystemColor(clBtnFace), 0));
+                Exit(FontAwesome.GetIcon(fa_arrow_up, X, Y, StyleServices.GetSystemColor(clBtnText), StyleServices.GetSystemColor(clBtnFace), 0));
               end;
-        16818
-             :
+        16818:
               begin
-                Exit(AwesomeFont.GetIcon(fa_arrow_up, X, Y, StyleServices.GetSystemColor(clGrayText), StyleServices.GetSystemColor(clBtnFace), 0));
+                Exit(FontAwesome.GetIcon(fa_arrow_up, X, Y, StyleServices.GetSystemColor(clGrayText), StyleServices.GetSystemColor(clBtnFace), 0));
               end;
         //W10
         //shell32.dll
-        5100
-             :
+        5100:
               begin
                 //OutputDebugString(PChar('GetModuleName ' + GetModuleName(hInst)));
-                Exit(AwesomeFont.GetIcon(fa_thumb_tack, 16, 16, 12, 12, StyleServices.GetSystemColor(clGrayText), StyleServices.GetSystemColor(clWindow), -22, iaRight));
-                //Exit(AwesomeFont.GetIcon(fa_check_square_o, 16, 16, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
+                Exit(FontAwesome.GetIcon(fa_thumb_tack, 16, 16, 12, 12, StyleServices.GetSystemColor(clGrayText), StyleServices.GetSystemColor(clWindow), -22, iaRight));
+                //Exit(FontAwesome.GetIcon(fa_check_square_o, 16, 16, StyleServices.GetSystemColor(clWindowText), StyleServices.GetSystemColor(clWindow), 0));
               end;
      end;
 
     Exit(Trampoline_user32_LoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
   end
   else
-  if (hInst>0) and (ImageType=IMAGE_BITMAP) and (X=0) and (Y=0) and IS_INTRESOURCE(ImageName) then
+  if (hInst > 0) and (ImageType = IMAGE_BITMAP) and (X = 0) and (Y = 0) and IS_INTRESOURCE(ImageName) then
   begin
     hModule := GetModuleHandle(ExplorerFrame);
     if (hModule = hInst) then
@@ -567,21 +565,21 @@ begin
                           LColor := StyleServices.GetSystemColor(clBtnText);
                           Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
-                          LRect:=Rect(0, 0, 16, 16);
-                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+                          LRect := Rect(0, 0, 16, 16);
+                          FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
 
                           OffsetRect(LRect, 16, 0);
-                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+                          FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
 
                           OffsetRect(LRect, 16, 0);
-                          LRect2:=LRect;
+                          LRect2 := LRect;
                           InflateRect(LRect2, -2, -2);
-                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect2, LColor);
+                          FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect2, LColor);
 
                           OffsetRect(LRect, 16 + 2, 0);
-                          LRect2:=LRect;
+                          LRect2 := LRect;
                           InflateRect(LRect2, -2, -2);
-                          AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect2, LColor);
+                          FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect2, LColor);
 
                           Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                        end;
@@ -595,7 +593,7 @@ begin
         end
         else
         //Windows Vista - W7
-        if (TOSVersion.Major=6) and ((TOSVersion.Minor=0) or (TOSVersion.Minor=1)) then
+        if (TOSVersion.Major = 6) and ((TOSVersion.Minor = 0) or (TOSVersion.Minor = 1)) then
         begin
           LBackColor := StyleServices.GetSystemColor(clWindow);
           LRect := Rect(0, 0, LBitmap.Width, LBitmap.Height );
@@ -608,7 +606,7 @@ begin
                      begin
                         LColor := StyleServices.GetSystemColor(clHighlight);
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_search, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_search, LRect, LColor);
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                         //Bitmap32_SetAlphaByColor(LBitmap, 255, LColor);
                      end;
@@ -620,7 +618,7 @@ begin
                      begin
                         LColor:= StyleServices.GetSystemColor(clWindowText);
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
 
@@ -632,7 +630,7 @@ begin
                      begin
                         LColor := StyleServices.GetSystemColor(clHighlight);
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
 
@@ -645,16 +643,16 @@ begin
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
                         LRect:=Rect(0, 0, 16, 16);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
 
                         OffsetRect(LRect, 16, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
 
                         OffsetRect(LRect, 16, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect, LColor);
 
                         OffsetRect(LRect, 16, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
@@ -668,16 +666,16 @@ begin
                         Bitmap32_SetAlphaAndColor(LBitmap, 1, LBackColor);
 
                         LRect:=Rect(0, 0, 21, 21);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
 
                         OffsetRect(LRect, 21, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_remove, LRect, LColor);
 
                         OffsetRect(LRect, 21, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_refresh, LRect, LColor);
 
                         OffsetRect(LRect, 21, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
@@ -703,10 +701,10 @@ begin
                         LRect := Rect(0, 0, 27, 27);
                         InflateRect(LRect, -4, -4);
 
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
 
                         OffsetRect(LRect, 27 + 4, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
 
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
@@ -730,15 +728,15 @@ begin
                         //left arrow
                         LRect := Rect(0, 0, 25, 25);
                         InflateRect(LRect, -4, -4);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_arrow_left, LRect, LColor);
 
                         //right arrow
                         OffsetRect(LRect, 25 + 4, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_arrow_right, LRect, LColor);
 
                         //dropdown arrow
                         LRect := Rect(60, 8, 72, 20);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
 
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
@@ -756,19 +754,19 @@ begin
 
                         LColor := StyleServices.GetSystemColor(clGrayText);
                         OffsetRect(LRect, 58, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
                         LColor:= StyleServices.GetSystemColor(clBtnText);
                         OffsetRect(LRect, 70, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
                         LColor:= StyleServices.GetSystemColor(clHighlight);
                         OffsetRect(LRect, 70, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
                         LColor:= StyleServices.GetSystemColor(clHighlight);
                         OffsetRect(LRect, 70, 0);
-                        AwesomeFont.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
+                        FontAwesome.DrawChar(LBitmap.Canvas.Handle, fa_caret_down, LRect, LColor);
 
                         Bitmap32_SetAlphaExceptColor(LBitmap, 255, LBackColor);
                      end;
