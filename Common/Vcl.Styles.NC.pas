@@ -538,8 +538,6 @@ begin
 
   FAwesomeFontColor := StyleServices.GetSystemColor(clBtnText);
   FAwesomeHotFontColor := StyleServices.GetSystemColor(clHighlight);
-
-  inherited Create(Collection);
 end;
 
 destructor TNCButton.Destroy;
@@ -561,7 +559,7 @@ begin
   TextFormat := TTextFormatFlags(Flags);
   if LStyleServices.GetElementColor(Details, ecTextColor, ThemeTextColor) then
   begin
-    if AColor<>clNone then
+    if AColor <> clNone then
      Canvas.Font.Color := AColor
     else
      Canvas.Font.Color := ThemeTextColor;
@@ -2088,20 +2086,20 @@ var
  LIndex  : Integer;
  LParams : TArray<TRttiParameter>;
 begin
-  Result:=nil;
-  LMethod:=nil;
-  Found:=False;
+  Result := nil;
+  LMethod := nil;
+  Found := False;
   for LMethod in RttiType.GetMethods do
    if SameText(LMethod.Name, MethodName) then
    begin
-     LParams:=LMethod.GetParameters;
-     if Length(Args)=Length(LParams) then
+     LParams := LMethod.GetParameters;
+     if Length(Args) = Length(LParams) then
      begin
-       Found:=True;
-       for LIndex:=0 to Length(LParams)-1 do
-       if LParams[LIndex].ParamType.Handle<>Args[LIndex].TypeInfo then
+       Found := True;
+       for LIndex := 0 to Length(LParams) - 1 do
+       if LParams[LIndex].ParamType.Handle <> Args[LIndex].TypeInfo then
        begin
-         Found:=False;
+         Found := False;
          Break;
        end;
      end;
@@ -2109,8 +2107,8 @@ begin
      if Found then Break;
    end;
 
-   if (LMethod<>nil) and Found then
-     Result:=LMethod.Invoke(Instance, Args)
+   if (LMethod <> nil) and Found then
+     Result := LMethod.Invoke(Instance, Args)
    else
      raise Exception.CreateFmt('method %s not found',[MethodName]);
 end;
@@ -2170,7 +2168,7 @@ end;
 
 constructor TNCControl.Create(Collection: TCollection);
 begin
-  inherited;
+  inherited Create(Collection);
   FNCControls := TNCControls(Collection.Owner);
   FEnabled := True;
   FVisible := True;
@@ -2182,7 +2180,7 @@ end;
 
 destructor TNCControl.Destroy;
 begin
-  FreeAndNil(FFont);
+  FFont.Free;
   inherited;
 end;
 
