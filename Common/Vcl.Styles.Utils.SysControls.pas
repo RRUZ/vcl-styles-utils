@@ -57,6 +57,10 @@ type
     ParentClassName: PChar;
   end;
 
+  TStyleHookInfo = record
+    StyleHookClass: TSysStyleHookClass;
+  end;
+
 type
   TSysHookAction = (cAdded, cRemoved);
   TBeforeHookingControl = function(Info: PControlInfo): Boolean;
@@ -69,7 +73,7 @@ type
     FHook_WH_CBT: HHook;
     FBeforeHookingControlProc: TBeforeHookingControl;
     FSysHookNotificationProc: TSysHookNotification;
-    FRegSysStylesList: TObjectDictionary<String, TSysStyleHookClass>;
+    FRegSysStylesList: TDictionary<String, TStyleHookInfo>;
     FSysStyleHookList: TObjectDictionary<HWND, TSysStyleHook>;
     FChildRegSysStylesList: TObjectDictionary<HWND, TChildControlInfo>;
     FHookVclControls: Boolean;
@@ -658,7 +662,7 @@ begin
   FHookDialogIcons := False;
   FHookVclControls := False;
   FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
-  FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;
+  FRegSysStylesList := TDictionary<String, TStyleHookInfo>.Create; //TSysStyleHookClass>.Create;
   FChildRegSysStylesList := TObjectDictionary<HWND, TChildControlInfo>.Create;
   //FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([]);
   InstallHook_WH_CBT;
@@ -691,7 +695,7 @@ var
     sChildClassName := LowerCase(GetWindowClassName(ChildHandle));
     if FRegSysStylesList.ContainsKey(sChildClassName) then
     begin
-      LStyleHook:=FRegSysStylesList[LowerCase(sChildClassName)].Create(ChildHandle);
+      LStyleHook:=FRegSysStylesList[LowerCase(sChildClassName)].StyleHookClass.Create(ChildHandle);
       FSysStyleHookList.Add(ChildHandle, LStyleHook);
       SendMessage(ChildHandle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
       InvalidateRect(ChildHandle, nil, False);
@@ -712,7 +716,7 @@ begin
   { Hook the control directly ! }
   if FSysStyleHookList.ContainsKey(Handle) then
     FSysStyleHookList.Remove(Handle);
-  LStyleHook:=FRegSysStylesList[LowerCase(sClassName)].Create(Handle);
+  LStyleHook:=FRegSysStylesList[LowerCase(sClassName)].StyleHookClass.Create(Handle);
   FSysStyleHookList.Add(Handle, LStyleHook);
   SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
 //    if Assigned(FSysHookNotificationProc) then
@@ -764,7 +768,7 @@ var
     ZeroMemory(@Info, sizeof(TChildControlInfo));
     Info.Parent := Parent;
     Info.ParentStyle := ParentStyle;
-    Info.StyleHookClass := FRegSysStylesList[sClassName];
+    Info.StyleHookClass := FRegSysStylesList[sClassName].StyleHookClass;
     if FChildRegSysStylesList.ContainsKey(Handle) then
       FChildRegSysStylesList.Remove(Handle);
     FChildRegSysStylesList.Add(Handle, Info);
@@ -780,7 +784,7 @@ var
     RemoveUnusedHooks;
     if FSysStyleHookList.ContainsKey(Handle) then
       FSysStyleHookList.Remove(Handle);
-    LStyleHook:=FRegSysStylesList[sClassName].Create(Handle);
+    LStyleHook:=FRegSysStylesList[sClassName].StyleHookClass.Create(Handle);
     FSysStyleHookList.Add(Handle, LStyleHook);
     SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
     if Assigned(FSysHookNotificationProc) then
@@ -908,10 +912,13 @@ begin
 end;
 
 class procedure TSysStyleManager.RegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
+var
+  StockStyleHook: TStyleHookInfo;
 begin
   if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
     FRegSysStylesList.Remove(LowerCase(SysControlClass));
-  FRegSysStylesList.Add(LowerCase(SysControlClass), SysStyleHookClass);
+  StockStyleHook.StyleHookClass := SysStyleHookClass;
+  FRegSysStylesList.Add(LowerCase(SysControlClass), StockStyleHook);
 end;
 
 class procedure TSysStyleManager.RemoveHook_WH_CBT;
