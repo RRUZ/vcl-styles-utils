@@ -17,6 +17,12 @@
 // All Rights Reserved.
 //
 // **************************************************************************************************
+//
+// Added by gandf 23/06/2017 :
+//  - List all *.vsf file from "Style" from application folder
+//      ExtractFilePath(Application.ExeName) + 'Style\\*.vsf'
+// **************************************************************************************************
+
 unit Vcl.Styles.Utils.SystemMenu;
 
 interface
@@ -96,15 +102,8 @@ begin
   LMenuInfo.fMask  := MIIM_TYPE;
   LMenuInfo.dwTypeData := Buffer;
   LMenuInfo.cch := SizeOf(Buffer);
-  if GetMenuItemInfo(hMenu, MenuIndex-1, True, LMenuInfo) then
-  begin
-    if (LMenuInfo.fType and MFT_SEPARATOR) = MFT_SEPARATOR then
-    else
-    begin
-      InsertMenu(hMenu, MenuIndex, MF_BYPOSITION or MF_SEPARATOR, 0, nil);
-      inc(MenuIndex);
-    end;
-  end;
+  InsertMenu(hMenu, MenuIndex, MF_BYPOSITION or MF_SEPARATOR, 0, nil);
+  inc(MenuIndex);
 end;
 
 { TVclStylesSystemMenu }
@@ -175,7 +174,7 @@ var
  LMethodInfo : TMethodInfo;
  s : string;
  LStyleNames: TArray<string>;
-
+ Infos_fichier: TSearchRec;
 begin
   LSysMenu := GetSystemMenu(FForm.Handle, False);
 
@@ -203,16 +202,12 @@ begin
 
   for s in LStyleNames do
   begin
-
     if not FShowNativeStyle and SameText('Windows', s) then
       Continue;
 
     InsertMenuHelper(FVCLStylesMenu, LSubMenuIndex, uIDNewItem,  PChar(s), nil);
     if SameText(TStyleManager.ActiveStyle.Name, s) then
       CheckMenuItem(FVCLStylesMenu, LSubMenuIndex, MF_BYPOSITION or MF_CHECKED);
-
-    if SameText('Windows', s) then
-     AddMenuSeparatorHelper(FVCLStylesMenu,  LSubMenuIndex);
 
     inc(LSubMenuIndex);
     inc(uIDNewItem);
@@ -224,6 +219,53 @@ begin
                         end;
     FMethodsDict.Add(uIDNewItem-1, LMethodInfo);
   end;
+
+  if FindFirst(ExtractFilePath(Application.ExeName) + 'Style\\*.vsf', faAnyFile, Infos_fichier)=0 then
+  begin
+    if FMethodsDict.Count > 0 then
+    begin
+      inc(LSubMenuIndex);
+      AddMenuSeparatorHelper(FVCLStylesMenu,  LSubMenuIndex);
+    end;
+
+    repeat
+      s := ChangeFileExt(Infos_fichier.Name, '');
+      if not FShowNativeStyle and SameText('Windows', s) then
+        Continue;
+
+      InsertMenuHelper(FVCLStylesMenu, LSubMenuIndex, uIDNewItem,  PChar(s), nil);
+      if SameText(TStyleManager.ActiveStyle.Name, s) then
+        CheckMenuItem(FVCLStylesMenu, LSubMenuIndex, MF_BYPOSITION or MF_CHECKED);
+
+      inc(LSubMenuIndex);
+      inc(uIDNewItem);
+      LMethodInfo:=TMethodInfo.Create;
+      LMethodInfo.Value1:=s;
+      LMethodInfo.Method:=procedure(Info : TMethodInfo)
+                          var
+                            Found: Boolean;
+                            LStyleNames: TArray<string>;
+                            s : string;
+                          begin
+                            Found := False;
+                            LStyleNames:=TStyleManager.StyleNames;
+                            for s in LStyleNames do
+                            begin
+                              if SameText(Info.Value1.AsString, s) then
+                              begin
+                                Found := True;
+                                break;
+                              end;
+                            end;
+                            if Not Found then
+                              TStyleManager.SetStyle(TStyleManager.LoadFromFile(ExtractFilePath(Application.ExeName) + 'Style\\' + Info.Value1.AsString + '.vsf'))
+                            else
+                              TStyleManager.SetStyle(Info.Value1.AsString);
+                          end;
+      FMethodsDict.Add(uIDNewItem-1, LMethodInfo);
+    until FindNext(Infos_fichier)<>0;;
+  end;
+  FindClose(Infos_fichier);
 end;
 
 procedure TVclStylesSystemMenu.WndProc(var Message: TMessage);
