@@ -18,6 +18,9 @@
 // All Rights Reserved.
 //
 // **************************************************************************************************
+// Added by gandf 24/06/2017 :
+//  - Draw vertical menu bar with tmPopupSeparator rotated (90°)
+// **************************************************************************************************
 unit Vcl.Styles.Utils.Menus;
 
 interface
@@ -67,6 +70,14 @@ const
   MARLETT_MINIMIZE_CHAR = Char(48);
   MARLETT_CLOSE_CHAR = Char(114);
   MARLETT_MAXIMIZE_CHAR = Char(49);
+  MARLETT_LEFT_ARROW_SCROLL_CHAR = Char(51);
+  MARLETT_RIGHT_ARROW_SCROLL_CHAR = Char(52);
+  MARLETT_UP_ARROW_SCROLL_CHAR = Char(53);
+  MARLETT_DOWN_ARROW_SCROLL_CHAR = Char(54);
+  MARLETT_PAGE_DOWN_ARROW_CHAR = Char(55);
+  MARLETT_RIGHT_ARROW_SUBMENU_CHAR = Char(56);
+  MARLETT_UP_ARROW_CHAR = Char(116);
+  MARLETT_DOWN_ARROW_CHAR = Char(117);
 
 type
   TSysPopupStyleHook = class;
@@ -466,7 +477,7 @@ var
 
 var
   LThemedMenu: TThemedMenu;
-  LDetails: TThemedElementDetails;
+  LDetails, LDetailsBar: TThemedElementDetails;
   LTextFormat: TTextFormat;
   LSize: TSize;
   LMenuItem: TMenuItem;
@@ -482,6 +493,7 @@ var
   sShortCut: String;
   LBitmap: TBitmap;
   LParentMenu: TMenu;
+  LBitmapBar: TBitmap;
 
 
 begin
@@ -815,6 +827,22 @@ begin
     end
     else
       DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat)
+  end;
+
+  {Draw vertical menu bar}
+  LDetailsBar := StyleServices.GetElementDetails(tmPopupSeparator);
+  LBitmapBar := TBitmap.Create;
+  LBitmapBar.SetSize(LTextRect.Height, LTextRect.Height);
+  LBitmapBar.PixelFormat := pf32bit;
+  LBitmapBar.AlphaFormat := afDefined;
+  LImageRect := Rect(0, 0, LBitmapBar.Width, LBitmapBar.Height);
+  R:=LImageRect;
+  try
+    StyleServices.DrawElement(LBitmapBar.Canvas.Handle, LDetailsBar, Rect(0, 0, R.Width, R.Height));
+    RotateBitmap(LBitmapBar, DegToRad(90), true);
+    BitBlt(DC, LTextRect.Left - 6, LTextRect.Top, 1, LTextRect.Height, LBitmapBar.Canvas.Handle, round(LTextRect.Height / 2), 0, SRCCOPY);//SRCPAINT);//
+  finally
+    LBitmapBar.Free;
   end;
 
   { Draw ShortCut Text . }
