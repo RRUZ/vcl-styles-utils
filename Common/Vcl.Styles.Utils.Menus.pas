@@ -20,6 +20,7 @@
 // **************************************************************************************************
 // Added by gandf 24/06/2017 :
 //  - Draw vertical menu bar with tmPopupSeparator rotated (90°)
+//  - Draw prefix marked by "&"
 // **************************************************************************************************
 unit Vcl.Styles.Utils.Menus;
 
@@ -774,7 +775,7 @@ begin
   end;
 
   { Draw Text }
-  LTextFormat := [tfLeft, tfVerticalCenter, tfSingleLine, tfExpandTabs, tfHidePrefix];
+  LTextFormat := [tfLeft, tfVerticalCenter, tfSingleLine, tfExpandTabs]; //, tfHidePrefix];
 
 //  if (LMenuItem.Parent<>nil) then
 //   OutputDebugString(PChar(Format('LMenuItem.Parent %s IsItemHILITE %s', [LMenuItem.Parent.Caption, BoolToStr(IsItemHILITE(LMenuItem.Parent.Handle, LMenuItem.Parent.MenuIndex), True)])));
