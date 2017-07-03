@@ -14,12 +14,14 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
 // Contributors :
+//
 // gandf https://github.com/gandf
+//
 // **************************************************************************************************
 unit Vcl.Styles.Utils.Menus;
 
@@ -867,20 +869,20 @@ begin
   end;
 
   {Draw vertical menu bar}
-  LDetailsBar := StyleServices.GetElementDetails(tmPopupSeparator);
-  LBitmapBar := TBitmap.Create;
-  LBitmapBar.SetSize(LTextRect.Height, LTextRect.Height);
-  LBitmapBar.PixelFormat := pf32bit;
-  LBitmapBar.AlphaFormat := afDefined;
-  LImageRect := Rect(0, 0, LBitmapBar.Width, LBitmapBar.Height);
-  R:=LImageRect;
-  try
-    StyleServices.DrawElement(LBitmapBar.Canvas.Handle, LDetailsBar, Rect(0, 0, R.Width, R.Height));
-    RotateBitmap(LBitmapBar, DegToRad(90), true);
-    BitBlt(DC, LTextRect.Left - 6, LTextRect.Top, 1, LTextRect.Height, LBitmapBar.Canvas.Handle, round(LTextRect.Height / 2), 0, SRCCOPY);
-  finally
-    LBitmapBar.Free;
-  end;
+//  LDetailsBar := StyleServices.GetElementDetails(tmPopupSeparator);
+//  LBitmapBar := TBitmap.Create;
+//  LBitmapBar.SetSize(LTextRect.Height, LTextRect.Height);
+//  LBitmapBar.PixelFormat := pf32bit;
+//  LBitmapBar.AlphaFormat := afDefined;
+//  LImageRect := Rect(0, 0, LBitmapBar.Width, LBitmapBar.Height);
+//  R:=LImageRect;
+//  try
+//    StyleServices.DrawElement(LBitmapBar.Canvas.Handle, LDetailsBar, Rect(0, 0, R.Width, R.Height));
+//    RotateBitmap(LBitmapBar, DegToRad(90), true);
+//    BitBlt(DC, LTextRect.Left - 6, LTextRect.Top, 1, LTextRect.Height, LBitmapBar.Canvas.Handle, round(LTextRect.Height / 2), 0, SRCCOPY);
+//  finally
+//    LBitmapBar.Free;
+//  end;
 
   { Draw ShortCut Text . }
   if LMenuItem <> nil then
