@@ -290,6 +290,7 @@ const
   fa_angle_up = $F106;
   fa_angle_down = $F107;
   fa_desktop = $F108;
+  fa_mouse_pointer = $F245;
   fa_laptop = $F109;
   fa_tablet = $F10A;
   fa_mobile_phone = $F10B;

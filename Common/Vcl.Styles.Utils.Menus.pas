@@ -18,9 +18,8 @@
 // All Rights Reserved.
 //
 // **************************************************************************************************
-// Added by gandf 24/06/2017 :
-//  - Draw vertical menu bar with tmPopupSeparator rotated (90°)
-//  - Draw prefix marked by "&"
+// Contributors :
+// gandf https://github.com/gandf
 // **************************************************************************************************
 unit Vcl.Styles.Utils.Menus;
 
@@ -661,46 +660,19 @@ begin
 
       end
       else
-      if (LParentMenu.Images <> nil) and (ImageIndex > -1) then
-      begin
-        LImageWidth := LParentMenu.Images.Width;
-        DisplayCheckedGlyph := False;
-        LImageRect := Rect(0, 0, LParentMenu.Images.Width, LParentMenu.Images.Height);
-        RectVCenter(LImageRect, ItemRect2);
-
-        if not RightToLeft then
-          OffsetRect(LImageRect, 4, 0)
-        else
-        begin
-          LImageRect.Left := ItemRect2.Right - LParentMenu.Images.Width - 4;
-          LImageRect.Right := ItemRect2.Right;
-        end;
-
-        if (LSysPopupItem.Checked) and (not LSysPopupItem.RadioCheck)  then
-        begin
-         R:=LImageRect;
-         InflateRect(R, 2, 2);
-         Canvas.Brush.Style:=bsClear;
-         Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
-         Canvas.Rectangle(R);
-        end;
-
-        LParentMenu.Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex, not LSysPopupItem.Disabled);
-      end
-      else
-      if (LMenuItem.Parent<>nil) and (LMenuItem.Parent.SubMenuImages <> nil) and (ImageIndex > -1) then
+      if (LMenuItem.Parent <> nil) and (LMenuItem.Parent.SubMenuImages <> nil) and (ImageIndex > -1) then
       begin
         LImageWidth := LMenuItem.Parent.SubMenuImages.Width;
         DisplayCheckedGlyph := False;
         LImageRect := Rect(0, 0, LMenuItem.Parent.SubMenuImages.Width, LMenuItem.Parent.SubMenuImages.Height);
-        RectVCenter(LImageRect, ItemRect2);
+        RectVCenter(LImageRect, ItemRect);
 
         if not RightToLeft then
           OffsetRect(LImageRect, 4, 0)
         else
         begin
-          LImageRect.Left := ItemRect2.Right - LMenuItem.Parent.SubMenuImages.Width - 4;
-          LImageRect.Right := ItemRect2.Right;
+          LImageRect.Left := ItemRect.Right - LMenuItem.Parent.SubMenuImages.Width - 4;
+          LImageRect.Right := ItemRect.Right;
         end;
 
         if (LSysPopupItem.Checked) and (not LSysPopupItem.RadioCheck)  then
@@ -713,8 +685,34 @@ begin
         end;
 
         LMenuItem.Parent.SubMenuImages.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex);
-      end;
+      end
+      else
+      if (LParentMenu.Images <> nil) and (ImageIndex > -1) then
+      begin
+        LImageWidth := LParentMenu.Images.Width;
+        DisplayCheckedGlyph := False;
+        LImageRect := Rect(0, 0, LParentMenu.Images.Width, LParentMenu.Images.Height);
+        RectVCenter(LImageRect, ItemRect);
 
+        if not RightToLeft then
+          OffsetRect(LImageRect, 4, 0)
+        else
+        begin
+          LImageRect.Left := ItemRect.Right - LParentMenu.Images.Width - 4;
+          LImageRect.Right := ItemRect.Right;
+        end;
+
+        if (LSysPopupItem.Checked) and (not LSysPopupItem.RadioCheck)  then
+        begin
+         R:=LImageRect;
+         InflateRect(R, 2, 2);
+         Canvas.Brush.Style:=bsClear;
+         Canvas.Pen.Color  :=StyleServices.GetSystemColor(clHotLight);
+         Canvas.Rectangle(R);
+        end;
+
+        LParentMenu.Images.Draw(Canvas, LImageRect.Left, LImageRect.Top, ImageIndex, not LSysPopupItem.Disabled);
+      end;
   end
   else if LSysPopupItem.Bitmap > 0 then
   begin
