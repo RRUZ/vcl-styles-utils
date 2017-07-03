@@ -625,7 +625,7 @@ begin
           LImageRect.Right := ItemRect.Right;
         end;
 
-        if (LSysPopupItem.Checked) and (not LSysPopupItem.RadioCheck)  then
+        if (LMenuItem.Parent<>nil) and (LMenuItem.Parent.SubMenuImages <> nil) and (ImageIndex > -1) then
         begin
          R:=LImageRect;
          InflateRect(R, 2, 2);
