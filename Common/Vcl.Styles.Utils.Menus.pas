@@ -667,14 +667,14 @@ begin
         LImageWidth := LMenuItem.Parent.SubMenuImages.Width;
         DisplayCheckedGlyph := False;
         LImageRect := Rect(0, 0, LMenuItem.Parent.SubMenuImages.Width, LMenuItem.Parent.SubMenuImages.Height);
-        RectVCenter(LImageRect, ItemRect);
+        RectVCenter(LImageRect, ItemRect2);
 
         if not RightToLeft then
           OffsetRect(LImageRect, 4, 0)
         else
         begin
-          LImageRect.Left := ItemRect.Right - LMenuItem.Parent.SubMenuImages.Width - 4;
-          LImageRect.Right := ItemRect.Right;
+          LImageRect.Left := ItemRect2.Right - LMenuItem.Parent.SubMenuImages.Width - 4;
+          LImageRect.Right := ItemRect2.Right;
         end;
 
         if (LSysPopupItem.Checked) and (not LSysPopupItem.RadioCheck)  then
@@ -694,14 +694,14 @@ begin
         LImageWidth := LParentMenu.Images.Width;
         DisplayCheckedGlyph := False;
         LImageRect := Rect(0, 0, LParentMenu.Images.Width, LParentMenu.Images.Height);
-        RectVCenter(LImageRect, ItemRect);
+        RectVCenter(LImageRect, ItemRect2);
 
         if not RightToLeft then
           OffsetRect(LImageRect, 4, 0)
         else
         begin
-          LImageRect.Left := ItemRect.Right - LParentMenu.Images.Width - 4;
-          LImageRect.Right := ItemRect.Right;
+          LImageRect.Left := ItemRect2.Right - LParentMenu.Images.Width - 4;
+          LImageRect.Right := ItemRect2.Right;
         end;
 
         if (LSysPopupItem.Checked) and (not LSysPopupItem.RadioCheck)  then
