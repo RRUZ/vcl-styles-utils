@@ -92,9 +92,9 @@ type
     property FormBorderSize : TRect read FFormBorderSize write FFormBorderSize;
     property Form : TCustomForm read FForm;
   protected
-     function  GetNCControlIndex(P: TPoint) : Integer;
-     function  PointInNCControl(P: TPoint)  : Boolean;
-     property LastPoint : TPoint read FLastPoint;
+    function  GetNCControlIndex(P: TPoint) : Integer;
+    function  PointInNCControl(P: TPoint)  : Boolean;
+    property LastPoint : TPoint read FLastPoint;
   public
     property Controls : TListNCControls read FControls;
     property ControlsList[index : Integer] : TNCControl read GetControl; default;
@@ -142,9 +142,9 @@ type
     procedure SetName(const Value: TComponentName);
     procedure DrawControl(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean); virtual;
   protected
-     procedure Handle_WMNCLButtonDown(var Message: TWMNCHitMessage); virtual;
-     procedure Handle_WMNCLButtonUp(var Message: TWMNCHitMessage); virtual;
-     procedure Handle_WMNCMouseMove(var Message: TWMNCHitMessage); virtual;
+    procedure Handle_WMNCLButtonDown(var Message: TWMNCHitMessage); virtual;
+    procedure Handle_WMNCLButtonUp(var Message: TWMNCHitMessage); virtual;
+    procedure Handle_WMNCMouseMove(var Message: TWMNCHitMessage); virtual;
   published
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); virtual;
     property Left: Integer read FLeft write SetLeft;
@@ -198,6 +198,7 @@ type
     FUseFontAwesome: Boolean;
     FAwesomeHotFontColor: TColor;
     FAwesomeFontColor: TColor;
+    FOnClose: TNotifyEvent;
     procedure DrawControl(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean); override;
     procedure SetStyle(const Value: TNCButtonStyle);
     procedure SetDisabledImageIndex(const Value: TImageIndex);
@@ -247,6 +248,7 @@ type
     property AwesomeHotFontColor : TColor read FAwesomeHotFontColor write FAwesomeHotFontColor;
     property OnDropDownClick: TNotifyEvent read FOnDropDownClick write FOnDropDownClick;
     property OnClick: TNotifyEvent read FOnClick write FOnClick;
+    property OnClose: TNotifyEvent read FOnClose write FOnClose;
   end;
 
   TFormStyleNCControls = class({$IF (CompilerVersion >= 31)}Vcl.Styles.Utils.Shadow.{$IFEND}TFormStyleHook)
@@ -362,9 +364,9 @@ end;
 
 function  GetRegisteredStylesHooks(ControlClass: TClass) : TStyleHookList;
 begin
- Result:=nil;
-    if TCustomStyleEngine.GetRegisteredStyleHooks.ContainsKey(ControlClass) then
-      Result:=TCustomStyleEngine.GetRegisteredStyleHooks[ControlClass];
+   Result := nil;
+   if TCustomStyleEngine.GetRegisteredStyleHooks.ContainsKey(ControlClass) then
+     Result := TCustomStyleEngine.GetRegisteredStyleHooks[ControlClass];
 end;
 
 { TNCControls }
@@ -400,7 +402,7 @@ end;
 
 function TNCControls.GetActiveTabButtonIndex: Integer;
 begin
- Result:= FActiveTabControlIndex;
+ Result := FActiveTabControlIndex;
 end;
 
 function TNCControls.GetControl(Index: Integer): TNCControl;
@@ -528,9 +530,10 @@ begin
   FImageStyle        := isNormal;
   FDropDownMenu      := nil;
   FOnDropDownClick   := nil;
-  FOnClick           := nil;
-  FHintWindow        := THintWindow.Create(nil);
-  FAlphaColor        := FNCControls.StyleServices.GetSystemColor(clBtnFace);
+  FOnClick := nil;
+  FOnClose := nil;
+  FHintWindow := THintWindow.Create(nil);
+  FAlphaColor := FNCControls.StyleServices.GetSystemColor(clBtnFace);
   FDirection := TGradientDirection.gdHorizontal;
 
   FFontColor :=  StyleServices.GetSystemColor(clBtnText);
@@ -649,6 +652,7 @@ begin
     end;
 
     P := NCControls.LastPoint;
+
     LNCButtton := NCControls.LNCControl[i].GetAs<TNCButton>;
 
     if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnDropDownClick) and
@@ -671,6 +675,14 @@ begin
       // LPoint := Point(X, Y);
       // TrackPopupMenu(LNCButtton.FDropDownMenu.Handle, TPM_RIGHTALIGN or TPM_TOPALIGN, LPoint.X, LPoint.Y, 0, PopupList.Window, nil);
       // end;
+    end
+    else if (LNCButtton.Style = nsTab) and Assigned(LNCButtton.FOnClose) and PtInRect(LRect, P) then
+    begin
+      if LNCButtton.ShowHint then
+        LNCButtton.HideHintWindow();
+
+      if not IsIconic(TCustomFormClass(NCControls.Form).Handle) then
+        LNCButtton.FOnClose(LNCButtton);
     end
     else if (LNCButtton.Enabled) and Assigned(LNCButtton.FOnClick) then
     begin
@@ -724,7 +736,7 @@ end;
 
 procedure TNCButton.DrawControl(ACanvas: TCanvas; AMouseInControl, Pressed: Boolean);
 var
-  Details:  TThemedElementDetails;
+  Details, Details2:  TThemedElementDetails;
   ButtonRect, DrawRect, LRect, LRectAwesome : TRect;
   IW, IH, IX, IY: Integer;
   SaveIndex: Integer;
@@ -732,6 +744,7 @@ var
   BCaption: String;
   LStyleServices : TCustomStyleServices;
   LColor, LColor1, LColor2, ThemeTextColor : TColor;
+  FButtonState: TThemedWindow;
 
   function GetBorderSize: TRect;
   var
@@ -833,6 +846,27 @@ var
     end;
   end;
 
+  function GetButtonCloseRect(Index: Integer): TRect;
+  var
+    Details : TThemedElementDetails;
+    R, ButtonR : TRect;
+  begin
+    R := BoundsRect;
+    if R.Left < 0 then Exit;
+
+    if Index = TabIndex then
+      InflateRect(R, 0, 2);
+
+    Result := R;
+    Details := LStyleServices.GetElementDetails(twSmallCloseButtonNormal);
+    if not LStyleServices.GetElementContentRect(0, Details, Result, ButtonR) then
+      ButtonR := Rect(0, 0, 0, 0);
+
+    Result.Left := Result.Right - (ButtonR.Width) - 3;
+    Result.Width:= ButtonR.Width;
+    Result.Top :=  Result.Top + 3;
+  end;
+
 begin
 
   LStyleServices := NCControls.StyleServices;
@@ -907,7 +941,7 @@ begin
     end;
   end
   else
-  if FStyle=nsGradient then
+  if FStyle = nsGradient then
   begin
     LColor := ACanvas.Pen.Color;
     try
@@ -954,6 +988,22 @@ begin
     DrawRect := ButtonRect;
 
     LStyleServices.DrawElement(ACanvas.Handle, Details, DrawRect);
+
+    if @FOnClose <> nil then
+    begin
+      if AMouseInControl then
+       FButtonState := twSmallCloseButtonHot
+      else
+      if Index = TabIndex then
+       FButtonState := twSmallCloseButtonNormal
+      else
+       FButtonState := twSmallCloseButtonDisabled;
+
+      Details2 := LStyleServices.GetElementDetails(FButtonState);
+      LRect := GetButtonCloseRect(Index);
+      if LRect.Bottom - LRect.Top > 0 then
+        LStyleServices.DrawElement(ACanvas.Handle, Details2, LRect);
+    end;
   end
   else if FStyle = nsEdge then
   begin
@@ -1131,7 +1181,7 @@ begin
 
 //    if AMouseInControl then
 //      Dec(IY);
-    if Enabled and ((FImageStyle=isNormal) or ((FImageStyle=isGrayHot) and AMouseInControl)) then
+    if Enabled and ((FImageStyle = isNormal) or ((FImageStyle = isGrayHot) and AMouseInControl)) then
       ImageList_Draw(NCControls.FImages.Handle, LImgIndex, ACanvas.Handle, IX, IY, ILD_NORMAL)
     else
       DoDrawGrayImage(ACanvas.Handle, NCControls.FImages.Handle, LImgIndex, IX, IY);
@@ -1189,39 +1239,38 @@ begin
       with ACanvas do
       begin
 
-          LColor:=Pen.Color;
+         LColor := Pen.Color;
+         // draw split line
+         if FStyle <> nsSplitTrans then
+         begin
+           Pen.Color := LStyleServices.GetSystemColor(clBtnShadow);
+           MoveTo(LRect.Right - 15, LRect.Top + 3);
+           LineTo(LRect.Right - 15, LRect.Bottom - 3);
+           if Enabled then
+             Pen.Color := LStyleServices.GetSystemColor(clBtnHighLight)
+           else
+             Pen.Color := Font.Color;
+           MoveTo(LRect.Right - 14, LRect.Top + 3);
+           LineTo(LRect.Right - 14, LRect.Bottom - 3);
+         end;
 
-          // draw split line
-          if FStyle <> nsSplitTrans then
-          begin
-            Pen.Color := LStyleServices.GetSystemColor(clBtnShadow);
-            MoveTo(LRect.Right - 15, LRect.Top + 3);
-            LineTo(LRect.Right - 15, LRect.Bottom - 3);
-            if Enabled then
-              Pen.Color := LStyleServices.GetSystemColor(clBtnHighLight)
-            else
-              Pen.Color := Font.Color;
-            MoveTo(LRect.Right - 14, LRect.Top + 3);
-            LineTo(LRect.Right - 14, LRect.Bottom - 3);
-          end;
 
+        // draw arrow
 
-          // draw arrow
+        if (FStyle = nsSplitTrans) and (not AMouseInControl)  then
+         Pen.Color := FFontColor
+        else
+         Pen.Color := FHotFontColor;
 
-          if (FStyle = nsSplitTrans) and (not AMouseInControl)  then
-           Pen.Color := FFontColor
-          else
-           Pen.Color := FHotFontColor;
+        X := LRect.Right - 8;
+        Y := LRect.Top + (Height div 2) + 1;
+        for i := 3 downto 0 do
+        begin
+          MoveTo(X - I, Y - I);
+          LineTo(X + I + 1, Y - I);
+        end;
 
-          X := LRect.Right - 8;
-          Y := LRect.Top + (Height div 2) + 1;
-          for i := 3 downto 0 do
-          begin
-            MoveTo(X - I, Y - I);
-            LineTo(X + I + 1, Y - I);
-          end;
-
-          Pen.Color := LColor;
+        Pen.Color := LColor;
       end;
 
     end
@@ -1236,6 +1285,10 @@ begin
 //      if not StyleServices.HasElementFixedPosition(Details) then
 //        CorrectLeftButtonRect(ButtonRect);
 //      DrawRect := ButtonRect;
+
+      if (FCaptionAligmentFlags and DT_CENTER) <> DT_CENTER then
+        DrawRect.Left := DrawRect.Left + 5;
+
 
       DrawControlText(ACanvas, Details, BCaption, DrawRect, FCaptionAligmentFlags, ThemeTextColor);
 
