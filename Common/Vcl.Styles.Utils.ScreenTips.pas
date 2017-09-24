@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2015 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -54,7 +54,9 @@ implementation
 
 uses
   Winapi.CommCtrl,
+  {$IF CompilerVersion >= 30.0}  //DX Seattle and UP.
   Vcl.SysStyles,
+  {$IFEND}
   Vcl.Styles.Utils.SysControls;
 
 { TSysTooltipsStyleHook }

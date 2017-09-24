@@ -1991,7 +1991,7 @@ begin
   if GetMenuItemInfo(FMenu, FIndex, True, pMenuItemInfo) then
   begin
      //Fix for shell menus on W10
-    if (VCLMenuItems=nil) or (not (pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW)) then
+    if (VCLMenuItems = nil) or (not (pMenuItemInfo.fType and MFT_OWNERDRAW = MFT_OWNERDRAW)) then
     begin
       { The Size needed for the Buffer . }
       StrSize := pMenuItemInfo.cch * 2 + 2;
