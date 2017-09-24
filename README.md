@@ -3,7 +3,7 @@
 The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview), adding unique features like the support for [Classic and New Common dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls), [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and much more. 
 
 <p align="center">
-  <img src="https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Images%20New%20Dialogs/Mix6.png" alt="Mix" title="TOpenDialog using the Glow Vcl Style and the Vcl Styles Utils project running on Windows 10"/>
+  <img src="https://github.com/RRUZ/vcl-styles-utils/blob/master/images/Mix6.png" alt="Mix" title="TOpenDialog using the Glow Vcl Style and the Vcl Styles Utils project running on Windows 10"/>
 </p>
 
 [![](https://theroadtodelphi.files.wordpress.com/2014/07/followrruz.png)](https://twitter.com/RRUZ)
@@ -16,37 +16,37 @@ The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styl
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC'>TNCControls</a> component which allow you add controls to the Non Client area of the form</li>
 </ul> 
 
-![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/NCButtonsMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/NCButtonsMain.png)
+![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/NCButtonsMain.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/NCButtonsMain.png)
 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesWebBrowser'> Vcl.Styles.WebBrowser</a> unit, add support for style the scrollbars and dialogs of the TWebBrowser component.</li>
 </ul>  
 
-![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/WebBrowserStyledMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/WebBrowserStyledMain.png)
+![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/WebBrowserStyledMain.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/WebBrowserStyledMain.png)
 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus'>Vcl.Styles.Utils.Menus </a> unit, add support for style the VCL popup menus, system and Shell menus.</li>
 </ul> 
 
-![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/VCLStyles%20PopUp/Menu.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/VCLStyles%20PopUp/Menu.png)
+![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/VCLStyles%20PopUp/Menu.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/VCLStyles%20PopUp/Menu.png)
 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls'>Vcl.Styles.SysControls </a> add support for style the Standard Windows dialogs.</li>
 </ul>  
 
-![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/DialogsMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/DialogsMain.png)
+![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/DialogsMain.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/DialogsMain.png)
 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFormStyleHooks'>Vcl.Styles.FormStyleHooks</a> unit add support for use images and solid colors in the title and background of the TForms.</li>
 </ul>   
 
- ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/FormHooksMain.png)
+ ![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/FormHooksMain.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/FormHooksMain.png)
  
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme'>Task Dialogs</a> support.</li>
 </ul>
  
- ![https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Task%20Dialogs/TaskDialogs2.png](https://dl.dropboxusercontent.com/u/12733424/Blog/VCl%20Utils/Task%20Dialogs/TaskDialogs2.png)
+ ![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/TaskDialogs2.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/TaskDialogs2.png)
 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesFixes'>Vcl.Styles.Fixes</a> unit Fix several QC reports related to the VCL Styles.</li>
