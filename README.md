@@ -28,7 +28,7 @@ The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styl
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus'>Vcl.Styles.Utils.Menus </a> unit, add support for style the VCL popup menus, system and Shell menus.</li>
 </ul> 
 
-![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/VCLStyles%20PopUp/Menu.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/VCLStyles%20PopUp/Menu.png)
+![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/VCLStyles%20PopUp/Menu.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/Menu.png)
 
 <ul>
  <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls'>Vcl.Styles.SysControls </a> add support for style the Standard Windows dialogs.</li>
