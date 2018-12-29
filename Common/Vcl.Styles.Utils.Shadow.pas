@@ -2332,12 +2332,12 @@ begin
     FIcon := TIcon.Create;
   if TmpHandle <> 0 then
   begin
-    IconX := GetSystemMetrics(SM_CXSMICON);
+    IconX := Winapi.Windows.GetSystemMetrics(SM_CXSMICON);
     if IconX = 0 then
-      IconX := GetSystemMetrics(SM_CXSIZE);
-    IconY := GetSystemMetrics(SM_CYSMICON);
+      IconX := Winapi.Windows.GetSystemMetrics(SM_CXSIZE);
+    IconY := Winapi.Windows.GetSystemMetrics(SM_CYSMICON);
     if IconY = 0 then
-      IconY := GetSystemMetrics(SM_CYSIZE);
+      IconY := Winapi.Windows.GetSystemMetrics(SM_CYSIZE);
     FIcon.Handle := CopyImage(TmpHandle, IMAGE_ICON, IconX, IconY, 0);
     FIconHandle := TmpHandle;
   end;
@@ -2964,7 +2964,7 @@ var
   LIconDraw: Boolean;
   FMenu, FChildMenu: TMainMenu;
 begin
-  Result := GetSystemMetrics(SM_CYMENU);
+  Result := Winapi.Windows.GetSystemMetrics(SM_CYMENU);
   if MainMenu = nil then
     Exit;
 
@@ -2993,7 +2993,7 @@ begin
     Buffer.Canvas.Font.Assign(Screen.MenuFont);
     LIconDraw := FShowMDIButtons and CanTrackMDISystemMenu;
     if LIconDraw then
-      LHeight := GetSystemMetrics(SM_CYMENU)
+      LHeight := Winapi.Windows.GetSystemMetrics(SM_CYMENU)
     else
       LHeight := 0;
     for I := 0 to FItemCount - 1 do
@@ -3003,14 +3003,14 @@ begin
       if (LHeight > AWidth) and (LHeight <> 0) then
       begin
         LHeight := LWidth;
-        Result := Result + GetSystemMetrics(SM_CYMENU);
+        Result := Result + Winapi.Windows.GetSystemMetrics(SM_CYMENU);
       end;
     end;
   finally
     Buffer.Free;
   end;
   if (LButtonWidth <> 0) and (LHeight + LButtonWidth > AWidth) then
-    Result := Result + GetSystemMetrics(SM_CYMENU);
+    Result := Result + Winapi.Windows.GetSystemMetrics(SM_CYMENU);
 end;
 
 function TFormStyleHook.TMainMenuBarStyleHook.GetMenuItemWidth
@@ -3245,7 +3245,7 @@ begin
 
     { draw items }
     FRightAlign := FFormHook.Control.BiDiMode = bdRightToLeft;
-    BW := GetSystemMetrics(SM_CYMENU);
+    BW := Winapi.Windows.GetSystemMetrics(SM_CYMENU);
     Y := 0;
     if FShowMDIButtons then
       RX := FBoundsRect.Width - BW * 3
@@ -3276,7 +3276,7 @@ begin
         FItems[I].ItemRect.Right := FItems[I].ItemRect.Left + W;
         if (FItems[I].ItemRect.Right > FBoundsRect.Width) and (X <> 0) then
         begin
-          Y := Y + GetSystemMetrics(SM_CYMENU);
+          Y := Y + Winapi.Windows.GetSystemMetrics(SM_CYMENU);
           FItems[I].ItemRect.Left := 0;
           FItems[I].ItemRect.Right := W;
         end;
@@ -3288,7 +3288,7 @@ begin
         FItems[I].ItemRect.Right := FItems[I].ItemRect.Left + W;
         if (FItems[I].ItemRect.Left < 0) and (X <> 0) then
         begin
-          Y := Y + GetSystemMetrics(SM_CYMENU);
+          Y := Y + Winapi.Windows.GetSystemMetrics(SM_CYMENU);
           if FShowMDIButtons then
             FItems[I].ItemRect.Right := FBoundsRect.Width - BW * 3
           else
@@ -3299,7 +3299,7 @@ begin
       end;
       FItems[I].ItemRect.Top := Y;
       FItems[I].ItemRect.Bottom := FItems[I].ItemRect.Top +
-        GetSystemMetrics(SM_CYMENU);
+        Winapi.Windows.GetSystemMetrics(SM_CYMENU);
     end;
 
     if not FRightAlign then
@@ -3592,7 +3592,7 @@ begin
   else
   begin
     if FShowMDIButtons and CanTrackMDISystemMenu and
-      Rect(0, 0, GetSystemMetrics(SM_CYMENU), GetSystemMetrics(SM_CYMENU))
+      Rect(0, 0, Winapi.Windows.GetSystemMetrics(SM_CYMENU), Winapi.Windows.GetSystemMetrics(SM_CYMENU))
       .Contains(Point(X, Y)) then
       TrackMDIChildSystemMenu;
   end;
