@@ -660,10 +660,16 @@ procedure TFontAwesome.LoadFontFromResource;
 var
  LStream : TResourceStream;
  LStatus : TStatus;
+ cFonts: DWord;
 begin
   LStream := TResourceStream.Create(HInstance, 'fontawesome', RT_RCDATA);
   try
     FPrivateFontCollection := TGPPrivateFontCollection.Create;
+
+    // We HAVE to do this to register the font to the system (Weird .NET bug !)
+    cFonts:= 0;
+    AddFontMemResourceEx(LStream.Memory, Cardinal(LStream.Size), nil, @cFonts);
+
     LStatus := FPrivateFontCollection.AddMemoryFont(LStream.Memory, LStream.Size);
     if (LStatus <> Status.Ok) then
        RaiseLastOSError();
