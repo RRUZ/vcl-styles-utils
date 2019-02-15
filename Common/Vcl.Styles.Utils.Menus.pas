@@ -1642,7 +1642,7 @@ begin
         end;
       end;
 
-    MN_BUTTONDOWN, MN_DBLCLK:
+    MN_BUTTONDOWN_UP, MN_DBLCLK:
       begin
         { we should calc item/button pressed with mouse position }
         LInitPos.X := 0;
