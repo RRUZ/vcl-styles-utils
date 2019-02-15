@@ -166,6 +166,7 @@ const
 {$IFDEF HOOK_Navigation}
 const
   VSCLASS_NAVIGATION                  = 'Navigation';
+  VSCLASS_COMMONITEMSDIALOG           = 'CommonItemsDialog';
 {$ENDIF}
 
 {$IFDEF HOOK_TreeView}
@@ -3053,10 +3054,14 @@ var
   LHWND       : HWND;
   LFuncDrawThemeBackground : TFuncDrawThemeBackground;
 begin
+  Result := S_FALSE;
   VCLStylesLock.Enter;
   try
     if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
-      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+    begin
+      Result := Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+      Exit;
+    end;
 
     if not THThemesClasses.ContainsKey(hTheme)  then
     begin
@@ -3068,32 +3073,24 @@ begin
       end
       else
       begin
-       //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-       Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+        Result := Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+        Exit;
       end;
     end
     else
     LThemeClass := THThemesClasses.Items[hTheme];
-//
-//    DrawStyleFillRect(hdc, pRect, clGray);
-//    Exit(S_OK);
 
     LHWND := THThemesHWND.Items[hTheme];
 
-   //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    if FuncsDrawThemeBackground.ContainsKey(LThemeClass) then
    begin
      LFuncDrawThemeBackground := FuncsDrawThemeBackground.Items[LThemeClass];
-     Exit(LFuncDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
+     Result := LFuncDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND);
    end
    else
    begin
-
-//     OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-//     DrawStyleFillRect(hdc, pRect, clPurple);
-//     Exit(S_OK);
-//
-     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+     DrawStyleFillRect(hdc, pRect, clBtnFace);
+     Result := S_OK;
    end;
   finally
     VCLStylesLock.Leave;
@@ -3495,7 +3492,8 @@ begin
       else
       {$ENDIF}
      {$IFDEF HOOK_TreeView}
-      if  SameText(LThemeClass, VSCLASS_TREEVIEW) or SameText(LThemeClass, VSCLASS_PROPERTREE) then
+      if  SameText(LThemeClass, VSCLASS_TREEVIEW) or SameText(LThemeClass, VSCLASS_PROPERTREE) or
+          SameText(LThemeClass, 'ExplorerNavPane') then
       begin
 
         pColor:=clNone;
@@ -4178,6 +4176,28 @@ begin
 end;
 {$IFEND}
 
+function UxTheme_CommonItemsDialog(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; Stdcall;
+var
+ LColor : TColor;
+begin
+  case iPartId of
+    1:
+      begin
+        case iStateId of
+         //background
+         0 :
+             begin
+               DrawStyleElement(hdc, StyleServices.GetElementDetails(twWindowRoot), pRect);
+               Exit(S_OK);
+             end;
+        end;
+      end;
+  end;
+
+   //OutputDebugString(PChar(Format('UxTheme_CommonItemsDialog class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+end;
+
 const
   themelib = 'uxtheme.dll';
 
@@ -4276,8 +4296,11 @@ initialization
     FuncsDrawThemeBackground.Add(VSCLASS_TREEVIEW, @UxTheme_TreeView);
     {$ENDIF}
     {$IFDEF HOOK_Navigation}
-    if TOSVersion.Check(6, 2) then //Windows 8
-      FuncsDrawThemeBackground.Add(VSCLASS_NAVIGATION, @UxTheme_Navigation);
+    if TOSVersion.Check(6, 2) then //Windows 8, 10...
+      begin
+        FuncsDrawThemeBackground.Add(VSCLASS_NAVIGATION, @UxTheme_Navigation);
+        FuncsDrawThemeBackground.Add(VSCLASS_COMMONITEMSDIALOG, @UxTheme_CommonItemsDialog);
+      end;
     {$ENDIF}
 
     @Trampoline_UxTheme_OpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
