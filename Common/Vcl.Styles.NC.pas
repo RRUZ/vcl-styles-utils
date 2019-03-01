@@ -2076,6 +2076,7 @@ var
   LStylesServices: TCustomStyleServices;
   LForm: TCustomForm;
 begin
+
   if (Self is TFormStyleNCControls) and (TFormStyleNCControls(Self).NCControls <> nil) then
   begin
     LStylesServices := TFormStyleNCControls(Self).NCControls.StyleServices;

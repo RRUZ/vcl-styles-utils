@@ -3144,7 +3144,6 @@ var
   LThemeClass : string;
   LColor : TColor;
 begin
-
      VCLStylesLock.Enter;
      try
       if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not THThemesClasses.ContainsKey(hTheme) then
