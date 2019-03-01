@@ -104,9 +104,10 @@
         <DCCReference Include="..\Common\Vcl.Styles.Utils.SysControls.pas"/>
         <DCCReference Include="..\Common\Vcl.Styles.Utils.SysStyleHook.pas"/>
         <DCCReference Include="..\Common\Vcl.Styles.UxTheme.pas"/>
-        <DCCReference Include="..\Common\uVisualStylePreview.pas"/>
-        <DCCReference Include="..\Common\uRegisterVisualStyles.pas"/>
+        <DCCReference Include="..\Common\Vcl.Styles.Preview.pas"/>
+        <DCCReference Include="..\Common\Vcl.Styles.Register.pas"/>
         <DCCReference Include="..\Common\Vcl.Styles.FontAwesome.pas"/>
+        <DCCReference Include="..\Common\Vcl.Styles.MiscFunctions.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

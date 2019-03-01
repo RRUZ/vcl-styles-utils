@@ -1,4 +1,4 @@
-unit uVisualStylePreview;
+unit Vcl.Styles.Preview;
 
 interface
 

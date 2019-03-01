@@ -61,7 +61,8 @@ uses
   Vcl.Controls,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
-  Vcl.Themes;
+  Vcl.Themes,
+  Vcl.Styles.MiscFunctions;
 
 type
   TListStyleBrush  = class(TDictionary<Integer, HBRUSH>)
@@ -99,6 +100,9 @@ var
   CanDraw: Boolean;
   SaveIndex : Integer;
 begin
+  if not(ExecutingInMainThread) then
+    Exit(Trampoline_user32_DrawEdge(hDC, qrc, edge, grfFlags));
+
   CanDraw := (not StyleServices.IsSystemStyle) and (TSysStyleManager.Enabled);
   if (CanDraw) and (edge <> BDR_OUTER) and (edge <> BDR_INNER) then
   begin
@@ -115,7 +119,7 @@ end;
 
 function Detour_FillRect(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or StyleServices.IsSystemStyle or not(TSysStyleManager.Enabled) then
     Exit(Trampoline_user32_FillRect(hDC, lprc, hbr))
   else if (hbr > 0) and (hbr < COLOR_ENDCOLORS + 1) then
     Exit(Trampoline_user32_FillRect(hDC, lprc, GetSysColorBrush(hbr - 1)))
@@ -125,7 +129,7 @@ end;
 
 function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or StyleServices.IsSystemStyle or not(TSysStyleManager.Enabled) then
     Result := Trampoline_user32_GetSysColor(nIndex)
   else if nIndex = COLOR_HOTLIGHT then
     Result := DWORD(StyleServices.GetSystemColor(clHighlight))
@@ -139,6 +143,9 @@ var
   LBrush: HBRUSH;
   LColor: TColor;
 begin
+  if not(ExecutingInMainThread) then
+    Exit(Trampoline_user32_GetSysColorBrush(nIndex));
+
   {
     The reason to change the previous code implementation
     is that the win32 graphics may differ with the VCL graphics:
@@ -188,6 +195,12 @@ var
   I: Integer;
   LActiveStyle: TCustomStyleServices;
 begin
+  if not(ExecutingInMainThread) then
+    begin
+      Trampoline_SetStyle(Self, Style);
+      exit;
+    end;
+
   LActiveStyle := TStyleManager.ActiveStyle;
   Trampoline_SetStyle(Self, Style);
   if (Style <> LActiveStyle) then
@@ -211,6 +224,9 @@ var
   LThemedComboBox: TThemedComboBox;
   LThemedScrollBar: TThemedScrollBar;
 begin
+  if not(ExecutingInMainThread) then
+    Exit(Trampoline_user32_DrawFrameControl(DC, Rect, uType, uState));
+
   Result := False;
   CanDraw:= (not StyleServices.IsSystemStyle) and (TSysStyleManager.Enabled) and (Rect <> nil);
   if CanDraw then
@@ -455,7 +471,10 @@ var
    end;
 
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not TSysStyleManager.HookDialogIcons then
+  if not(ExecutingInMainThread) or
+     StyleServices.IsSystemStyle or
+     not(TSysStyleManager.Enabled) or
+     not(TSysStyleManager.HookDialogIcons) then
    Exit(Trampoline_user32_LoadIconW(_hInstance, lpIconName));
 
    if {(_hInstance>0) and (_hInstance<>HInstance) and} IS_INTRESOURCE(lpIconName) then
@@ -508,7 +527,7 @@ var
   LRect, LRect2 : TRect;
   LBackColor, LColor : TColor;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or StyleServices.IsSystemStyle or not(TSysStyleManager.Enabled) then
     Exit(Trampoline_user32_LoadImageW(hInst, ImageName, ImageType, X, Y, Flags));
 
                                                                                                                          //w8 - W10
@@ -800,6 +819,9 @@ end;
   var
     LControl : TWinControl;
   begin
+    if not(ExecutingInMainThread) then
+      Exit(Trampoline_SetWindowTheme(hwnd, pszSubAppName, pszSubIdList));
+
      LControl:= FindControl(hwnd);
      if (pszSubAppName = '') and (pszSubIdList = '') and TStyleManager.IsCustomStyleActive and (LControl<>nil) and (LControl is TMonthCalendar) then
        Exit(S_OK)

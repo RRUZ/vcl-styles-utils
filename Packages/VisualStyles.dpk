@@ -46,8 +46,9 @@ contains
   Vcl.Styles.Utils.SysControls in '..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.UxTheme in '..\Common\Vcl.Styles.UxTheme.pas',
-  uVisualStylePreview in '..\Common\uVisualStylePreview.pas',
-  uRegisterVisualStyles in '..\Common\uRegisterVisualStyles.pas',
-  Vcl.Styles.FontAwesome in '..\Common\Vcl.Styles.FontAwesome.pas';
+  Vcl.Styles.Preview in '..\Common\Vcl.Styles.Preview.pas',
+  Vcl.Styles.Register in '..\Common\Vcl.Styles.Register.pas',
+  Vcl.Styles.FontAwesome in '..\Common\Vcl.Styles.FontAwesome.pas',
+  Vcl.Styles.MiscFunctions in '..\Common\Vcl.Styles.MiscFunctions.pas';
 
 end.
