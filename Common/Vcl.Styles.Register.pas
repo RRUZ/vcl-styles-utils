@@ -1,4 +1,4 @@
-unit uRegisterVisualStyles;
+unit Vcl.Styles.Register;
 
 interface
 
@@ -7,7 +7,7 @@ procedure Register;
 implementation
 
 uses
-  System.Classes, uVisualStylePreview;
+  System.Classes, Vcl.Styles.Preview;
 
 procedure Register;
 begin

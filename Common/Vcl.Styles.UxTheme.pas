@@ -106,7 +106,8 @@ uses
   Vcl.Styles.Hooks,
   Vcl.Styles.Utils.Graphics,
   Vcl.Styles.FontAwesome,
-  Vcl.Styles.Utils.SysControls;
+  Vcl.Styles.Utils.SysControls,
+  Vcl.Styles.MiscFunctions;
 
 type
  TDrawThemeBackground  = function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; Foo: Pointer): HRESULT; stdcall;
@@ -220,6 +221,12 @@ var
 
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 begin
+  if not(ExecutingInMainThread) then
+    begin
+      Result:=Trampoline_UxTheme_OpenThemeData(hwnd, pszClassList);
+      exit;
+    end;
+
   //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList));
   VCLStylesLock.Enter;
   try
@@ -241,6 +248,12 @@ end;
 //HTHEME WINAPI OpenThemeDataForDpi(HWDN   hwnd, PCWSTR pszClassIdList, UINT   dpi);
 function Detour_UxTheme_OpenThemeDataForDPI(hwnd: HWND; pszClassList: LPCWSTR; dpi: UINT): HTHEME; stdcall;
 begin
+  if not(ExecutingInMainThread) then
+    begin
+      Result := Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, dpi);
+      exit;
+    end;
+
   VCLStylesLock.Enter;
   try
     Result := Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, dpi);
@@ -259,6 +272,12 @@ end;
 
 function Detour_UxTheme_OpenThemeDataEx(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall;
 begin
+  if not(ExecutingInMainThread) then
+    begin
+      Result:=Trampoline_UxTheme_OpenThemeDataEx(hwnd, pszClassList, dwFlags);
+      exit;
+    end;
+
   //OutputDebugString(PChar('Detour_UxTheme_OpenThemeDataEx '+pszClassList));
   VCLStylesLock.Enter;
   try
@@ -3099,7 +3118,9 @@ end;
 
 function Detour_UxTheme_DrawThemeBackgroundEx(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pOptions: Pointer): HRESULT; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or
+     StyleServices.IsSystemStyle or
+     not(TSysStyleManager.Enabled) then
     Exit(Trampoline_UxTheme_DrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions))
   else
     Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pOptions, Trampoline_UxTheme_DrawThemeBackgroundEx));
@@ -3107,7 +3128,9 @@ end;
 
 function Detour_UxTheme_DrawThemeBackground(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or
+     StyleServices.IsSystemStyle or
+     not(TSysStyleManager.Enabled) then
     Exit(Trampoline_UxTheme_DrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect))
   else
     Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pClipRect, Trampoline_UxTheme_DrawThemeBackground));
@@ -3122,7 +3145,9 @@ end;
 
 function Detour_UxTheme_GetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or
+     StyleServices.IsSystemStyle or
+     not(TSysStyleManager.Enabled) then
    Result:= Trampoline_UxTheme_GetThemeSysColor(hTheme, iColorId)
   else
    Result:= StyleServices.GetSystemColor(iColorId or Integer($FF000000));
@@ -3144,6 +3169,9 @@ var
   LThemeClass : string;
   LColor : TColor;
 begin
+  if not(ExecutingInMainThread) then
+    Exit(Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
+
      VCLStylesLock.Enter;
      try
       if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or not THThemesClasses.ContainsKey(hTheme) then
@@ -3152,6 +3180,7 @@ begin
      finally
        VCLStylesLock.Leave;
      end;
+
 
 
      case iPropId  of
@@ -3165,6 +3194,7 @@ begin
                //OutputDebugString(PChar(Format('Intercepted Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
                //pColor := ColorToRGB(clRed);
                pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+               //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
                Exit(S_OK);
              end;
          end;
@@ -3177,7 +3207,7 @@ begin
 //Debug Output: Intercepted Detour_GetThemeColor Class CPLCommandModule::CommandModule hTheme 65575 iPartId 3 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 //Debug Output: Intercepted Detour_GetThemeColor Class InfoBar hTheme 65576 iPartId 2 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 
-//OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+
 
     if LThemeClass<>'' then
     begin
@@ -3436,7 +3466,7 @@ begin
 
           9 :
               case iStateId  of
-               1 :  pColor:=  ColorToRGB(clBlue);
+               1 :  pColor:= ColorToRGB(clBlue);
                2 :  pColor:= ColorToRGB(clYellow);
               end;
         end;
@@ -3624,6 +3654,8 @@ begin
      //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
      //OutputDebugString2(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor]));
     end;
+
+  //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 end;
 
 
@@ -3650,6 +3682,9 @@ var
   LText : string;
   LRect : TRect;
 begin
+ if not(ExecutingInMainThread) then
+   Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+
  LThemeClasses := TStringList.Create;
  try
    VCLStylesLock.Enter;
@@ -4037,6 +4072,9 @@ var
   LThemeClass : string;
   plf: LOGFONTW;
 begin
+  if not(ExecutingInMainThread) then
+    Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+
  VCLStylesLock.Enter;
  try
    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or (dwTextFlags and DT_CALCRECT <> 0) or not THThemesClasses.ContainsKey(hTheme) then
