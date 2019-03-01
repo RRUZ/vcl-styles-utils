@@ -458,12 +458,15 @@ class function TStyleManagerHelper.GetStyleSourceInfo(const StyleName: string): 
 Var
  LRegisteredStyles : TDictionary<string, TSourceInfo>;
 begin
+  Result.Data       := nil;
+  Result.StyleClass := nil;
+
   LRegisteredStyles := TStyleManager.RegisteredStyles;
   try
     if LRegisteredStyles.ContainsKey(StyleName) then
-      Result:=LRegisteredStyles[StyleName];
+      Result := LRegisteredStyles[StyleName];
   finally
-     LRegisteredStyles.Free;
+    LRegisteredStyles.Free;
   end;
 end;
 
