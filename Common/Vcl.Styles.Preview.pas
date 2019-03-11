@@ -7,6 +7,8 @@ Uses
   Vcl.Themes, Vcl.Forms, Vcl.Graphics, Vcl.Controls, Vcl.ExtCtrls;
 
 type
+  TPreviewType = (ptOriginal, ptTabs);
+
   TVisualStylePreview = class(TCustomControl)
     protected
       FStyle           : TCustomStyleServices;
@@ -15,12 +17,31 @@ type
       FRegion          : HRGN;
       FBitmap          : TBitmap;
       FUnavailableText : string;
+      FPreviewType     : TPreviewType;
+      FFormBorderSize  : TRect;
 
       procedure SetStyle(const aStyle : TCustomStyleServices);
 
-      function  GetBorderSize : TRect;
+      function  GetFormBorderSize : TRect;
+      function  GetMainMenuRect : TRect;
+      function  GetTabsRect : TRect;
+
+      function  GetCaptionHeight : integer;
+      function  GetLeftFormBorderWidth : integer;
+      function  GetRightFormBorderWidth : integer;
+      function  GetBottomFormBorderHeight : integer;
       function  RectVCenter(var aRect : TRect; aBounds : TRect): TRect;
-      procedure DrawDefaultPanel(aHandle : THandle; aRect : TRect);
+
+      procedure DrawCaption;
+      procedure DrawFormBorders;
+      procedure DrawMainMenu;
+      procedure DrawToolButtons;
+      procedure DrawButtons;
+      procedure DrawTabs;
+      procedure DrawDefaultPanel;
+      procedure DrawOriginalPreview;
+      procedure DrawTabsPreview;
+
       procedure Paint; override;
 
     public
@@ -35,6 +56,7 @@ type
       property UnavailableText : string               read FUnavailableText write FUnavailableText;
 
     published
+      property PreviewType     : TPreviewType         read FPreviewType     write FPreviewType;
       property Align;
       property Anchors;
       property Visible;
@@ -45,15 +67,20 @@ implementation
 uses
   System.SysUtils, System.Types, System.UITypes;
 
+const
+  ORIGINAL_PPI = 96;
+
 constructor TVisualStylePreview.Create(AControl: TComponent);
 begin
   inherited Create(AControl);
 
-  FRegion  := 0;
-  FStyle   := nil;
-  FCaption := '';
-  FIcon    := 0;
-  FBitmap  := nil;
+  FRegion         := 0;
+  FStyle          := nil;
+  FCaption        := '';
+  FIcon           := 0;
+  FBitmap         := nil;
+  FPreviewType    := ptOriginal;
+  FFormBorderSize := rect(0, 0, 0, 0);
 end;
 
 destructor TVisualStylePreview.Destroy;
@@ -89,28 +116,72 @@ begin
   Refresh;
 end;
 
-function TVisualStylePreview.GetBorderSize: TRect;
+function TVisualStylePreview.GetCaptionHeight : integer;
 var
-  TempSize    : TSize;
-  TempDetails : TThemedElementDetails;
+  LSize    : TSize;
+  LDetails : TThemedElementDetails;
 begin
-  Result := Rect(0, 0, 0, 0);
+  LDetails := FStyle.GetElementDetails(twCaptionActive);
+  FStyle.GetElementSize(0, LDetails, esActual, LSize);
+  Result := LSize.cy;
+end;
 
-  TempDetails := Style.GetElementDetails(twCaptionActive);
-  Style.GetElementSize(0, TempDetails, esActual, TempSize);
-  Result.Top  := TempSize.cy;
+function TVisualStylePreview.GetLeftFormBorderWidth : integer;
+var
+  LSize    : TSize;
+  LDetails : TThemedElementDetails;
+begin
+  LDetails := FStyle.GetElementDetails(twFrameLeftActive);
+  FStyle.GetElementSize(0, LDetails, esActual, LSize);
+  Result := LSize.cx;
+end;
 
-  TempDetails := Style.GetElementDetails(twFrameLeftActive);
-  Style.GetElementSize(0, TempDetails, esActual, TempSize);
-  Result.Left := TempSize.cx;
+function TVisualStylePreview.GetRightFormBorderWidth : integer;
+var
+  LSize    : TSize;
+  LDetails : TThemedElementDetails;
+begin
+  LDetails  := FStyle.GetElementDetails(twFrameRightActive);
+  FStyle.GetElementSize(0, LDetails, esActual, LSize);
+  Result := LSize.cx;
+end;
 
-  TempDetails  := Style.GetElementDetails(twFrameRightActive);
-  Style.GetElementSize(0, TempDetails, esActual, TempSize);
-  Result.Right := TempSize.cx;
+function TVisualStylePreview.GetBottomFormBorderHeight : integer;
+var
+  LSize    : TSize;
+  LDetails : TThemedElementDetails;
+begin
+  LDetails   := FStyle.GetElementDetails(twFrameBottomActive);
+  FStyle.GetElementSize(0, LDetails, esActual, LSize);
+  Result := LSize.cy;
+end;
 
-  TempDetails   := Style.GetElementDetails(twFrameBottomActive);
-  Style.GetElementSize(0, TempDetails, esActual, TempSize);
-  Result.Bottom := TempSize.cy;
+function TVisualStylePreview.GetFormBorderSize: TRect;
+begin
+  Result.Top    := GetCaptionHeight;
+  Result.Left   := GetLeftFormBorderWidth;
+  Result.Right  := GetRightFormBorderWidth;
+  Result.Bottom := GetBottomFormBorderHeight;
+end;
+
+function TVisualStylePreview.GetMainMenuRect : TRect;
+const
+  MENU_ITEM_HEIGHT = 20;
+begin
+  Result.Left   := FFormBorderSize.Left;
+  Result.Top    := FFormBorderSize.Top;
+  Result.Right  := FBitmap.Width - FFormBorderSize.Right;
+  Result.Bottom := Result.Top + MulDiv(MENU_ITEM_HEIGHT, screen.PixelsPerInch, ORIGINAL_PPI);
+end;
+
+function TVisualStylePreview.GetTabsRect : TRect;
+const
+  TABS_HEIGHT = 27;
+begin
+  Result.Left   := FFormBorderSize.Left;
+  Result.Top    := FFormBorderSize.Top;
+  Result.Right  := FBitmap.Width - FFormBorderSize.Right;
+  Result.Bottom := Result.Top + MulDiv(TABS_HEIGHT, screen.PixelsPerInch, ORIGINAL_PPI);
 end;
 
 function TVisualStylePreview.RectVCenter(var aRect : TRect; aBounds : TRect): TRect;
@@ -122,237 +193,367 @@ begin
   Result := aRect;
 end;
 
-procedure TVisualStylePreview.DrawDefaultPanel(aHandle : THandle; aRect : TRect);
+procedure TVisualStylePreview.DrawDefaultPanel;
 var
-  TempDetails : TThemedElementDetails;
-  TempColor   : TColor;
-  TempFlags   : DWORD;
+  LDetails : TThemedElementDetails;
+  LColor   : TColor;
+  LRect    : TRect;
 begin
-  TempDetails := StyleServices.GetElementDetails(tpPanelBackground);
-  StyleServices.DrawElement(aHandle, TempDetails, aRect, nil);
+  LRect := rect(0, 0, FBitmap.Width, FBitmap.Height);
 
-  if (length(FUnavailableText) > 0) then
+  if (csDesigning in ComponentState) then
     begin
-      if not(StyleServices.GetElementColor(TempDetails, ecTextColor, TempColor)) then
-        TempColor := StyleServices.GetSystemColor(clBtnText);
-
-      TempFlags := DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_CENTER;
-
-      StyleServices.DrawText(aHandle, TempDetails, FUnavailableText, aRect, TTextFormatFlags(TempFlags), TempColor);
-    end;
-end;
-
-procedure TVisualStylePreview.Paint;
-var
-  LDetails        : TThemedElementDetails;
-  CaptionDetails  : TThemedElementDetails;
-  IconDetails     : TThemedElementDetails;
-  IconRect        : TRect;
-  BorderRect      : TRect;
-  CaptionRect     : TRect;
-  ButtonRect      : TRect;
-  TextRect        : TRect;
-  CaptionBitmap   : TBitmap;
-  //LBitmap         : TBitmap;
-  ThemeTextColor  : TColor;
-  ARect           : TRect;
-  LRect           : TRect;
-  //BlendFunction   : TBlendFunction;
-  LRegion         : HRgn;
-  i               : Integer;
-begin
-  if (FStyle = nil) then
-    begin
-      DrawDefaultPanel(Canvas.Handle, ClientRect);
+      FBitmap.Canvas.Brush.Color := clWhite;
+      FBitmap.Canvas.Brush.Style := bsSolid;
+      FBitmap.Canvas.FillRect(LRect);
       exit;
     end;
 
-  BorderRect := GetBorderSize;
-  ARect:=ClientRect;
-  CaptionBitmap := TBitmap.Create;
-  try
-    CaptionBitmap.SetSize(ARect.Width, BorderRect.Top);
-        {
-    LBitmap:=TBitmap.Create;
-    LBitmap.PixelFormat:=pf32bit;
-    }
-    FBitmap.Width :=ClientRect.Width;
-    FBitmap.Height:=ClientRect.Height;
+  LDetails := StyleServices.GetElementDetails(tpPanelBackground);
 
-    //Draw background
-    LDetails.Element := teWindow;
-    LDetails.Part := 0;
-    Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ARect);
+  if not(StyleServices.GetElementColor(LDetails, ecFillColor, LColor)) then
+    LColor := GetSysColor(COLOR_BTNFACE);
 
-    //Draw caption border
-    CaptionRect := Rect(0, 0, CaptionBitmap.Width, CaptionBitmap.Height);
-    LDetails := Style.GetElementDetails(twCaptionActive);
+  FBitmap.Canvas.Brush.Color := LColor;
+  FBitmap.Canvas.Brush.Style := bsSolid;
+  FBitmap.Canvas.FillRect(LRect);
 
-    LRegion := FRegion;
-    try
-      Style.GetElementRegion(LDetails, ARect, FRegion);
-      SetWindowRgn(Handle, FRegion, True);
-    finally
-      if LRegion <> 0 then
-        DeleteObject(LRegion);
+  if (length(FUnavailableText) > 0) then
+    begin
+      if not(StyleServices.GetElementColor(LDetails, ecTextColor, LColor)) then
+        LColor := GetSysColor(COLOR_BTNTEXT);
+
+      FBitmap.Canvas.Font.Color := LColor;
+      FBitmap.Canvas.TextRect(LRect, FUnavailableText, [tfVerticalCenter, tfCenter, tfSingleLine]);
     end;
+end;
 
-         {
-    Style.GetElementRegion(LDetails, ARect, Region);
-    SetWindowRgn(Handle, Region, True);
-        }
+procedure TVisualStylePreview.DrawCaption;
+var
+  LClientRect     : TRect;
+  LCaptionRect    : TRect;
+  LTextRect       : TRect;
+  LIconRect       : TRect;
+  LButtonRect     : TRect;
+  LDetails        : TThemedElementDetails;
+  LCaptionDetails : TThemedElementDetails;
+  LIconDetails    : TThemedElementDetails;
+  LRegion         : HRGN;
+begin
+  LClientRect  := ClientRect;
+  LCaptionRect := Rect(0, 0, FBitmap.Width, FFormBorderSize.Top);
 
-    Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, CaptionRect);
-    TextRect := CaptionRect;
-    CaptionDetails := LDetails;
+  //Draw background
+  LDetails.Element := teWindow;
+  LDetails.Part    := 0;
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LClientRect);
 
-    //Draw icon
-    IconDetails := Style.GetElementDetails(twSysButtonNormal);
-    if not Style.GetElementContentRect(0, IconDetails, CaptionRect, ButtonRect) then
-      ButtonRect := Rect(0, 0, 0, 0);
-    IconRect := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
-    RectVCenter(IconRect, ButtonRect);
-    if ButtonRect.Width > 0 then
+  //Draw caption border
+  LDetails := FStyle.GetElementDetails(twCaptionActive);
 
-     if FIcon<>0 then
-      DrawIconEx(CaptionBitmap.Canvas.Handle, IconRect.Left, IconRect.Top, FIcon, 0, 0, 0, 0, DI_NORMAL);
-
-    Inc(TextRect.Left, ButtonRect.Width + 5);
-
-    //Draw buttons
-
-    //Close button
-    LDetails := Style.GetElementDetails(twCloseButtonNormal);
-    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-     Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-    //Maximize button
-    LDetails := Style.GetElementDetails(twMaxButtonNormal);
-    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-      Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-    //Minimize button
-    LDetails := Style.GetElementDetails(twMinButtonNormal);
-
-    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-      Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-    //Help button
-    LDetails := Style.GetElementDetails(twHelpButtonNormal);
-    if Style.GetElementContentRect(0, LDetails, CaptionRect, ButtonRect) then
-      Style.DrawElement(CaptionBitmap.Canvas.Handle, LDetails, ButtonRect);
-
-    if ButtonRect.Left > 0 then
-      TextRect.Right := ButtonRect.Left;
-
-    //Draw text
-    Style.DrawText(CaptionBitmap.Canvas.Handle, CaptionDetails, FCaption, TextRect, [tfLeft, tfSingleLine, tfVerticalCenter]);
-
-    //Draw caption
-    FBitmap.Canvas.Draw(0, 0, CaptionBitmap);
-
+  LRegion := FRegion;
+  try
+    FStyle.GetElementRegion(LDetails, LClientRect, FRegion);
+    SetWindowRgn(Handle, FRegion, True);
   finally
-    CaptionBitmap.Free;
+    if (LRegion <> 0) then DeleteObject(LRegion);
   end;
 
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LCaptionRect);
+  LTextRect       := LCaptionRect;
+  LCaptionDetails := LDetails;
+
+  //Draw icon
+  LIconDetails := FStyle.GetElementDetails(twSysButtonNormal);
+  LIconRect    := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+
+  if not(FStyle.GetElementContentRect(0, LIconDetails, LCaptionRect, LButtonRect)) then
+    LButtonRect := Rect(0, 0, 0, 0);
+
+  RectVCenter(LIconRect, LButtonRect);
+
+  if (LButtonRect.Width > 0) and (FIcon <> 0) then
+    DrawIconEx(FBitmap.Canvas.Handle, LIconRect.Left, LIconRect.Top, FIcon, 0, 0, 0, 0, DI_NORMAL);
+
+  Inc(LTextRect.Left, LButtonRect.Width + MulDiv(5, screen.PixelsPerInch, ORIGINAL_PPI));
+
+  //Draw buttons
+
+  //Close button
+  LDetails := FStyle.GetElementDetails(twCloseButtonNormal);
+  if FStyle.GetElementContentRect(0, LDetails, LCaptionRect, LButtonRect) then
+   FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LButtonRect);
+
+  //Maximize button
+  LDetails := FStyle.GetElementDetails(twMaxButtonNormal);
+  if FStyle.GetElementContentRect(0, LDetails, LCaptionRect, LButtonRect) then
+    FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LButtonRect);
+
+  //Minimize button
+  LDetails := FStyle.GetElementDetails(twMinButtonNormal);
+
+  if FStyle.GetElementContentRect(0, LDetails, LCaptionRect, LButtonRect) then
+    FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LButtonRect);
+
+  //Help button
+  LDetails := FStyle.GetElementDetails(twHelpButtonNormal);
+  if FStyle.GetElementContentRect(0, LDetails, LCaptionRect, LButtonRect) then
+    FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LButtonRect);
+
+  if (LButtonRect.Left > 0) then LTextRect.Right := LButtonRect.Left;
+
+  //Draw text
+  FStyle.DrawText(FBitmap.Canvas.Handle, LCaptionDetails, FCaption, LTextRect, [tfLeft, tfSingleLine, tfVerticalCenter]);
+end;
+
+procedure TVisualStylePreview.DrawFormBorders;
+var
+  LRect    : TRect;
+  LDetails : TThemedElementDetails;
+begin
   //Draw left border
-  CaptionRect := Rect(0, BorderRect.Top, BorderRect.Left, ARect.Height - BorderRect.Bottom);
-  LDetails := Style.GetElementDetails(twFrameLeftActive);
-  if CaptionRect.Bottom - CaptionRect.Top > 0 then
-    Style.DrawElement(FBitmap.Canvas.Handle, LDetails, CaptionRect);
+  LRect    := Rect(0, FFormBorderSize.Top, FFormBorderSize.Left, FBitmap.Height - FFormBorderSize.Bottom);
+  LDetails := FStyle.GetElementDetails(twFrameLeftActive);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LRect);
 
   //Draw right border
-  CaptionRect := Rect(ARect.Width - BorderRect.Right, BorderRect.Top, ARect.Width, ARect.Height - BorderRect.Bottom);
-  LDetails := Style.GetElementDetails(twFrameRightActive);
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, CaptionRect);
+  LRect    := Rect(FBitmap.Width - FFormBorderSize.Right, FFormBorderSize.Top, FBitmap.Width, FBitmap.Height - FFormBorderSize.Bottom);
+  LDetails := FStyle.GetElementDetails(twFrameRightActive);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LRect);
 
   //Draw Bottom border
-  CaptionRect := Rect(0, ARect.Height - BorderRect.Bottom, ARect.Width, ARect.Height);
-  LDetails := Style.GetElementDetails(twFrameBottomActive);
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, CaptionRect);
+  LRect    := Rect(0, FBitmap.Height - FFormBorderSize.Bottom, FBitmap.Width, FBitmap.Height);
+  LDetails := FStyle.GetElementDetails(twFrameBottomActive);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LRect);
+end;
 
-  //Draw Main Menu
-  LDetails:= Style.GetElementDetails(tmMenuBarBackgroundActive);
-  LRect:=Rect(BorderRect.Left, BorderRect.Top+1, ARect.Width-BorderRect.Left,BorderRect.Top+1+20);
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, LRect);
+procedure TVisualStylePreview.DrawMainMenu;
+const
+  MENU_ITEM_WIDTH = 30;
+var
+  LMenuRect : TRect;
+  LItemRect : TRect;
+  LDetails  : TThemedElementDetails;
+  LColor    : TColor;
+  LWidth    : integer;
+begin
+  LMenuRect := GetMainMenuRect;
 
-  LDetails := Style.GetElementDetails(tmMenuBarItemNormal);
-  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
+  LDetails := FStyle.GetElementDetails(tmMenuBarBackgroundActive);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LMenuRect);
 
-//    function DrawText(DC: HDC; Details: TThemedElementDetails;
-//      const S: string; var R: TRect; Flags: TTextFormat; Color: TColor = clNone): Boolean; overload;
-//    function DrawText(DC: HDC; Details: TThemedElementDetails;
-//      const S: string; var R: TRect; Flags: TTextFormat; Options: TStyleTextOptions): Boolean; overload;
+  LDetails := FStyle.GetElementDetails(tmMenuBarItemNormal);
+  FStyle.GetElementColor(LDetails, ecTextColor, LColor);
 
-  CaptionRect := Rect(LRect.Left+10,LRect.Top+3, LRect.Right ,LRect.Bottom);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'File', CaptionRect, [tfLeft], ThemeTextColor);
-  CaptionRect := Rect(LRect.Left+40,LRect.Top+3, LRect.Right ,LRect.Bottom);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Edit', CaptionRect,  [tfLeft], ThemeTextColor);
-  CaptionRect := Rect(LRect.Left+70,LRect.Top+3, LRect.Right ,LRect.Bottom);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'View', CaptionRect,  [tfLeft], ThemeTextColor);
-  CaptionRect := Rect(LRect.Left+110,LRect.Top+3, LRect.Right ,LRect.Bottom);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Help', CaptionRect,  [tfLeft], ThemeTextColor);
+  LWidth := MulDiv(MENU_ITEM_WIDTH, screen.PixelsPerInch, ORIGINAL_PPI);
 
+  LItemRect.Left   := LMenuRect.Left + MulDiv(10, screen.PixelsPerInch, ORIGINAL_PPI);
+  LItemRect.Top    := LMenuRect.Top  + MulDiv(3, screen.PixelsPerInch, ORIGINAL_PPI);
+  LItemRect.Right  := LItemRect.Left + LWidth;
+  LItemRect.Bottom := LMenuRect.Bottom;
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'File', LItemRect, [tfLeft], LColor);
 
-  //Draw ToolButtons
+  LItemRect.Left   := LItemRect.Right;
+  LItemRect.Right  := LItemRect.Left + LWidth;
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Edit', LItemRect, [tfLeft], LColor);
+
+  LItemRect.Left   := LItemRect.Right;
+  LItemRect.Right  := LItemRect.Left + LWidth;
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'View', LItemRect, [tfLeft], LColor);
+
+  LItemRect.Left   := LItemRect.Right;
+  LItemRect.Right  := LItemRect.Left + LWidth;
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Help', LItemRect, [tfLeft], LColor);
+end;
+
+procedure TVisualStylePreview.DrawToolButtons;
+const
+  BUTTON_WIDTH  = 75;
+  BUTTON_HEIGHT = 25;
+  PANEL_PADDING = 10;
+var
+  LMenuRect   : TRect;
+  LButtonRect : TRect;
+  LDetails    : TThemedElementDetails;
+  LColor      : TColor;
+  i           : integer;
+  LWidth      : integer;
+  LHeight     : integer;
+  LPadding    : integer;
+begin
+  LMenuRect := GetMainMenuRect;
+  LWidth    := MulDiv(BUTTON_WIDTH,  screen.PixelsPerInch, ORIGINAL_PPI);
+  LHeight   := MulDiv(BUTTON_HEIGHT, screen.PixelsPerInch, ORIGINAL_PPI);
+  LPadding  := MulDiv(PANEL_PADDING, screen.PixelsPerInch, ORIGINAL_PPI);
+
+  LButtonRect.Left   := FFormBorderSize.Left + LPadding;
+  LButtonRect.Top    := LMenuRect.Bottom + LPadding;
+  LButtonRect.Right  := LButtonRect.Left + LWidth;
+  LButtonRect.Bottom := LButtonRect.Top  + LHeight;
+
   for i := 1 to 3 do
-  begin
-    LDetails := Style.GetElementDetails(ttbButtonNormal);
-    ButtonRect.Left:=BorderRect.Left+5+((i-1)*76);
-    ButtonRect.Top:=LRect.Top+30;
-    ButtonRect.Width:=75;
-    ButtonRect.Height:=25;
-    Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+    begin
+      LDetails := FStyle.GetElementDetails(ttbButtonNormal);
+      FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LButtonRect);
 
-    Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-    Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'ToolButton'+IntToStr(i), ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
-  end;
+      FStyle.GetElementColor(LDetails, ecTextColor, LColor);
+      FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'ToolButton' + IntToStr(i), LButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), LColor);
 
-  //Draw Normal
-  LDetails := Style.GetElementDetails(tbPushButtonNormal);
-  ButtonRect.Left:=BorderRect.Left+5;
-  ButtonRect.Top:=ARect.Height-45;
-  ButtonRect.Width:=75;
-  ButtonRect.Height:=25;
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+      LButtonRect.Left  := LButtonRect.Right;
+      LButtonRect.Right := LButtonRect.Left + LWidth;
+    end;
+end;
 
-  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Normal', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+procedure TVisualStylePreview.DrawButtons;
+const
+  BUTTON_WIDTH  = 75;
+  BUTTON_HEIGHT = 25;
+  PANEL_PADDING = 10;
+var
+  LButtonRect : TRect;
+  LDetails    : TThemedElementDetails;
+  LColor      : TColor;
+  i           : integer;
+  LCaption    : string;
+  LWidth      : integer;
+  LHeight     : integer;
+  LPadding    : integer;
+begin
+  LWidth    := MulDiv(BUTTON_WIDTH,  screen.PixelsPerInch, ORIGINAL_PPI);
+  LHeight   := MulDiv(BUTTON_HEIGHT, screen.PixelsPerInch, ORIGINAL_PPI);
+  LPadding  := MulDiv(PANEL_PADDING, screen.PixelsPerInch, ORIGINAL_PPI);
 
-  //Draw Hot
-  LDetails := Style.GetElementDetails(tbPushButtonHot);
-  ButtonRect.Left:=BorderRect.Left+85;
-  ButtonRect.Top:=ARect.Height-45;
-  ButtonRect.Width:=75;
-  ButtonRect.Height:=25;
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+  LButtonRect.Left   := FFormBorderSize.Left + LPadding;
+  LButtonRect.Right  := LButtonRect.Left + LWidth;
+  LButtonRect.Bottom := FBitmap.Height - FFormBorderSize.Bottom - LPadding;
+  LButtonRect.Top    := LButtonRect.Bottom - LHeight;
 
-  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Hot', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+  for i := 1 to 4 do
+    begin
+      case i of
+        1 :
+          begin
+            LDetails := FStyle.GetElementDetails(tbPushButtonNormal);
+            LCaption := 'Normal';
+          end;
 
-  //Draw Pressed
-  LDetails := Style.GetElementDetails(tbPushButtonPressed);
-  ButtonRect.Left:=BorderRect.Left+165;
-  ButtonRect.Top:=ARect.Height-45;
-  ButtonRect.Width:=75;
-  ButtonRect.Height:=25;
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+        2 :
+          begin
+            LDetails := FStyle.GetElementDetails(tbPushButtonHot);
+            LCaption := 'Hot';
+          end;
 
-  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Pressed', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+        3 :
+          begin
+            LDetails := FStyle.GetElementDetails(tbPushButtonPressed);
+            LCaption := 'Pressed';
+          end;
 
-  //Draw Disabled
-  LDetails := Style.GetElementDetails(tbPushButtonDisabled);
-  ButtonRect.Left:=BorderRect.Left+245;
-  ButtonRect.Top:=ARect.Height-45;
-  ButtonRect.Width:=75;
-  ButtonRect.Height:=25;
-  Style.DrawElement(FBitmap.Canvas.Handle, LDetails, ButtonRect);
+        4 :
+          begin
+            LDetails := FStyle.GetElementDetails(tbPushButtonDisabled);
+            LCaption := 'Disabled';
+          end;
+      end;
 
-  Style.GetElementColor(LDetails, ecTextColor, ThemeTextColor);
-  Style.DrawText(FBitmap.Canvas.Handle, LDetails, 'Disabled', ButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), ThemeTextColor);
+      FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LButtonRect);
+      FStyle.GetElementColor(LDetails, ecTextColor, LColor);
+      FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, LCaption, LButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), LColor);
 
-  Canvas.Draw(0,0,FBitmap);
+      LButtonRect.Left  := LButtonRect.Right + LPadding;
+      LButtonRect.Right := LButtonRect.Left  + LWidth;
+    end;
+end;
+
+procedure TVisualStylePreview.DrawTabs;
+const
+  TAB_WIDTH  = 80;
+  TAB_OFFSET = 3;
+var
+  LDetails  : TThemedElementDetails;
+  LTabsRect : TRect;
+  LItemRect : TRect;
+  LWidth    : integer;
+  LColor    : TColor;
+  LFlags    : TTextFormat;
+  LOffset   : integer;
+begin
+  LWidth    := MulDiv(TAB_WIDTH,  screen.PixelsPerInch, ORIGINAL_PPI);
+  LOffset   := MulDiv(TAB_OFFSET, screen.PixelsPerInch, ORIGINAL_PPI);
+  LTabsRect := GetTabsRect;
+  LFlags    := TTextFormatFlags(DT_VCENTER or DT_CENTER);
+  LColor    := clBlack;
+
+  // Tabs background
+  LDetails := StyleServices.GetElementDetails(ttPane);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LTabsRect);
+
+
+  // Selected tab
+  LItemRect       := LTabsRect;
+  LItemRect.Right := LItemRect.Left + LWidth;
+
+  LDetails := StyleServices.GetElementDetails(ttTabItemSelected);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LItemRect);
+  FStyle.GetElementColor(LDetails, ecTextColor, LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Selected', LItemRect, LFlags, LColor);
+
+
+  // Hot tab
+  LItemRect.Left  := succ(LItemRect.Right);
+  LItemRect.Right := LItemRect.Left + LWidth;
+  LItemRect.Top   := LTabsRect.Top  + LOffset;  // unselected tabs are slightly shorter
+
+  LDetails := StyleServices.GetElementDetails(ttTabItemHot);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LItemRect);
+  FStyle.GetElementColor(LDetails, ecTextColor, LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Hot', LItemRect, LFlags, LColor);
+
+
+  // Normal tab
+  LItemRect.Left  := succ(LItemRect.Right);
+  LItemRect.Right := LItemRect.Left + LWidth;
+
+  LDetails := StyleServices.GetElementDetails(ttTabItemNormal);
+  FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LItemRect);
+  FStyle.GetElementColor(LDetails, ecTextColor, LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Normal', LItemRect, LFlags, LColor);
+end;
+
+procedure TVisualStylePreview.DrawOriginalPreview;
+begin
+  FFormBorderSize := GetFormBorderSize;
+
+  DrawCaption;
+  DrawFormBorders;
+  DrawMainMenu;
+  DrawToolButtons;
+  DrawButtons;
+end;
+
+procedure TVisualStylePreview.DrawTabsPreview;
+begin
+  FFormBorderSize := GetFormBorderSize;
+
+  DrawCaption;
+  DrawFormBorders;
+  DrawTabs;
+  DrawButtons;
+end;
+
+procedure TVisualStylePreview.Paint;
+begin
+  FBitmap.SetSize(ClientRect.Width, ClientRect.Height);
+
+  if (FStyle = nil) then
+    DrawDefaultPanel
+   else
+    case FPreviewType of
+      ptOriginal : DrawOriginalPreview;
+      ptTabs     : DrawTabsPreview;
+    end;
+
+  Canvas.Draw(0, 0, FBitmap);
 end;
 
 end.
