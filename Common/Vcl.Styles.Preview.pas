@@ -18,6 +18,7 @@ type
       FBitmap          : TBitmap;
       FPreviewType     : TPreviewType;
       FFormBorderSize  : TRect;
+      FBkgColor        : TColor;
       FUnavailableText : string;
       FSelectedText    : string;
       FHotText         : string;
@@ -77,6 +78,7 @@ type
 
     published
       property PreviewType     : TPreviewType         read FPreviewType     write FPreviewType;
+      property BkgColor        : TColor               read FBkgColor        write FBkgColor;
       property Align;
       property Anchors;
       property Visible;
@@ -101,6 +103,7 @@ begin
   FBitmap         := nil;
   FPreviewType    := ptOriginal;
   FFormBorderSize := rect(0, 0, 0, 0);
+  FBkgColor       := clNone;
 
   FUnavailableText := 'Preview not available';
   FSelectedText    := 'Selected';
@@ -235,16 +238,25 @@ begin
 
   if (csDesigning in ComponentState) then
     begin
-      FBitmap.Canvas.Brush.Color := clWhite;
+      if (FBkgColor <> clNone) then
+        FBitmap.Canvas.Brush.Color := FBkgColor
+       else
+        FBitmap.Canvas.Brush.Color := clWhite;
+
       FBitmap.Canvas.Brush.Style := bsSolid;
       FBitmap.Canvas.FillRect(LRect);
       exit;
     end;
 
-  LDetails := StyleServices.GetElementDetails(tpPanelBackground);
+  if (FBkgColor <> clNone) then
+    LColor := FBkgColor
+   else
+    begin
+      LDetails := StyleServices.GetElementDetails(tpPanelBackground);
 
-  if not(StyleServices.GetElementColor(LDetails, ecFillColor, LColor)) then
-    LColor := GetSysColor(COLOR_BTNFACE);
+      if not(StyleServices.GetElementColor(LDetails, ecFillColor, LColor)) then
+        LColor := GetSysColor(COLOR_BTNFACE);
+    end;
 
   FBitmap.Canvas.Brush.Color := LColor;
   FBitmap.Canvas.Brush.Style := bsSolid;
