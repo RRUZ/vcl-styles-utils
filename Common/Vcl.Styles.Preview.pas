@@ -16,9 +16,19 @@ type
       FCaption         : TCaption;
       FRegion          : HRGN;
       FBitmap          : TBitmap;
-      FUnavailableText : string;
       FPreviewType     : TPreviewType;
       FFormBorderSize  : TRect;
+      FUnavailableText : string;
+      FSelectedText    : string;
+      FHotText         : string;
+      FNormalText      : string;
+      FDisabledText    : string;
+      FPressedText     : string;
+      FButtonText      : string;
+      FFileMenuText    : string;
+      FEditMenuText    : string;
+      FViewMenuText    : string;
+      FHelpMenuText    : string;
 
       procedure SetStyle(const aStyle : TCustomStyleServices);
 
@@ -54,6 +64,16 @@ type
       property Caption         : TCaption             read FCaption         write FCaption;
       property Bitmap          : TBitmap              read FBitmap          write FBitmap;
       property UnavailableText : string               read FUnavailableText write FUnavailableText;
+      property SelectedText    : string               read FSelectedText    write FSelectedText;
+      property HotText         : string               read FHotText         write FHotText;
+      property NormalText      : string               read FNormalText      write FNormalText;
+      property DisabledText    : string               read FDisabledText    write FDisabledText;
+      property PressedText     : string               read FPressedText     write FPressedText;
+      property ButtonText      : string               read FButtonText      write FButtonText;
+      property FileMenuText    : string               read FFileMenuText    write FFileMenuText;
+      property EditMenuText    : string               read FEditMenuText    write FEditMenuText;
+      property ViewMenuText    : string               read FViewMenuText    write FViewMenuText;
+      property HelpMenuText    : string               read FHelpMenuText    write FHelpMenuText;
 
     published
       property PreviewType     : TPreviewType         read FPreviewType     write FPreviewType;
@@ -81,6 +101,18 @@ begin
   FBitmap         := nil;
   FPreviewType    := ptOriginal;
   FFormBorderSize := rect(0, 0, 0, 0);
+
+  FUnavailableText := 'Preview not available';
+  FSelectedText    := 'Selected';
+  FHotText         := 'Hot';
+  FNormalText      := 'Normal';
+  FDisabledText    := 'Disabled';
+  FPressedText     := 'Pressed';
+  FButtonText      := 'ToolButton';
+  FFileMenuText    := 'File';
+  FEditMenuText    := 'Edit';
+  FViewMenuText    := 'View';
+  FHelpMenuText    := 'Help';
 end;
 
 destructor TVisualStylePreview.Destroy;
@@ -351,19 +383,19 @@ begin
   LItemRect.Top    := LMenuRect.Top  + MulDiv(3, screen.PixelsPerInch, ORIGINAL_PPI);
   LItemRect.Right  := LItemRect.Left + LWidth;
   LItemRect.Bottom := LMenuRect.Bottom;
-  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'File', LItemRect, [tfLeft], LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FFileMenuText, LItemRect, [tfLeft], LColor);
 
   LItemRect.Left   := LItemRect.Right;
   LItemRect.Right  := LItemRect.Left + LWidth;
-  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Edit', LItemRect, [tfLeft], LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FEditMenuText, LItemRect, [tfLeft], LColor);
 
   LItemRect.Left   := LItemRect.Right;
   LItemRect.Right  := LItemRect.Left + LWidth;
-  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'View', LItemRect, [tfLeft], LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FViewMenuText, LItemRect, [tfLeft], LColor);
 
   LItemRect.Left   := LItemRect.Right;
   LItemRect.Right  := LItemRect.Left + LWidth;
-  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Help', LItemRect, [tfLeft], LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FHelpMenuText, LItemRect, [tfLeft], LColor);
 end;
 
 procedure TVisualStylePreview.DrawToolButtons;
@@ -397,7 +429,7 @@ begin
       FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LButtonRect);
 
       FStyle.GetElementColor(LDetails, ecTextColor, LColor);
-      FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'ToolButton' + IntToStr(i), LButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), LColor);
+      FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FButtonText + IntToStr(i), LButtonRect, TTextFormatFlags(DT_VCENTER or DT_CENTER), LColor);
 
       LButtonRect.Left  := LButtonRect.Right;
       LButtonRect.Right := LButtonRect.Left + LWidth;
@@ -434,25 +466,25 @@ begin
         1 :
           begin
             LDetails := FStyle.GetElementDetails(tbPushButtonNormal);
-            LCaption := 'Normal';
+            LCaption := FNormalText;
           end;
 
         2 :
           begin
             LDetails := FStyle.GetElementDetails(tbPushButtonHot);
-            LCaption := 'Hot';
+            LCaption := FHotText;
           end;
 
         3 :
           begin
             LDetails := FStyle.GetElementDetails(tbPushButtonPressed);
-            LCaption := 'Pressed';
+            LCaption := FPressedText;
           end;
 
         4 :
           begin
             LDetails := FStyle.GetElementDetails(tbPushButtonDisabled);
-            LCaption := 'Disabled';
+            LCaption := FDisabledText;
           end;
       end;
 
@@ -496,7 +528,7 @@ begin
   LDetails := StyleServices.GetElementDetails(ttTabItemSelected);
   FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LItemRect);
   FStyle.GetElementColor(LDetails, ecTextColor, LColor);
-  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Selected', LItemRect, LFlags, LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FSelectedText, LItemRect, LFlags, LColor);
 
 
   // Hot tab
@@ -507,7 +539,7 @@ begin
   LDetails := StyleServices.GetElementDetails(ttTabItemHot);
   FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LItemRect);
   FStyle.GetElementColor(LDetails, ecTextColor, LColor);
-  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Hot', LItemRect, LFlags, LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FHotText, LItemRect, LFlags, LColor);
 
 
   // Normal tab
@@ -517,7 +549,7 @@ begin
   LDetails := StyleServices.GetElementDetails(ttTabItemNormal);
   FStyle.DrawElement(FBitmap.Canvas.Handle, LDetails, LItemRect);
   FStyle.GetElementColor(LDetails, ecTextColor, LColor);
-  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, 'Normal', LItemRect, LFlags, LColor);
+  FStyle.DrawText(FBitmap.Canvas.Handle, LDetails, FNormalText, LItemRect, LFlags, LColor);
 end;
 
 procedure TVisualStylePreview.DrawOriginalPreview;
