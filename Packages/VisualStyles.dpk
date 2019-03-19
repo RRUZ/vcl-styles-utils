@@ -9,21 +9,21 @@ package VisualStyles;
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
+{$LOCALSYMBOLS OFF}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
-{$REFERENCEINFO ON}
+{$REFERENCEINFO OFF}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
+{$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
 {$IMPLICITBUILD OFF}
 
@@ -49,6 +49,7 @@ contains
   Vcl.Styles.Preview in '..\Common\Vcl.Styles.Preview.pas',
   Vcl.Styles.Register in '..\Common\Vcl.Styles.Register.pas',
   Vcl.Styles.FontAwesome in '..\Common\Vcl.Styles.FontAwesome.pas',
-  Vcl.Styles.MiscFunctions in '..\Common\Vcl.Styles.MiscFunctions.pas';
+  Vcl.Styles.MiscFunctions in '..\Common\Vcl.Styles.MiscFunctions.pas',
+  Vcl.Styles.DPIAware in '..\Common\Vcl.Styles.DPIAware.pas';
 
 end.
