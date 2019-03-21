@@ -106,7 +106,8 @@ uses
   Vcl.Styles.Hooks,
   Vcl.Styles.Utils.Graphics,
   Vcl.Styles.FontAwesome,
-  Vcl.Styles.Utils.SysControls;
+  Vcl.Styles.Utils.SysControls,
+  Vcl.Styles.MiscFunctions;
 
 type
  TDrawThemeBackground  = function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; Foo: Pointer): HRESULT; stdcall;
@@ -166,6 +167,7 @@ const
 {$IFDEF HOOK_Navigation}
 const
   VSCLASS_NAVIGATION                  = 'Navigation';
+  VSCLASS_COMMONITEMSDIALOG           = 'CommonItemsDialog';
 {$ENDIF}
 
 {$IFDEF HOOK_TreeView}
@@ -219,6 +221,12 @@ var
 
 function Detour_UxTheme_OpenThemeData(hwnd: HWND; pszClassList: LPCWSTR): HTHEME; stdcall;
 begin
+  if not(ExecutingInMainThread) then
+    begin
+      Result:=Trampoline_UxTheme_OpenThemeData(hwnd, pszClassList);
+      exit;
+    end;
+
   //OutputDebugString(PChar('Detour_UxTheme_OpenThemeData '+pszClassList));
   VCLStylesLock.Enter;
   try
@@ -240,6 +248,12 @@ end;
 //HTHEME WINAPI OpenThemeDataForDpi(HWDN   hwnd, PCWSTR pszClassIdList, UINT   dpi);
 function Detour_UxTheme_OpenThemeDataForDPI(hwnd: HWND; pszClassList: LPCWSTR; dpi: UINT): HTHEME; stdcall;
 begin
+  if not(ExecutingInMainThread) then
+    begin
+      Result := Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, dpi);
+      exit;
+    end;
+
   VCLStylesLock.Enter;
   try
     Result := Trampoline_UxTheme_OpenThemeDataForDPI(hwnd, pszClassList, dpi);
@@ -258,6 +272,12 @@ end;
 
 function Detour_UxTheme_OpenThemeDataEx(hwnd: HWND; pszClassList: LPCWSTR; dwFlags: DWORD): HTHEME; stdcall;
 begin
+  if not(ExecutingInMainThread) then
+    begin
+      Result:=Trampoline_UxTheme_OpenThemeDataEx(hwnd, pszClassList, dwFlags);
+      exit;
+    end;
+
   //OutputDebugString(PChar('Detour_UxTheme_OpenThemeDataEx '+pszClassList));
   VCLStylesLock.Enter;
   try
@@ -3053,10 +3073,14 @@ var
   LHWND       : HWND;
   LFuncDrawThemeBackground : TFuncDrawThemeBackground;
 begin
+  Result := S_FALSE;
   VCLStylesLock.Enter;
   try
     if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
-      Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+    begin
+      Result := Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+      Exit;
+    end;
 
     if not THThemesClasses.ContainsKey(hTheme)  then
     begin
@@ -3068,32 +3092,24 @@ begin
       end
       else
       begin
-       //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-       Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+        Result := Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
+        Exit;
       end;
     end
     else
     LThemeClass := THThemesClasses.Items[hTheme];
-//
-//    DrawStyleFillRect(hdc, pRect, clGray);
-//    Exit(S_OK);
 
     LHWND := THThemesHWND.Items[hTheme];
 
-   //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
    if FuncsDrawThemeBackground.ContainsKey(LThemeClass) then
    begin
      LFuncDrawThemeBackground := FuncsDrawThemeBackground.Items[LThemeClass];
-     Exit(LFuncDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND));
+     Result := LFuncDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, Foo, Trampoline, LThemeClass, LHWND);
    end
    else
    begin
-
-//     OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
-//     DrawStyleFillRect(hdc, pRect, clPurple);
-//     Exit(S_OK);
-//
-     Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+     DrawStyleFillRect(hdc, pRect, clBtnFace);
+     Result := S_OK;
    end;
   finally
     VCLStylesLock.Leave;
@@ -3102,7 +3118,9 @@ end;
 
 function Detour_UxTheme_DrawThemeBackgroundEx(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pOptions: Pointer): HRESULT; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or
+     StyleServices.IsSystemStyle or
+     not(TSysStyleManager.Enabled) then
     Exit(Trampoline_UxTheme_DrawThemeBackgroundEx(hTheme, hdc, iPartId, iStateId, pRect, pOptions))
   else
     Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pOptions, Trampoline_UxTheme_DrawThemeBackgroundEx));
@@ -3110,7 +3128,9 @@ end;
 
 function Detour_UxTheme_DrawThemeBackground(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; pClipRect: Pointer): HRESULT; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or
+     StyleServices.IsSystemStyle or
+     not(TSysStyleManager.Enabled) then
     Exit(Trampoline_UxTheme_DrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect))
   else
     Exit(Detour_UxTheme_DrawThemeMain(hTheme, hdc, iPartId, iStateId, pRect, pClipRect, Trampoline_UxTheme_DrawThemeBackground));
@@ -3125,7 +3145,9 @@ end;
 
 function Detour_UxTheme_GetThemeSysColor(hTheme: HTHEME; iColorId: Integer): COLORREF; stdcall;
 begin
-  if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+  if not(ExecutingInMainThread) or
+     StyleServices.IsSystemStyle or
+     not(TSysStyleManager.Enabled) then
    Result:= Trampoline_UxTheme_GetThemeSysColor(hTheme, iColorId)
   else
    Result:= StyleServices.GetSystemColor(iColorId or Integer($FF000000));
@@ -3147,6 +3169,8 @@ var
   LThemeClass : string;
   LColor : TColor;
 begin
+  if not(ExecutingInMainThread) then
+    Exit(Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor));
 
      VCLStylesLock.Enter;
      try
@@ -3156,6 +3180,7 @@ begin
      finally
        VCLStylesLock.Leave;
      end;
+
 
 
      case iPropId  of
@@ -3169,6 +3194,7 @@ begin
                //OutputDebugString(PChar(Format('Intercepted Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
                //pColor := ColorToRGB(clRed);
                pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+               //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
                Exit(S_OK);
              end;
          end;
@@ -3181,7 +3207,7 @@ begin
 //Debug Output: Intercepted Detour_GetThemeColor Class CPLCommandModule::CommandModule hTheme 65575 iPartId 3 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 //Debug Output: Intercepted Detour_GetThemeColor Class InfoBar hTheme 65576 iPartId 2 iStateId 1  iPropId 3803 Color        0 Process ThemedSysControls.exe (14304)
 
-//OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+
 
     if LThemeClass<>'' then
     begin
@@ -3440,7 +3466,7 @@ begin
 
           9 :
               case iStateId  of
-               1 :  pColor:=  ColorToRGB(clBlue);
+               1 :  pColor:= ColorToRGB(clBlue);
                2 :  pColor:= ColorToRGB(clYellow);
               end;
         end;
@@ -3495,7 +3521,8 @@ begin
       else
       {$ENDIF}
      {$IFDEF HOOK_TreeView}
-      if  SameText(LThemeClass, VSCLASS_TREEVIEW) or SameText(LThemeClass, VSCLASS_PROPERTREE) then
+      if  SameText(LThemeClass, VSCLASS_TREEVIEW) or SameText(LThemeClass, VSCLASS_PROPERTREE) or
+          SameText(LThemeClass, 'ExplorerNavPane') then
       begin
 
         pColor:=clNone;
@@ -3627,6 +3654,8 @@ begin
      //OutputDebugString(PChar(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor])));
      //OutputDebugString2(Format('Detour_GetThemeColor hTheme %d iPartId %d iStateId %d  Color %8.x', [hTheme, iPartId, iStateId, pColor]));
     end;
+
+  //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
 end;
 
 
@@ -3653,6 +3682,9 @@ var
   LText : string;
   LRect : TRect;
 begin
+ if not(ExecutingInMainThread) then
+   Exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect));
+
  LThemeClasses := TStringList.Create;
  try
    VCLStylesLock.Enter;
@@ -4040,6 +4072,9 @@ var
   LThemeClass : string;
   plf: LOGFONTW;
 begin
+  if not(ExecutingInMainThread) then
+    Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+
  VCLStylesLock.Enter;
  try
    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled or (dwTextFlags and DT_CALCRECT <> 0) or not THThemesClasses.ContainsKey(hTheme) then
@@ -4052,8 +4087,53 @@ begin
 
  if LThemeClass<>'' then
  begin
+   if SameText(LThemeClass, VSCLASS_TREEVIEW) then
+   begin
+        case iPartId of
+          1 :
+          begin
+            if iStateId = 2 then
+            begin
+              LCanvas:=TCanvas.Create;
+              SaveIndex := SaveDC(hdc);
+              try
+                LCanvas.Handle:=hdc;
+                if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
+                begin
+                  ZeroMemory(@plf, SizeOf(plf));
+                  plf.lfHeight := 13;
+                  plf.lfCharSet := DEFAULT_CHARSET;
+                  StrCopy(plf.lfFaceName, 'Tahoma');
+                  LCanvas.Font.Handle := CreateFontIndirect(plf);
+                end;
+                LDetails := StyleServices.GetElementDetails(tlListItemNormal);
+                ThemeTextColor := StyleServices.GetStyleFontColor(sfListItemTextNormal);
+                StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+              finally
+                if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
+                  DeleteObject(LCanvas.Font.Handle);
+                LCanvas.Handle := 0;
+                LCanvas.Free;
+                RestoreDC(hdc, SaveIndex);
+              end;
+
+              Result := S_OK;
+            end
+            else
+            begin
+              //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+              Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+            end;
+          end;
+        else
+          begin
+             //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+             Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+          end;
+        end;
+   end
    {$IFDEF HOOK_ListView}
-   if SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) then
+   else if SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) then
    begin
         case iPartId of
           LVP_GROUPHEADER :
@@ -4178,6 +4258,28 @@ begin
 end;
 {$IFEND}
 
+function UxTheme_CommonItemsDialog(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer;  const pRect: TRect; Foo: Pointer; Trampoline : TDrawThemeBackground; LThemeClass : string; hwnd : HWND): HRESULT; Stdcall;
+var
+ LColor : TColor;
+begin
+  case iPartId of
+    1:
+      begin
+        case iStateId of
+         //background
+         0 :
+             begin
+               DrawStyleElement(hdc, StyleServices.GetElementDetails(twWindowRoot), pRect);
+               Exit(S_OK);
+             end;
+        end;
+      end;
+  end;
+
+   //OutputDebugString(PChar(Format('UxTheme_CommonItemsDialog class %s hTheme %d iPartId %d iStateId %d', [LThemeClass, hTheme, iPartId, iStateId])));
+   Exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+end;
+
 const
   themelib = 'uxtheme.dll';
 
@@ -4276,8 +4378,11 @@ initialization
     FuncsDrawThemeBackground.Add(VSCLASS_TREEVIEW, @UxTheme_TreeView);
     {$ENDIF}
     {$IFDEF HOOK_Navigation}
-    if TOSVersion.Check(6, 2) then //Windows 8
-      FuncsDrawThemeBackground.Add(VSCLASS_NAVIGATION, @UxTheme_Navigation);
+    if TOSVersion.Check(6, 2) then //Windows 8, 10...
+      begin
+        FuncsDrawThemeBackground.Add(VSCLASS_NAVIGATION, @UxTheme_Navigation);
+        FuncsDrawThemeBackground.Add(VSCLASS_COMMONITEMSDIALOG, @UxTheme_CommonItemsDialog);
+      end;
     {$ENDIF}
 
     @Trampoline_UxTheme_OpenThemeData          := InterceptCreate(themelib, 'OpenThemeData', @Detour_UxTheme_OpenThemeData);
