@@ -267,7 +267,9 @@ const
 
 
   procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True); overload;
+{$IF (CompilerVersion >= 33)}
   procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; ClipRect: PRect; DPI: Integer = 0; RestoreDC : Boolean = True); overload;
+{$IFEND}
   procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleRectangle(hdc : HDC; LRect : TRect; AColor :TColor);
@@ -799,6 +801,7 @@ begin
   end;
 end;
 
+{$IF (CompilerVersion >= 33)}
 procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; ClipRect: PRect; DPI: Integer = 0; RestoreDC : Boolean = True);
 var
   SaveIndex : Integer;
@@ -814,6 +817,7 @@ begin
       Winapi.Windows.RestoreDC(hdc, SaveIndex);
   end;
 end;
+{$IFEND}
 
 procedure GradientRoundedFillCanvas(const ACanvas: TCanvas;
   const AStartColor, AEndColor: TColor; const ARect: TRect;
