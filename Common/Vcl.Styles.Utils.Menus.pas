@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2017 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -205,6 +205,7 @@ implementation
 
 uses
   Vcl.Forms,
+  Vcl.Styles.Utils.Misc,
   Vcl.Styles.Utils.SysControls,
   Vcl.Styles.Utils.Graphics;
 
@@ -2246,8 +2247,6 @@ begin
       Result := (pMenuItemInfo.fType and MFT_SEPARATOR) = MFT_SEPARATOR;
   end;
 end;
-
-
 
 initialization
 

@@ -12,8 +12,6 @@ uses
   Vcl.Forms,
   uMain in 'uMain.pas' {Form1},
   {$IFDEF USEVCLSTYLESHOOKS}
-  DDetours in '..\..\Common\delphi-detours-library\DDetours.pas',
-  InstDecode in '..\..\Common\delphi-detours-library\InstDecode.pas',
   Vcl.Styles.Hooks in '..\..\Common\Vcl.Styles.Hooks.pas',
   Vcl.Styles.UxTheme in '..\..\Common\Vcl.Styles.UxTheme.pas',
   {$ENDIF}

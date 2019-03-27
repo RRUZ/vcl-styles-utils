@@ -42,7 +42,7 @@ uses
   Vcl.StdCtrls,
   Vcl.GraphUtil,
   Vcl.Forms,
-  Vcl.Styles.MiscFunctions;
+  Vcl.Styles.Utils.Misc;
 
 type
   TNCControl      = class;

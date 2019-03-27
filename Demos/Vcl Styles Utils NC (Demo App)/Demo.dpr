@@ -12,14 +12,13 @@ uses
   Vcl.Styles.FormStyleHooks in '..\..\Common\Vcl.Styles.FormStyleHooks.pas',
   Vcl.Styles.NC in '..\..\Common\Vcl.Styles.NC.pas',
   Vcl.Styles.Utils.SystemMenu in '..\..\Common\Vcl.Styles.Utils.SystemMenu.pas',
-  uDropdown in 'uDropdown.pas' {FrmDropDown},
-  uButtonsStyles in 'uButtonsStyles.pas' {FrmButtonsStyles},
-  uCustomStyles in 'uCustomStyles.pas' {FrmCustomStyles},
   Vcl.Styles.Utils.Menus in '..\..\Common\Vcl.Styles.Utils.Menus.pas',
   Vcl.Styles.Utils.SysControls in '..\..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
-  Vcl.Styles.Utils.Graphics in '..\..\Common\Vcl.Styles.Utils.Graphics.pas',
-  DDetours in '..\..\Common\delphi-detours-library\DDetours.pas',
+  Vcl.Styles.Utils.Graphics in '..\..\Common\Vcl.Styles.Utils.Graphics.pas',  
+  uDropdown in 'uDropdown.pas' {FrmDropDown},
+  uButtonsStyles in 'uButtonsStyles.pas' {FrmButtonsStyles},
+  uCustomStyles in 'uCustomStyles.pas' {FrmCustomStyles},
   uAlphaGradient in 'uAlphaGradient.pas' {FrmAlphaGradient},
   uButtonsTabsStyles in 'uButtonsTabsStyles.pas' {FrmButtonsTabsStyle};
 

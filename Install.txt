@@ -9,5 +9,5 @@ Installation :
 2. Under Tools, Environment Options, Library, add the directory where
  the VCL Styles Utils library have been installed (Ex : C:\Delphi\Libs\vcl-styles-utils\Common) to the Win32 and Win64 library path
 
- if you want to use the VCl.Styles.Hooks unit you must also include the Delphi detours library files 
-   Ex : C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library
+ if you want to use the Vcl.Styles.Hooks unit you must also include the Delphi detours library (https://github.com/MahdiSafsafi/DDetours) in the library path.
+   

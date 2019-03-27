@@ -6,7 +6,6 @@ uses
   System.IOUtils,
   System.SysUtils,
   Vcl.Forms,
-
   uMain in 'uMain.pas' {Form4},
   Vcl.Themes,
   Vcl.Styles,
