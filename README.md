@@ -3,7 +3,7 @@
 The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview), adding unique features like the support for [Classic and New Common dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls), [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and much more. 
 
 <p align="center">
-  <img src="https://github.com/RRUZ/vcl-styles-utils/blob/master/images/Mix6.png" alt="Mix" title="TOpenDialog using the Glow Vcl Style and the Vcl Styles Utils project running on Windows 10"/>
+  <img src="https://github.com/RRUZ/vcl-styles-utils/blob/master/images/NewOpendialog.gif" alt="Mix" title="TOpenDialog styled with Vcl Style and the Vcl Styles Utils project running on Windows 10"/>
 </p>
 
 [![](https://theroadtodelphi.files.wordpress.com/2014/07/followrruz.png)](https://twitter.com/RRUZ)
