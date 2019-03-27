@@ -266,7 +266,10 @@ const
   procedure AlphaBlendRectangle(const DC: HDC;  const AColor : TColor;const ARect: TRect; SourceConstantAlpha : Byte); overload;
 
 
-  procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True);
+  procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; RestoreDC : Boolean = True); overload;
+{$IF (CompilerVersion >= 33)}
+  procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; ClipRect: PRect; DPI: Integer = 0; RestoreDC : Boolean = True); overload;
+{$IFEND}
   procedure DrawStyleDownArrow(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleFillRect(hdc : HDC; LRect : TRect; AColor :TColor);
   procedure DrawStyleRectangle(hdc : HDC; LRect : TRect; AColor :TColor);
@@ -797,6 +800,24 @@ begin
       Winapi.Windows.RestoreDC(hdc, SaveIndex);
   end;
 end;
+
+{$IF (CompilerVersion >= 33)}
+procedure DrawStyleElement(hdc : HDC; LDetails  : TThemedElementDetails; pRect : TRect; ClipRect: PRect; DPI: Integer = 0; RestoreDC : Boolean = True);
+var
+  SaveIndex : Integer;
+begin
+  SaveIndex := 0;
+
+  if RestoreDC then SaveIndex := SaveDC(hdc);
+
+  try
+    StyleServices.DrawElement(hdc, LDetails, pRect, ClipRect, DPI);
+  finally
+    if (SaveIndex > 0) and RestoreDC then
+      Winapi.Windows.RestoreDC(hdc, SaveIndex);
+  end;
+end;
+{$IFEND}
 
 procedure GradientRoundedFillCanvas(const ACanvas: TCanvas;
   const AStartColor, AEndColor: TColor; const ARect: TRect;

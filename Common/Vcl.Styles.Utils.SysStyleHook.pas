@@ -429,7 +429,7 @@ begin
   if FFont <> nil then
     Exit(FFont);
 
-  hFont := SendMessage(Handle, WM_GETFONT, 0, 0);
+  hFont := HGDIOBJ(SendMessage(Handle, WM_GETFONT, 0, 0));
   Result := TFont.Create;
   FillChar(LogFont, SizeOf(LogFont), 0);
   GetObject(hFont, SizeOf(LogFont), @LogFont);
