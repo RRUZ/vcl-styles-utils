@@ -1,6 +1,9 @@
 package VisualStyles;
 
+
+
 {$R *.res}
+
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
@@ -28,6 +31,7 @@ package VisualStyles;
 {$IMPLICITBUILD OFF}
 
 requires
+  
   rtl,
   vcl,
   vclimg,
@@ -35,6 +39,7 @@ requires
   Detours;
 
 contains
+  
   Vcl.Styles.Ext in '..\Common\Vcl.Styles.Ext.pas',
   Vcl.Styles.Hooks in '..\Common\Vcl.Styles.Hooks.pas',
   Vcl.Styles.Utils.ComCtrls in '..\Common\Vcl.Styles.Utils.ComCtrls.pas',
@@ -49,7 +54,7 @@ contains
   Vcl.Styles.Preview in '..\Common\Vcl.Styles.Preview.pas',
   Vcl.Styles.Register in '..\Common\Vcl.Styles.Register.pas',
   Vcl.Styles.FontAwesome in '..\Common\Vcl.Styles.FontAwesome.pas',
-  Vcl.Styles.MiscFunctions in '..\Common\Vcl.Styles.MiscFunctions.pas',
-  Vcl.Styles.DPIAware in '..\Common\Vcl.Styles.DPIAware.pas';
+  Vcl.Styles.DPIAware in '..\Common\Vcl.Styles.DPIAware.pas',
+  Vcl.Styles.Utils.Misc in '..\Common\Vcl.Styles.Utils.Misc.pas';
 
 end.

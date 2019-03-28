@@ -4364,57 +4364,58 @@ begin
     VCLStylesLock.Leave;
   end;
 
-  if LThemeClass <> '' then
+  if LThemeClass<>'' then
   begin
     if SameText(LThemeClass, VSCLASS_TREEVIEW) then
     begin
-      case iPartId of
-        1:
+        case iPartId of
+          1 :
           begin
             if iStateId = 2 then
             begin
-              LCanvas := TCanvas.Create;
               SaveIndex := SaveDC(hdc);
               try
-                LCanvas.Handle := hdc;
-                if pOptions.dwFlags AND DTT_FONTPROP <> 0 then
-                begin
-                  ZeroMemory(@plf, SizeOf(plf));
-                  plf.lfHeight := 13;
-                  plf.lfCharSet := DEFAULT_CHARSET;
-                  StrCopy(plf.lfFaceName, 'Tahoma');
-                  LCanvas.Font.Handle := CreateFontIndirect(plf);
-                end;
                 LDetails := StyleServices.GetElementDetails(tlListItemNormal);
                 ThemeTextColor := StyleServices.GetStyleFontColor(sfListItemTextNormal);
-                StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags),
-                  ThemeTextColor);
+                if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
+                begin
+                  LCanvas := TCanvas.Create;
+                  try
+                    LCanvas.Handle := hdc;
+                    ZeroMemory(@plf, SizeOf(plf));
+                    plf.lfHeight := 13;
+                    plf.lfCharSet := DEFAULT_CHARSET;
+                    StrCopy(plf.lfFaceName, 'Tahoma');
+                    LCanvas.Font.Handle := CreateFontIndirect(plf);
+                    StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
+                  finally
+                    if pOptions.dwFlags AND DTT_FONTPROP <> 0  then
+                      DeleteObject(LCanvas.Font.Handle);
+                    LCanvas.Handle := 0;
+                    LCanvas.Free;
+                  end;
+                end
+                else
+                  StyleServices.DrawText(hdc, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags), ThemeTextColor);
               finally
-                if pOptions.dwFlags AND DTT_FONTPROP <> 0 then
-                  DeleteObject(LCanvas.Font.Handle);
-                LCanvas.Handle := 0;
-                LCanvas.Free;
                 RestoreDC(hdc, SaveIndex);
               end;
-
               Result := S_OK;
             end
             else
             begin
-              // OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-              exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags,
-                pRect, pOptions));
+              //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+              Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
             end;
           end;
-      else
-        begin
-          // OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
-          exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect,
-            pOptions));
+        else
+          begin
+             //OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeTextEx hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, pszText])));
+             Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
+          end;
         end;
-      end;
     end
-{$IFDEF HOOK_ListView}
+   {$IFDEF HOOK_ListView}
     else if SameText(LThemeClass, VSCLASS_LISTVIEW) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) then
     begin
       case iPartId of
