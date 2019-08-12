@@ -25,6 +25,12 @@ unit Vcl.Styles.UxTheme;
 
 interface
 
+uses
+  System.Types;
+
+var
+  Trampoline_user32_GetSysColor: function(nIndex: Integer): DWORD; stdcall;
+
 implementation
 
 { TODO
@@ -55,7 +61,6 @@ uses
   DDetours,
   System.SyncObjs,
   System.SysUtils,
-  System.Types,
   System.Classes,
   System.UITypes,
   System.Math,
@@ -68,7 +73,6 @@ uses
   Vcl.GraphUtil,
   Vcl.Themes,
   Vcl.Imaging.pngimage,
-  Vcl.Styles.Hooks,
   Vcl.Styles.Utils.Graphics,
   Vcl.Styles.FontAwesome,
   Vcl.Styles.Utils.SysControls,
