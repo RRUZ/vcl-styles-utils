@@ -23,3 +23,4 @@
 {$DEFINE HOOK_UXTHEME}
 {$DEFINE HOOK_TDateTimePicker}
 {$DEFINE HOOK_TProgressBar}
+{.$DEFINE LimitStylesToCurrentProcess}
