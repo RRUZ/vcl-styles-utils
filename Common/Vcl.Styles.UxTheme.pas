@@ -3234,7 +3234,6 @@ var
   LHWND: hwnd;
   LFuncDrawThemeBackground: TFuncDrawThemeBackground;
 begin
-  Result := S_FALSE;
   VCLStylesLock.Enter;
   try
     if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
@@ -3269,8 +3268,7 @@ begin
     end
     else
     begin
-      DrawStyleFillRect(hdc, pRect, clBtnFace);
-      Result := S_OK;
+      Result := Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo);
     end;
   finally
     VCLStylesLock.Leave;
