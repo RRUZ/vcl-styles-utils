@@ -5,7 +5,7 @@
         <ProjectVersion>18.5</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Package</AppType>
@@ -107,8 +107,8 @@
         <DCCReference Include="..\Common\Vcl.Styles.Preview.pas"/>
         <DCCReference Include="..\Common\Vcl.Styles.Register.pas"/>
         <DCCReference Include="..\Common\Vcl.Styles.FontAwesome.pas"/>
-        <DCCReference Include="..\Common\Vcl.Styles.MiscFunctions.pas"/>
         <DCCReference Include="..\Common\Vcl.Styles.DPIAware.pas"/>
+        <DCCReference Include="..\Common\Vcl.Styles.Utils.Misc.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
