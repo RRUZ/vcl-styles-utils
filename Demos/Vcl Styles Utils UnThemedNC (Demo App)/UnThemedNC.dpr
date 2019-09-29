@@ -12,12 +12,14 @@ uses
   Vcl.Styles.Utils.ComCtrls in '..\..\Common\Vcl.Styles.Utils.ComCtrls.pas',
   Vcl.Styles.Utils.Forms in '..\..\Common\Vcl.Styles.Utils.Forms.pas',
   Vcl.Styles.Utils.Menus in '..\..\Common\Vcl.Styles.Utils.Menus.pas',
+  Vcl.Styles.Utils.Misc in '..\..\Common\Vcl.Styles.Utils.Misc.pas',
   Vcl.Styles.Utils.ScreenTips in '..\..\Common\Vcl.Styles.Utils.ScreenTips.pas',
   Vcl.Styles.Utils.StdCtrls in '..\..\Common\Vcl.Styles.Utils.StdCtrls.pas',
   Vcl.Styles.Utils.SysControls in '..\..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.SysStyleHook in '..\..\Common\Vcl.Styles.Utils.SysStyleHook.pas',
   Vcl.Styles.Utils.Graphics in '..\..\Common\Vcl.Styles.Utils.Graphics.pas',
   Vcl.Styles.Hooks in '..\..\Common\Vcl.Styles.Hooks.pas',
+  Vcl.Styles.FontAwesome in '..\..\Common\Vcl.Styles.FontAwesome.pas',
   Vcl.Styles.UxTheme in '..\..\Common\Vcl.Styles.UxTheme.pas';
 
 {$R *.res}

@@ -15,6 +15,8 @@ uses
   Vcl.Styles.Utils.SysControls in '..\..\Common\Vcl.Styles.Utils.SysControls.pas',
   Vcl.Styles.Utils.Graphics in '..\..\Common\Vcl.Styles.Utils.Graphics.pas',
   Vcl.Styles.UxTheme in '..\..\Common\Vcl.Styles.UxTheme.pas',
+  Vcl.Styles.FontAwesome in '..\..\Common\Vcl.Styles.FontAwesome.pas',
+  Vcl.Styles.Utils.Misc in '..\..\Common\Vcl.Styles.Utils.Misc.pas',
   Vcl.Styles.Hooks in '..\..\Common\Vcl.Styles.Hooks.pas';
 
 {$R *.res}
