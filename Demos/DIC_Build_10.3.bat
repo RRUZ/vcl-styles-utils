@@ -1,5 +1,3 @@
-BRCC32 VersionInfo.rc
-
 echo 10.3.2
 call "C:\Program Files (x86)\Embarcadero\Studio\20.0\bin\rsvars.bat"
 
