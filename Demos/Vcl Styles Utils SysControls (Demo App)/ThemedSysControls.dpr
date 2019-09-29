@@ -12,6 +12,7 @@ uses
   Vcl.Forms,
   uMain in 'uMain.pas' {Form1},
   {$IFDEF USEVCLSTYLESHOOKS}
+  Vcl.Styles.FontAwesome in '..\..\Common\Vcl.Styles.FontAwesome.pas',
   Vcl.Styles.Hooks in '..\..\Common\Vcl.Styles.Hooks.pas',
   Vcl.Styles.UxTheme in '..\..\Common\Vcl.Styles.UxTheme.pas',
   {$ENDIF}
