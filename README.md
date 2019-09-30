@@ -1,8 +1,7 @@
 ![Lang](https://img.shields.io/github/languages/top/RRUZ/vcl-styles-utils.svg)
 ![Contrib](https://img.shields.io/github/contributors/RRUZ/vcl-styles-utils.svg)
 ![LastCommit](https://img.shields.io/github/last-commit/RRUZ/vcl-styles-utils.svg)
-![Follow](https://img.shields.io/twitter/follow/@RRUZ.svg?label=Follow%20%40RRUZ&style=social)
-
+![Follow](https://img.shields.io/twitter/follow/RRUZ.svg?style=social)
 # VCL Styles Utils #
 
 The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview), adding unique features like the support for [Classic and New Common dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls), [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and much more. 
