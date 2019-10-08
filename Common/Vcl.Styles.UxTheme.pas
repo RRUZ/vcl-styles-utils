@@ -690,6 +690,27 @@ begin
     end
     else
     {$ENDIF}
+    {$IFDEF HOOK_Menu}
+    if SameText(LThemeClass, 'MenuStyle') then
+    begin
+      pColor := clNone;
+      case iPartId of
+        13:
+          case iStateId  of
+            0 : pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnFace));
+          end;
+      end;
+
+      if TColor(pColor) = clNone then
+      begin
+        Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+        //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+      end
+      else
+        Result := S_OK;
+    end
+    else
+    {$ENDIF}
     if SameText(LThemeClass, VSCLASS_TEXTSTYLE) then
     begin
       pColor := clNone;
