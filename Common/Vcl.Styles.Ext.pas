@@ -28,7 +28,7 @@ interface
 {$IFEND}
 {$DEFINE USE_VCL_STYLESAPI}
 
-Uses
+uses
   System.Classes,
   System.Generics.Collections,
   Winapi.Windows,
@@ -37,10 +37,7 @@ Uses
   Vcl.Forms,
   Vcl.Graphics,
   Vcl.Controls,
-  Vcl.ExtCtrls,
-  Vcl.Direct2D,
-  Winapi.D2D1,
-  System.StrUtils;
+  Vcl.ExtCtrls;
 
 type
   TStyleHookList = TList<TStyleHookClass>;

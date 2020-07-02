@@ -31,6 +31,7 @@ uses
   Winapi.Windows,
   Vcl.Styles,
   Vcl.Themes,
+  Vcl.Controls,
   Vcl.StdCtrls,
   Vcl.GraphUtil,
   Vcl.Graphics;

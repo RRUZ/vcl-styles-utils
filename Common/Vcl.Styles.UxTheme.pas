@@ -69,6 +69,7 @@ uses
   WinApi.Windows,
   WinApi.UxTheme,
   WinApi.Messages,
+  Vcl.Controls,
   Vcl.Graphics,
   Vcl.GraphUtil,
   Vcl.Themes,
