@@ -38,7 +38,10 @@ Uses
   Vcl.Forms,
   Vcl.Graphics,
   Vcl.Controls,
-  Vcl.ExtCtrls;
+  Vcl.ExtCtrls,
+  Vcl.Direct2D,
+  Winapi.D2D1,
+  System.StrUtils;
 
 type
   TStyleHookList = TList<TStyleHookClass>;
