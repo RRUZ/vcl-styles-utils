@@ -37,7 +37,10 @@ Uses
   Vcl.Forms,
   Vcl.Graphics,
   Vcl.Controls,
-  Vcl.ExtCtrls;
+  Vcl.ExtCtrls,
+  Vcl.Direct2D,
+  Winapi.D2D1,
+  System.StrUtils;
 
 type
   TStyleHookList = TList<TStyleHookClass>;
@@ -247,19 +250,21 @@ uses
 {$IFDEF USE_VCL_STYLESAPI}
   System.ZLib,
   System.UITypes,
-  System.StrUtils,
   Vcl.StdCtrls,
   Vcl.ImgList,
   Vcl.Consts,
   Vcl.GraphUtil,
   Vcl.Imaging.pngimage,
+{$IF CompilerVersion >= 34}
   Vcl.Direct2D,
+  System.StrUtils,
   Winapi.D2D1,
+{$IFEND}  
   Winapi.Messages,
 {$ENDIF}
   Vcl.Dialogs;
 
-{$IF (DEFINED (USE_VCL_STYLESAPI) and (CompilerVersion >=23))}
+{$IF (DEFINED (USE_VCL_STYLESAPI) AND (CompilerVersion >= 23))}
 {$I '..\source\vcl\StyleUtils.inc'}
 {$I '..\source\vcl\StyleAPI.inc'}
 {$IFEND}
