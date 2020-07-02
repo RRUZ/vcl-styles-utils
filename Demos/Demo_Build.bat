@@ -1,6 +1,28 @@
-echo 10.1
-call "C:\Program Files (x86)\Embarcadero\Studio\18.0\bin\rsvars.bat"
+@SET ORGPATH=%PATH%
 
+IF %1% LEQ 13 GOTO RADSTUDIO
+GOTO STUDIO
+
+:RADSTUDIO
+IF EXIST "c:\Program Files (x86)\Embarcadero\RAD Studio\%1.0\bin\rsvars.bat" GOTO INITRADSTUDIO 
+ECHO ...\Embarcadero\RAD Studio\%1.0\bin\rsvars.bat was not found.
+GOTO DONE
+  
+:STUDIO  
+IF EXIST "c:\Program Files (x86)\Embarcadero\Studio\%1.0\bin\rsvars.bat" GOTO INITSTUDIO 
+ECHO ...\Embarcadero\Studio\%1.0\bin\rsvars.bat was not found.
+GOTO DONE
+
+:INITRADSTUDIO
+call "%c:\Program Files (x86)\Embarcadero\RAD Studio\%1.0\bin\rsvars.bat" 	
+GOTO INIT
+
+:INITSTUDIO
+call "c:\Program Files (x86)\Embarcadero\Studio\%1.0\bin\rsvars.bat" 	
+GOTO INIT
+
+
+:INIT
 msbuild.exe "Vcl Styles Basic Demo (Demo App)\Demo.dproj" /target:Clean;Build /p:Platform=Win32 /p:config=debug
 set BUILD_STATUS=%ERRORLEVEL%
 if %BUILD_STATUS%==0 GOTO 1
@@ -121,5 +143,6 @@ EXIT
 
 
 :DONE
-pause
-EXIT
+@SET PATH=%ORGPATH%
+
+REM pause

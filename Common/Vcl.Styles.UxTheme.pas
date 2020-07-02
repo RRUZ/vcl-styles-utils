@@ -1202,7 +1202,7 @@ var
   SaveIndex: Integer;
   LCanvas: TCanvas;
   LRect: TRect;
-  LColor, LStartColor: TColor;
+  LColor: TColor;
 begin
   case iPartId of
     LVP_LISTITEM:

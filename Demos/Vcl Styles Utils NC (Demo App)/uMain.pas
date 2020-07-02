@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls, Vcl.ImgList,
-  Vcl.ComCtrls, Vcl.ToolWin, Vcl.Styles.NC, Vcl.ExtCtrls, System.ImageList;
+  Vcl.ComCtrls, Vcl.ToolWin, Vcl.Styles.NC, Vcl.ExtCtrls;
 
 type
   TFrmMain = class(TForm)

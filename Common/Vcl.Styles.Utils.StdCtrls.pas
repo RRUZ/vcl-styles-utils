@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2019 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2020 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -2571,8 +2571,7 @@ begin
   // DoubleBuffered := True;
 end;
 
-function TSysCheckBoxStyleHook.GetDrawState(State: TSysCheckBoxState)
-  : TThemedButton;
+function TSysCheckBoxStyleHook.GetDrawState(State: TSysCheckBoxState): TThemedButton;
 begin
   Result := tbButtonDontCare;
 
@@ -2796,8 +2795,7 @@ begin
   // DoubleBuffered := True;
 end;
 
-function TSysRadioButtonStyleHook.GetDrawState(State: TSysCheckBoxState)
-  : TThemedButton;
+function TSysRadioButtonStyleHook.GetDrawState(State: TSysCheckBoxState): TThemedButton;
 begin
   Result := tbButtonDontCare;
 
