@@ -14,7 +14,7 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -54,9 +54,9 @@ implementation
 
 uses
   Winapi.CommCtrl,
-{$IF CompilerVersion >= 30.0}  // DX Seattle and UP.
+  {$IF CompilerVersion >= 30.0}  //DX Seattle and UP.
   Vcl.SysStyles,
-{$IFEND}
+  {$IFEND}
   Vcl.Styles.Utils.SysControls;
 
 { TSysTooltipsStyleHook }
@@ -147,14 +147,15 @@ end;
 
 initialization
 
-{$IF CompilerVersion >= 30.0}  // DX Seattle and UP.
-TCustomStyleEngine.UnRegisterSysStyleHook('tooltips_class32', Vcl.SysStyles.TSysTooltipsStyleHook);
+{$IF CompilerVersion >= 30.0}  //DX Seattle and UP.
+  TCustomStyleEngine.UnRegisterSysStyleHook('tooltips_class32', Vcl.SysStyles.TSysTooltipsStyleHook);
 {$IFEND}
+
+
 if StyleServices.Available then
   TSysStyleManager.RegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
 
 finalization
-
-TSysStyleManager.UnRegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
+  TSysStyleManager.UnRegisterSysStyleHook(TOOLTIPS_CLASS, TSysTooltipsStyleHook);
 
 end.

@@ -16,7 +16,7 @@
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
 //
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2019 Rodrigo Ruz V.
 //
 // Contributor(s): Mahdi Safsafi.
 //
@@ -28,32 +28,11 @@ unit Vcl.Styles.Hooks;
 interface
 
 uses
-  Vcl.Themes,
   WinApi.Windows;
 
-{$I VCL.Styles.Utils.inc}
-
-var
-  Trampoline_SetStyle: procedure(Self: TObject; Style: TCustomStyleServices);
-  Trampoline_user32_FillRect: function(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
-  Trampoline_user32_DrawEdge: function(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;  stdcall = nil;
-  Trampoline_user32_DrawFrameControl: function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
-  Trampoline_user32_LoadIconW: function (hInstance: HINST; lpIconName: PWideChar): HICON; stdcall = nil;
-  Trampoline_user32_GetSysColorBrush: function(nIndex: Integer): HBRUSH; stdcall;
-  {$IFDEF HOOK_UXTHEME}
-  Trampoline_user32_LoadImageW: function (hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall = nil;
-  {$ENDIF HOOK_UXTHEME}
-  {$IFDEF HOOK_User32SysColor}
-  Trampoline_user32_GetSysColor: function(nIndex: Integer): DWORD; stdcall;
-  {$ENDIF HOOK_User32SysColor}
-
-{$IFDEF HOOK_TDateTimePicker}
-  {$IF CompilerVersion>=29}
-  Trampoline_SetWindowTheme: function(hwnd: HWND; pszSubAppName: LPCWSTR; pszSubIdList: LPCWSTR): HRESULT; stdcall;
-  {$IFEND CompilerVersion}
-{$ENDIF HOOK_TDateTimePicker}
-
 implementation
+
+{$I VCL.Styles.Utils.inc}
 
 uses
   DDetours,
@@ -77,6 +56,7 @@ uses
   Vcl.Controls,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
+  Vcl.Themes,
   Vcl.Styles.Utils.Misc;
 
 type
@@ -93,6 +73,25 @@ var
   VCLStylesBrush: TObjectDictionary<string, TListStyleBrush>;
   VCLStylesLock: TCriticalSection = nil;
   LSetStylePtr: TSetStyle;
+
+  Trampoline_SetStyle  : procedure(Self: TObject; Style: TCustomStyleServices);
+  Trampoline_user32_FillRect  : function(hDC: hDC; const lprc: TRect; hbr: HBRUSH): Integer; stdcall;
+  Trampoline_user32_DrawEdge  : function(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;  stdcall = nil;
+  Trampoline_user32_DrawFrameControl : function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
+  Trampoline_user32_LoadIconW  : function (hInstance: HINST; lpIconName: PWideChar): HICON; stdcall = nil;
+  Trampoline_user32_GetSysColorBrush: function(nIndex: Integer): HBRUSH; stdcall;
+  {$IFDEF HOOK_UXTHEME}
+  Trampoline_user32_LoadImageW: function (hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall = nil;
+  {$ELSE}
+  Trampoline_user32_GetSysColor: function(nIndex: Integer): DWORD; stdcall;
+  {$ENDIF HOOK_UXTHEME}
+
+{$IFDEF HOOK_TDateTimePicker}
+  {$IF CompilerVersion>=29}
+  Trampoline_SetWindowTheme: function(hwnd: HWND; pszSubAppName: LPCWSTR; pszSubIdList: LPCWSTR): HRESULT; stdcall;
+  {$IFEND CompilerVersion}
+{$ENDIF HOOK_TDateTimePicker}
+
 
 function Detour_DrawEdge(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL; stdcall;
 var

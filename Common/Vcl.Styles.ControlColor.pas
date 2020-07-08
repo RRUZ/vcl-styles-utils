@@ -1,4 +1,4 @@
-// **************************************************************************************************
+//**************************************************************************************************
 //
 // Unit Vcl.Styles.ControlColor
 // unit for the VCL Styles Utils
@@ -15,18 +15,18 @@
 // The Original Code is Vcl.Styles.ControlColor
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-// **************************************************************************************************
+//**************************************************************************************************
 unit Vcl.Styles.ControlColor;
 
 interface
 
 uses
-  Vcl.StdCtrls,
-  Vcl.Controls,
-  Winapi.Messages;
+ Vcl.StdCtrls,
+ Vcl.Controls,
+ Winapi.Messages;
 
 type
   /// <summary> The <c>TEditStyleHookColor</c> vcl style hook allows you to use custom colors in the TCustomEdit descendent components
@@ -57,7 +57,7 @@ type
   /// </code>
   /// </remarks>
   TMemoStyleHookColor = class(TMemoStyleHook)
-  strict private
+  strict  private
     procedure UpdateColors;
   protected
     procedure WndProc(var Message: TMessage); override;
@@ -67,15 +67,17 @@ type
 
 implementation
 
-uses
+Uses
   System.UITypes,
   Winapi.Windows,
   Vcl.Graphics,
   Vcl.Themes,
   Vcl.Styles;
 
+
 type
-  TWinControlClass = class(TWinControl);
+ TWinControlClass= class(TWinControl);
+
 
 constructor TEditStyleHookColor.Create(AControl: TWinControl);
 begin
@@ -87,23 +89,23 @@ procedure TEditStyleHookColor.UpdateColors;
 var
   LStyle: TCustomStyleServices;
 begin
-  if Control.Enabled then
-  begin
-    Brush.Color := TWinControlClass(Control).Color;
-    FontColor := TWinControlClass(Control).Font.Color;
-  end
-  else
-  begin
-    LStyle := StyleServices;
-    Brush.Color := LStyle.GetStyleColor(scEditDisabled);
-    FontColor := LStyle.GetStyleFontColor(sfEditBoxTextDisabled);
-  end;
+ if Control.Enabled then
+ begin
+  Brush.Color := TWinControlClass(Control).Color;
+  FontColor   := TWinControlClass(Control).Font.Color;
+ end
+ else
+ begin
+  LStyle := StyleServices;
+  Brush.Color := LStyle.GetStyleColor(scEditDisabled);
+  FontColor := LStyle.GetStyleFontColor(sfEditBoxTextDisabled);
+ end;
 end;
 
 procedure TEditStyleHookColor.WndProc(var Message: TMessage);
 begin
   case Message.Msg of
-    CN_CTLCOLORMSGBOX .. CN_CTLCOLORSTATIC:
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
       begin
         UpdateColors;
         SetTextColor(Message.WParam, ColorToRGB(FontColor));
@@ -133,23 +135,23 @@ procedure TMemoStyleHookColor.UpdateColors;
 var
   LStyle: TCustomStyleServices;
 begin
-  if Control.Enabled then
-  begin
-    Brush.Color := TWinControlClass(Control).Color;
-    FontColor := TWinControlClass(Control).Font.Color;
-  end
-  else
-  begin
-    LStyle := StyleServices;
-    Brush.Color := LStyle.GetStyleColor(scEditDisabled);
-    FontColor := LStyle.GetStyleFontColor(sfEditBoxTextDisabled);
-  end;
+ if Control.Enabled then
+ begin
+  Brush.Color := TWinControlClass(Control).Color;
+  FontColor   := TWinControlClass(Control).Font.Color;
+ end
+ else
+ begin
+  LStyle := StyleServices;
+  Brush.Color := LStyle.GetStyleColor(scEditDisabled);
+  FontColor := LStyle.GetStyleFontColor(sfEditBoxTextDisabled);
+ end;
 end;
 
 procedure TMemoStyleHookColor.WndProc(var Message: TMessage);
 begin
   case Message.Msg of
-    CN_CTLCOLORMSGBOX .. CN_CTLCOLORSTATIC:
+    CN_CTLCOLORMSGBOX..CN_CTLCOLORSTATIC:
       begin
         UpdateColors;
         SetTextColor(Message.WParam, ColorToRGB(FontColor));
@@ -158,7 +160,8 @@ begin
         Handled := True;
       end;
 
-    CM_COLORCHANGED, CM_ENABLEDCHANGED:
+    CM_COLORCHANGED,
+    CM_ENABLEDCHANGED:
       begin
         UpdateColors;
         Handled := False;

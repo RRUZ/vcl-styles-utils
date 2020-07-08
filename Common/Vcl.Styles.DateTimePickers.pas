@@ -1,4 +1,4 @@
-// **************************************************************************************************
+//**************************************************************************************************
 //
 // Unit Vcl.Styles.DateTimePickers
 // unit for the VCL Styles Utils
@@ -15,21 +15,20 @@
 // The Original Code is Vcl.Styles.DateTimePickers
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2016 Rodrigo Ruz V.
 // All Rights Reserved.
 //
-// **************************************************************************************************
+//**************************************************************************************************
 unit Vcl.Styles.DateTimePickers;
 
 interface
 
 {$IF RTLVersion>=24}
-{$LEGACYIFEND ON}
+  {$LEGACYIFEND ON}
 {$IFEND}
 {$IF (CompilerVersion >= 31)}
-  {$MESSAGE ERROR 'This unit is deprecated, Use the Vcl.Styles.Hooks unit Instead'}
+    {$MESSAGE ERROR 'This unit is deprecated, Use the Vcl.Styles.Hooks unit Instead'}
 {$ELSE}
-
 uses
   Winapi.CommCtrl,
   Winapi.Messages,
@@ -39,133 +38,133 @@ uses
   Vcl.Controls;
 
 type
-  TDateTimePickerStyleHookFix = class(TDateTimePickerStyleHook)
-  private
+ TDateTimePickerStyleHookFix = class(TDateTimePickerStyleHook)
+ private
     procedure CNNotify(var Message: TWMNotify); message CN_NOTIFY;
     procedure WMPaint(var Message: TMessage); message WM_PAINT;
     procedure SetColorsCalendar;
-  public
+ public
     procedure PaintBackground(Canvas: TCanvas); override;
     constructor Create(AControl: TWinControl); override;
-  end deprecated 'Use the Vcl.Styles.Hooks unit Instead';
+ end deprecated 'Use the Vcl.Styles.Hooks unit Instead';
 
 implementation
 
 uses
   System.SysUtils,
   System.Classes,
-  Winapi.Windows,
+  WinApi.Windows,
   Vcl.Styles,
   Vcl.Themes;
 
 type
-  TDateTimePickerStyleHookHelper = class helper for TDateTimePickerStyleHook
+ TDateTimePickerStyleHookHelper = class helper for TDateTimePickerStyleHook
   private
     function GetDroppedDown: Boolean;
     procedure SetDroppedDown(const Value: Boolean);
     function GetMouseOnButton: Boolean;
     procedure SetMouseOnButton(const Value: Boolean);
-  public
+ public
     function GetButtonRect_: TRect;
-    property _FDroppedDown: Boolean read GetDroppedDown Write SetDroppedDown;
-    property _FMouseOnButton: Boolean read GetMouseOnButton Write SetMouseOnButton;
-  end;
+    property _FDroppedDown : Boolean read GetDroppedDown Write SetDroppedDown;
+    property _FMouseOnButton : Boolean read GetMouseOnButton Write SetMouseOnButton;
+ end;
 
-  { TDateTimePickerStyleHookHelper }
+{ TDateTimePickerStyleHookHelper }
 function TDateTimePickerStyleHookHelper.GetButtonRect_: TRect;
 begin
-  Result := Self.GetButtonRect;
+ Result:=Self.GetButtonRect;
 end;
 
 function TDateTimePickerStyleHookHelper.GetDroppedDown: Boolean;
 begin
-  Result := Self.FDroppedDown;
+ Result:=Self.FDroppedDown;
 end;
 
 function TDateTimePickerStyleHookHelper.GetMouseOnButton: Boolean;
 begin
-  Result := Self.FMouseOnButton;
+ Result:=Self.FMouseOnButton;
 end;
 
 procedure TDateTimePickerStyleHookHelper.SetDroppedDown(const Value: Boolean);
 begin
-  Self.FDroppedDown := Value;
+ Self.FDroppedDown:=Value;
 end;
 
 procedure TDateTimePickerStyleHookHelper.SetMouseOnButton(const Value: Boolean);
 begin
-  Self.FMouseOnButton := Value;
+ Self.FMouseOnButton:=Value;
 end;
 
 { TDateTimePickerStyleHookFix }
 procedure TDateTimePickerStyleHookFix.SetColorsCalendar;
 Var
-  LTextColor, LBackColor: TColor;
-  LDateTimePicker: TDateTimePicker;
+  LTextColor, LBackColor : TColor;
+  LDateTimePicker : TDateTimePicker;
 begin
-  LDateTimePicker := TDateTimePicker(Control);
-  // get the vcl styles colors
-  LTextColor := StyleServices.GetSystemColor(clWindowText);
-  LBackColor := StyleServices.GetSystemColor(clWindow);
+   LDateTimePicker:=TDateTimePicker(Control);
+   //get the vcl styles colors
+   LTextColor:=StyleServices.GetSystemColor(clWindowText);
+   LBackColor:=StyleServices.GetSystemColor(clWindow);
 
-  LDateTimePicker.Color := LBackColor;
-  // set the colors of the calendar
-  LDateTimePicker.CalColors.BackColor := LBackColor;
-  LDateTimePicker.CalColors.MonthBackColor := LBackColor;
-  LDateTimePicker.CalColors.TextColor := LTextColor;
-  LDateTimePicker.CalColors.TitleBackColor := LBackColor;
-  LDateTimePicker.CalColors.TitleTextColor := LTextColor;
-  LDateTimePicker.CalColors.TrailingTextColor := LTextColor;
+   LDateTimePicker.Color:=LBackColor;
+   //set the colors of the calendar
+   LDateTimePicker.CalColors.BackColor:=LBackColor;
+   LDateTimePicker.CalColors.MonthBackColor:=LBackColor;
+   LDateTimePicker.CalColors.TextColor:=LTextColor;
+   LDateTimePicker.CalColors.TitleBackColor:=LBackColor;
+   LDateTimePicker.CalColors.TitleTextColor:=LTextColor;
+   LDateTimePicker.CalColors.TrailingTextColor:=LTextColor;
 end;
 
 procedure TDateTimePickerStyleHookFix.CNNotify(var Message: TWMNotify);
 var
-  hwnd: Winapi.Windows.hwnd;
+  hwnd: WinAPi.Windows.HWND;
 begin
   CallDefaultProc(TMessage(Message));
   if Kind = dtkDate then
-    with Message, NMHdr^ do
-    begin
-      Result := 0;
-      case code of
+  with Message, NMHdr^ do
+  begin
+    Result := 0;
+    case code of
 
-        DTN_DROPDOWN:
+      DTN_DROPDOWN:
+        begin
+          SetColorsCalendar;
+          hwnd := SendMessage(TDateTimePicker(Control).Handle, DTM_GETMONTHCAL, 0,0);
+          if (Winapi.uxTheme.GetWindowTheme(hwnd)<>0) then
+            Winapi.uxTheme.SetWindowTheme(hwnd, '', '');//disable themes in the drop down window
+
+          _FDroppedDown := True;
+          RedrawWindow(Handle, nil, 0, RDW_ERASE or RDW_INVALIDATE or RDW_UPDATENOW);
+          if not TStyleManager.SystemStyle.Enabled then
           begin
-            SetColorsCalendar;
-            hwnd := SendMessage(TDateTimePicker(Control).Handle, DTM_GETMONTHCAL, 0, 0);
-            if (Winapi.uxTheme.GetWindowTheme(hwnd) <> 0) then
-              Winapi.uxTheme.SetWindowTheme(hwnd, '', ''); // disable themes in the drop down window
-
-            _FDroppedDown := True;
-            RedrawWindow(Handle, nil, 0, RDW_ERASE or RDW_INVALIDATE or RDW_UPDATENOW);
-            if not TStyleManager.SystemStyle.Enabled then
-            begin
-              SetRedraw(False);
-              SetTimer(Handle, 1, 300, nil);
-            end;
+            SetRedraw(False);
+            SetTimer(Handle, 1, 300, nil);
           end;
+        end;
 
-        DTN_CLOSEUP:
-          begin
-            _FDroppedDown := False;
-            _FMouseOnButton := False;
-            RedrawWindow(Handle, nil, 0, RDW_ERASE or RDW_INVALIDATE or RDW_UPDATENOW);
-          end;
-      end;
+      DTN_CLOSEUP:
+        begin
+          _FDroppedDown := False;
+          _FMouseOnButton := False;
+          RedrawWindow(Handle, nil, 0, RDW_ERASE or RDW_INVALIDATE or RDW_UPDATENOW);
+        end;
     end;
+  end;
   Handled := True;
 end;
+
 
 constructor TDateTimePickerStyleHookFix.Create(AControl: TWinControl);
 begin
   inherited;
-  OverrideEraseBkgnd := True;
-  // this indicates which this style hook will call the PaintBackground method when the WM_ERASEBKGND message is sent.
+  OverrideEraseBkgnd:=True;//this indicates which this style hook will call the PaintBackground method when the WM_ERASEBKGND message is sent.
 end;
 
 procedure TDateTimePickerStyleHookFix.PaintBackground(Canvas: TCanvas);
 begin
-  // use the proper style color to paint the background
+  //use the proper style color to paint the background
   Canvas.Brush.Color := StyleServices.GetStyleColor(scEdit);
   Canvas.FillRect(Control.ClientRect);
 end;
@@ -177,7 +176,7 @@ var
   LPaintStruct: TPaintStruct;
   LRect: TRect;
   LDetails: TThemedElementDetails;
-  sDateTime: string;
+  sDateTime  : string;
 begin
   DC := Message.WParam;
   LCanvas := TCanvas.Create;
@@ -187,31 +186,28 @@ begin
     else
       LCanvas.Handle := BeginPaint(Control.Handle, LPaintStruct);
 
-    if not TStyleManager.ActiveStyle.IsSystemStyle and (Winapi.uxTheme.GetWindowTheme(Control.Handle) <> 0) then
-      Winapi.uxTheme.SetWindowTheme(Control.Handle, '', ''); // disable themes in the calendar
+    if not TStyleManager.ActiveStyle.IsSystemStyle and  (Winapi.uxTheme.GetWindowTheme(Control.Handle )<>0) then
+      Winapi.uxTheme.SetWindowTheme(Control.Handle, '', '');//disable themes in the calendar
 
-    PaintNC(LCanvas);
-    Paint(LCanvas);
+      PaintNC(LCanvas);
+      Paint(LCanvas);
 
     if DateMode = dmUpDown then
       LRect := Rect(2, 2, Control.Width - 2, Control.Height - 2)
     else
       LRect := Rect(2, 2, GetButtonRect_.Left, Control.Height - 2);
 
-    if ShowCheckBox then
-      LRect.Left := LRect.Height + 2;
+    if ShowCheckBox then LRect.Left := LRect.Height + 2;
     IntersectClipRect(LCanvas.Handle, LRect.Left, LRect.Top, LRect.Right, LRect.Bottom);
-    Message.WParam := WParam(LCanvas.Handle);
+    Message.wParam := WPARAM(LCanvas.Handle);
 
-    // only works for DateFormat = dfShort
+    //only works for DateFormat = dfShort
     case TDateTimePicker(Control).Kind of
-      dtkDate:
-        sDateTime := DateToStr(TDateTimePicker(Control).DateTime);
-      dtkTime:
-        sDateTime := TimeToStr(TDateTimePicker(Control).DateTime);
+     dtkDate : sDateTime:=DateToStr(TDateTimePicker(Control).DateTime);
+     dtkTime : sDateTime:=TimeToStr(TDateTimePicker(Control).DateTime);
     end;
 
-    // draw the current date/time value
+    //draw the current date/time value
     LDetails := StyleServices.GetElementDetails(teEditTextNormal);
     DrawControlText(LCanvas, LDetails, sDateTime, LRect, DT_VCENTER or DT_LEFT);
 
@@ -228,5 +224,4 @@ begin
   Handled := True;
 end;
 {$IFEND}
-
 end.

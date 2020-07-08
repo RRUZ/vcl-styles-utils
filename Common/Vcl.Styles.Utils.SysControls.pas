@@ -14,11 +14,12 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
 unit Vcl.Styles.Utils.SysControls;
+
 
 interface
 
@@ -103,13 +104,11 @@ type
     /// <summary>
     /// Event to preventvor allow hook a control.
     /// </summary>
-    class Property OnBeforeHookingControl: TBeforeHookingControl read FBeforeHookingControlProc
-      write FBeforeHookingControlProc;
+    class Property OnBeforeHookingControl: TBeforeHookingControl read FBeforeHookingControlProc write FBeforeHookingControlProc;
     /// <summary>
     /// Notify when a hook foir control is added or removed
     /// </summary>
-    class Property OnHookNotification: TSysHookNotification read FSysHookNotificationProc
-      write FSysHookNotificationProc;
+    class Property OnHookNotification: TSysHookNotification read FSysHookNotificationProc write FSysHookNotificationProc;
     /// <summary>
     /// Enable or disable the style of the controls
     /// </summary>
@@ -118,8 +117,7 @@ type
     /// Allow set the current VCL Style font and background color in  child
     /// controls.
     /// </summary>
-    class property UseStyleColorsChildControls: Boolean read FUseStyleColorsChildControls
-      write FUseStyleColorsChildControls;
+    class property UseStyleColorsChildControls: Boolean read FUseStyleColorsChildControls write FUseStyleColorsChildControls;
     /// <summary>
     /// Allow disable or enable the hook of VCL Controls
     /// </summary>
@@ -136,13 +134,14 @@ type
     /// Collection of Styled Child Controls
     /// </summary>
     class property ChildRegSysStylesList: TObjectDictionary<HWND, TChildControlInfo> read FChildRegSysStylesList;
-    class procedure AddControlDirectly(Handle: HWND; const sClassName: string; IncludeChildControls: Boolean = False);
+    class procedure AddControlDirectly(Handle: HWND; const sClassName : string; IncludeChildControls : Boolean = False);
   end;
+
 
 implementation
 
 uses
-  Winapi.CommCtrl,
+  WinApi.CommCtrl,
   Vcl.Styles.Utils.Misc;
 
 function FindWinFromRoot(Root: HWND; ClassName: PChar): HWND;
@@ -187,28 +186,30 @@ begin
     Exit;
   end;
 
-  if SameText(LInfo.ClassName, WC_LISTVIEW) then
+  if SameText(LInfo.ClassName,  WC_LISTVIEW) then
   begin
     if SameText(LInfo.ParentClassName, 'listviewpopup') then
-      Result := False;
-  end
-  else if SameText(LInfo.ClassName, TRACKBAR_CLASS) then
-  begin
-    if SameText(LInfo.ParentClassName, 'ViewControlClass') then
-      Result := False;
+     Result:=False;
   end
   else
-    // Prevent hook Toolbars on DirectUIHWND
-    if SameText(LInfo.ClassName, TOOLBARCLASSNAME) then
+  if SameText(LInfo.ClassName, TRACKBAR_CLASS) then
+  begin
+    if SameText(LInfo.ParentClassName, 'ViewControlClass') then
+     Result:=False;
+  end
+  else
+  //Prevent hook Toolbars on DirectUIHWND
+  if SameText(LInfo.ClassName, TOOLBARCLASSNAME) then
+  begin
+    if SameText(LInfo.ParentClassName, 'ViewControlClass') then
+     Result:=False
+    else
+    if Root > 0 then
     begin
-      if SameText(LInfo.ParentClassName, 'ViewControlClass') then
-        Result := False
-      else if Root > 0 then
-      begin
-        C := FindWinFromRoot(Root, REBARCLASSNAME);
-        Result := not(C > 0);
-      end;
+      C := FindWinFromRoot(Root, REBARCLASSNAME);
+      Result := not(C > 0);
     end;
+  end;
 end;
 
 procedure HookNotification(Action: TSysHookAction; Info: PControlInfo);
@@ -218,7 +219,7 @@ end;
 
 class constructor TSysStyleManager.Create;
 begin
-  FHook_WH_CBT := 0;
+  FHook_WH_CBT:=0;
   FBeforeHookingControlProc := @BeforeHookingControl;
   FSysHookNotificationProc := @HookNotification;
   FUseStyleColorsChildControls := True;
@@ -228,7 +229,7 @@ begin
   FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([doOwnsValues]);
   FRegSysStylesList := TObjectDictionary<String, TSysStyleHookClass>.Create;
   FChildRegSysStylesList := TObjectDictionary<HWND, TChildControlInfo>.Create;
-  // FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([]);
+  //FSysStyleHookList := TObjectDictionary<HWND, TSysStyleHook>.Create([]);
   InstallHook_WH_CBT;
 end;
 
@@ -241,58 +242,58 @@ begin
   inherited;
 end;
 
-class procedure TSysStyleManager.AddControlDirectly(Handle: HWND; const sClassName: string;
-  IncludeChildControls: Boolean = False);
+class procedure TSysStyleManager.AddControlDirectly(Handle: HWND; const sClassName : string; IncludeChildControls : Boolean = False);
 var
-  LStyleHook: TSysStyleHook;
-  ParentStyle: DWORD;
+ LStyleHook  : TSysStyleHook;
+ ParentStyle : DWORD;
 
   procedure AddChildControl(ChildHandle: HWND);
   var
     Info: TChildControlInfo;
-    sChildClassName: string;
-    LStyleHook: TSysStyleHook;
+    sChildClassName : string;
+    LStyleHook  : TSysStyleHook;
   begin
-    { Hook the control directly ! }
+   { Hook the control directly ! }
     ZeroMemory(@Info, sizeof(TChildControlInfo));
     Info.Parent := Handle;
     Info.ParentStyle := ParentStyle;
     sChildClassName := LowerCase(GetWindowClassName(ChildHandle));
     if FRegSysStylesList.ContainsKey(sChildClassName) then
     begin
-      LStyleHook := FRegSysStylesList[LowerCase(sChildClassName)].Create(ChildHandle);
+      LStyleHook:=FRegSysStylesList[LowerCase(sChildClassName)].Create(ChildHandle);
       FSysStyleHookList.Add(ChildHandle, LStyleHook);
       SendMessage(ChildHandle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
       InvalidateRect(ChildHandle, nil, False);
-      // if Assigned(FSysHookNotificationProc) then
-      // FSysHookNotificationProc(cAdded, @Info);
+//    if Assigned(FSysHookNotificationProc) then
+//      FSysHookNotificationProc(cAdded, @Info);
     end;
   end;
 
-  function EnumChildProc(const hWindow: HWND; const lParam: lParam): Boolean; stdcall;
+  function EnumChildProc(const hWindow: hWnd; const LParam : LParam): boolean; stdcall;
   begin
     AddChildControl(hWindow);
-    Result := True;
+    Result:= True;
   end;
 
 begin
   if not FRegSysStylesList.ContainsKey(LowerCase(sClassName)) then
-    Exit;
+   Exit;
   { Hook the control directly ! }
   if FSysStyleHookList.ContainsKey(Handle) then
     FSysStyleHookList.Remove(Handle);
-  LStyleHook := FRegSysStylesList[LowerCase(sClassName)].Create(Handle);
+  LStyleHook:=FRegSysStylesList[LowerCase(sClassName)].Create(Handle);
   FSysStyleHookList.Add(Handle, LStyleHook);
   SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
-  // if Assigned(FSysHookNotificationProc) then
-  // FSysHookNotificationProc(cAdded, @Info);
+//    if Assigned(FSysHookNotificationProc) then
+//      FSysHookNotificationProc(cAdded, @Info);
 
   if IncludeChildControls then
   begin
-    ParentStyle := GetWindowLongPtr(Handle, GWL_STYLE);
-    EnumChildWindows(Handle, @EnumChildProc, 0);
+   ParentStyle:=GetWindowLongPtr(Handle, GWL_STYLE);
+   EnumChildWindows(Handle, @EnumChildProc, 0);
   end;
 end;
+
 
 constructor TSysStyleManager.Create(AOwner: TComponent);
 begin
@@ -305,23 +306,23 @@ begin
 end;
 
 type
-  TSysStyleClass = class(TSysStyleHook);
+ TSysStyleClass = class(TSysStyleHook);
 
 class function TSysStyleManager.HookActionCallBackCBT(nCode: Integer; wParam: wParam; lParam: lParam): LRESULT;
 var
   CBTSturct: TCBTCreateWnd;
   sClassName, Tmp: string;
-  { LHWND, } Parent: HWND;
+  {LHWND,} Parent: HWND;
   Style, ParentStyle, ExStyle, ParentExStyle: NativeInt;
   Info: TControlInfo;
 
   procedure RemoveUnusedHooks;
   var
-    LHandle: THandle;
+    LHandle : THandle;
   begin
-    for LHandle in TSysStyleManager.SysStyleHookList.Keys do
-      if TSysStyleClass(TSysStyleManager.SysStyleHookList.Items[LHandle]).MustRemove then
-        TSysStyleManager.SysStyleHookList.Remove(LHandle);
+   for LHandle in TSysStyleManager.SysStyleHookList.Keys do
+    if TSysStyleClass(TSysStyleManager.SysStyleHookList.Items[LHandle]).MustRemove then
+      TSysStyleManager.SysStyleHookList.Remove(LHandle);
   end;
 
   procedure AddChildControl(Handle: HWND);
@@ -342,13 +343,13 @@ var
 
   procedure AddControl(Handle: HWND);
   var
-    LStyleHook: TSysStyleHook;
+   LStyleHook : TSysStyleHook;
   begin
     { Hook the control directly ! }
     RemoveUnusedHooks;
     if FSysStyleHookList.ContainsKey(Handle) then
       FSysStyleHookList.Remove(Handle);
-    LStyleHook := FRegSysStylesList[sClassName].Create(Handle);
+    LStyleHook:=FRegSysStylesList[sClassName].Create(Handle);
     FSysStyleHookList.Add(Handle, LStyleHook);
     SendMessage(Handle, CM_CONTROLHOOKEDDIRECTLY, 0, 0);
     if Assigned(FSysHookNotificationProc) then
@@ -360,19 +361,20 @@ begin
   if not FEnabled then
     Exit;
 
-  // if (nCode = HCBT_ACTIVATE) and not(StyleServices.IsSystemStyle) then
-  // begin
-  // LHWND := HWND(wParam);
-  // if(LHWND>0) then
-  // begin
-  // sClassName:= GetWindowClassName(LHWND);
-  // if (sClassName<>'') and  (not TSysStyleManager.SysStyleHookList.ContainsKey(LHWND)) and (SameText(sClassName,'#32770'))  then
-  // begin
-  // TSysStyleManager.AddControlDirectly(LHWND, sClassName);
-  // InvalidateRect(LHWND, nil, False);
-  // end;
-  // end;
-  // end;
+//  if (nCode = HCBT_ACTIVATE) and not(StyleServices.IsSystemStyle) then
+//     begin
+//       LHWND := HWND(wParam);
+//       if(LHWND>0) then
+//       begin
+//          sClassName:= GetWindowClassName(LHWND);
+//          if (sClassName<>'') and  (not TSysStyleManager.SysStyleHookList.ContainsKey(LHWND)) and (SameText(sClassName,'#32770'))  then
+//          begin
+//            TSysStyleManager.AddControlDirectly(LHWND, sClassName);
+//            InvalidateRect(LHWND, nil, False);
+//          end;
+//       end;
+//     end;
+
 
   if (nCode = HCBT_CREATEWND) and not(StyleServices.IsSystemStyle) then
   begin
@@ -381,8 +383,8 @@ begin
     sClassName := GetWindowClassName(wParam);
     sClassName := LowerCase(sClassName);
 
-    // if SameText(sClassName, '#32770') then
-    // OutputDebugString(PChar('Class '+sclassName+' '+IntToHex(wParam, 8)));
+//    if SameText(sClassName, '#32770') then
+//      OutputDebugString(PChar('Class '+sclassName+' '+IntToHex(wParam, 8)));
 
     Parent := CBTSturct.lpcs.hwndParent;
     Style := CBTSturct.lpcs.Style;
@@ -449,14 +451,15 @@ begin
         AddControl(wParam);
     end;
 
-    // if FSysStyleHookList.ContainsKey(wParam) or  FChildRegSysStylesList.ContainsKey(wParam) then
-    // OutputDebugString(PChar('Hooked '+IntToHex(wParam, 8)));
+   // if FSysStyleHookList.ContainsKey(wParam) or  FChildRegSysStylesList.ContainsKey(wParam) then
+   //  OutputDebugString(PChar('Hooked '+IntToHex(wParam, 8)));
 
   end;
 
+
   if nCode = HCBT_DESTROYWND then
   begin
-    // OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
+    //OutputDebugString(PChar('HCBT_DESTROYWND Handle '+IntToHex(wParam, 8)));
     if FSysStyleHookList.ContainsKey(wParam) then
     begin
       ZeroMemory(@Info, sizeof(TControlInfo));
@@ -473,8 +476,7 @@ begin
   FHook_WH_CBT := SetWindowsHookEx(WH_CBT, @HookActionCallBackCBT, 0, GetCurrentThreadId);
 end;
 
-class procedure TSysStyleManager.RegisterSysStyleHook(const SysControlClass: String;
-  SysStyleHookClass: TSysStyleHookClass);
+class procedure TSysStyleManager.RegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
 begin
   if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
     FRegSysStylesList.Remove(LowerCase(SysControlClass));
@@ -487,8 +489,7 @@ begin
     UnhookWindowsHookEx(FHook_WH_CBT);
 end;
 
-class procedure TSysStyleManager.UnRegisterSysStyleHook(const SysControlClass: String;
-  SysStyleHookClass: TSysStyleHookClass);
+class procedure TSysStyleManager.UnRegisterSysStyleHook(const SysControlClass: String; SysStyleHookClass: TSysStyleHookClass);
 begin
   if FRegSysStylesList.ContainsKey(LowerCase(SysControlClass)) then
     FRegSysStylesList.Remove(LowerCase(SysControlClass));

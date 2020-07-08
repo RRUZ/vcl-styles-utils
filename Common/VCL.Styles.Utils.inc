@@ -14,17 +14,16 @@
 //
 //
 // Portions created by Mahdi Safsafi [SMP3]   e-mail SMP@LIVE.FR
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2017 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //************************************************************************************************
 
 {$DEFINE USE_Vcl.Styles.Hooks}
 {$DEFINE HOOK_UXTHEME}
-{$DEFINE HOOK_User32SysColor}
 {$DEFINE HOOK_TDateTimePicker}
 {$DEFINE HOOK_TProgressBar}
-{.$DEFINE LimitStylesToCurrentProcess}
+{.$DEFINE LimitStylesToMainApplicationThread}
 
 { Feature toggles for supported UxThemes - see Vcl.Styles.UxTheme }
 
