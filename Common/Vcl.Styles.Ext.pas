@@ -259,7 +259,7 @@ uses
 {$IFEND}  
   Winapi.Messages,
 {$ENDIF}
-  Vcl.Dialogs;
+  Vcl.Dialogs, Vcl.Styles.Utils.Misc, Vcl.Styles.Utils.Graphics;
 
 {$IF (DEFINED (USE_VCL_STYLESAPI) AND (CompilerVersion >= 23))}
 {$I '..\source\vcl\StyleUtils.inc'}
