@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.UxTheme.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2019 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2020 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -284,7 +284,7 @@ end;
 
 {$IF CompilerVersion >= 30}
 function InterceptCreateOrdinal(const Module: string; MethodName: Integer; const InterceptProc: Pointer;
-  ForceLoadModule: Boolean = True; Options: Byte = v1compatibility): Pointer;
+  ForceLoadModule: Boolean = True; const Options: TInterceptOptions = DefaultInterceptOptions): Pointer;
 var
   pOrgPointer: Pointer;
   LModule: THandle;
@@ -298,7 +298,7 @@ begin
   begin
     pOrgPointer := GetProcAddress(LModule, PChar(MethodName));
     if Assigned(pOrgPointer) then
-      Result := DDetours.InterceptCreate(pOrgPointer, InterceptProc, Options);
+      DDetours.InterceptCreate(pOrgPointer, InterceptProc, Result, nil, Options);
   end;
 end;
 {$IFEND}
@@ -712,6 +712,28 @@ begin
     end
     else
     {$ENDIF}
+    {$IFDEF HOOK_VirtualShell}
+    if SameText(LThemeClass, VSCLASS_SCROLLBAR) then
+    begin
+      // Fix a theme issue in Mustangpeak Virtual Shell
+      pColor := clNone;
+      case iPartId of
+        11:
+          case iStateId  of
+            0 : pColor := ColorToRGB(StyleServices.GetStyleColor(scPanel));
+          end;
+      end;
+
+     if TColor(pColor) = clNone then
+     begin
+       Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+       //OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+     end
+     else
+       Result := S_OK;
+    end
+    else
+    {$ENDIF}
     if SameText(LThemeClass, VSCLASS_TEXTSTYLE) then
     begin
       pColor := clNone;
@@ -861,7 +883,7 @@ begin
               pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
           end;
       else
-        pColor := ColorToRGB(clRed);
+        pColor := ColorToRGB(clBtnText);
       end;
 
       if TColor(pColor) = clNone then
@@ -878,14 +900,12 @@ begin
     if SameText(LThemeClass, VSCLASS_TREEVIEW) or SameText(LThemeClass, VSCLASS_PROPERTREE) or
        SameText(LThemeClass, 'ExplorerNavPane') then
     begin
-
       pColor := clNone;
       case iPartId of
         0, 2:
           case iStateId of
             0:
               pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow)); // OK
-
           end;
       end;
 
@@ -900,7 +920,7 @@ begin
     else
     {$ENDIF}
     {$IFDEF HOOK_ListView}
-              if (SameText(LThemeClass, VSCLASS_ITEMSVIEW) or SameText(LThemeClass, VSCLASS_LISTVIEW) or
+    if (SameText(LThemeClass, VSCLASS_ITEMSVIEW) or SameText(LThemeClass, VSCLASS_LISTVIEW) or
       SameText(LThemeClass, VSCLASS_LISTVIEWSTYLE) or SameText(LThemeClass, VSCLASS_ITEMSVIEW_LISTVIEW) or
       SameText(LThemeClass, VSCLASS_EXPLORER_LISTVIEW)) then
     begin
@@ -1509,7 +1529,7 @@ begin
     case iPartId of
       1 :
       begin
-        if iStateId = 2 then
+        if iStateId in [1,2] then
         begin
           SaveIndex := SaveDC(hdc);
           try
@@ -1960,7 +1980,7 @@ begin
         try
           if hwnd <> 0 then
             DrawStyleParentBackground(hwnd, hdc, pRect);
-          StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+          DrawStyleElement(hdc, LDetails, pRect);
         finally
           RestoreDC(hdc, SaveIndex);
         end;
@@ -1984,7 +2004,7 @@ begin
         try
           if hwnd <> 0 then
             DrawStyleParentBackground(hwnd, hdc, pRect);
-          StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+          DrawStyleElement(hdc, LDetails, pRect);
         finally
           RestoreDC(hdc, SaveIndex);
         end;
@@ -2137,7 +2157,7 @@ begin
         try
           if hwnd <> 0 then
             DrawStyleParentBackground(hwnd, hdc, pRect);
-          StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+          DrawStyleElement(hdc, LDetails, pRect);
         finally
           RestoreDC(hdc, SaveIndex);
         end;
@@ -3263,7 +3283,7 @@ begin
         try
           if hwnd <> 0 then
             DrawStyleParentBackground(hwnd, hdc, pRect);
-          StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+          DrawStyleElement(hdc, LDetails, pRect);
         finally
           RestoreDC(hdc, SaveIndex);
         end;
@@ -3293,7 +3313,7 @@ begin
         try
           if hwnd <> 0 then
             DrawStyleParentBackground(hwnd, hdc, pRect);
-          StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+          DrawStyleElement(hdc, LDetails, pRect);
         finally
           RestoreDC(hdc, SaveIndex);
         end;
@@ -3320,7 +3340,7 @@ begin
         try
           if hwnd <> 0 then
             DrawStyleParentBackground(hwnd, hdc, pRect);
-          StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+          DrawStyleElement(hdc, LDetails, pRect);
         finally
           RestoreDC(hdc, SaveIndex);
         end;
@@ -3460,7 +3480,7 @@ begin
         try
           if (hwnd <> 0) then
             DrawStyleParentBackground(hwnd, hdc, pRect);
-          StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+          DrawStyleElement(hdc, LDetails, pRect);
         finally
           RestoreDC(hdc, SaveIndex);
         end;
@@ -3555,7 +3575,7 @@ begin
   try
     if hwnd <> 0 then
       DrawStyleParentBackground(hwnd, hdc, pRect);
-    StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+    DrawStyleElement(hdc, LDetails, pRect);
   finally
     RestoreDC(hdc, SaveIndex);
   end;
@@ -3777,13 +3797,13 @@ begin
   LDetails := StyleServices.GetElementDetails(LScrollDetails);
 
   if (iPartId = SBP_THUMBBTNHORZ) then
-    StyleServices.DrawElement(hdc, StyleServices.GetElementDetails(tsUpperTrackHorzNormal), pRect, nil)
+    DrawStyleElement(hdc, StyleServices.GetElementDetails(tsUpperTrackHorzNormal), pRect)
   else if (iPartId = SBP_THUMBBTNVERT) then
-    StyleServices.DrawElement(hdc, StyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect, nil);
+    DrawStyleElement(hdc, StyleServices.GetElementDetails(tsUpperTrackVertNormal), pRect);
 
   // OutputDebugString(PChar(Format('UxTheme_ScrollBar class %s hTheme %d iPartId %d iStateId %d Left %d Top %d Width %d Height %d',
   // [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId, PRect.Left, prect.Top, prect.Width, prect.Height])));
-  StyleServices.DrawElement(hdc, LDetails, pRect, nil);
+  DrawStyleElement(hdc, LDetails, pRect);
   exit(S_OK);
 end;
 {$ENDIF}
