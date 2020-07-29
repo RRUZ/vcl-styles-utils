@@ -15,7 +15,7 @@
 // The Original Code is Vcl.Styles.FormStyleHooks.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2020 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2019 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 // **************************************************************************************************
@@ -23,11 +23,9 @@
 unit Vcl.Styles.FormStyleHooks;
 
 interface
-
 {$IF RTLVersion>=24}
-{$LEGACYIFEND ON}
+  {$LEGACYIFEND ON}
 {$IFEND}
-
 uses
   Winapi.Windows,
   Winapi.Messages,
@@ -81,7 +79,8 @@ type
     class constructor Create;
     class destructor Destroy;
   public
-    class property SharedImageLocation: string read FSharedImageLocation write SetSharedImageLocation;
+    class property SharedImageLocation: string read FSharedImageLocation
+      write SetSharedImageLocation;
     class property SharedBitMap: TBitmap read FSharedBitMap write FSharedBitMap;
     class property MergeImages: Boolean read FMergeImages write FMergeImages;
     class property NCSettings: TSettings read FNCSettings;
@@ -100,7 +99,8 @@ type
   /// </summary>
   TFormStyleHookRgn = class(TFormStyleHook)
   private
-    procedure WMWindowPosChanging(var Message: TWMWindowPosChanging); message WM_WINDOWPOSCHANGING;
+    procedure WMWindowPosChanging(var Message: TWMWindowPosChanging);
+      message WM_WINDOWPOSCHANGING;
   protected
     procedure PaintNC(Canvas: TCanvas); override;
   end;
@@ -136,15 +136,21 @@ type
     procedure SetFRegion(const Value: HRGN);
     function GetForm: TCustomForm;
   public
-    property _FCloseButtonRect: TRect read GetFCloseButtonRect Write SetFCloseButtonRect;
-    property _FMaxButtonRect: TRect read GetFMaxButtonRect Write SetFMaxButtonRect;
-    property _FMinButtonRect: TRect read GetFMinButtonRect Write SetFMinButtonRect;
-    property _FHelpButtonRect: TRect read GetFHelpButtonRect Write SetFHelpButtonRect;
-    property _FSysMenuButtonRect: TRect read GetFSysMenuButtonRect Write SetFSysMenuButtonRect;
+    property _FCloseButtonRect: TRect read GetFCloseButtonRect
+      Write SetFCloseButtonRect;
+    property _FMaxButtonRect: TRect read GetFMaxButtonRect
+      Write SetFMaxButtonRect;
+    property _FMinButtonRect: TRect read GetFMinButtonRect
+      Write SetFMinButtonRect;
+    property _FHelpButtonRect: TRect read GetFHelpButtonRect
+      Write SetFHelpButtonRect;
+    property _FSysMenuButtonRect: TRect read GetFSysMenuButtonRect
+      Write SetFSysMenuButtonRect;
     property _FCaptionRect: TRect read GetFCaptionRect Write SetFCaptionRect;
     function _GetBorderSize: TRect;
     property _FFormActive: Boolean read GetFFormActive;
-    property _FChangeSizeCalled: Boolean read GetFChangeSizeCalled write SetFChangeSizeCalled;
+    property _FChangeSizeCalled: Boolean read GetFChangeSizeCalled
+      write SetFChangeSizeCalled;
     property _FWidth: Integer read GetFWidth write SetFWidth;
     property _FHeight: Integer read GetFHeight write SetFHeight;
     property _FLeft: Integer read GetFLeft write SetFLeft;
@@ -166,7 +172,7 @@ function RectVCenter(var R: TRect; Bounds: TRect): TRect;
 
 implementation
 
-uses
+Uses
   System.SysUtils,
   System.Classes,
   System.Types,
@@ -188,7 +194,8 @@ end;
 
 { TFormStyleHookRgn }
 
-procedure TFormStyleHookRgn.WMWindowPosChanging(var Message: TWMWindowPosChanging);
+procedure TFormStyleHookRgn.WMWindowPosChanging(var Message
+  : TWMWindowPosChanging);
 var
   Changed: Boolean;
 
@@ -203,7 +210,8 @@ var
       Exit;
 
     R := Rect(0, 0, _FWidth, _FHeight);
-    if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+    if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+    then
       Detail := twCaptionActive
     else
       Detail := twSmallCaptionActive;
@@ -254,7 +262,8 @@ begin
   if _FChangeSizeCalled then
     Exit;
 
-  if (Message.WindowPos^.flags and SWP_NOSIZE = 0) or (Message.WindowPos^.flags and SWP_NOMOVE = 0) then
+  if (Message.WindowPos^.flags and SWP_NOSIZE = 0) or
+    (Message.WindowPos^.flags and SWP_NOMOVE = 0) then
   begin
     if (Message.WindowPos^.flags and SWP_NOMOVE = 0) then
     begin
@@ -263,7 +272,8 @@ begin
     end;
     if (Message.WindowPos^.flags and SWP_NOSIZE = 0) then
     begin
-      Changed := ((Message.WindowPos^.cx <> _FWidth) or (Message.WindowPos^.cy <> _FHeight)) and
+      Changed := ((Message.WindowPos^.cx <> _FWidth) or
+        (Message.WindowPos^.cy <> _FHeight)) and
         (Message.WindowPos^.flags and SWP_NOSIZE = 0);
       _FWidth := Message.WindowPos^.cx;
       _FHeight := Message.WindowPos^.cy;
@@ -309,7 +319,8 @@ begin
 
   { draw caption }
 
-  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+  then
   begin
     if _FFormActive then
       Detail := twCaptionActive
@@ -334,16 +345,20 @@ begin
   CaptionDetails := Details;
 
   { draw icon }
-  if (biSystemMenu in TCustomFormClass(Form).BorderIcons) and (Form.BorderStyle <> bsDialog) and
-    (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and
+    (Form.BorderStyle <> bsSizeToolWin) then
   begin
     IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
-    if not StyleServices.GetElementContentRect(0, IconDetails, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, IconDetails, DrawRect,
+      ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
-    R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+    R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON),
+      GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R1, ButtonRect);
     if ButtonRect.Width > 0 then
-      DrawIconEx(CaptionBuffer.Canvas.Handle, R1.Left, R1.Top, _GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
+      DrawIconEx(CaptionBuffer.Canvas.Handle, R1.Left, R1.Top,
+        _GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
     Inc(TextRect.Left, ButtonRect.Width + 5);
     _FSysMenuButtonRect := ButtonRect;
   end
@@ -353,7 +368,8 @@ begin
   { draw buttons }
   if (biSystemMenu in TCustomFormClass(Form).BorderIcons) then
   begin
-    if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+    if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+    then
     begin
       if (_FPressedButton = HTCLOSE) and (_FHotButton = HTCLOSE) then
         FButtonState := twCloseButtonPushed
@@ -377,7 +393,8 @@ begin
     end;
 
     Details := StyleServices.GetElementDetails(FButtonState);
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
 
     StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
@@ -386,8 +403,10 @@ begin
     _FCloseButtonRect := ButtonRect;
   end;
 
-  if (biMaximize in TCustomFormClass(Form).BorderIcons) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
-    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (biMaximize in TCustomFormClass(Form).BorderIcons) and
+    (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and
+    (Form.BorderStyle <> bsSizeToolWin) then
   begin
     if Form.WindowState = wsMaximized then
     begin
@@ -413,17 +432,21 @@ begin
     end;
     Details := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
     if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details,
+        ButtonRect);
     if ButtonRect.Left > 0 then
       TextRect.Right := ButtonRect.Left;
     _FMaxButtonRect := ButtonRect;
   end;
 
-  if (biMinimize in TCustomFormClass(Form).BorderIcons) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
-    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (biMinimize in TCustomFormClass(Form).BorderIcons) and
+    (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and
+    (Form.BorderStyle <> bsSizeToolWin) then
   begin
     if (_FPressedButton = HTMINBUTTON) and (_FHotButton = HTMINBUTTON) then
       FButtonState := twMinButtonPushed
@@ -436,18 +459,22 @@ begin
 
     Details := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
     if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details,
+        ButtonRect);
     if ButtonRect.Left > 0 then
       TextRect.Right := ButtonRect.Left;
     _FMinButtonRect := ButtonRect;
   end;
 
-  if (biHelp in TCustomFormClass(Form).BorderIcons) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
-    ((not(biMaximize in TCustomFormClass(Form).BorderIcons) and not(biMinimize in TCustomFormClass(Form).BorderIcons))
-    or (Form.BorderStyle = bsDialog)) then
+  if (biHelp in TCustomFormClass(Form).BorderIcons) and
+    (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    ((not(biMaximize in TCustomFormClass(Form).BorderIcons) and
+    not(biMinimize in TCustomFormClass(Form).BorderIcons)) or
+    (Form.BorderStyle = bsDialog)) then
   begin
     if (_FPressedButton = HTHELP) and (_FHotButton = HTHELP) then
       FButtonState := twHelpButtonPushed
@@ -459,10 +486,12 @@ begin
       FButtonState := twHelpButtonDisabled;
     Details := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, Details, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
     if ButtonRect.Width > 0 then
-      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details, ButtonRect);
+      StyleServices.DrawElement(CaptionBuffer.Canvas.Handle, Details,
+        ButtonRect);
 
     if ButtonRect.Left > 0 then
       TextRect.Right := ButtonRect.Left;
@@ -477,7 +506,8 @@ begin
   // CaptionBuffer.Canvas to free its handle, making the outcome of the call
   // to DrawText dependent on parameter evaluation order.
   LText := Text;
-  StyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+  StyleServices.DrawText(CaptionBuffer.Canvas.Handle, CaptionDetails, LText,
+    TextRect, TextFormat);
   _FCaptionRect := TextRect;
 
   { draw caption buffer }
@@ -490,7 +520,8 @@ begin
 
   { draw left border }
 
-  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+  then
   begin
     if _FFormActive then
       Detail := twFrameLeftActive
@@ -511,7 +542,8 @@ begin
     StyleServices.DrawElement(Canvas.Handle, Details, DrawRect);
 
   { draw right border }
-  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+  then
   begin
     if _FFormActive then
       Detail := twFrameRightActive
@@ -532,7 +564,8 @@ begin
     StyleServices.DrawElement(Canvas.Handle, Details, DrawRect);
 
   { draw Bottom border }
-  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+  then
   begin
     if _FFormActive then
       Detail := twFrameBottomActive
@@ -578,7 +611,8 @@ begin
     FColor := Value;
 end;
 
-procedure TFormStyleHookBackground.TSettings.SetImageLocation(const Value: string);
+procedure TFormStyleHookBackground.TSettings.SetImageLocation
+  (const Value: string);
 var
   Picture: TPicture;
 begin
@@ -626,7 +660,8 @@ begin
   FreeAndNil(FBackGroundSettings);
 end;
 
-class procedure TFormStyleHookBackground.SetSharedImageLocation(const Value: string);
+class procedure TFormStyleHookBackground.SetSharedImageLocation
+  (const Value: string);
 var
   Picture: TPicture;
 begin
@@ -668,8 +703,8 @@ begin
     // use a bitmap
     begin
       // check the size of the bitmap against the control bounds to detrine how the bitmap is drawn
-      if not FMergeImages and ((BackGroundSettings.Bitmap.Width < LRect.Width) or
-        (BackGroundSettings.Bitmap.Height < LRect.Height)) then
+      if not FMergeImages and ((BackGroundSettings.Bitmap.Width < LRect.Width)
+        or (BackGroundSettings.Bitmap.Height < LRect.Height)) then
       begin
         Canvas.Brush.Bitmap := BackGroundSettings.Bitmap;
         Canvas.FillRect(LRect);
@@ -729,7 +764,8 @@ var
     TopOffset, LeftOffset: Integer;
     BS: TRect;
   begin
-    if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0)
+    if (Form.WindowState = wsMaximized) and
+      (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0)
     then
     begin
       BS := _GetBorderSize;
@@ -751,7 +787,8 @@ var
     TopOffset, RightOffset: Integer;
     BS: TRect;
   begin
-    if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0)
+    if (Form.WindowState = wsMaximized) and
+      (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (ButtonRect.Width > 0)
     then
     begin
       BS := _GetBorderSize;
@@ -796,7 +833,8 @@ begin
   R := _GetBorderSize;
 
   { draw caption }
-  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+  then
   begin
     if _FFormActive then
       LDetail := twCaptionActive
@@ -871,11 +909,13 @@ begin
   CaptionDetails := LDetails;
 
   { draw icon }
-  if (biSystemMenu in TCustomFormClass(Form).BorderIcons) and (Form.BorderStyle <> bsDialog) and
-    (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and
+    (Form.BorderStyle <> bsSizeToolWin) then
   begin
     IconDetails := StyleServices.GetElementDetails(twSysButtonNormal);
-    if not StyleServices.GetElementContentRect(0, IconDetails, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, IconDetails, DrawRect,
+      ButtonRect) then
       ButtonRect := Rect(0, 0, 0, 0);
 
 {$IF CompilerVersion > 23.0}
@@ -890,10 +930,12 @@ begin
     else
       TextTopOffset := 0;
 {$IFEND}
-    R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+    R1 := Rect(0, 0, GetSystemMetrics(SM_CXSMICON),
+      GetSystemMetrics(SM_CYSMICON));
     RectVCenter(R1, ButtonRect);
     if ButtonRect.Width > 0 then
-      DrawIconEx(LBitmap.Canvas.Handle, R1.Left, R1.Top, _GetIconFast.Handle, 0, 0, 0, 0, DI_NORMAL);
+      DrawIconEx(LBitmap.Canvas.Handle, R1.Left, R1.Top, _GetIconFast.Handle, 0,
+        0, 0, 0, DI_NORMAL);
     Inc(TextRect.Left, ButtonRect.Width + 5);
     _FSysMenuButtonRect := ButtonRect;
   end
@@ -903,7 +945,8 @@ begin
   { draw buttons }
   if (biSystemMenu in TCustomFormClass(Form).BorderIcons) then
   begin
-    if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+    if (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin)
+    then
     begin
       if (_FPressedButton = HTCLOSE) and (_FHotButton = HTCLOSE) then
         FButtonState := twCloseButtonPushed
@@ -927,7 +970,8 @@ begin
     end;
 
     LDetails := StyleServices.GetElementDetails(FButtonState);
-    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
 
 {$IF CompilerVersion > 23.0}
@@ -941,8 +985,10 @@ begin
     _FCloseButtonRect := ButtonRect;
   end;
 
-  if (biMaximize in TCustomFormClass(Form).BorderIcons) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
-    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (biMaximize in TCustomFormClass(Form).BorderIcons) and
+    (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and
+    (Form.BorderStyle <> bsSizeToolWin) then
   begin
     if Form.WindowState = wsMaximized then
     begin
@@ -968,7 +1014,8 @@ begin
     end;
     LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
 
 {$IF CompilerVersion > 23.0}
@@ -982,8 +1029,10 @@ begin
     _FMaxButtonRect := ButtonRect;
   end;
 
-  if (biMinimize in TCustomFormClass(Form).BorderIcons) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
-    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and (Form.BorderStyle <> bsSizeToolWin) then
+  if (biMinimize in TCustomFormClass(Form).BorderIcons) and
+    (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    (Form.BorderStyle <> bsDialog) and (Form.BorderStyle <> bsToolWindow) and
+    (Form.BorderStyle <> bsSizeToolWin) then
   begin
     if (_FPressedButton = HTMINBUTTON) and (_FHotButton = HTMINBUTTON) then
       FButtonState := twMinButtonPushed
@@ -996,7 +1045,8 @@ begin
 
     LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
 
 {$IF CompilerVersion > 23.0}
@@ -1010,9 +1060,11 @@ begin
     _FMinButtonRect := ButtonRect;
   end;
 
-  if (biHelp in TCustomFormClass(Form).BorderIcons) and (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
-    ((not(biMaximize in TCustomFormClass(Form).BorderIcons) and not(biMinimize in TCustomFormClass(Form).BorderIcons))
-    or (Form.BorderStyle = bsDialog)) then
+  if (biHelp in TCustomFormClass(Form).BorderIcons) and
+    (biSystemMenu in TCustomFormClass(Form).BorderIcons) and
+    ((not(biMaximize in TCustomFormClass(Form).BorderIcons) and
+    not(biMinimize in TCustomFormClass(Form).BorderIcons)) or
+    (Form.BorderStyle = bsDialog)) then
   begin
     if (_FPressedButton = HTHELP) and (_FHotButton = HTHELP) then
       FButtonState := twHelpButtonPushed
@@ -1024,7 +1076,8 @@ begin
       FButtonState := twHelpButtonDisabled;
     LDetails := StyleServices.GetElementDetails(FButtonState);
 
-    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect) then
+    if not StyleServices.GetElementContentRect(0, LDetails, DrawRect, ButtonRect)
+    then
       ButtonRect := Rect(0, 0, 0, 0);
 
 {$IF CompilerVersion > 23.0}
@@ -1047,23 +1100,27 @@ begin
   LText := Text;
 
 {$IF CompilerVersion > 23.0}
-  if (Form.WindowState = wsMaximized) and (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (TextTopOffset <> 0) and
-    (biSystemMenu in TCustomFormClass(Form).BorderIcons) then
+  if (Form.WindowState = wsMaximized) and
+    (TCustomFormClass(Form).FormStyle <> fsMDIChild) and (TextTopOffset <> 0)
+    and (biSystemMenu in TCustomFormClass(Form).BorderIcons) then
   begin
     Inc(TextRect.Left, R.Left);
     MoveWindowOrg(LBitmap.Canvas.Handle, 0, TextTopOffset);
-    StyleServices.DrawText(LBitmap.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+    StyleServices.DrawText(LBitmap.Canvas.Handle, CaptionDetails, LText,
+      TextRect, TextFormat);
     MoveWindowOrg(LBitmap.Canvas.Handle, 0, -TextTopOffset);
   end
   else
 {$IFEND}
-    StyleServices.DrawText(LBitmap.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+    StyleServices.DrawText(LBitmap.Canvas.Handle, CaptionDetails, LText,
+      TextRect, TextFormat);
   _FCaptionRect := TextRect;
 
   { draw caption buffer }
 
   if FNCSettings.UseAlpha then
-    UpdateLayeredWindow(Handle, 0, nil, @LBitmapSize, LBitmap.Canvas.Handle, @LBitmapPos, 0, @pblend, ULW_ALPHA)
+    UpdateLayeredWindow(Handle, 0, nil, @LBitmapSize, LBitmap.Canvas.Handle,
+      @LBitmapPos, 0, @pblend, ULW_ALPHA)
   else
     Canvas.Draw(0, 0, LBitmap);
 
@@ -1091,11 +1148,13 @@ begin
     else
     begin
       if FMergeImages then
-        if (DrawRect.Height <= FSharedBitMap.Height) and (DrawRect.Width <= FSharedBitMap.Width) then
+        if (DrawRect.Height <= FSharedBitMap.Height) and
+          (DrawRect.Width <= FSharedBitMap.Width) then
           Canvas.CopyRect(DrawRect, FSharedBitMap.Canvas, DrawRect)
         else
           Canvas.StretchDraw(DrawRect, FSharedBitMap)
-      else if (DrawRect.Height <= FNCSettings.Bitmap.Height) and (DrawRect.Width <= FNCSettings.Bitmap.Width) then
+      else if (DrawRect.Height <= FNCSettings.Bitmap.Height) and
+        (DrawRect.Width <= FNCSettings.Bitmap.Width) then
         Canvas.CopyRect(DrawRect, FNCSettings.Bitmap.Canvas, DrawRect)
       else
         Canvas.StretchDraw(DrawRect, FNCSettings.Bitmap);
@@ -1115,11 +1174,13 @@ begin
     else
     begin
       if FMergeImages then
-        if (DrawRect.Height <= FSharedBitMap.Height) and (Control.Width <= FSharedBitMap.Width) then
+        if (DrawRect.Height <= FSharedBitMap.Height) and
+          (Control.Width <= FSharedBitMap.Width) then
           Canvas.CopyRect(DrawRect, FSharedBitMap.Canvas, DrawRect)
         else
           Canvas.StretchDraw(DrawRect, FSharedBitMap)
-      else if (DrawRect.Height <= FNCSettings.Bitmap.Height) and (Control.Width <= FNCSettings.Bitmap.Width) then
+      else if (DrawRect.Height <= FNCSettings.Bitmap.Height) and
+        (Control.Width <= FNCSettings.Bitmap.Width) then
         Canvas.CopyRect(DrawRect, FNCSettings.Bitmap.Canvas, DrawRect)
       else
         Canvas.StretchDraw(DrawRect, FNCSettings.Bitmap);
@@ -1138,7 +1199,8 @@ begin
     else
     begin
       if FMergeImages then
-        if (DrawRect.Height <= FSharedBitMap.Height) and (Control.Width <= FSharedBitMap.Width) then
+        if (DrawRect.Height <= FSharedBitMap.Height) and
+          (Control.Width <= FSharedBitMap.Width) then
           Canvas.CopyRect(DrawRect, FSharedBitMap.Canvas, DrawRect)
         else
         begin
@@ -1149,7 +1211,8 @@ begin
           SrcBackRect.SetLocation(FSharedBitMap.Width - DrawRect.Width, 0);
           Canvas.CopyRect(DrawRect, FSharedBitMap.Canvas, SrcBackRect);
         end
-      else if (DrawRect.Height <= FNCSettings.Bitmap.Height) and (Control.Width <= FNCSettings.Bitmap.Width) then
+      else if (DrawRect.Height <= FNCSettings.Bitmap.Height) and
+        (Control.Width <= FNCSettings.Bitmap.Width) then
         Canvas.CopyRect(DrawRect, FNCSettings.Bitmap.Canvas, DrawRect)
       else
       begin
@@ -1343,7 +1406,7 @@ end;
 procedure TFormStyleHookHelper.SetFRegion(const Value: HRGN);
 begin
   with Self do
-    FRegion := Value;
+   FRegion := Value;
 end;
 
 procedure TFormStyleHookHelper.SetFSysMenuButtonRect(const Value: TRect);
@@ -1373,7 +1436,7 @@ end;
 function TFormStyleHookHelper._GetBorderSize: TRect;
 begin
   with Self do
-    Result := GetBorderSize;
+   Result := GetBorderSize;
 end;
 
 function TFormStyleHookHelper._GetBorderSizeAddr: Pointer;
@@ -1384,6 +1447,7 @@ begin
     MethodAddr := GetBorderSize;
   Result := TMethod(MethodAddr).Code;
 end;
+
 
 function TFormStyleHookHelper._GetRegionAddr: Pointer;
 var
@@ -1411,5 +1475,6 @@ begin
   with Self do
     Result := NormalizePoint(P);
 end;
+
 
 end.
