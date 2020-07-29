@@ -103,6 +103,7 @@ const
   VSCLASS_SEARCHEDITBOX = 'SearchEditBox';
   VSCLASS_SEARCHBOX = 'SearchBox';
   VSCLASS_CompositedSEARCHBOX = 'SearchBoxCompositedSearchBox::SearchBox';
+  VSCLASS_SearchBoxComposited = 'SearchBoxComposited::SearchBox';
   VSCLASS_INACTIVESEARCHBOX = 'InactiveSearchBoxCompositedSearchBox::SearchBox';
 {$ENDIF}
 
@@ -4631,6 +4632,7 @@ begin
 {$IFDEF HOOK_SearchBox}
   FuncsDrawThemeBackground.Add(VSCLASS_SEARCHBOX, @UxTheme_SearchBox);
   FuncsDrawThemeBackground.Add(VSCLASS_CompositedSEARCHBOX, @UxTheme_SearchBox);
+  FuncsDrawThemeBackground.Add(VSCLASS_SearchBoxComposited, @UxTheme_SearchBox);
   FuncsDrawThemeBackground.Add(VSCLASS_INACTIVESEARCHBOX, @UxTheme_SearchBox);
 {$ENDIF}
 {$IFDEF HOOK_CommandModule}
