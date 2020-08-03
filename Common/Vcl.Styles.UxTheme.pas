@@ -3305,10 +3305,10 @@ begin
             LCanvas.Draw(0, 0, LBtnBmp);
           finally
             LCanvas.Free;
+            LBtnBmp.Free;
           end;
         finally
           RestoreDC(hndc, SaveIndex);
-          LBtnBmp.Free;
         end;
 
         exit(S_OK);
