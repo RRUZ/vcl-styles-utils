@@ -1226,11 +1226,17 @@ end;
 function TSysDialogStyleHook.NormalizePoint(const P: TPoint): TPoint;
 var
   WindowPos, ClientPos: TPoint;
+  bsize: TRect;
 begin
   { Convert the point from the screen to the client window . }
   WindowPos := Point(SysControl.Left, SysControl.Top);
   ClientPos := Point(0, 0);
   ClientToScreen(Handle, ClientPos);
+  if GetWindowLong(Handle, GWL_EXSTYLE) and WS_EX_LAYOUTRTL > 0 then
+  begin
+    bsize := BorderSize;
+    ClientPos.X := ClientPos.X - SysControl.Width + bsize.left + bsize.Right;
+  end;
   Result := P;
   ScreenToClient(Handle, Result);
   Inc(Result.X, ClientPos.X - WindowPos.X);
