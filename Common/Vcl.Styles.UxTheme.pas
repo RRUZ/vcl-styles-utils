@@ -481,6 +481,7 @@ begin
   finally
     VCLStylesLock.Leave;
   end;
+  // OutputDebugString(PChar(Format('Detour_UxTheme_DrawThemeMain hTheme %d iPartId %d iStateId %d  text %s', [hTheme, iPartId, iStateId, LThemeClass])));
 end;
 
 function Detour_UxTheme_DrawThemeBackgroundEx(hTheme: hTheme; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect;
@@ -624,7 +625,6 @@ begin
     {$IFDEF HOOK_SearchBox}
     if SameText(VSCLASS_SEARCHEDITBOX, LThemeClass) then
     begin
-      pColor := clNone;
       case iPartId of
         1:
           case iStateId of
@@ -3255,11 +3255,16 @@ end;
 {$ENDIF}
 
 {$IF Defined(HOOK_Button) or Defined(HOOK_AllButtons)}
-function UxTheme_Button(hTheme: hTheme; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect; Foo: Pointer;
-  Trampoline: TDrawThemeBackground; LThemeClass: string; hwnd: hwnd): HRESULT; stdcall;
+function UxTheme_Button(hTheme: hTheme; hndc: hdc; iPartId, iStateId: Integer;
+    const pRect: TRect; Foo: Pointer; Trampoline: TDrawThemeBackground;
+    LThemeClass: string; hwnd: hwnd): HRESULT; stdcall;
 var
   LDetails: TThemedElementDetails;
   SaveIndex: Integer;
+  LBtnBmp: TBitmap;
+  LDC: HDC;
+  LColor: TColor;
+  LCanvas: TCanvas;
 begin
   case iPartId of
 
@@ -3279,14 +3284,31 @@ begin
           PBS_DEFAULTED_ANIMATING:
             LDetails := StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
         end;
-
-        SaveIndex := SaveDC(hdc);
+        
+        SaveIndex := SaveDC(hndc);
         try
-          if hwnd <> 0 then
-            DrawStyleParentBackground(hwnd, hdc, pRect);
-          DrawStyleElement(hdc, LDetails, pRect);
+          LBtnBmp := TBitmap.Create;
+          LCanvas := TCanvas.Create;
+          try
+            LCanvas.Handle := hndc;
+            LBtnBmp.PixelFormat := pf24bit;
+            LBtnBmp.Transparent := True;
+            LBtnBmp.SetSize(pRect.Width, pRect.Height);
+            LDC := LBtnBmp.Canvas.Handle;
+            LColor := StyleServices.GetSystemColor(clBtnFace);
+            DrawStyleFillRect(LDC, pRect, LColor);
+
+            if hwnd <> 0 then
+              DrawStyleParentBackground(hwnd, hndc, pRect);
+            DrawStyleElement(LDC, LDetails, pRect);
+
+            LCanvas.Draw(0, 0, LBtnBmp);
+          finally
+            LCanvas.Free;
+          end;
         finally
-          RestoreDC(hdc, SaveIndex);
+          RestoreDC(hndc, SaveIndex);
+          LBtnBmp.Free;
         end;
 
         exit(S_OK);
@@ -3310,13 +3332,13 @@ begin
             LDetails := StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
         end;
 
-        SaveIndex := SaveDC(hdc);
+        SaveIndex := SaveDC(hndc);
         try
           if hwnd <> 0 then
-            DrawStyleParentBackground(hwnd, hdc, pRect);
-          DrawStyleElement(hdc, LDetails, pRect);
+            DrawStyleParentBackground(hwnd, hndc, pRect);
+          DrawStyleElement(hndc, LDetails, pRect);
         finally
-          RestoreDC(hdc, SaveIndex);
+          RestoreDC(hndc, SaveIndex);
         end;
 
         exit(S_OK);
@@ -3337,13 +3359,13 @@ begin
             LDetails := StyleServices.GetElementDetails(tbCommandLinkGlyphDefaulted);
         end;
 
-        SaveIndex := SaveDC(hdc);
+        SaveIndex := SaveDC(hndc);
         try
           if hwnd <> 0 then
-            DrawStyleParentBackground(hwnd, hdc, pRect);
-          DrawStyleElement(hdc, LDetails, pRect);
+            DrawStyleParentBackground(hwnd, hndc, pRect);
+          DrawStyleElement(hndc, LDetails, pRect);
         finally
-          RestoreDC(hdc, SaveIndex);
+          RestoreDC(hndc, SaveIndex);
         end;
 
         exit(S_OK);
@@ -3370,7 +3392,7 @@ begin
             LDetails := StyleServices.GetElementDetails(tbRadioButtonCheckedDisabled);
         end;
 
-        DrawStyleElement(hdc, LDetails, pRect);
+        DrawStyleElement(hndc, LDetails, pRect);
         exit(S_OK);
       end;
 
@@ -3420,13 +3442,13 @@ begin
             LDetails := StyleServices.GetElementDetails(tbCheckBoxExcludedDisabled);
         end;
 
-        DrawStyleElement(hdc, LDetails, pRect);
+        DrawStyleElement(hndc, LDetails, pRect);
         exit(S_OK);
       end
   end;
 
   // OutputDebugString(PChar(Format('UxTheme_Button  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
-  exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
+  exit(Trampoline(hTheme, hndc, iPartId, iStateId, pRect, Foo));
 end;
 {$ENDIF}
 

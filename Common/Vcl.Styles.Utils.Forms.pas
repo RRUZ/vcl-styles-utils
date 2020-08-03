@@ -1089,10 +1089,14 @@ begin
       TextRect.Right := ButtonRect.Left;
   end;
 
+  // Draw background and buttons first, then caption text directly on the Canvas.
+  // This to make sure "right to left" caption is displayed properly
+  Canvas.Draw(0, 0, CaptionBmp);
+
   { draw text }
   TextFormat := [tfLeft, tfSingleLine, tfVerticalCenter];
-  if SysControl.BidiMode = bmRightToLeft then
-    Include(TextFormat, tfRtlReading);
+//  if SysControl.BidiMode = bmRightToLeft then
+//    Include(TextFormat, tfRtlReading);
   // Important: Must retrieve Text prior to calling DrawText as it causes
   // CaptionBuffer.Canvas to free its handle, making the outcome of the call
   // to DrawText dependent on parameter evaluation order.
@@ -1102,28 +1106,27 @@ begin
     and (TextTopOffset <> 0) and (biSystemMenu in LBorderIcons) then
   begin
     Inc(TextRect.Left, R.Left);
-    MoveWindowOrg(CaptionBmp.Canvas.Handle, 0, TextTopOffset);
+    MoveWindowOrg(Canvas.Handle, 0, TextTopOffset);
     if Assigned(Application.Mainform) then
-      StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed, Application.MainForm.Monitor.PixelsPerInch)
+      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed, Application.MainForm.Monitor.PixelsPerInch)
     else
-      StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed, Screen.PixelsPerInch);
-    MoveWindowOrg(CaptionBmp.Canvas.Handle, 0, -TextTopOffset);
+      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed, Screen.PixelsPerInch);
+    MoveWindowOrg(Canvas.Handle, 0, -TextTopOffset);
   end
   else
   begin
     {$IF (CompilerVersion >= 33)}
     if Assigned(Application.Mainform) then
-      StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clBlue, Application.MainForm.Monitor.PixelsPerInch)
+      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clBlue, Application.MainForm.Monitor.PixelsPerInch)
     else
-      StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clBlue, Screen.PixelsPerInch);
+      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clBlue, Screen.PixelsPerInch);
     {$ELSE}
-    StyleServices.DrawText(CaptionBmp.Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
+    StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat);
     {$ENDIF}
   end;
 
   FCaptionRect := TextRect;
 
-  Canvas.Draw(0, 0, CaptionBmp);
   CaptionBmp.Free;
 
   DC := Canvas.Handle;
