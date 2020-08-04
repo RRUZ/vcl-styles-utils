@@ -3334,9 +3334,26 @@ begin
 
         SaveIndex := SaveDC(hndc);
         try
-          if hwnd <> 0 then
-            DrawStyleParentBackground(hwnd, hndc, pRect);
-          DrawStyleElement(hndc, LDetails, pRect);
+          LBtnBmp := TBitmap.Create;
+          LCanvas := TCanvas.Create;
+          try
+            LCanvas.Handle := hndc;
+            LBtnBmp.PixelFormat := pf24bit;
+            LBtnBmp.Transparent := True;
+            LBtnBmp.SetSize(pRect.Width, pRect.Height);
+            LDC := LBtnBmp.Canvas.Handle;
+            LColor := StyleServices.GetSystemColor(clBtnFace);
+            DrawStyleFillRect(LDC, pRect, LColor);
+
+            if hwnd <> 0 then
+              DrawStyleParentBackground(hwnd, hndc, pRect);
+            DrawStyleElement(LDC, LDetails, pRect);
+
+            LCanvas.Draw(0, 0, LBtnBmp);
+          finally
+            LCanvas.Free;
+            LBtnBmp.Free;
+          end;
         finally
           RestoreDC(hndc, SaveIndex);
         end;
