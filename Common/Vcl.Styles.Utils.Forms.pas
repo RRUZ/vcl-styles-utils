@@ -1402,7 +1402,7 @@ end;
 
 procedure TSysDialogStyleHook.WndProc(var Message: TMessage);
 var
-  DFBW: Integer;
+  DFBW,DX: Integer;
   LBorderSize: TRect;
   LParentHandle: HWND;
 begin
@@ -1414,17 +1414,23 @@ begin
         FSysCloseButtonDisabled := IsSysCloseButtonDisabled;
       end;
 
-    WM_CREATE:
+    WM_SHOWWINDOW:
       begin
         Message.Result := CallDefaultProc(Message);
         { DFBW =Default Frame Border Width }
         DFBW := GetSysMetrics(SM_CXBORDER);
         Inc(DFBW);
         LBorderSize := GetBorderSize;
+        DX := LBorderSize.Left + LBorderSize.Right - 2*DFBW;
 
-        if (SysControl.Width > LBorderSize.Left) and (SysControl.Width > LBorderSize.Right) then
-          SetWindowPos(Handle, 0, 0, 0, SysControl.Width + DFBW, SysControl.Height + DFBW + 1, SWP_NOMOVE or SWP_NOZORDER or SWP_FRAMECHANGED);
-        Exit;
+        // Adjust the window size if the vcl style border is smaller or larger
+        // than the default frame border is.
+        if (DFBW <> LBorderSize.Left) then
+          SetWindowPos(Handle, 0, 0, 0, SysControl.Width + DX, SysControl.Height + DX + 1, SWP_NOMOVE or SWP_NOZORDER or SWP_FRAMECHANGED);
+
+        // This code was moved from WM_CREATE: to be able to change TaskDialog, ColorDialog... sizes.
+        // E.g. the TaskDialog size is changed after creation to fit controls added to it. So in
+        // order to change its size - we need to do it here.
       end;
 
     WM_DESTROY:
