@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 498
   Top = 321
   Caption = 'Main'
-  ClientHeight = 229
+  ClientHeight = 263
   ClientWidth = 423
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -103,6 +103,22 @@ object Form1: TForm1
     Caption = 'PrintDialog'
     OnClick = BtnPrintDialogClick
   end
+  object BtnTaskDialog: TSpeedButton
+    Left = 8
+    Top = 170
+    Width = 97
+    Height = 22
+    Caption = 'TaskDialog'
+    OnClick = BtnTaskDialogClick
+  end
+  object BtnTaskDialogCmd: TSpeedButton
+    Left = 115
+    Top = 170
+    Width = 98
+    Height = 22
+    Caption = 'TaskDialogCmd'
+    OnClick = BtnTaskDialogCmdClick
+  end
   object ComboBoxStyles: TComboBox
     Left = 53
     Top = 8
@@ -123,7 +139,7 @@ object Form1: TForm1
   end
   object StaticText1: TStaticText
     Left = 8
-    Top = 181
+    Top = 208
     Width = 187
     Height = 17
     Caption = 'Right Click to Show Break Popup Menu'
@@ -143,7 +159,7 @@ object Form1: TForm1
   end
   object StaticText2: TStaticText
     Left = 8
-    Top = 204
+    Top = 231
     Width = 219
     Height = 17
     Caption = 'Right Click to Show Right To Left PopupMenu'
@@ -180,12 +196,12 @@ object Form1: TForm1
     OnClick = CheckBoxHookDialogIconsClick
   end
   object OpenDialog1: TOpenDialog
-    Left = 160
-    Top = 166
+    Left = 368
+    Top = 214
   end
   object ColorDialog1: TColorDialog
-    Left = 104
-    Top = 158
+    Left = 384
+    Top = 62
   end
   object FontDialog1: TFontDialog
     Font.Charset = DEFAULT_CHARSET
@@ -764,8 +780,8 @@ object Form1: TForm1
   end
   object PopupMenu1: TPopupMenu
     Images = ImageList1
-    Left = 128
-    Top = 142
+    Left = 296
+    Top = 222
     object I1: TMenuItem
       Caption = 'Item 1'
       ImageIndex = 2

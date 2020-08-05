@@ -94,6 +94,8 @@ type
     C1: TMenuItem;
     CheckBoxModernDialogs: TCheckBox;
     CheckBoxHookDialogIcons: TCheckBox;
+    BtnTaskDialog: TSpeedButton;
+    BtnTaskDialogCmd: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure ComboBoxStylesSelect(Sender: TObject);
     procedure BtnOpenDialogClick(Sender: TObject);
@@ -110,6 +112,8 @@ type
     procedure BtnRaiseExceptionClick(Sender: TObject);
     procedure BtnSelectFolderClick(Sender: TObject);
     procedure BtnPrintDialogClick(Sender: TObject);
+    procedure BtnTaskDialogClick(Sender: TObject);
+    procedure BtnTaskDialogCmdClick(Sender: TObject);
     procedure CheckBoxModernDialogsClick(Sender: TObject);
     procedure CheckBoxHookDialogIconsClick(Sender: TObject);
   private
@@ -234,6 +238,48 @@ procedure TForm1.BtnOpenDialogClick(Sender: TObject);
 begin
  if OpenDialog1.Execute then
   ShowMessage(Format('%s', [OpenDialog1.FileName]));
+end;
+
+procedure TForm1.BtnTaskDialogClick(Sender: TObject);
+begin
+  with TTaskDialog.Create(Self) do
+  try
+    Caption := 'My Application';
+    Title := 'Hello World!';
+    Text := 'I am a TTaskDialog, that is, a wrapper for the Task Dialog introduced ' +
+            'in the Microsoft Windows Vista operating system. Am I not adorable?';
+    CommonButtons := [tcbClose];
+    Execute;
+  finally
+    Free;
+  end;
+end;
+
+procedure TForm1.BtnTaskDialogCmdClick(Sender: TObject);
+begin
+  with TTaskDialog.Create(self) do
+  try
+    Title := 'Confirm Removal';
+    Caption := 'VCL style utils BookBase';
+    Text := 'Are you sure that you want to remove the book file named VCL Styles Utils for beginners!';
+    with TTaskDialogButtonItem(Buttons.Add) do
+    begin
+      Caption := 'Remove';
+      CommandLinkHint := 'Remove the book from the catalogue.';
+      ModalResult := mrYes;
+    end;
+    with TTaskDialogButtonItem(Buttons.Add) do
+    begin
+      Caption := 'Keep';
+      CommandLinkHint := 'Keep the book in the catalogue.';
+      ModalResult := mrNo;
+    end;
+    Flags := Flags + [tfUseCommandLinks];
+    CommonButtons := [];
+    Execute;
+  finally
+    Free;
+  end
 end;
 
 end.
