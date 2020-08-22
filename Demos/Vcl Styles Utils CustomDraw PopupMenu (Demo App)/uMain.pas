@@ -40,7 +40,7 @@ var
 implementation
 
 uses
- Vcl.Styles.Utils.SysControls;
+ Vcl.Styles.Utils.SysControls, System.Types;
 
 {$R *.dfm}
 
