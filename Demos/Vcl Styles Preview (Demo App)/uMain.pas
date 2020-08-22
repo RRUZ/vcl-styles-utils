@@ -5,7 +5,10 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.Styles.Ext,
-  Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, Vcl.ToolWin;
+  Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, Vcl.ToolWin,
+  System.Actions, Vcl.Styles.Preview;
+
+{.$DEFINE USETVISUALSTYLEPREVIEW}
 
 type
   TFrmMain = class(TForm)
@@ -25,7 +28,11 @@ type
   private
     Loading : Boolean;
     FStylesPath : string;
+    {$IFDEF USETVISUALSTYLEPREVIEW}
+    FPreview:TVisualStylePreview;
+    {$ELSE}
     FPreview:TVclStylesPreview;
+    {$ENDIF}
     procedure FillVclStylesList;
     procedure ClearVclStylesList;
   public
@@ -52,7 +59,13 @@ begin
    Loading:=False;
    FStylesPath:= IncludeTrailingPathDelimiter(ExpandFileName(ExtractFilePath(ParamStr(0))  + '\..\Styles'));
    ReportMemoryLeaksOnShutdown:=True;
+   {$IFDEF USETVISUALSTYLEPREVIEW}
+   FPreview:=TVisualStylePreview.Create(Self);
+   FPreview.PreviewType := ptTabs;
+   FPreview.DestroyStyle := False;
+   {$ELSE}
    FPreview:=TVclStylesPreview.Create(Self);
+   {$ENDIF}
    FPreview.Parent:=Panel1;
    FPreview.BoundsRect := Panel1.ClientRect;
    FillVclStylesList;
@@ -91,7 +104,7 @@ begin
    begin
      FPreview.Caption:=Item.SubItems[1];
      FPreview.Style:=LStyle;
-     TVclStylesPreviewClass(FPreview).Paint;
+     FPreview.Repaint;
    end;
   end;
 end;
