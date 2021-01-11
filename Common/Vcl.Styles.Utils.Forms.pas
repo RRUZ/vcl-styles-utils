@@ -1108,9 +1108,9 @@ begin
     Inc(TextRect.Left, R.Left);
     MoveWindowOrg(Canvas.Handle, 0, TextTopOffset);
     if Assigned(Application.Mainform) then
-      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed, Application.MainForm.Monitor.PixelsPerInch)
+      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed{$IF RTLVersion > 32}, Application.MainForm.Monitor.PixelsPerInch{$IFEND})
     else
-      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed, Screen.PixelsPerInch);
+      StyleServices.DrawText(Canvas.Handle, CaptionDetails, LText, TextRect, TextFormat, clRed{$IF RTLVersion > 32}, Screen.PixelsPerInch{$IFEND});
     MoveWindowOrg(Canvas.Handle, 0, -TextTopOffset);
   end
   else

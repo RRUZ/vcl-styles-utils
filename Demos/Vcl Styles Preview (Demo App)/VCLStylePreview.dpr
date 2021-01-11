@@ -9,6 +9,8 @@ uses
   Vcl.Themes,
   Windows,
   Vcl.Styles,
+  Vcl.Styles.Utils.Misc in '..\..\Common\Vcl.Styles.Utils.Misc.pas',
+  Vcl.Styles.Utils.Graphics in '..\..\Common\Vcl.Styles.Utils.Graphics.pas',
   Vcl.Styles.Ext in '..\..\Common\Vcl.Styles.Ext.pas';
 
 {$R *.res}
