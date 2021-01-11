@@ -28,7 +28,7 @@ uses
 
 procedure TForm25.FormCreate(Sender: TObject);
 var
-  LVclStylesSystemMenu : TVclStylesSystemMenu;
+  LVclStylesSystemMenu: TVclStylesSystemMenu;
 begin
   LVclStylesSystemMenu:=TVclStylesSystemMenu.Create(Self);
   LVclStylesSystemMenu.MenuCaption:='Choose a VCL Style';

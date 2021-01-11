@@ -23,8 +23,8 @@ type
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
   private
-    Loading : Boolean;
-    FStylesPath : string;
+    Loading: Boolean;
+    FStylesPath: string;
     FPreview:TVclStylesPreview;
     procedure FillVclStylesList;
     procedure ClearVclStylesList;
@@ -73,7 +73,7 @@ end;
 procedure TFrmMain.ListView1SelectItem(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 var
-   LStyle : TCustomStyle;
+   LStyle: TCustomStyle;
 begin
   if Selected then
   begin
@@ -109,7 +109,7 @@ end;
 
 procedure TFrmMain.ClearVclStylesList;
 var
- i : integer;
+ i: integer;
 begin
  for i:=0 to ListView1.Items.Count-1 do
   if Assigned(ListView1.Items[i].Data) then
@@ -120,7 +120,7 @@ end;
 procedure TFrmMain.FillVclStylesList;
 Var
  StyleName: string;
- Item     : TListItem;
+ Item: TListItem;
  StyleInfo:  TStyleInfo;
  SourceInfo: TSourceInfo;
  VCLStyleExt:TCustomStyleServices;

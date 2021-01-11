@@ -60,7 +60,7 @@ end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 var
- Style : string;
+ Style: string;
 begin
 
  for Style in TStyleManager.StyleNames do

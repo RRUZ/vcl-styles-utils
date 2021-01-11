@@ -87,11 +87,11 @@ end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 var
-  i, j     : Integer;
-  ExItem   : TComboExItem;
-  ListItem : TListItem;
+  i, j: Integer;
+  ExItem: TComboExItem;
+  ListItem: TListItem;
   MyTreeNode1, MyTreeNode2: TTreeNode;
-  s : string;
+  s: string;
 begin
   //ReportMemoryLeaksOnShutdown:=True;
 

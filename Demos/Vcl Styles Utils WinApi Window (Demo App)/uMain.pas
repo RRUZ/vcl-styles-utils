@@ -36,7 +36,7 @@ var
   Msg: TMsg;
 
 function MainWndProc(hWindow: HWND; Msg: UINT; wParam: wParam; lParam: lParam)
-  : LRESULT; stdcall; export;
+: LRESULT; stdcall; export;
 begin
   Result := 0;
   case Msg of
@@ -59,7 +59,7 @@ end;
 
 procedure CreateMyWindow;
 var
-  i : Integer;
+  i: Integer;
 begin
   wc.lpszClassName := 'CustomSkinedWindowClass';
   wc.lpfnWndProc := @MainWndProc;

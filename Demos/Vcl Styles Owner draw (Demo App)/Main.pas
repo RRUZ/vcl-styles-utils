@@ -19,7 +19,7 @@ type
     procedure CheckBox1Click(Sender: TObject);
   private
     { Private declarations }
-    Procedure SetOwnerDraw(Value : Boolean);
+    Procedure SetOwnerDraw(Value: Boolean);
 
   public
     { Public declarations }
@@ -45,9 +45,9 @@ end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 var
- i,j  :  integer;
- Item : TListItem;
- Root,Node : TTreeNode;
+ i,j:  integer;
+ Item: TListItem;
+ Root,Node: TTreeNode;
 begin
 
 

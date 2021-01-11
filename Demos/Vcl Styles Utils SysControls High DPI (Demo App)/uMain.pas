@@ -139,7 +139,7 @@ end;
 
 procedure TForm1.BtnSelectFolderClick(Sender: TObject);
 var
-  FDir : string;
+  FDir: string;
 begin
    SelectDirectory('Select Directory', ExtractFileDrive(FDir), FDir, [sdNewUI, sdNewFolder]);
 end;

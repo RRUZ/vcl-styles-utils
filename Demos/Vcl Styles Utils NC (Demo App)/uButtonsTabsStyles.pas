@@ -12,7 +12,7 @@ type
     ImageList1: TImageList;
     procedure FormCreate(Sender: TObject);
   private
-    NCControls : TNCControls;
+    NCControls: TNCControls;
   public
     { Public declarations }
   end;
@@ -23,7 +23,7 @@ implementation
 
 procedure TFrmButtonsTabsStyle.FormCreate(Sender: TObject);
 var
-  LNCControl : TNCButton;
+  LNCControl: TNCButton;
 begin
   NCControls := TNCControls.Create(Self);
   NCControls.Images      := ImageList1;

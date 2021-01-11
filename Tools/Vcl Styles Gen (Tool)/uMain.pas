@@ -49,13 +49,13 @@ procedure TFrmMain.Button1Click(Sender: TObject);
 const
  HueDelta=10;
 Var
-  LFilters : TObjectList<TBitmapFilter>;
-  VclUtils : TVclStylesUtils;
-  Hue      : Integer;
-  FileName : String;
+  LFilters: TObjectList<TBitmapFilter>;
+  VclUtils: TVclStylesUtils;
+  Hue: Integer;
+  FileName: String;
   StyleInfo: TStyleInfo;
-  LBitmap  : TBitmap;
-  LPng     : TPngImage;
+  LBitmap: TBitmap;
+  LPng: TPngImage;
 begin
   try
     Hue:=-180;
@@ -105,7 +105,7 @@ begin
     ShowMessage('Done');
   except
     on E: Exception do
-      ShowMessage(Format('Error saving vcl style - Message : %s : Trace %s',
+      ShowMessage(Format('Error saving vcl style - Message: %s: Trace %s',
         [E.Message, E.StackTrace]));
   end;
 end;
@@ -117,8 +117,8 @@ end;
 
 procedure TFrmMain.DrawSeletedVCLStyle;
 var
-  LBitmap   : TBitmap;
-  LStyle    : TCustomStyleExt;
+  LBitmap: TBitmap;
+  LStyle: TCustomStyleExt;
   SourceInfo: TSourceInfo;
 begin
    ImageVCLStyle.Picture:=nil;
@@ -127,11 +127,11 @@ begin
     LBitmap:=TBitmap.Create;
     try
        LBitmap.PixelFormat:=pf32bit;
-       LBitmap.Width :=ImageVCLStyle.ClientRect.Width;
-       LBitmap.Height:=ImageVCLStyle.ClientRect.Height;
+       LBitmap.Width := ImageVCLStyle.ClientRect.Width;
+       LBitmap.Height := ImageVCLStyle.ClientRect.Height;
        TStyleManager.StyleNames;
-       SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
-       LStyle:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
+       SourceInfo := TStyleManager.StyleSourceInfo[StyleName];
+       LStyle := TCustomStyleExt.Create(TStream(SourceInfo.Data));
        try
          DrawSampleWindow(LStyle, LBitmap.Canvas, ImageVCLStyle.ClientRect, StyleName);
          ImageVCLStyle.Picture.Assign(LBitmap);
@@ -146,14 +146,14 @@ end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
 var
-  s : string;
+  s: string;
 begin
  ReportMemoryLeaksOnShutdown:=True;
  for s in TStyleManager.StyleNames do
   if CompareText(s,'Windows')<>0 then
    ComboBoxVclStyles.Items.Add(s);
 
- ComboBoxVclStyles.ItemIndex:=0;
+ ComboBoxVclStyles.ItemIndex := 0;
  DrawSeletedVCLStyle;
  EditPath.Text:=IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))+'Output';
  ForceDirectories(EditPath.Text);
@@ -172,7 +172,7 @@ end;
 
 procedure RegisterVCLStyles;
 var
-  Style   : string;
+  Style: string;
 begin
   for Style in TDirectory.GetFiles(ExtractFilePath(ParamStr(0))+'\Styles', '*.vsf') do
     RegisterVCLStyle(Style);

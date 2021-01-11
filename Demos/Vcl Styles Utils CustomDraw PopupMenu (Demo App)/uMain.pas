@@ -55,7 +55,7 @@ procedure TMySysPopupStyleHook.DrawItem(Canvas: TCanvas; const Index: integer;
   const ItemRect: TRect; const ItemText: String; const State: TSysPopupItemState;
   const Style: TSysPopupItemStyle);
 var
- LItemRect : TRect;
+ LItemRect: TRect;
 begin
   { Skip Some Menu if You want .. }
   if Menu = GetSystemMenu(Form1.Handle, False) then

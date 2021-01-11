@@ -32,8 +32,8 @@ end;
 
 procedure LoadVCLStyles;
 var
-  f, s : string;
-  LFiles : TStringDynArray;
+  f, s: string;
+  LFiles: TStringDynArray;
 begin
   s := ExtractFilePath(ParamStr(0));
   LFiles := TDirectory.GetFiles(s, '*.vsf');

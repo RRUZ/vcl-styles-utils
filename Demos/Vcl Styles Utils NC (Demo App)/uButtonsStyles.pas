@@ -16,7 +16,7 @@ type
     procedure cbNCBtnStylesChange(Sender: TObject);
     procedure CheckBoxAwesomeClick(Sender: TObject);
   private
-    NCControls : TNCControls;
+    NCControls: TNCControls;
     procedure ButtonNCClick(Sender: TObject);
     procedure ButtonNCDropDownClick(Sender: TObject);
     procedure UpdateNCButtons;
@@ -61,7 +61,7 @@ end;
 
 procedure TFrmButtonsStyles.FormCreate(Sender: TObject);
 var
-  LStyle : TNCButton.TNCButtonStyle;
+  LStyle: TNCButton.TNCButtonStyle;
 begin
   for LStyle:= Low(TNCButton.TNCButtonStyle) to High(TNCButton.TNCButtonStyle) do
  // if not (LStyle in [nsAlpha, nsGradient]) then
@@ -80,13 +80,13 @@ const
     clWebRosyBrown, clWebYellowGreen, clGray, clWebOrange, clWebMoccasin, clWebMediumPurple,
     clWebMediumBlue, clWebMediumOrchid, clWebIvory, clWebSeashell, clWebPapayaWhip, clWebPeru);
 
-  AwesomeIcons : Array[0..11] of Word = (
+  AwesomeIcons: Array[0..11] of Word = (
     fa_home, fa_signal, fa_search, fa_envelope_o, fa_remove, fa_gear,
     fa_home, fa_signal, fa_gear, fa_download, fa_print, fa_camera);
 
 var
-  iLeft, iSep, i, LImageIndex : Integer;
-  LNCControl : TNCButton;
+  iLeft, iSep, i, LImageIndex: Integer;
+  LNCControl: TNCButton;
 begin
   NCControls.Controls.Clear;
   NCControls.Controls.BeginUpdate;

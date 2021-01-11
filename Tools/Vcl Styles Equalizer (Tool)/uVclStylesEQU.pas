@@ -14,7 +14,7 @@
 // The Original Code is uVclStylesEQU.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2021 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -155,9 +155,9 @@ type
     procedure btnLoadSettingsClick(Sender: TObject);
     procedure CbBlendTexturesChange(Sender: TObject);
   private
-    OriginalBitMap : TBitmap;
-    FStyleName     : string;
-    //FPreview       : TVclStylesPreview;
+    OriginalBitMap: TBitmap;
+    FStyleName: string;
+    //FPreview: TVclStylesPreview;
     procedure DrawSeletedVCLStyle;
     function GetStyleName: string;
     property StyleName: string Read GetStyleName Write FStyleName;
@@ -167,8 +167,8 @@ type
     procedure LoadStyleSystemColors;
 
     procedure SetPageActive(Index:integer);
-    function GetFilters  : TObjectList<TBitmapFilter>;
-    procedure DropFiles(var msg : TMessage); message WM_DROPFILES;
+    function GetFilters: TObjectList<TBitmapFilter>;
+    procedure DropFiles(var msg: TMessage); message WM_DROPFILES;
     procedure FillListStyles;
     procedure BuildPreview;
 
@@ -179,7 +179,7 @@ type
   end;
 
 var
-  FrmHueSat : TFrmHueSat;
+  FrmHueSat: TFrmHueSat;
 
 implementation
 
@@ -203,23 +203,23 @@ uses
   Vcl.Imaging.Jpeg,
   uVCLStylesInfo;
 
-procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp : TBitmap);
+procedure CreateArrayBitmap(Width,Height:Word;Colors: Array of TColor;var bmp: TBitmap);
 Var
- i : integer;
- w : integer;
+ i: integer;
+ w: integer;
 begin
-  bmp.PixelFormat:=pf32bit;
-  bmp.Width:=Width;
-  bmp.Height:=Height;
+  bmp.PixelFormat := pf32bit;
+  bmp.Width := Width;
+  bmp.Height := Height;
   bmp.Canvas.Brush.Color := clBlack;
   bmp.Canvas.FillRect(Rect(0,0, Width, Height));
 
-  w :=(Width-2) div (High(Colors)+1);
+  w := (Width - 2) div (High(Colors) + 1);
   for i:=0 to High(Colors) do
   begin
    bmp.Canvas.Brush.Color := Colors[i];
    //bmp.Canvas.FillRect(Rect((w*i),0, w*(i+1), Height));
-   bmp.Canvas.FillRect(Rect((w*i)+1,1, w*(i+1)+1, Height-1))
+   bmp.Canvas.FillRect(Rect((w*i)+1, 1, w * (i + 1) + 1, Height - 1))
   end;
 end;
 
@@ -228,10 +228,10 @@ const
   cb = 255;
 var
   FileIndex,
-  nCount     : integer;
-  FileName   : array [0..cb] of Char;
-  StyleInfo  : TStyleInfo;
-  LStyleName : string;
+  nCount: integer;
+  FileName: array [0..cb] of Char;
+  StyleInfo: TStyleInfo;
+  LStyleName: string;
 begin
   LStyleName :='';
   nCount := DragQueryFile( msg.WParam, $FFFFFFFF, FileName, cb);
@@ -273,9 +273,9 @@ end;
 
 function TFrmHueSat.GetFilters: TObjectList<TBitmapFilter>;
 var
-  LFilter : TValue;
-  ctx     : TRttiContext;
-  RttiInstanceType : TRttiInstanceType;
+  LFilter: TValue;
+  ctx: TRttiContext;
+  RttiInstanceType: TRttiInstanceType;
 begin
   Result:=TObjectList<TBitmapFilter>.Create;
 
@@ -343,8 +343,8 @@ end;
 
 procedure TFrmHueSat.btnApplyClick(Sender: TObject);
 Var
-  LFilters : TObjectList<TBitmapFilter>;
-  VclUtils : TVclStylesUtils;
+  LFilters: TObjectList<TBitmapFilter>;
+  VclUtils: TVclStylesUtils;
   sw: TStopWatch;
 begin
   if StyleName='' then exit;
@@ -374,7 +374,7 @@ begin
     LoadStyle;
   except
     on E: Exception do
-      MessageDlg(Format('Error saving vcl style - Message : %s : Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
+      MessageDlg(Format('Error saving vcl style - Message: %s: Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
   end;
 end;
 
@@ -385,14 +385,14 @@ end;
 
 procedure TFrmHueSat.btnSaveClick(Sender: TObject);
 Var
-  LFilters : TObjectList<TBitmapFilter>;
-  VclUtils : TVclStylesUtils;
-  Frm      : TFrmVCLStyleInfoDialog;
-  NewName  : string;
-  LBitmap  : TBitmap;
-  LPng     : TPngImage;
+  LFilters: TObjectList<TBitmapFilter>;
+  VclUtils: TVclStylesUtils;
+  Frm: TFrmVCLStyleInfoDialog;
+  NewName: string;
+  LBitmap: TBitmap;
+  LPng: TPngImage;
   ColorName: string;
-  sw       : TStopWatch;
+  sw: TStopWatch;
 begin
    if StyleName='' then exit;
    VclUtils:=TVclStylesUtils.Create(StyleName, True);
@@ -480,7 +480,7 @@ begin
 
         except
           on E: Exception do
-           MessageDlg(Format('Error saving vcl style - Message : %s : Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
+           MessageDlg(Format('Error saving vcl style - Message: %s: Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
         end;
      end;
    finally
@@ -555,7 +555,7 @@ end;
 procedure TFrmHueSat.ColorBoxblendGetColors(Sender: TCustomColorBox;
   Items: TStrings);
 Var
- Item : TIdentMapEntry;
+ Item: TIdentMapEntry;
 begin
   for Item in WebNamedColors do
    Items.AddObject(Item.Name,TObject(Item.Value));
@@ -580,8 +580,8 @@ end;
 
 procedure TFrmHueSat.DrawSeletedVCLStyle;
 var
-  LBitmap   : TBitmap;
-  LStyle    : TCustomStyleExt;
+  LBitmap: TBitmap;
+  LStyle: TCustomStyleExt;
   SourceInfo: TSourceInfo;
 begin
    ImageVCLStyle.Picture:=nil;
@@ -610,7 +610,7 @@ end;
 
 {
 var
-  LStyle    : TCustomStyleExt;
+  LStyle: TCustomStyleExt;
   SourceInfo: TSourceInfo;
 begin
    ImageVCLStyle.Picture:=nil;
@@ -633,8 +633,8 @@ end;
 
 procedure TFrmHueSat.EditHueExit(Sender: TObject);
 Var
-  Value : Integer;
-  Allow : Boolean;
+  Value: Integer;
+  Allow: Boolean;
 begin
   if TryStrToInt(EditHue.Text, Value) then
   begin
@@ -650,8 +650,8 @@ end;
 
 procedure TFrmHueSat.EditLightExit(Sender: TObject);
 Var
-  Value : Integer;
-  Allow : Boolean;
+  Value: Integer;
+  Allow: Boolean;
 begin
   if TryStrToInt(EditLight.Text, Value) then
   begin
@@ -668,8 +668,8 @@ end;
 
 procedure TFrmHueSat.EditSatExit(Sender: TObject);
 Var
-  Value : Integer;
-  Allow : Boolean;
+  Value: Integer;
+  Allow: Boolean;
 begin
   if TryStrToInt(EditSat.Text, Value) then
   begin
@@ -686,7 +686,7 @@ end;
 
 procedure TFrmHueSat.FillListStyles;
 var
-  s : string;
+  s: string;
 begin
  ComboBoxVclStyles.Items.Clear;
  for s in TStyleManager.StyleNames do
@@ -696,7 +696,7 @@ end;
 
 procedure TFrmHueSat.FormCreate(Sender: TObject);
 var
-  s : string;
+  s: string;
 begin
  {
  FPreview:=TVclStylesPreview.Create(Self);
@@ -765,12 +765,12 @@ end;
 
 procedure TFrmHueSat.BuildPreview;
 var
-  LFilters : TObjectList<TBitmapFilter>;
-  //VclUtils : TVclStylesUtils;
-  LBitmap  : TBitmap;
-  Filter   : TBitmapFilter;
-  Index    : Integer;
-  LColor   : TColor;
+  LFilters: TObjectList<TBitmapFilter>;
+  //VclUtils: TVclStylesUtils;
+  LBitmap: TBitmap;
+  Filter: TBitmapFilter;
+  Index: Integer;
+  LColor: TColor;
 begin
   if StyleName='' then exit;
   LFilters:=GetFilters;
@@ -864,9 +864,9 @@ end;
 
 procedure TFrmHueSat.SaveSettings;
 Var
- LVCLStylesFilter : TVCLStylesFilter;
- LFilters         : TObjectList<TBitmapFilter>;
- LElements        : TVCLStylesElements;
+ LVCLStylesFilter: TVCLStylesFilter;
+ LFilters: TObjectList<TBitmapFilter>;
+ LElements: TVCLStylesElements;
 begin
   if RadioButtonHSL.Checked then
     LVCLStylesFilter:=vsfHSL
@@ -900,7 +900,7 @@ end;
 
 procedure TFrmHueSat.SetPageActive(Index: integer);
 var
- i : Integer;
+ i: Integer;
 begin
   PageControl1.ActivePageIndex:=Index;
   for i := 0 to PageControl1.PageCount-1 do
@@ -917,7 +917,7 @@ end;
 
 procedure TFrmHueSat.LoadImageTexture;
 var
- JpegImage : TJPEGImage;
+ JpegImage: TJPEGImage;
 begin
   ImageTexture.Picture.LoadFromFile(ExtractFilePath(ParamStr(0))+'textures\'+CbTextures.Text);
   if (ImageTexture.Picture.Graphic is TJPegImage) then
@@ -936,13 +936,13 @@ end;
 
 procedure TFrmHueSat.LoadSettings;
 Var
- LFilterType  : TVCLStylesFilter;
- LFilters     : TObjectList<TBitmapFilter>;
- sw           : TStopWatch;
- VclUtils     : TVclStylesUtils;
- LElements    : TVCLStylesElements;
- Filter       : TBitmapFilter;
- i            : Integer;
+ LFilterType: TVCLStylesFilter;
+ LFilters: TObjectList<TBitmapFilter>;
+ sw: TStopWatch;
+ VclUtils: TVclStylesUtils;
+ LElements: TVCLStylesElements;
+ Filter: TBitmapFilter;
+ i: Integer;
 begin
   if StyleName='' then exit;
   OpenDialog1.Filter:='Visual Style EQ Settings|*.vseq';
@@ -954,7 +954,7 @@ begin
      TVclStylesUtils.LoadSettings(OpenDialog1.FileName, LElements, LFilterType, LFilters);
 
      case LFilterType of
-       vsfHSL   : begin
+       vsfHSL: begin
                     RadioButtonHSL.Checked:=True;
 
                     for Filter in  LFilters do
@@ -968,7 +968,7 @@ begin
                        TrackBarLightness.Position:=Filter.ColorValue;
                   end;
 
-       vsfRGB   : begin
+       vsfRGB: begin
                     RadioButtonRGB.Checked:=True;
                     for Filter in  LFilters do
                      if Filter is TBitmap32RedFilter then
@@ -981,7 +981,7 @@ begin
                         TrackBarBlue.Position:=Filter.ColorValue;
                   end;
 
-       vsfBlend : begin
+       vsfBlend: begin
                     RadioButtonBlend.Checked:=True;
                     Filter:=LFilters[0];
                     ColorBoxblend.Selected:=Filter.ColorValue;
@@ -1010,7 +1010,7 @@ begin
         LoadStyle(False);
       except
         on E: Exception do
-          MessageDlg(Format('Error applying settings - Message : %s : Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
+          MessageDlg(Format('Error applying settings - Message: %s: Trace %s', [E.Message, E.StackTrace]),  mtWarning, [mbOK], 0);
       end;
 
    finally
@@ -1055,10 +1055,10 @@ end;
 
 procedure TFrmHueSat.LoadStyleColors;
 var
- StyleColor : TStyleColor;
- Item       : TListItem;
- LColor     : TColor;
- LBitmap    : TBitmap;
+ StyleColor: TStyleColor;
+ Item: TListItem;
+ LColor: TColor;
+ LBitmap: TBitmap;
 begin
   if StyleName='' then exit;
   ListViewStyleColors.Items.BeginUpdate;
@@ -1091,10 +1091,10 @@ end;
 
 procedure TFrmHueSat.LoadStyleFontsColors;
 var
- StyleFont : TStyleFont;
- Item       : TListItem;
- LColor     : TColor;
- LBitmap    : TBitmap;
+ StyleFont: TStyleFont;
+ Item: TListItem;
+ LColor: TColor;
+ LBitmap: TBitmap;
 begin
   if StyleName='' then exit;
   ListViewStyleFontColors.Items.BeginUpdate;
@@ -1115,7 +1115,7 @@ begin
       try
         CreateArrayBitmap(16,16,[LColor], LBitmap);
         ImageListStyleFontColors.Add(LBitmap, nil);
-        Item.ImageIndex:=ImageListStyleFontColors.Count-1;
+        Item.ImageIndex := ImageListStyleFontColors.Count-1;
       finally
         LBitmap.Free;
       end;
@@ -1128,12 +1128,12 @@ end;
 
 procedure TFrmHueSat.LoadStyleSystemColors;
 Var
-  Element    : TIdentMapEntry;
-  Item       : TListItem;
-  LColor     : TColor;
-  LBitmap    : TBitmap;
+  Element: TIdentMapEntry;
+  Item: TListItem;
+  LColor: TColor;
+  LBitmap: TBitmap;
 begin
-  if StyleName='' then exit;
+  if StyleName = '' then exit;
 
   ListViewSystemColors.Items.BeginUpdate;
   try
@@ -1236,8 +1236,8 @@ end;
 
 procedure RegisterVCLStyles;
 var
-  Style     : string;
-  StylesDir : string;
+  Style: string;
+  StylesDir: string;
 begin
   StylesDir:=ExpandFileName(ExtractFilePath(ParamStr(0))  + '\..\Styles');
   if DirectoryExists(StylesDir) then

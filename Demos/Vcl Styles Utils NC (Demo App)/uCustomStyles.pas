@@ -27,7 +27,7 @@ type
     procedure ComboBox1Change(Sender: TObject);
   private
     { Private declarations }
-    NCControls : TNCControls;
+    NCControls: TNCControls;
   public
     { Public declarations }
   end;
@@ -46,7 +46,7 @@ end;
 
 procedure TFrmCustomStyles.FormCreate(Sender: TObject);
 var
- s : string;
+ s: string;
 begin
   for s in TStyleManager.StyleNames do
    if not SameText(s, 'Windows') then

@@ -36,8 +36,8 @@ end;
 
 procedure LoadVCLStyles;
 var
-  f, s : string;
-  LFiles : TStringDynArray;
+  f, s: string;
+  LFiles: TStringDynArray;
   StyleInfo: TStyleInfo;
 begin
   s:=ExtractFilePath(ParamStr(0));

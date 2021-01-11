@@ -91,11 +91,11 @@ begin
         for Index := 0 to SelLst.cItems - 1 do
         begin
           Text := Text + Format(
-            'Object : %u'#13#10 +
-            ' Name : %s'#13#10 +
+            'Object: %u'#13#10 +
+            ' Name: %s'#13#10 +
             ' Class: %s'#13#10 +
-            ' Path : %s'#13#10 +
-            ' UPN : %s'#13#10, [
+            ' Path: %s'#13#10 +
+            ' UPN: %s'#13#10, [
             Index,
             WideCharToString(SelLst.aDsSelection[Index].pwzName),
             WideCharToString(SelLst.aDsSelection[Index].pwzClass),

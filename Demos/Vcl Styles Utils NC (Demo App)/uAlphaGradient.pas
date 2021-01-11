@@ -13,7 +13,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-    NCControls : TNCControls;
+    NCControls: TNCControls;
      procedure ButtonNCClick(Sender: TObject);
  public
     { Public declarations }
@@ -35,7 +35,7 @@ end;
 
 procedure TFrmAlphaGradient.FormCreate(Sender: TObject);
 var
- LNCControl : TNCControl;
+ LNCControl: TNCControl;
 begin
   NCControls := TNCControls.Create(Self);
   NCControls.Images      := ImageList1;

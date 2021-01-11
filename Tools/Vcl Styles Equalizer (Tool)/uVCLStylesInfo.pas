@@ -14,7 +14,7 @@
 // The Original Code is uVCLStylesInfo.pas.
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2014 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2012-2021 Rodrigo Ruz V.
 // All Rights Reserved.
 //
 //**************************************************************************************************
@@ -44,13 +44,13 @@ type
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
-    FStatus   : Boolean;
+    FStatus: Boolean;
     FStyleInfo: TStyleInfo;
     procedure SetStyleInfo(const Value: TStyleInfo);
     { Private declarations }
   public
     property  StyleInfo:  TStyleInfo read FStyleInfo write SetStyleInfo;
-    function Execute : Boolean;
+    function Execute: Boolean;
   end;
 
 implementation

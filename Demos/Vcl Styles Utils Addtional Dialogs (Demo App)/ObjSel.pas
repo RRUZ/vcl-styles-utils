@@ -374,8 +374,8 @@ const
 type
   PDSOPUplevelFilterFlags = ^TDSOPUplevelFilterFlags;
   _DSOP_UPLEVEL_FILTER_FLAGS = record
-    flBothModes     : ULONG;
-    flMixedModeOnly : ULONG;
+    flBothModes: ULONG;
+    flMixedModeOnly: ULONG;
     flNativeModeOnly: ULONG;
   end;
   TDSOPUplevelFilterFlags = _DSOP_UPLEVEL_FILTER_FLAGS;
@@ -384,7 +384,7 @@ type
 type
   PDSOPFilterFlags = ^TDSOPFilterFlags;
   _DSOP_FILTER_FLAGS = record
-    Uplevel    : TDSOPUplevelFilterFlags;
+    Uplevel: TDSOPUplevelFilterFlags;
     flDownlevel: ULONG;
   end;
   TDSOPFilterFlags = _DSOP_FILTER_FLAGS;
@@ -432,13 +432,13 @@ type
   PDSOPScopeInitInfo = ^TDSOPScopeInitInfo;
   PDSOP_SCOPE_INIT_INFO = PDSOPScopeInitInfo;
   _DSOP_SCOPE_INIT_INFO = record
-    cbSize     : ULONG;
-    flType     : ULONG;
-    flScope    : ULONG;
+    cbSize: ULONG;
+    flType: ULONG;
+    flScope: ULONG;
     FilterFlags: TDSOPFilterFlags;
-    pwzDcName  : PCWSTR;  // OPTIONAL
-    pwzADsPath : PCWSTR;  // OPTIONAL
-    hr         : HRESULT;
+    pwzDcName: PCWSTR;  // OPTIONAL
+    pwzADsPath: PCWSTR;  // OPTIONAL
+    hr: HRESULT;
   end;
   TDSOPScopeInitInfo = _DSOP_SCOPE_INIT_INFO;
   DSOP_SCOPE_INIT_INFO = _DSOP_SCOPE_INIT_INFO;
@@ -505,11 +505,11 @@ type
   PDSOPInitInfo = ^TDSOPInitInfo;
   PDSOP_INIT_INFO = PDSOPInitInfo;
   _DSOP_INIT_INFO = record
-    cbSize            : ULONG;
-    pwzTargetComputer : PCWSTR;
-    cDsScopeInfos     : ULONG;
-    aDsScopeInfos     : PDSOPScopeInitInfo;
-    flOptions         : ULONG;
+    cbSize: ULONG;
+    pwzTargetComputer: PCWSTR;
+    cDsScopeInfos: ULONG;
+    aDsScopeInfos: PDSOPScopeInitInfo;
+    flOptions: ULONG;
     cAttributesToFetch: ULONG;
     apwzAttributeNames: ^PCWSTR;
   end;
@@ -565,12 +565,12 @@ type
   PDSSelection = ^TDSSelection;
   PDS_SELECTION = PDSSelection;
   _DS_SELECTION = record
-    pwzName              : PWSTR;
-    pwzADsPath           : PWSTR;
-    pwzClass             : PWSTR;
-    pwzUPN               : PWSTR;
+    pwzName: PWSTR;
+    pwzADsPath: PWSTR;
+    pwzClass: PWSTR;
+    pwzUPN: PWSTR;
     pvarFetchedAttributes: PVariant;
-    flScopeType          : ULONG;
+    flScopeType: ULONG;
   end;
   TDSSelection = _DS_SELECTION;
   DS_SELECTION = _DS_SELECTION;
@@ -579,9 +579,9 @@ type
   PDSSelectionList = ^TDSSelectionList;
   PDS_SELECTION_LIST = PDSSelectionList;
   _DS_SELECTION_LIST = record
-    cItems            : ULONG;
+    cItems: ULONG;
     cFetchedAttributes: ULONG;
-    aDsSelection      : array [0..0] of TDSSelection;
+    aDsSelection: array [0..0] of TDSSelection;
   end;
   TDSSelectionList = _DS_SELECTION_LIST;
   DS_SELECTION_LIST = _DS_SELECTION_LIST;
