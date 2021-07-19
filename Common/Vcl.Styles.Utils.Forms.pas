@@ -1486,9 +1486,8 @@ begin
     Handled := False;
     Exit;
   end;
-  P.X := Longint(Word(Message.WParam));
-  P.Y := Longint(HiWord(Message.WParam));
-  GetCursorPos(P);
+  P.X := Int16(Message.LParam and $0000FFFF);
+  P.Y := Int16(Message.LParam shr 16);
   if FScrollKind = sbVertical then
   begin
     if (P.Y >= 0) then
@@ -1570,7 +1569,7 @@ begin
   GetCursorPos(P);
   if (FPrevPoint <> P) and (FDownPoint <> P) then
   begin
-    SendMessage(Handle, CM_SCROLLTRACKING, MakeWParam(P.X, P.Y), 0);
+    SendMessage(Handle, CM_SCROLLTRACKING, 0, PointToLParam(P));
     FPrevPoint := P;
     FDownPoint := Point(-1, -1);
   end;
