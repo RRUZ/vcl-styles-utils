@@ -18,14 +18,16 @@
 // All Rights Reserved.
 //
 //************************************************************************************************
+
 {$DEFINE USE_Vcl.Styles.Hooks}
 {$DEFINE HOOK_UXTHEME}
 {$DEFINE HOOK_TDateTimePicker}
 {$DEFINE HOOK_TProgressBar}
 {.$DEFINE LimitStylesToMainApplicationThread}
 {.$DEFINE HOOK_VirtualShell}
-{$DEFINE HOOK_ExplorerStatusBar}
+{.$DEFINE HOOK_ExplorerStatusBar}
 { Feature toggles for supported UxThemes - see Vcl.Styles.UxTheme }
+
 {$DEFINE HOOK_Button}
 {$DEFINE HOOK_AllButtons}
 {$DEFINE HOOK_Scrollbar}
