@@ -16,7 +16,7 @@
 //
 // The Initial Developer of the Original Code is Rodrigo Ruz V.
 //
-// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2021 Rodrigo Ruz V.
+// Portions created by Rodrigo Ruz V. are Copyright (C) 2013-2023 Rodrigo Ruz V.
 //
 // Contributor(s): Mahdi Safsafi.
 //
