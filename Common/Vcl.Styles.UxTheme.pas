@@ -3576,7 +3576,7 @@ begin
       end
   end;
 
-   OutputDebugString(PChar(Format('UxTheme_TaskDialog  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
+  // OutputDebugString(PChar(Format('UxTheme_TaskDialog  class %s hTheme %d iPartId %d iStateId %d', [THThemesClasses.Items[hTheme],hTheme, iPartId, iStateId])));
   exit(Trampoline(hTheme, hdc, iPartId, iStateId, pRect, Foo));
 end;
 {$ENDIF}

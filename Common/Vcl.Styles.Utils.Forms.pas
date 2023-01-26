@@ -1418,13 +1418,14 @@ begin
       begin
         Message.Result := CallDefaultProc(Message);
         { DFBW =Default Frame Border Width }
-        DFBW := GetSysMetrics(SM_CXBORDER);
-        Inc(DFBW);
+        DFBW := GetSysMetrics(SM_CXSIZEFRAME) * 2;
+        //Inc(DFBW);
         LBorderSize := GetBorderSize;
         DX := LBorderSize.Left + LBorderSize.Right - 2*DFBW;
 
         // Adjust the window size if the vcl style border is smaller or larger
         // than the default frame border is.
+
         if (DFBW <> LBorderSize.Left) then
           SetWindowPos(Handle, 0, 0, 0, SysControl.Width + DX, SysControl.Height + DX + 1, SWP_NOMOVE or SWP_NOZORDER or SWP_FRAMECHANGED);
 
