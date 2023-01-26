@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ImgList,
-  Vcl.ExtCtrls, Vcl.Mask;
+  Vcl.ExtCtrls, Vcl.Mask, System.ImageList;
 
 type
   TFrmMain = class(TForm)
@@ -54,6 +54,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure CheckBox1Click(Sender: TObject);
     procedure ComboBoxStylesSelect(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   public
     { Public declarations }
   end;
@@ -83,6 +84,11 @@ end;
 procedure TFrmMain.ComboBoxStylesSelect(Sender: TObject);
 begin
   TStyleManager.SetStyle(ComboBoxStyles.Items[ComboBoxStyles.ItemIndex]);
+end;
+
+procedure TFrmMain.FormActivate(Sender: TObject);
+begin
+  TStyleManager.TrySetStyle('Auric');
 end;
 
 procedure TFrmMain.FormCreate(Sender: TObject);
