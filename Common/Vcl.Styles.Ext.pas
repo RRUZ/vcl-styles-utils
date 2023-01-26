@@ -93,6 +93,7 @@ type
   TSourceInfo = record
     Data: TStyleServicesHandle;
     StyleClass: TCustomStyleServicesClass;
+    {$IF CompilerVersion >= 35}DesigningState: Boolean;{$IFEND}
   end;
 
 {$REGION 'Documentation'}
@@ -411,6 +412,12 @@ begin
 {$ELSE}
   p := Pointer(PByte(@Self.Flags) + 4);
 {$ENDIF CPUX64}
+
+{$IF (CompilerVersion >= 35)}  //Alexandria.
+  with Self do
+    p := Pointer(@FRegisteredStyles);
+{$IFEND}
+
   LRegisteredStyles := TDictionary<string, TSourceInfo>(p^);
 {$IFEND}
   for t in LRegisteredStyles do
