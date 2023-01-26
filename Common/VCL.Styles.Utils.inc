@@ -25,7 +25,7 @@
 {$DEFINE HOOK_TProgressBar}
 {.$DEFINE LimitStylesToMainApplicationThread}
 {.$DEFINE HOOK_VirtualShell}
-
+{.$DEFINE HOOK_ExplorerStatusBar}
 { Feature toggles for supported UxThemes - see Vcl.Styles.UxTheme }
 
 {$DEFINE HOOK_Button}

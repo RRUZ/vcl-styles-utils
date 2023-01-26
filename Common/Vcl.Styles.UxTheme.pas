@@ -152,6 +152,10 @@ const
   MARLETT_MAXIMIZE_CHAR = Char(49);
 {$ENDIF}
 
+{$IFDEF HOOK_ExplorerStatusBar}
+  VSCLASS_EXPLORERSTATUSBAR = 'ExplorerStatusBar';
+{$IFEND}
+
 type
   TDrawThemeBackground = function(hTheme: hTheme; hdc: hdc; iPartId, iStateId: Integer; const pRect: TRect; Foo: Pointer): HRESULT; stdcall;
   TFuncDrawThemeBackground  =  function(hTheme: HTHEME; hdc: HDC; iPartId, iStateId: Integer; const pRect: TRect; Foo: Pointer; Trampoline: TDrawThemeBackground; LThemeClass: string; hwnd: HWND): HRESULT; stdcall;
@@ -1037,6 +1041,25 @@ begin
       Result := S_OK;
       // if pColor=clNone then
       // OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+    end
+    else
+    {$ENDIF}
+    {$IFDEF HOOK_EXPLORERSTATUSBAR}
+    if SameText(LThemeClass, VSCLASS_EXPLORERSTATUSBAR) then
+    begin
+      pColor := clNone;
+      if (iPartId = 0) and (iStateId = 0) then
+      begin
+        pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow));
+      end;
+      if TColor(pColor) = clNone then
+      begin
+        // OutputDebugString(PChar(Format('Detour_GetThemeColor Class %s hTheme %d iPartId %d iStateId %d  iPropId %d Color %8.x', [LThemeClass, hTheme, iPartId, iStateId, iPropId, pColor])));
+        Result := Trampoline_UxTheme_GetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+      end
+      else
+        Result := S_OK;
+
     end
     else
     {$ENDIF}
