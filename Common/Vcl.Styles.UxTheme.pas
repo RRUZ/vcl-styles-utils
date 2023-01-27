@@ -602,17 +602,13 @@ begin
     begin
       pColor := clNone;
       case iPartId of
-
         0:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
           end;
-
         1:
           case iStateId of
-            1:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            1: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
           end;
       end;
 
@@ -632,8 +628,7 @@ begin
       case iPartId of
         1:
           case iStateId of
-            2:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            2: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
           end;
       end;
 
@@ -654,13 +649,11 @@ begin
       case iPartId of
         TTP_STANDARD:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
           end;
         4:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlight));
           end;
       end;
 
@@ -681,8 +674,8 @@ begin
       case iPartId of
         9:
           case iStateId  of
-            1:  pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow));
-            2:  pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+            1: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow));
+            2: pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlight));
           end;
       end;
 
@@ -746,8 +739,7 @@ begin
 
         TEXT_MAININSTRUCTION:
           case iStateId of
-            0:
-                pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlightText));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlightText));
           end;
       end;
 
@@ -768,8 +760,7 @@ begin
 
         HP_HEADERITEM:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
           end;
 
       end;
@@ -792,14 +783,12 @@ begin
 
         1: // preview background
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow));
           end;
 
         2: // preview text
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
           end;
       end;
 
@@ -815,39 +804,27 @@ begin
     begin
       pColor := clNone;
       case iPartId of
-
         5:
           case iStateId of
-            0:
-              ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+            0: ColorToRGB(StyleServices.GetSystemColor(clHighlight));
           end;
-
         6:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clBtnText));
           end;
-
         7:
           case iStateId of
-            1:
-              pColor := GetStyleHighLightColor();
-            2:
-              pColor := ColorToRGB(clGreen);
+            1: pColor := GetStyleHighLightColor();
+            2: pColor := ColorToRGB(clGreen);
           end;
-
         8:
           case iStateId of
-            0:
-              pColor := ColorToRGB(clRed);
+            0: pColor := ColorToRGB(clRed);
           end;
-
         9:
           case iStateId of
-            1:
-              pColor := ColorToRGB(clBlue);
-            2:
-              pColor := ColorToRGB(clYellow);
+            1: pColor := ColorToRGB(clBlue);
+            2: pColor := ColorToRGB(clYellow);
           end;
       end;
 
@@ -909,8 +886,7 @@ begin
       case iPartId of
         0, 2:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow)); // OK
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow)); // OK
           end;
       end;
 
@@ -934,51 +910,38 @@ begin
       case iPartId of
         0:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindow));
           end;
 
         LVP_LISTITEM:
           case iStateId of
-            0:
-              pColor := ColorToRGB(clRed);
+            0: pColor := ColorToRGB(clRed);
           end;
 
         LVP_LISTSORTEDDETAIL:
           case iStateId of
-            1:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            1: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
             // normal main column (name)
-            2:
-              pColor := ColorToRGB(clWindowText);
-
+            2: pColor := ColorToRGB(clWindowText);
             // SELECTED
-            3:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            3: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
 
             // hot text
-            4:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
-            5:
-              pColor := ColorToRGB(clBlue);
-            6:
-              pColor := ColorToRGB(clYellow);
-            7:
-              pColor := ColorToRGB(clGreen);
-            8:
-              pColor := ColorToRGB(clFuchsia);
+            4: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            5: pColor := ColorToRGB(clBlue);
+            6: pColor := ColorToRGB(clYellow);
+            7: pColor := ColorToRGB(clGreen);
+            8: pColor := ColorToRGB(clFuchsia);
           end;
 
         LVP_EMPTYTEXT:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlight));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clHighlight));
           end;
 
         LVP_GROUPHEADER:
           case iStateId of
-            0:
-              pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
+            0: pColor := ColorToRGB(StyleServices.GetSystemColor(clWindowText));
           end;
       end;
 
@@ -1002,39 +965,30 @@ begin
         // button with dropdown
         3:
           case iStateId of
-            1:
-              pColor := ColorToRGB(GetStyleBtnTextColor); // GetStyleHighLightColor;
-            6:
-              pColor := ColorToRGB(clYellow); // StyleServices.GetSystemColor(clBtnShadow);
+            1: pColor := ColorToRGB(GetStyleBtnTextColor); // GetStyleHighLightColor;
+            6: pColor := ColorToRGB(clYellow); // StyleServices.GetSystemColor(clBtnShadow);
           end;
-
         4:
           case iStateId of
-            1:
-              pColor := ColorToRGB(GetStyleBtnTextColor);
+            1: pColor := ColorToRGB(GetStyleBtnTextColor);
           end;
 
         9:
           case iStateId of
-            1:
-              pColor := ColorToRGB(GetStyleBtnTextColor);
+            1: pColor := ColorToRGB(GetStyleBtnTextColor);
               // ColorToRGB(StyleServices.GetSystemColor(clBtnText));
             // Highlight
-            2:
-              pColor := ColorToRGB(GetStyleBtnTextColor);
+            2: pColor := ColorToRGB(GetStyleBtnTextColor);
               // ColorToRGB(StyleServices.GetSystemColor(clBtnText)); //OK
-            3:
-              pColor := ColorToRGB(GetStyleBtnTextColor);
+            3: pColor := ColorToRGB(GetStyleBtnTextColor);
               // ColorToRGB(StyleServices.GetSystemColor(clBtnText)); //OK
-            6:
-              pColor := ColorToRGB(clLime); // StyleServices.GetSystemColor(clBtnShadow);
+            6: pColor := ColorToRGB(clLime); // StyleServices.GetSystemColor(clBtnShadow);
           end;
 
         // header text
         10:
           case iStateId of
-            1:
-              pColor := ColorToRGB(GetStyleHighLightColor);
+            1: pColor := ColorToRGB(GetStyleHighLightColor);
           end;
       end;
 
@@ -1059,7 +1013,6 @@ begin
       end
       else
         Result := S_OK;
-
     end
     else
     {$ENDIF}
@@ -1658,18 +1611,12 @@ begin
       BP_COMMANDLINK:
         begin
           case iStateId of
-            CMDLS_NORMAL:
-              LDetails := StyleServices.GetElementDetails(tbPushButtonNormal);
-            CMDLS_HOT:
-              LDetails := StyleServices.GetElementDetails(tbPushButtonHot);
-            CMDLS_PRESSED:
-              LDetails := StyleServices.GetElementDetails(tbPushButtonPressed);
-            CMDLS_DISABLED:
-              LDetails := StyleServices.GetElementDetails(tbPushButtonDisabled);
-            CMDLS_DEFAULTED:
-              LDetails := StyleServices.GetElementDetails(tbPushButtonDefaulted);
-            CMDLS_DEFAULTED_ANIMATING:
-              LDetails := StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
+            CMDLS_NORMAL: LDetails := StyleServices.GetElementDetails(tbPushButtonNormal);
+            CMDLS_HOT: LDetails := StyleServices.GetElementDetails(tbPushButtonHot);
+            CMDLS_PRESSED: LDetails := StyleServices.GetElementDetails(tbPushButtonPressed);
+            CMDLS_DISABLED: LDetails := StyleServices.GetElementDetails(tbPushButtonDisabled);
+            CMDLS_DEFAULTED: LDetails := StyleServices.GetElementDetails(tbPushButtonDefaulted);
+            CMDLS_DEFAULTED_ANIMATING: LDetails := StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
           end;
 
           if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
@@ -1990,12 +1937,9 @@ begin
     LVP_EXPANDBUTTON:
       begin
         case iStateId of
-          LVEB_NORMAL:
-            LDetails := StyleServices.GetElementDetails(tcpThemedChevronOpenedNormal);
-          LVEB_HOVER:
-            LDetails := StyleServices.GetElementDetails(tcpThemedChevronOpenedHot);
-          LVEB_PUSHED:
-            LDetails := StyleServices.GetElementDetails(tcpThemedChevronOpenedPressed);
+          LVEB_NORMAL: LDetails := StyleServices.GetElementDetails(tcpThemedChevronOpenedNormal);
+          LVEB_HOVER: LDetails := StyleServices.GetElementDetails(tcpThemedChevronOpenedHot);
+          LVEB_PUSHED: LDetails := StyleServices.GetElementDetails(tcpThemedChevronOpenedPressed);
         else
           LDetails := StyleServices.GetElementDetails(tcpThemedChevronOpenedNormal);
         end;
@@ -2014,12 +1958,9 @@ begin
     LVP_COLLAPSEBUTTON:
       begin
         case iStateId of
-          LVCB_NORMAL:
-            LDetails := StyleServices.GetElementDetails(tcpThemedChevronClosedNormal);
-          LVCB_HOVER:
-            LDetails := StyleServices.GetElementDetails(tcpThemedChevronClosedHot);
-          LVCB_PUSHED:
-            LDetails := StyleServices.GetElementDetails(tcpThemedChevronClosedPressed);
+          LVCB_NORMAL: LDetails := StyleServices.GetElementDetails(tcpThemedChevronClosedNormal);
+          LVCB_HOVER: LDetails := StyleServices.GetElementDetails(tcpThemedChevronClosedHot);
+          LVCB_PUSHED: LDetails := StyleServices.GetElementDetails(tcpThemedChevronClosedPressed);
         else
           LDetails := StyleServices.GetElementDetails(tcpThemedChevronClosedNormal);
         end;
@@ -2146,33 +2087,18 @@ begin
     HP_HEADERITEM:
       begin
         case iStateId of
-          HIS_NORMAL:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
-          HIS_HOT:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
-          HIS_PRESSED:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
-
-          HIS_SORTEDNORMAL:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
-          HIS_SORTEDHOT:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
-          HIS_SORTEDPRESSED:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
-
-          HIS_ICONNORMAL:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
-          HIS_ICONHOT:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
-          HIS_ICONPRESSED:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
-
-          HIS_ICONSORTEDNORMAL:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
-          HIS_ICONSORTEDHOT:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
-          HIS_ICONSORTEDPRESSED:
-            LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
+          HIS_NORMAL: LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
+          HIS_HOT: LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
+          HIS_PRESSED: LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
+          HIS_SORTEDNORMAL: LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
+          HIS_SORTEDHOT: LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
+          HIS_SORTEDPRESSED: LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
+          HIS_ICONNORMAL: LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
+          HIS_ICONHOT: LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
+          HIS_ICONPRESSED: LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
+          HIS_ICONSORTEDNORMAL: LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
+          HIS_ICONSORTEDHOT: LDetails := StyleServices.GetElementDetails(thHeaderItemHot);
+          HIS_ICONSORTEDPRESSED: LDetails := StyleServices.GetElementDetails(thHeaderItemPressed);
         else
           LDetails := StyleServices.GetElementDetails(thHeaderItemNormal);
         end;
@@ -2210,14 +2136,11 @@ begin
     HP_HEADERDROPDOWN:
       begin
         case iStateId of
-          HDDS_NORMAL:
-            LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal);
+          HDDS_NORMAL: LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal);
             // tcDropDownButtonNormal, thHeaderDropDownNormal
-          HDDS_SOFTHOT:
-            LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
+          HDDS_SOFTHOT: LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
             // tcDropDownButtonHot, thHeaderDropDownSoftHot
-          HDDS_HOT:
-            LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
+          HDDS_HOT: LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
             // tcDropDownButtonHot, thHeaderDropDownHot
         end;
 
@@ -2228,14 +2151,11 @@ begin
     HP_HEADERDROPDOWNFILTER:
       begin
         case iStateId of
-          HDDFS_NORMAL:
-            LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal);
+          HDDFS_NORMAL: LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownNormal);
             // tcDropDownButtonNormal, thHeaderDropDownNormal
-          HDDFS_SOFTHOT:
-            LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
+          HDDFS_SOFTHOT: LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
             // tcDropDownButtonHot, thHeaderDropDownSoftHot
-          HDDFS_HOT:
-            LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
+          HDDFS_HOT: LDetails := StyleServices.GetElementDetails(ttbSplitButtonDropDownHot);
             // tcDropDownButtonHot, thHeaderDropDownHot
         end;
 
@@ -2418,12 +2338,10 @@ begin
     0:
       begin
         case iStateId of
-
           0:
             begin
               if (hwnd <> 0) then
                 DrawStyleParentBackground(hwnd, hdc, pRect);
-
               LDetails.Element := teToolBar;
               LDetails.Part := 0;
               LDetails.State := 0;
@@ -2432,7 +2350,6 @@ begin
               DrawStyleElement(hdc, StyleServices.GetElementDetails(tmPopupBackground), pRect);
               exit(S_OK);
             end;
-
         end;
       end;
 
@@ -2760,16 +2677,11 @@ begin
     MC_NAVNEXT:
       begin
         case iStateId of
-          MCNN_NORMAL:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnRightNormal);
-          MCNN_HOT:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnRightHot);
-          MCNN_PRESSED:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnRightPressed);
-          MCNN_DISABLED:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnRightDisabled);
+          MCNN_NORMAL: LDetails := StyleServices.GetElementDetails(tsArrowBtnRightNormal);
+          MCNN_HOT: LDetails := StyleServices.GetElementDetails(tsArrowBtnRightHot);
+          MCNN_PRESSED: LDetails := StyleServices.GetElementDetails(tsArrowBtnRightPressed);
+          MCNN_DISABLED: LDetails := StyleServices.GetElementDetails(tsArrowBtnRightDisabled);
         end;
-
         DrawStyleElement(hdc, LDetails, pRect);
         exit(S_OK);
       end;
@@ -2777,14 +2689,10 @@ begin
     MC_NAVPREV:
       begin
         case iStateId of
-          MCNP_NORMAL:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftNormal);
-          MCNP_HOT:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftHot);
-          MCNP_PRESSED:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftPressed);
-          MCNP_DISABLED:
-            LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftDisabled);
+          MCNP_NORMAL: LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftNormal);
+          MCNP_HOT: LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftHot);
+          MCNP_PRESSED: LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftPressed);
+          MCNP_DISABLED: LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftDisabled);
         end;
 
         DrawStyleElement(hdc, LDetails, pRect);
@@ -2807,14 +2715,10 @@ begin
     DP_DATEBORDER:
       begin
         case iStateId of
-          DPDB_NORMAL:
-            LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
-          DPDB_HOT:
-            LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollHot);
-          DPDB_FOCUSED:
-            LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollFocused);
-          DPDB_DISABLED:
-            LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
+          DPDB_NORMAL: LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollNormal);
+          DPDB_HOT: LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollHot);
+          DPDB_FOCUSED: LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollFocused);
+          DPDB_DISABLED: LDetails := StyleServices.GetElementDetails(teEditBorderNoScrollDisabled);
         end;
 
         DrawStyleElement(hdc, LDetails, pRect);
@@ -2825,14 +2729,10 @@ begin
       begin
 
         case iStateId of
-          DPSCBR_NORMAL:
-            LDetails := StyleServices.GetElementDetails(tcBorderNormal);
-          DPSCBR_HOT:
-            LDetails := StyleServices.GetElementDetails(tcBorderHot);
-          DPSCBR_PRESSED:
-            LDetails := StyleServices.GetElementDetails(tcBorderHot);
-          DPSCBR_DISABLED:
-            LDetails := StyleServices.GetElementDetails(tcBorderDisabled);
+          DPSCBR_NORMAL: LDetails := StyleServices.GetElementDetails(tcBorderNormal);
+          DPSCBR_HOT: LDetails := StyleServices.GetElementDetails(tcBorderHot);
+          DPSCBR_PRESSED: LDetails := StyleServices.GetElementDetails(tcBorderHot);
+          DPSCBR_DISABLED: LDetails := StyleServices.GetElementDetails(tcBorderDisabled);
         end;
 
         DrawStyleElement(hdc, LDetails, pRect);
