@@ -766,8 +766,9 @@ end;
 procedure DrawStyleParentBackgroundEx(Handle: THandle; DC: HDC; const ARect: TRect);
 var
   LBuffer: TBitmap;
-  LPoint: TPoint;
+  LPoint, LOldOrigin: TPoint;
   LParentHandle: THandle;
+  LTempDC: HDC;
 begin
   if (Handle = 0) or (ARect.Width <= 0) or (ARect.Height <= 0) then
     exit;
@@ -778,10 +779,22 @@ begin
     if (LParentHandle <> 0) then
     begin
       LBuffer.SetSize(ARect.Width, ARect.Height);
-      SendMessage(LParentHandle, WM_ERASEBKGND, LBuffer.Canvas.Handle, 0);
-      ClientToScreen(Handle, LPoint);
-      ScreenToClient(LParentHandle, LPoint);
-      BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, LBuffer.Canvas.Handle, LPoint.x, LPoint.y, SRCCOPY)
+
+      LBuffer.Canvas.Lock;
+      try
+        LTempDC := LBuffer.Canvas.Handle;
+
+        ClientToScreen(Handle, LPoint);
+        ScreenToClient(LParentHandle, LPoint);
+
+        SetViewportOrgEx(LTempDC, -LPoint.X, -LPoint.Y, @LOldOrigin);
+        SendMessage(LParentHandle, WM_ERASEBKGND, WParam(LTempDC), 0);
+        SetViewportOrgEx(LTempDC, LOldOrigin.X, LOldOrigin.Y,nil);
+
+        BitBlt(DC, ARect.Left, ARect.Top, ARect.Width, ARect.Height, LTempDC, 0, 0, SRCCOPY);
+      finally
+        LBuffer.Canvas.Unlock;
+      end;
     end;
   finally
     LBuffer.Free;
