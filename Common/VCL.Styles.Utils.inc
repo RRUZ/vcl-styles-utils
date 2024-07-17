@@ -25,8 +25,6 @@
 {.$DEFINE LimitStylesToMainApplicationThread}
 {.$DEFINE HOOK_VirtualShell}
 {.$DEFINE HOOK_ExplorerStatusBar}
-// Workaround a Problem RegisterClass(wnd) useing hbrBackground=GetSysColorBrush()
-{$DEFINE HOOK_REGISTERCLASS}
 { Feature toggles for supported UxThemes - see Vcl.Styles.UxTheme }
 {$DEFINE HOOK_Button}
 {$DEFINE HOOK_AllButtons}
