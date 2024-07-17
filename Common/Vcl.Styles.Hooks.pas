@@ -79,7 +79,11 @@ var
   Trampoline_user32_DrawEdge: function(hDC: hDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;  stdcall = nil;
   Trampoline_user32_DrawFrameControl: function (DC: HDC; Rect: PRect; uType, uState: UINT): BOOL; stdcall = nil;
   Trampoline_user32_LoadIconW: function (hInstance: HINST; lpIconName: PWideChar): HICON; stdcall = nil;
-  Trampoline_user32_GetSysColorBrush: function(nIndex: Integer): HBRUSH; stdcall;
+  Trampoline_user32_GetSysColorBrush: function(nIndex: Integer): HBRUSH = nil; stdcall;
+  {$IFDEF HOOK_REGISTERCLASS}
+  Trampoline_user32_RegisterClassA: function(const wndClass: TWndClassA): ATOM; stdcall = nil;
+  Trampoline_user32_RegisterClassW: function(const wndClass: TWndClassW): ATOM; stdcall = nil;
+  {$endif}
   {$IFDEF HOOK_UXTHEME}
   Trampoline_user32_LoadImageW: function (hInst: HINST; ImageName: LPCWSTR; ImageType: UINT; X, Y: Integer; Flags: UINT): THandle; stdcall = nil;
   {$ELSE}
@@ -135,6 +139,93 @@ begin
     Result := DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
 end;
 
+{$ifdef HOOK_REGISTERCLASS}
+function Detour_RegisterClassA(wndClass: PWndClassA): ATOM; stdcall;
+var
+  LCurrentStyleBrush: TListStyleBrush;
+  enum: TListStyleBrush.TPairEnumerator;
+  LColor: TColor;
+begin
+  if not(ExecutingInMainThread) then
+     Exit(Trampoline_user32_RegisterClassA(wndClass^));
+
+  VCLStylesLock.Enter;
+  try
+    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+       Exit(Trampoline_user32_RegisterClassA(wndClass^));
+
+    if VCLStylesBrush.TryGetValue(StyleServices.Name, LCurrentStyleBrush) then
+    begin
+      enum := LCurrentStyleBrush.GetEnumerator;
+      while enum.MoveNext do
+      begin
+        if enum.Current.Value = wndClass^.hbrBackground  then
+        begin
+{  
+   never register a WindowClass with a Detour_GetSysColorBrush because 
+   UnregisterClass will destroy the HBRUSH and the next call to Detour_GetSysColorBrush() 
+   will return a invalid HBRUSH and RegisterClass fails.
+}
+          if enum.Current.Key = COLOR_HOTLIGHT then
+             LColor := StyleServices.GetSystemColor(clHighlight)
+          else
+             LColor := StyleServices.GetSystemColor(TColor(enum.Current.Key or Integer($FF000000)));
+          // create the same colored brush again ... so windows can safely destroy it
+          wndClass^.hbrBackground := CreateSolidBrush(LColor);
+          break;
+        end;
+      end;
+    end;
+  finally
+    VCLStylesLock.Leave;
+  end;
+  result := Trampoline_user32_RegisterClassA(wndClass^);
+end;
+{$endif}
+
+{$ifdef HOOK_REGISTERCLASS}
+function Detour_RegisterClassW(wndClass: PWndClassW): ATOM; stdcall;
+var
+  LCurrentStyleBrush: TListStyleBrush;
+  enum: TListStyleBrush.TPairEnumerator;
+  LColor: TColor;
+begin
+  if not(ExecutingInMainThread) then
+     Exit(Trampoline_user32_RegisterClassW(wndClass^));
+
+  VCLStylesLock.Enter;
+  try
+    if StyleServices.IsSystemStyle or not TSysStyleManager.Enabled then
+       Exit(Trampoline_user32_RegisterClassW(wndClass^));
+
+    if VCLStylesBrush.TryGetValue(StyleServices.Name, LCurrentStyleBrush) then
+    begin
+      enum := LCurrentStyleBrush.GetEnumerator;
+      while enum.MoveNext do
+      begin
+        if enum.Current.Value = wndClass^.hbrBackground  then
+        begin
+{  
+   never register a WindowClass with a Detour_GetSysColorBrush because 
+   UnregisterClass will destroy the HBRUSH and the next call to Detour_GetSysColorBrush() 
+   will return a invalid HBRUSH and RegisterClass fails.
+}
+          if enum.Current.Key = COLOR_HOTLIGHT then
+             LColor := StyleServices.GetSystemColor(clHighlight)
+          else
+             LColor := StyleServices.GetSystemColor(TColor(enum.Current.Key or Integer($FF000000)));
+          // create the same colored brush again ... so windows can safely destroy it
+          wndClass^.hbrBackground := CreateSolidBrush(LColor);
+          break;
+        end;
+      end;
+    end;
+  finally
+    VCLStylesLock.Leave;
+  end;
+  result := Trampoline_user32_RegisterClassW(wndClass^);
+end;
+{$endif}
 function Detour_GetSysColorBrush(nIndex: Integer): HBRUSH; stdcall;
 var
   LCurrentStyleBrush: TListStyleBrush;
@@ -851,6 +942,12 @@ initialization
     hnd := BeginTransaction();
     @Trampoline_user32_GetSysColor := InterceptCreate(user32, 'GetSysColor', @Detour_GetSysColor);
     @Trampoline_user32_GetSysColorBrush := InterceptCreate(user32, 'GetSysColorBrush', @Detour_GetSysColorBrush);
+{$ifdef HOOK_REGISTERCLASS}
+   // if hbrBackground is created from Detour_GetSysColorBrush replace it by a new HBRUSH with same color
+   // so that UnregisterClass() can safely destroy the HBrush
+   @Trampoline_user32_RegisterClassA   := InterceptCreate(user32, 'RegisterClassA', @Detour_RegisterClassA);
+   @Trampoline_user32_RegisterClassW   := InterceptCreate(user32, 'RegisterClassW', @Detour_RegisterClassW);
+{$endif}
     @Trampoline_user32_FillRect := InterceptCreate(user32, 'FillRect', @Detour_FillRect);
     @Trampoline_user32_DrawEdge := InterceptCreate(user32, 'DrawEdge', @Detour_DrawEdge);
     @Trampoline_user32_DrawFrameControl :=  InterceptCreate(user32, 'DrawFrameControl', @Detour_WinApi_DrawFrameControl);
@@ -882,6 +979,10 @@ finalization
   InterceptRemove(@Trampoline_user32_DrawEdge);
   InterceptRemove(@Trampoline_user32_DrawFrameControl);
   InterceptRemove(@Trampoline_user32_LoadIconW);
+{$ifdef HOOK_REGISTERCLASS}
+  InterceptRemove(@Trampoline_user32_RegisterClassA);
+  InterceptRemove(@Trampoline_user32_RegisterClassW);
+{$endif}
 
 {$IFDEF HOOK_UXTHEME}
   if TOSVersion.Check(6) then
