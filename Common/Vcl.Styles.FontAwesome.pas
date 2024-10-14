@@ -578,7 +578,7 @@ type
   TFontAwesome = class
   private
     FPrivateFontCollection: TGPPrivateFontCollection;
-    procedure LoadFontFromResource;
+    function LoadFontFromResource: boolean;
   public
     constructor Create;
     Destructor Destroy; override;
@@ -654,28 +654,31 @@ begin
   inherited;
 end;
 
-procedure TFontAwesome.LoadFontFromResource;
+function TFontAwesome.LoadFontFromResource: boolean;
 var
- LStream: TResourceStream;
- LStatus: TStatus;
+ LStream : TResourceStream;
+ LStatus : TStatus;
  cFonts: DWord;
 begin
-  LStream := TResourceStream.Create(HInstance, 'fontawesome', RT_RCDATA);
-  try
-    FPrivateFontCollection := TGPPrivateFontCollection.Create;
+  if (gdiplusToken <> 0) and (FPrivateFontCollection = nil) then
+  begin
+    LStream := TResourceStream.Create(HInstance, 'fontawesome', RT_RCDATA);
+    try
+      FPrivateFontCollection := TGPPrivateFontCollection.Create;
 
-    // We HAVE to do this to register the font to the system (Weird .NET bug !)
-    cFonts:= 0;
-    AddFontMemResourceEx(LStream.Memory, Cardinal(LStream.Size), nil, @cFonts);
+      // We HAVE to do this to register the font to the system (Weird .NET bug !)
+      cFonts:= 0;
+      AddFontMemResourceEx(LStream.Memory, Cardinal(LStream.Size), nil, @cFonts);
 
-    LStatus := FPrivateFontCollection.AddMemoryFont(LStream.Memory, LStream.Size);
-    if (LStatus <> Status.Ok) then
-       RaiseLastOSError();
-  finally
-    LStream.Free;
+      LStatus := FPrivateFontCollection.AddMemoryFont(LStream.Memory, LStream.Size);
+      if (LStatus <> Status.Ok) then
+         RaiseLastOSError();
+    finally
+      LStream.Free;
+    end;
   end;
+  result := FPrivateFontCollection <> nil;
 end;
-
 
 function TFontAwesome.GetIcon(const ACode: Word; Width, Height, CharX,
   CharY: Integer; AColor, ABackColor: TColor; Orientation: Integer;
@@ -755,6 +758,8 @@ var
  LGPStringFormat: TGPStringFormat;
  LRect: TGPRectF;
 begin
+  if not LoadFontFromResource() then exit;
+
   LGPGraphics := TGPGraphics.Create(DC);
   try
     LFont := TGPFont.Create('FontAwesome', AFontHeight, FontStyleRegular, UnitPixel, FPrivateFontCollection);
