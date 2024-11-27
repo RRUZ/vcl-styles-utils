@@ -533,8 +533,14 @@ var
   LParentMenu: TMenu;
   ItemRect2: TRect;
 
-
+  LMenuItemInfo: TMenuItemInfo;
+  LGUIThreadinfo: TGUIThreadinfo;
+  DrawItemStruct: TDrawItemStruct;
 begin
+  //AW: 27.11.2024 - Use DPI from Window instead of MainForm
+  if CheckPerMonitorV2SupportForWindow(Handle) then
+     LPixelsPerInch := GetDPIForWindow(Handle)
+  else
   if Assigned(Application.Mainform) then
     LPixelsPerInch := Application.MainForm.Monitor.PixelsPerInch
   else
@@ -547,6 +553,48 @@ begin
   { Fast access . }
   LSysPopupItem := Items[Index]; // Do not destroy !!
   DC := Canvas.Handle;
+
+  if (Style <> isSep) and (LSysPopupItem.VCLMenuItems = nil) and
+     (ItemText = '') and LSysPopupItem.IsItemOwnerDraw then
+  begin
+    // redirect owner draw of non VCL MenuItems to Owner Window Handle
+    // assume they use themed methods to draw the MenuItem
+    // --> File Dialogs uses this
+    LGUIThreadinfo.cbSize := sizeof(TGUIThreadinfo);
+    if GetGUIThreadInfo(GetCurrentThreadID(), LGUIThreadinfo) then
+    begin
+      DrawItemStruct.CtlType    := ODT_MENU;
+      DrawItemStruct.CtlID      := 0;
+      DrawItemStruct.itemID     := LSysPopupItem.GetItemID;
+      DrawItemStruct.itemAction := ODA_DRAWENTIRE;
+      DrawItemStruct.itemState  := 0;
+
+      if isDefault in State then
+         DrawItemStruct.itemState  := DrawItemStruct.itemState or ODS_DEFAULT;
+      if isHot in State then
+         DrawItemStruct.itemState  := DrawItemStruct.itemState or ODS_HOTLIGHT; // ODS_SELECTED;
+      if isDisabled in State then
+         DrawItemStruct.itemState  := DrawItemStruct.itemState or ODS_DISABLED;
+      if isChecked in State then
+         DrawItemStruct.itemState  := DrawItemStruct.itemState or ODS_CHECKED;
+
+      DrawItemStruct.hwndItem := FMenu;
+      DrawItemStruct.hDC      := DC;
+      DrawItemStruct.rcItem   := ItemRect2;
+
+      FillChar(LMenuItemInfo, sizeof(TMenuItemInfo), Char(0));
+      LMenuItemInfo.cbSize := sizeof(TMenuItemInfo);
+      LMenuItemInfo.fMask  := MIIM_DATA;
+      if GetMenuItemInfo(FMenu, LSysPopupItem.FIndex, True, LMenuItemInfo) then
+         DrawItemStruct.itemData := LMenuItemInfo.dwItemData
+      else
+         DrawItemStruct.itemData := 0;
+
+      SendMessage( LGUIThreadinfo.hwndMenuOwner, WM_DRAWITEM, 0, NativeInt(@DrawItemStruct) );
+      exit;
+    end;
+  end;
+
   R := ItemRect2;
   LThemedMenu := tmPopupItemNormal;
   if isHot in State then
@@ -870,7 +918,7 @@ begin
       DrawText(Canvas.Handle, LDetails, Copy(ItemText, 1, P), LTextRect, LTextFormat)
     end
     else
-      DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat)
+      DrawText(Canvas.Handle, LDetails, ItemText, LTextRect, LTextFormat);
   end;
 
   {Draw vertical menu bar}
