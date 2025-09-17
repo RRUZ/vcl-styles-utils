@@ -1,3 +1,5 @@
 @Echo OFF
-FOR /L %%G IN (12,1,23) DO IF %%G NEQ 16 call Demo_Build.bat %%G
+FOR %%G IN (12,13,14,15,17,18,19,20,21,22,23,37) DO (
+    call Demo_Build.bat %%G
+)
 PAUSE

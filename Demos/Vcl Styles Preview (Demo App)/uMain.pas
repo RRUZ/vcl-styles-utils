@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.Styles.Ext,
-  Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, Vcl.ToolWin;
+  Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, Vcl.ToolWin,
+  System.Actions;
 
 type
   TFrmMain = class(TForm)
@@ -118,12 +119,12 @@ begin
 end;
 
 procedure TFrmMain.FillVclStylesList;
-Var
- StyleName: string;
- Item: TListItem;
- StyleInfo:  TStyleInfo;
- SourceInfo: TSourceInfo;
- VCLStyleExt:TCustomStyleServices;
+var
+  StyleName: string;
+  Item: TListItem;
+  StyleInfo:  TStyleInfo;
+  SourceInfo: TSourceInfo;
+  VCLStyleExt:TCustomStyleServices;
 begin
    Loading:=True;
                {
@@ -140,25 +141,30 @@ begin
    end;
             }
 
-   for StyleName in  TStyleManager.StyleNames do
-     if not SameText(StyleName,'Windows') then
-     begin
-        Item:=ListView1.Items.Add;
-        Item.Caption:='Resource';
-        Item.SubItems.Add('');
+  for StyleName in  TStyleManager.StyleNames do
+    if not SameText(StyleName,'Windows') then
+    begin
+      Item := ListView1.Items.Add;
+      Item.Caption := 'Resource';
+      Item.SubItems.Add('');
 
-        SourceInfo:=TStyleManager.StyleSourceInfo[StyleName];
-        VCLStyleExt:=TCustomStyleExt.Create(TStream(SourceInfo.Data));
+      {$IF (CompilerVersion <> 35)}  // see comments in Vcl.Style.Ext.TStyleManagerHelper
 
-        Item.Data  :=VCLStyleExt;
-        StyleInfo  :=TCustomStyleExt(VCLStyleExt).StyleInfo;
-        Item.SubItems.Add(StyleInfo.Name);
-        Item.SubItems.Add(StyleInfo.Author);
-        Item.SubItems.Add(StyleInfo.AuthorURL);
-        Item.SubItems.Add(StyleInfo.Version);
-     end;
+      SourceInfo :=  TStyleManager.StyleSourceInfo[StyleName];
+      VCLStyleExt := TCustomStyleExt.Create(TStream(SourceInfo.Data));
 
-   Loading:=False;
+      Item.Data := VCLStyleExt;
+      StyleInfo := TCustomStyleExt(VCLStyleExt).StyleInfo;
+      Item.SubItems.Add(StyleInfo.Name);
+      Item.SubItems.Add(StyleInfo.Author);
+      Item.SubItems.Add(StyleInfo.AuthorURL);
+      Item.SubItems.Add(StyleInfo.Version);
+
+      {$IFEND}
+
+    end;
+
+  Loading := False;
 end;
 
 

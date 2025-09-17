@@ -4,7 +4,7 @@
 ![Follow](https://img.shields.io/twitter/follow/RRUZ.svg?style=social)
 # VCL Styles Utils #
 
-The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview), adding unique features like the support for [Classic and New Common dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls), [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and much more. 
+The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styles](http://docwiki.embarcadero.com/RADStudio/en/VCL_Styles_Overview). It provides additional features such as support for [Classic and New Common dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesSysControls), [Task Dialogs](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesUxTheme), Styling of [popup and shell menus](https://github.com/RRUZ/vcl-styles-utils/wiki/VCLStylesMenus), [Non client area](https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC) components and other enhancements.. 
 
 <p align="center">
   <img src="https://github.com/RRUZ/vcl-styles-utils/blob/master/images/NewOpendialog.gif" alt="Mix" title="TOpenDialog styled with Vcl Style and the Vcl Styles Utils project running on Windows 10"/>
@@ -12,10 +12,10 @@ The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styl
 
 ## Features ##
 <ul>
- <li>Works in Delphi XE2-XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo, 10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens</li>
- <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesExt'>Vcl.Styles.Ext</a> unit extended the VCL Styles adding new properties and methods to list, remove and reload VCL Styles.</li>
- <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesUtils'>Vcl.Styles.Utils</a> unit, allows modify the VCL Styles manipulating the visual elements and fonts colors.</li>
- <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC'>TNCControls</a> component which allow you add controls to the Non Client area of the form</li>
+ <li>Works in Delphi XE2-XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo, 10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens, 13 Florence</li>
+ <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesExt'>Vcl.Styles.Ext</a> extends VCL Styles by introducing new properties and methods to list, remove, and reload styles.</li>
+ <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesUtils'>Vcl.Styles.Utils</a> allows you to tweak the appearance of VCL Styles by modifying visual elements and font colors of the style.</li>
+ <li><a href='https://github.com/RRUZ/vcl-styles-utils/wiki/VclStylesNC'>TNCControls</a> component that allows you to add controls to the non-client area of a form.</li>
 </ul> 
 
 ![https://github.com/RRUZ/vcl-styles-utils/blob/master/images/NCButtonsMain.png](https://github.com/RRUZ/vcl-styles-utils/blob/master/images/NCButtonsMain.png)
@@ -66,5 +66,5 @@ The *VCL Styles Utils* is a Delphi library which extend the [RAD Studio VCL Styl
 </li>
 </ul>
 
-**Note** : If you want to use the Vcl.Styles.Hooks unit you must also include the [Delphi Detours Library](https://github.com/MahdiSafsafi/delphi-detours-library) files in your lib/search path Example : *C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library*
+**Note** : To use the Vcl.Styles.Hooks unit you must also include the [Delphi Detours Library](https://github.com/MahdiSafsafi/delphi-detours-library) files in the IDE library/search path - Example : *C:\Delphi\Libs\vcl-styles-utils\Common\delphi-detours-library*
 
