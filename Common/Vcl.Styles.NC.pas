@@ -316,8 +316,8 @@ type
   end;
 
 var
-  Trampoline_TFormStyleHook_GetBorderSize: function(Self: TFormStyleHook): TRect;
-  Trampoline_TFormStyleHook_GetRegion: function(Self: TFormStyleHook): HRgn;
+ Trampoline_TFormStyleHook_GetBorderSize: function(Self: TFormStyleHook{$IF CompilerVersion >= 36}; UseActiveStyle: Boolean = True{$IFEND}): TRect;
+ Trampoline_TFormStyleHook_GetRegion: function(Self: TFormStyleHook): HRgn;
 
 class function TCustomStyleEngineHelper.GetRegisteredStyleHooks: TStyleHookDictionary;
 begin
@@ -2004,7 +2004,7 @@ begin
 end;
 
 // This custom GetBorderSize method is necessary to allow to the NC controls use a custom Style in the title and border area.
-function Detour_TFormStyleHook_GetBorderSize(Self: TFormStyleHook): TRect;
+function Detour_TFormStyleHook_GetBorderSize(Self: TFormStyleHook{$IF CompilerVersion >= 36}; UseActiveStyle: Boolean = True{$IFEND}): TRect;
 var
   Size: TSize;
   Details: TThemedElementDetails;
@@ -2013,7 +2013,7 @@ var
   LForm: TCustomForm;
 begin
   if not(ExecutingInMainThread) then
-    Exit(Trampoline_TFormStyleHook_GetBorderSize(Self));
+    Exit(Trampoline_TFormStyleHook_GetBorderSize(Self{$IF CompilerVersion >= 36}, UseActiveStyle{$IFEND}));
 
   if (Self is TFormStyleNCControls) and (TFormStyleNCControls(Self).NCControls <> nil) then
   begin
@@ -2071,7 +2071,7 @@ begin
     end;
   end
   else
-    Exit(Trampoline_TFormStyleHook_GetBorderSize(Self));
+    Exit(Trampoline_TFormStyleHook_GetBorderSize(Self{$IF CompilerVersion >= 36}, UseActiveStyle{$IFEND}));
 end;
 
 // This custom GetRegion method is necessary to allow to the NC controls use a custom Style in the title and border area.
