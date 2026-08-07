@@ -2106,6 +2106,13 @@ var
     LMenuItem: TMenuItem;
     i: integer;
   begin
+    { An item without children never owns a submenu HMENU: TMenuItem.AppendTo only passes
+      hSubMenu when GetCount > 0. Reading TMenuItem.Handle, on the other hand, CREATES one,
+      because TMenuItem.GetHandle allocates whenever FHandle = 0. Leaving early therefore
+      avoids allocating a USER menu handle for every leaf item this lookup walks over. }
+    Result := nil;
+    if AMenu.Count = 0 then
+      Exit;
     if (AMenu.Handle = FMenu) then
       Result := AMenu
     else
@@ -2124,9 +2131,23 @@ var
 begin
   Result := nil;
 
+  { PopupList holds every TPopupMenu regardless of its Owner, but comparing only the popup's own
+    handle cannot match a submenu, whose HMENU belongs to a TMenuItem rather than to the
+    TPopupMenu. Walking the item tree here makes this route work for popup menus that are not a
+    component of a form - for example one created as TPopupMenu.Create(nil) and filled at run
+    time, which the Screen.Forms scan below can never reach. Without it VCLMenuItems is nil for
+    such a submenu, so GetItemText falls back to GetMenuItemInfo(MIIM_STRING), which is empty for
+    an MFT_OWNERDRAW item - and TMenuItem.AppendTo flags every item MFT_OWNERDRAW as soon as the
+    menu has an Images list - leaving the submenu painted with neither caption nor image. }
   for i := 0 to PopupList.Count - 1 do
-    if TPopupMenu(PopupList.Items[i]).Handle = FMenu then
-      Exit(TPopupMenu(PopupList.Items[i]).Items);
+  begin
+    LPopupMenu := TPopupMenu(PopupList.Items[i]);
+    if LPopupMenu.Handle = FMenu then
+      Exit(LPopupMenu.Items);
+    Result := GetMenuItem(LPopupMenu.Items);
+    if Assigned(Result) then
+      Exit;
+  end;
 
   for i := 0 to Screen.FormCount - 1 do
   begin
