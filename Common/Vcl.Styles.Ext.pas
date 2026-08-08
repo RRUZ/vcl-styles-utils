@@ -413,11 +413,19 @@ begin
     006CD071 07               pop es  006CD076 FFFF             db $ff $ff
   }
   // Use the address of the Self.Flags property to calculate the offset of the FRegisteredStyles
+//>>>
+{$IF (CompilerVersion < 35)}
+//<<<
 {$IFDEF CPUX64}
   p := Pointer(PByte(@Self.Flags) + 8);
 {$ELSE}
+
   p := Pointer(PByte(@Self.Flags) + 4);
+
 {$ENDIF CPUX64}
+//>>>
+{$IFEND}
+//<<<
 
 {$IF (CompilerVersion >= 35)}  //Alexandria.
   with Self do

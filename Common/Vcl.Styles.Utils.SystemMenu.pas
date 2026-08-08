@@ -178,6 +178,8 @@ begin
   LSysMenu := GetSystemMenu(FForm.Handle, False);
 
   LSubMenuIndex := GetMenuItemCount(LSysMenu);
+  if LSubMenuIndex = -1 then //Support for TFrame
+    exit;
   AddMenuSeparatorHelper(LSysMenu, LSubMenuIndex);
 
   FVCLStylesMenu := CreatePopupMenu();
