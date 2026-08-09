@@ -856,11 +856,13 @@ begin
   if TmpHandle = 0 then
   begin
     { Get instance }
-    GetClassName(Handle, @Buffer, sizeof(Buffer));
+    { nMaxCount is a character count, not a byte count }
+    GetClassName(Handle, @Buffer, Length(Buffer));
     FillChar(Info, sizeof(Info), 0);
     Info.cbSize := sizeof(Info);
 
-    if GetClassInfoEx(GetWindowLong(Handle, GWL_HINSTANCE), @Buffer, Info) then
+    { GetWindowLong truncates an HINSTANCE to 32 bits on Win64 }
+    if GetClassInfoEx(HINST(GetWindowLongPtr(Handle, GWLP_HINSTANCE)), @Buffer, Info) then
     begin
       TmpHandle := Info.hIconSm;
       if TmpHandle = 0 then
