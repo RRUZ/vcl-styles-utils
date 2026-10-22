@@ -1578,6 +1578,7 @@ var
   LCanvas: TCanvas;
   LThemeClass: string;
   plf: LOGFONTW;
+  {$IFDEF HOOK_ListView}LTextOptions: TDTTOpts;{$ENDIF}
 begin
   if not(ExecutingInMainThread) then
     Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
@@ -1655,29 +1656,12 @@ begin
         begin
           if iStateId = VS_STATE_COMMON then
           begin
-            LCanvas := TCanvas.Create;
-            SaveIndex := SaveDC(hdc);
-            try
-              LCanvas.Handle := hdc;
-              if pOptions.dwFlags AND DTT_FONTPROP <> 0 then
-              begin
-                ZeroMemory(@plf, SizeOf(plf));
-                plf.lfHeight := 13;
-                plf.lfCharSet := DEFAULT_CHARSET;
-                StrCopy(plf.lfFaceName, 'Tahoma');
-                LCanvas.Font.Handle := CreateFontIndirect(plf);
-              end;
-              LDetails := StyleServices.GetElementDetails(tlListItemNormal);
-              ThemeTextColor := StyleServices.GetStyleFontColor(sfListItemTextNormal);
-              StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags),
-                ThemeTextColor);
-            finally
-              LCanvas.Handle := 0;
-              LCanvas.Free;
-              RestoreDC(hdc, SaveIndex);
-            end;
-
-            Result := S_OK;
+            // Keep native group fonts and drawing options; override only the color.
+            LTextOptions := pOptions;
+            LTextOptions.dwFlags := (LTextOptions.dwFlags and not DTT_COLORPROP) or DTT_TEXTCOLOR;
+            LTextOptions.crText := ColorToRGB(StyleServices.GetStyleFontColor(sfListItemTextNormal));
+            Result := Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText,
+              cchText, dwTextFlags, pRect, LTextOptions);
           end
           else
           begin
