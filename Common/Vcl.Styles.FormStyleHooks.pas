@@ -1436,7 +1436,7 @@ end;
 function TFormStyleHookHelper._GetBorderSize{$IF CompilerVersion >= 36}(UseActiveStyle: Boolean = True){$IFEND}: TRect;
 begin
   with Self do
-    Result := GetBorderSize;
+    Result := GetBorderSize{$IF CompilerVersion >= 36}(UseActiveStyle){$IFEND};
 end;
 
 function TFormStyleHookHelper._GetBorderSizeAddr: Pointer;
