@@ -532,6 +532,10 @@ var
   LBitmap: TBitmap;
   LParentMenu: TMenu;
   ItemRect2: TRect;
+  ThreadInfo: TGUIThreadInfo;
+  NativeItem: TMenuItemInfo;
+  DrawInfo: TDrawItemStruct;
+  NativeTextColor: TColor;
 
 
 begin
@@ -581,6 +585,49 @@ begin
   else
   if (LThemedMenu <> tmPopupItemNormal) and (LThemedMenu <> tmPopupItemDisabled) then
     StyleServices.DrawElement(DC, LDetails, R);
+
+  // Shell travel-history captions live in the owner's item data, not in
+  // MIIM_STRING. Let that owner draw its opaque data rather than guessing it.
+  if LSysPopupItem.OwnerDraw and (LSysPopupItem.VCLItem = nil) and (ItemText = '') then
+  begin
+    ZeroMemory(@ThreadInfo, SizeOf(ThreadInfo));
+    ThreadInfo.cbSize := SizeOf(ThreadInfo);
+    ZeroMemory(@NativeItem, SizeOf(NativeItem));
+    NativeItem.cbSize := SizeOf(NativeItem);
+    NativeItem.fMask := MIIM_ID or MIIM_DATA;
+    if GetGUIThreadInfo(GetCurrentThreadId, ThreadInfo) and
+      (ThreadInfo.hwndMenuOwner <> 0) and
+      GetMenuItemInfo(FMenu, Index, True, NativeItem) then
+    begin
+      ZeroMemory(@DrawInfo, SizeOf(DrawInfo));
+      DrawInfo.CtlType := ODT_MENU;
+      DrawInfo.itemID := NativeItem.wID;
+      DrawInfo.itemAction := ODA_DRAWENTIRE;
+      if isHot in State then
+        DrawInfo.itemState := DrawInfo.itemState or ODS_SELECTED;
+      if isDisabled in State then
+        DrawInfo.itemState := DrawInfo.itemState or ODS_DISABLED;
+      if isChecked in State then
+        DrawInfo.itemState := DrawInfo.itemState or ODS_CHECKED;
+      if isDefault in State then
+        DrawInfo.itemState := DrawInfo.itemState or ODS_DEFAULT;
+      DrawInfo.hwndItem := HWND(FMenu);
+      DrawInfo.hDC := DC;
+      DrawInfo.rcItem := ItemRect2;
+      DrawInfo.itemData := NativeItem.dwItemData;
+      IntersectClipRect(DC, ItemRect2.Left, ItemRect2.Top, ItemRect2.Right, ItemRect2.Bottom);
+      // Some shell owner-draw implementations inherit the DC foreground.
+      NativeTextColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextNormal);
+      if isHot in State then
+        NativeTextColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextHot);
+      if isDisabled in State then
+        NativeTextColor := StyleServices.GetStyleFontColor(sfPopupMenuItemTextDisabled);
+      SetTextColor(DC, ColorToRGB(NativeTextColor));
+      SetBkMode(DC, TRANSPARENT);
+      SendMessage(ThreadInfo.hwndMenuOwner, WM_DRAWITEM, 0, LPARAM(@DrawInfo));
+      Exit;
+    end;
+  end;
 
   if Style = isDropDown then
     DrawSubMenu(ItemRect2);

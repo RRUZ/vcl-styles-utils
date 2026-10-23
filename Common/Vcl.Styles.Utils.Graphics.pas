@@ -29,6 +29,7 @@ uses
   System.Classes,
   System.SysUtils,
   Winapi.Windows,
+  Winapi.CommCtrl,
   Vcl.Styles,
   Vcl.Themes,
   Vcl.StdCtrls,
@@ -37,6 +38,13 @@ uses
 
 type
   TImageFilterCallback = procedure(const AColor: TColor; Value: Integer; out NewColor: TColor);
+
+
+
+function DrawStyleShellImage(DC: HDC; const R: TRect; Images: HIMAGELIST;
+  Index: Integer; Color: TColor): Boolean;
+function DrawStyleGlyphMask(DC: HDC; const R: TRect; Black, White: TBitmap;
+  Color: TColor): Boolean;
 
 const
   MaxHue = 180;
@@ -295,6 +303,104 @@ uses
 {$ENDIF}
   System.Types,
   System.Math, Vcl.Forms;
+
+function DrawStyleGlyphMask(DC: HDC; const R: TRect; Black, White: TBitmap;
+  Color: TColor): Boolean;
+type
+  TPixelRow = array[0..32767] of TRGBQuad;
+  PPixelRow = ^TPixelRow;
+var
+  W, H, X, Y, A, Ink: Integer;
+  B, S: PPixelRow;
+  C: COLORREF;
+  Blend: TBlendFunction;
+begin
+  Result := False;
+  W := Black.Width;
+  H := Black.Height;
+  if (Black.PixelFormat <> pf32bit) or (White.PixelFormat <> pf32bit) or
+    (W > 32768) then
+    Exit;
+  if (W <= 0) or (H <= 0) or (White.Width <> W) or (White.Height <> H) then
+    Exit;
+  GdiFlush;
+  C := ColorToRGB(Color);
+  Ink := 0;
+  for Y := 0 to H - 1 do
+  begin
+    B := Black.ScanLine[Y];
+    S := White.ScanLine[Y];
+    for X := 0 to W - 1 do
+    begin
+      // Dual mattes retain native antialiasing and legacy icon AND masks.
+      A := 255 - ((Integer(S[X].rgbRed) - B[X].rgbRed +
+        Integer(S[X].rgbGreen) - B[X].rgbGreen +
+        Integer(S[X].rgbBlue) - B[X].rgbBlue) div 3);
+      if A < 0 then
+        A := 0
+      else if A > 255 then
+        A := 255;
+      if A > 0 then
+        Inc(Ink);
+      B[X].rgbReserved := A;
+      B[X].rgbRed := MulDiv(GetRValue(C), A, 255);
+      B[X].rgbGreen := MulDiv(GetGValue(C), A, 255);
+      B[X].rgbBlue := MulDiv(GetBValue(C), A, 255);
+    end;
+  end;
+  // An opaque native background is not a usable glyph mask.
+  if (Ink = 0) or (Ink = W * H) then
+    Exit;
+  Blend.BlendOp := AC_SRC_OVER;
+  Blend.BlendFlags := 0;
+  Blend.SourceConstantAlpha := 255;
+  Blend.AlphaFormat := AC_SRC_ALPHA;
+  Result := Winapi.Windows.AlphaBlend(DC, R.Left + (R.Width - W) div 2,
+    R.Top + (R.Height - H) div 2, W, H, Black.Canvas.Handle, 0, 0, W, H, Blend);
+end;
+
+function DrawStyleShellImage(DC: HDC; const R: TRect; Images: HIMAGELIST;
+  Index: Integer; Color: TColor): Boolean;
+var
+  Black, White: TBitmap;
+  Icon: HICON;
+  W, H: Integer;
+begin
+  Result := False;
+  if (Images = 0) or (Index < 0) or (Index >= ImageList_GetImageCount(Images)) then
+    Exit;
+  if not ImageList_GetIconSize(Images, W, H) or (W <= 0) or (H <= 0) then
+    Exit;
+  Icon := ImageList_GetIcon(Images, Index, ILD_NORMAL);
+  if Icon = 0 then
+    Exit;
+  try
+    Black := TBitmap.Create;
+    try
+      White := TBitmap.Create;
+      try
+        Black.PixelFormat := pf32bit;
+        Black.SetSize(W, H);
+        White.PixelFormat := pf32bit;
+        White.SetSize(W, H);
+        Black.Canvas.Brush.Color := clBlack;
+        Black.Canvas.FillRect(Rect(0, 0, W, H));
+        White.Canvas.Brush.Color := clWhite;
+        White.Canvas.FillRect(Rect(0, 0, W, H));
+        DrawIconEx(Black.Canvas.Handle, 0, 0, Icon, W, H, 0, 0, DI_NORMAL);
+        DrawIconEx(White.Canvas.Handle, 0, 0, Icon, W, H, 0, 0, DI_NORMAL);
+        Result := DrawStyleGlyphMask(DC, R, Black, White, Color);
+      finally
+        White.Free;
+      end;
+    finally
+      Black.Free;
+    end;
+  finally
+    DestroyIcon(Icon);
+  end;
+end;
+
 
 type
   PRGBArray24 = ^TRGBArray24;

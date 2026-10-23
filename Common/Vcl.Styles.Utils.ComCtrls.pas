@@ -257,6 +257,8 @@ type
     function IsToolbarWrapable: Boolean;
   protected
     procedure ApplyImageList;
+    function CanPaintShellButtons: Boolean;
+    function PaintShellButtons(Canvas: TCanvas): Boolean;
     procedure PaintBackground(Canvas: TCanvas); override;
     procedure Paint(Canvas: TCanvas); override;
     procedure PaintNC(Canvas: TCanvas); override;
@@ -339,7 +341,7 @@ implementation
 
 uses
   // IOUtils,
-  Vcl.Styles.Utils.SysControls, Vcl.Styles.Utils.Graphics;
+  Vcl.Styles.Utils.SysControls, Vcl.Styles.Utils.Graphics, Vcl.Styles.Utils.Misc;
 
 //
 // procedure Addlog(const Msg: string);
@@ -1244,6 +1246,93 @@ begin
   end;
 end;
 
+
+function IsShellButton(Kind: TShellToolbarKind; Command, Image: Integer): Boolean;
+begin
+  // Unknown shell actions retain the native painter and shared image list.
+  Result := ((Kind = stkUp) and (Command = 256) and (Image = 0)) or
+    ((Kind = stkAddress) and (((Command = 102) and (Image = 2)) or
+      ((Command = 202) and (Image = 3)) or ((Command = 100) and (Image = 0))));
+end;
+function TSysToolbarStyleHook.CanPaintShellButtons: Boolean;
+var
+  Kind: TShellToolbarKind;
+  Button: TTBButton;
+  I: Integer;
+begin
+  Result := False;
+  Kind := ShellToolbarKind(GetParent(Handle));
+  if not (Kind in [stkUp, stkAddress]) then
+    Exit;
+  for I := 0 to Count - 1 do
+  begin
+    if SendMessage(Handle, TB_GETBUTTON, I, LPARAM(@Button)) = 0 then
+      Exit;
+    if (Button.fsState and TBSTATE_HIDDEN) <> 0 then
+      Continue;
+    if not IsShellButton(Kind, Button.idCommand, Button.iBitmap) then
+      Exit;
+  end;
+  Result := True;
+end;
+
+function TSysToolbarStyleHook.PaintShellButtons(Canvas: TCanvas): Boolean;
+var
+  Kind: TShellToolbarKind;
+  Button: TTBButton;
+  I, Hot, W, H: Integer;
+  R, PaintRect: TRect;
+  Images: HIMAGELIST;
+  BackColor, GlyphColor: TColor;
+begin
+  Result := False;
+  Kind := ShellToolbarKind(GetParent(Handle));
+  if not (Kind in [stkUp, stkAddress]) then
+    Exit;
+  if not CanPaintShellButtons then
+    Exit;
+  if Kind = stkUp then
+  begin
+    BackColor := StyleServices.GetSystemColor(clBtnFace);
+  end
+  else
+  begin
+    BackColor := StyleServices.GetSystemColor(clWindow);
+  end;
+  Canvas.Brush.Color := BackColor;
+  Canvas.FillRect(SysControl.ClientRect);
+  Hot := SendMessage(Handle, TB_GETHOTITEM, 0, 0);
+
+  Images := SendMessage(Handle, TB_GETIMAGELIST, 0, 0);
+  for I := 0 to Count - 1 do
+  begin
+    SendMessage(Handle, TB_GETBUTTON, I, LPARAM(@Button));
+    if (Button.fsState and TBSTATE_HIDDEN) <> 0 then
+      Continue;
+    if not IsShellButton(Kind, Button.idCommand, Button.iBitmap) then
+      Continue;
+    if SendMessage(Handle, TB_GETITEMRECT, I, LPARAM(@R)) = 0 then
+      Continue;
+    // Shell buttons can extend below the toolbar's visible client area.
+    // Clip state borders, but preserve the native icon cell's optical alignment.
+    IntersectRect(PaintRect, R, SysControl.ClientRect);
+    GlyphColor := StyleServices.GetSystemColor(clWindowText);
+    if (Button.fsState and TBSTATE_ENABLED) = 0 then
+      GlyphColor := StyleServices.GetStyleFontColor(sfToolItemTextDisabled)
+    else if (Button.fsState and (TBSTATE_PRESSED or TBSTATE_CHECKED)) <> 0 then
+      AlphaBlendRectangle(Canvas.Handle, StyleServices.GetSystemColor(clHighlight), PaintRect, 64)
+    else if I = Hot then
+      AlphaBlendRectangle(Canvas.Handle, StyleServices.GetSystemColor(clHighlight), PaintRect, 32);
+    if not DrawStyleShellImage(Canvas.Handle, R, Images, Button.iBitmap, GlyphColor) then
+    begin
+      if ImageList_GetIconSize(Images, W, H) then
+        ImageList_Draw(Images, Button.iBitmap, Canvas.Handle,
+          R.Left + (R.Width - W) div 2, R.Top + (R.Height - H) div 2, ILD_NORMAL);
+    end;
+  end;
+  Result := True;
+end;
+
 procedure TSysToolbarStyleHook.Paint(Canvas: TCanvas);
 var
   i: Integer;
@@ -1261,7 +1350,11 @@ var
   TxtFlags: DWORD;
   TxtFormat: TTextFormat;
 begin
-
+  if ShellToolbarKind(GetParent(Handle)) in [stkUp, stkAddress] then
+  begin
+    PaintShellButtons(Canvas);
+    Exit;
+  end;
   Bmp := TBitmap.Create;
   try
     ApplyImageList;
@@ -1481,6 +1574,16 @@ end;
 
 procedure TSysToolbarStyleHook.WndProc(var Message: TMessage);
 begin
+  // During shell initialization or while showing an unfamiliar action (for
+  // example Stop), retain native painting and its image-list ownership.
+  if (Message.Msg = WM_PAINT) and
+    (ShellToolbarKind(GetParent(Handle)) in [stkUp, stkAddress]) and
+    (not TSysStyleManager.Enabled or not StyleServicesEnabled or
+     not CanPaintShellButtons) then
+  begin
+    Message.Result := CallDefaultProc(Message);
+    Exit;
+  end;
   inherited;
 end;
 {$ENDREGION}
@@ -1933,6 +2036,8 @@ var
   S: string;
   Details: TThemedElementDetails;
 begin
+  if IsShellNavigationRebar(Handle) then
+    Exit;
   for i := 0 to GetBandCount - 1 do
   begin
     R := GetBandRect(i);
@@ -1968,6 +2073,12 @@ var
   LRect: TRect;
   LDetails: TThemedElementDetails;
 begin
+  if IsShellNavigationRebar(Handle) then
+  begin
+    Canvas.Brush.Color := StyleServices.GetSystemColor(clBtnFace);
+    Canvas.FillRect(SysControl.ClientRect);
+    Exit;
+  end;
   LRect := Rect(0, 0, SysControl.ClientWidth, SysControl.ClientHeight);
   InflateRect(LRect, 2, 2);
   LDetails.Element := teToolBar;
@@ -1984,6 +2095,8 @@ begin
   ExcludeClipRect(Canvas.Handle, 2, 2, SysControl.Width - 2, SysControl.Height - 2);
   Canvas.Brush.Color := StyleServices.ColorToRGB(clBtnFace);
   Canvas.FillRect(Rect(0, 0, SysControl.Width, SysControl.Height));
+  if IsShellNavigationRebar(Handle) then
+    Exit;
   LDetails.Element := teToolBar;
   LDetails.Part := 0;
   DrawStyleElement(Canvas.Handle, LDetails, Rect(0, 0, SysControl.Width, SysControl.Height));

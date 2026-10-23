@@ -29,6 +29,11 @@ uses
   Winapi.Windows;
 
 { .$DEFINE EventLog }
+type
+  TShellToolbarKind = (stkOther, stkUp, stkAddress, stkBreadcrumb);
+
+function ShellToolbarKind(Parent: HWND): TShellToolbarKind;
+function IsShellNavigationRebar(Wnd: HWND): Boolean;
 function GetWindowClassName(Window: HWND): String;
 function RectVCenter(var R: TRect; const Bounds: TRect): TRect;
 procedure MoveWindowOrg(DC: HDC; const DX, DY: Integer);
@@ -50,6 +55,27 @@ uses
   Winapi.CommCtrl,
   System.SysUtils,
   Vcl.Forms;
+
+function IsShellNavigationRebar(Wnd: HWND): Boolean;
+begin
+  Result := (FindWindowEx(Wnd, 0, 'TravelBand', nil) <> 0) and
+    (FindWindowEx(Wnd, 0, 'Address Band Root', nil) <> 0);
+end;
+
+function ShellToolbarKind(Parent: HWND): TShellToolbarKind;
+var
+  Name: string;
+begin
+  Result := stkOther;
+  Name := GetWindowClassName(Parent);
+  if SameText(Name, 'UpBand') then
+    Result := stkUp
+  else if SameText(Name, 'Breadcrumb Parent') then
+    Result := stkBreadcrumb
+  else if SameText(Name, 'msctls_progress32') and
+    SameText(GetWindowClassName(GetParent(Parent)), 'Address Band Root') then
+    Result := stkAddress;
+end;
 
 function ExecutingInMainThread: boolean;
 begin

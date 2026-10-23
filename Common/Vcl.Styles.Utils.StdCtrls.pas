@@ -142,9 +142,16 @@ type
     FListHandle, FEditHandle: HWnd;
     FListBoxInstance: Pointer;
     FDefListBoxProc: Pointer;
+    FColorSubclassInstalled: Boolean;
+    FColorWindowData: Pointer;
     FListBoxTimerCode: Integer;
     FListBoxUpBtnDown, FListBoxDownBtnDown, FListBoxTrackUpDown,
       FListBoxTrackDownDown: Boolean;
+    procedure InstallColorSubclass;
+    class function ColorWindowProc(Wnd: HWND; Msg: UINT; WParam: WPARAM;
+      LParam: LPARAM): LRESULT; stdcall; static;
+    class function ColorSubclassProc(Wnd: HWND; Msg: UINT; WParam: WPARAM;
+      LParam: LPARAM; ID: UINT_PTR; Data: DWORD_PTR): LRESULT; stdcall; static;
     procedure DrawListBoxVertScroll(DC: HDC);
     procedure DrawListBoxBorder;
     function IsDroppedDown: Boolean;
@@ -249,6 +256,20 @@ uses
   System.UITypes,
   Vcl.Styles.Utils.Misc,
   Vcl.Styles.Utils.SysControls, Vcl.Styles.Utils.Graphics;
+
+var
+  WM_VCLSTYLE_COMBOCOLORS: UINT;
+
+type
+  PComboColorWindowData = ^TComboColorWindowData;
+  TComboColorWindowData = record
+    Hook: TSysComboBoxStyleHook;
+    Previous: Pointer;
+  end;
+
+const
+  ComboColorWindowProperty = 'Vcl.Styles.Utils.ComboBox.ColorWindow';
+
 
 { TSysEditStyleHook }
 
@@ -1065,10 +1086,19 @@ begin
   FListBoxTrackDownDown := False;
   OverrideFont := True;
   UpdateColors;
+  // The shell subclasses file-dialog combos after their creation hook.
+  // Defer installing the color handler until that native setup has finished.
+  if WM_VCLSTYLE_COMBOCOLORS <> 0 then
+    PostMessage(Handle, WM_VCLSTYLE_COMBOCOLORS, 0, 0);
 end;
 
 destructor TSysComboBoxStyleHook.Destroy;
+var
+  WindowData: PComboColorWindowData;
 begin
+  if FColorSubclassInstalled then
+    RemoveWindowSubclass(Handle, @TSysComboBoxStyleHook.ColorSubclassProc, NativeUInt(Self));
+  FColorSubclassInstalled := False;
   if (FListHandle <> 0) and (FListBoxInstance <> nil) then
   begin
     SetWindowLong(FListHandle, GWL_WNDPROC, IntPtr(FDefListBoxProc));
@@ -1077,7 +1107,126 @@ begin
   end;
   if FListBoxTimerCode <> 0 then
     ListBoxStopTimer;
+  WindowData := PComboColorWindowData(FColorWindowData);
+  if WindowData <> nil then
+  begin
+    WindowData.Hook := nil;
+    FColorWindowData := nil;
+    if Pointer(GetWindowLongPtr(Handle, GWLP_WNDPROC)) = @TSysComboBoxStyleHook.ColorWindowProc then
+      SetWindowLongPtr(Handle, GWLP_WNDPROC, LONG_PTR(WindowData.Previous));
+    // The base destructor restores its original procedure even when another
+    // native wrapper is above us, so release our property in either case.
+    RemoveProp(Handle, ComboColorWindowProperty);
+    Dispose(WindowData);
+  end;
   inherited;
+end;
+
+procedure TSysComboBoxStyleHook.InstallColorSubclass;
+var
+  Controls: TInitCommonControlsEx;
+  WindowData: PComboColorWindowData;
+begin
+  if FColorSubclassInstalled or (Style = csSimple) or
+    ((SysControl.Style and (CBS_OWNERDRAWFIXED or CBS_OWNERDRAWVARIABLE)) <> 0) then
+    Exit;
+  if Style = csDropDownList then
+  begin
+    // The shell's legacy subclass consumes list colors above the common-control
+    // subclass dispatcher. Keep a separate outer layer for plain dropdown lists.
+    if (FColorWindowData <> nil) or
+      (GetProp(Handle, ComboColorWindowProperty) <> 0) then
+      Exit;
+    New(WindowData);
+    WindowData.Hook := Self;
+    WindowData.Previous := Pointer(GetWindowLongPtr(Handle, GWLP_WNDPROC));
+    if not SetProp(Handle, ComboColorWindowProperty, THandle(WindowData)) then
+    begin
+      Dispose(WindowData);
+      Exit;
+    end;
+    SetLastError(0);
+    if (SetWindowLongPtr(Handle, GWLP_WNDPROC,
+      LONG_PTR(@TSysComboBoxStyleHook.ColorWindowProc)) = 0) and (GetLastError <> 0) then
+    begin
+      RemoveProp(Handle, ComboColorWindowProperty);
+      Dispose(WindowData);
+      Exit;
+    end;
+    FColorWindowData := WindowData;
+    Exit;
+  end;
+  Controls.dwSize := SizeOf(Controls);
+  Controls.dwICC := ICC_STANDARD_CLASSES;
+  if InitCommonControlsEx(Controls) then
+    FColorSubclassInstalled := SetWindowSubclass(Handle,
+      @TSysComboBoxStyleHook.ColorSubclassProc, NativeUInt(Self), NativeUInt(Self));
+end;
+
+class function TSysComboBoxStyleHook.ColorWindowProc(Wnd: HWND; Msg: UINT;
+  WParam: WPARAM; LParam: LPARAM): LRESULT;
+var
+  WindowData: PComboColorWindowData;
+  Hook: TSysComboBoxStyleHook;
+  Previous: Pointer;
+  Info: TComboBoxInfo;
+begin
+  WindowData := PComboColorWindowData(GetProp(Wnd, ComboColorWindowProperty));
+  if WindowData = nil then
+    Exit(DefWindowProc(Wnd, Msg, WParam, LParam));
+  Hook := WindowData.Hook;
+  Previous := WindowData.Previous;
+  if Msg = WM_NCDESTROY then
+  begin
+    RemoveProp(Wnd, ComboColorWindowProperty);
+    if Hook <> nil then
+      Hook.FColorWindowData := nil;
+    Dispose(WindowData);
+  end
+  else if (Hook <> nil) and (Msg = WM_CTLCOLORLISTBOX) and
+    TSysStyleManager.Enabled and Hook.StyleServicesEnabled then
+  begin
+    FillChar(Info, SizeOf(Info), 0);
+    Info.cbSize := SizeOf(Info);
+    if GetComboBoxInfo(Wnd, Info) and (Info.hwndList = HWND(LParam)) then
+    begin
+      Hook.UpdateColors;
+      SetTextColor(WParam, ColorToRGB(Hook.FontColor));
+      SetBkColor(WParam, ColorToRGB(Hook.Brush.Color));
+      Exit(LRESULT(Hook.Brush.Handle));
+    end;
+  end;
+  Result := CallWindowProc(Previous, Wnd, Msg, WParam, LParam);
+end;
+
+class function TSysComboBoxStyleHook.ColorSubclassProc(Wnd: HWND; Msg: UINT;
+  WParam: WPARAM; LParam: LPARAM; ID: UINT_PTR; Data: DWORD_PTR): LRESULT;
+var
+  Hook: TSysComboBoxStyleHook;
+  Info: TComboBoxInfo;
+begin
+  Hook := TSysComboBoxStyleHook(Pointer(Data));
+  if Msg = WM_NCDESTROY then
+  begin
+    RemoveWindowSubclass(Wnd, @TSysComboBoxStyleHook.ColorSubclassProc, ID);
+    Hook.FColorSubclassInstalled := False;
+  end
+  else if ((Msg = WM_CTLCOLOREDIT) or (Msg = WM_CTLCOLORLISTBOX) or
+    (Msg = WM_CTLCOLORSTATIC)) and TSysStyleManager.Enabled and Hook.StyleServicesEnabled then
+  begin
+    FillChar(Info, SizeOf(Info), 0);
+    Info.cbSize := SizeOf(Info);
+    if GetComboBoxInfo(Wnd, Info) and
+      (((Msg = WM_CTLCOLORLISTBOX) and (HWND(LParam) = Info.hwndList)) or
+       ((Msg <> WM_CTLCOLORLISTBOX) and (HWND(LParam) = Info.hwndItem))) then
+    begin
+      Hook.UpdateColors;
+      SetTextColor(WParam, ColorToRGB(Hook.FontColor));
+      SetBkColor(WParam, ColorToRGB(Hook.Brush.Color));
+      Exit(LRESULT(Hook.Brush.Handle));
+    end;
+  end;
+  Result := DefSubclassProc(Wnd, Msg, WParam, LParam);
 end;
 
 procedure TSysComboBoxStyleHook.CNCommand(var Message: TWMCommand);
@@ -2195,7 +2344,7 @@ begin
   Color := StyleServices.GetStyleColor(ColorStates[SysControl.Enabled]);
 {$IF CompilerVersion > 23}
   if OverrideFont then
-    FontColor := StyleServices.GetStyleFontColor(FontColorStates[True])
+    FontColor := StyleServices.GetStyleFontColor(FontColorStates[SysControl.Enabled])
   else
     FontColor := clWindowText;
 {$ELSE}
@@ -2344,6 +2493,12 @@ procedure TSysComboBoxStyleHook.WndProc(var Message: TMessage);
 const
   States: array [Boolean] of TStyleColor = (scEditDisabled, scComboBox);
 begin
+  if (WM_VCLSTYLE_COMBOCOLORS <> 0) and (Message.Msg = WM_VCLSTYLE_COMBOCOLORS) then
+  begin
+    InstallColorSubclass;
+    Message.Result := 0;
+    Exit;
+  end;
   case Message.Msg of
 
     CB_SETCURSEL, WM_KILLFOCUS:
@@ -2358,6 +2513,12 @@ begin
     WM_CTLCOLORMSGBOX .. WM_CTLCOLORSTATIC,
       CN_CTLCOLORMSGBOX .. CN_CTLCOLORSTATIC:
       begin
+        if not TSysStyleManager.Enabled or not StyleServicesEnabled then
+        begin
+          Message.Result := CallDefaultProc(Message);
+          Exit;
+        end;
+        UpdateColors;
         SetTextColor(Message.wParam, ColorToRGB(FontColor));
         Brush.Color := StyleServices.GetStyleColor(States[SysControl.Enabled]);
         SetBkColor(Message.wParam, ColorToRGB(Brush.Color));
@@ -2859,6 +3020,8 @@ begin
 end;
 
 initialization
+
+WM_VCLSTYLE_COMBOCOLORS := RegisterWindowMessage('Vcl.Styles.Utils.ComboBox.Colors');
 
 if StyleServices.Available then
 begin

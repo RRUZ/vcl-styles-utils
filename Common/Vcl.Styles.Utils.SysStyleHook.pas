@@ -1099,55 +1099,45 @@ begin
   if OverridePaint then
   begin
     OrgDC := HDC(Message.wParam);
-    Canvas := TCanvas.Create;
+    if OrgDC <> 0 then
+      DC := OrgDC
+    else
+      DC := BeginPaint(SysControl.Handle, PS);
     try
-
-      if OrgDC <> 0 then
-      begin
-        Canvas.Handle := OrgDC;
-        DC:= OrgDC;
-      end
-      else
-      begin
-        DC := GetDC(Handle);
-        BeginPaint(SysControl.Handle, PS);
+      Canvas := TCanvas.Create;
+      try
         Canvas.Handle := DC;
-      end;
+        if Assigned(FFont) then
+          Canvas.Font.Assign(FFont);
 
-      if Assigned(FFont) then
-        Canvas.Font.Assign(FFont);
-
-      if not InternalPaint(Canvas.Handle) then
-        if FDoubleBuffered and (DC = 0) then
-        begin
-          Buffer := TBitmap.Create;
-          try
-            Buffer.SetSize(SysControl.Width, SysControl.Height);
+        if not InternalPaint(Canvas.Handle) then
+          if FDoubleBuffered and (DC = 0) then
+          begin
+            Buffer := TBitmap.Create;
+            try
+              Buffer.SetSize(SysControl.Width, SysControl.Height);
+              DoClipControls;
+              PaintBackground(Buffer.Canvas);
+              Paint(Buffer.Canvas);
+              // PaintControls(Handle,Canvas.Handle);
+              Canvas.Draw(0, 0, Buffer);
+            finally
+              Buffer.Free;
+            end;
+          end
+          else
+          begin
             DoClipControls;
-            PaintBackground(Buffer.Canvas);
-            Paint(Buffer.Canvas);
+            Paint(Canvas);
             // PaintControls(Handle,Canvas.Handle);
-            Canvas.Draw(0, 0, Buffer);
-          finally
-            Buffer.Free;
           end;
-        end
-        else
-        begin
-          DoClipControls;
-          Paint(Canvas);
-          // PaintControls(Handle,Canvas.Handle);
-        end;
-
-      if OrgDC = 0 then
-      begin
-        ReleaseDC(SysControl.Handle, DC);
-        EndPaint(SysControl.Handle, PS);
+      finally
+        Canvas.Handle := 0;
+        Canvas.Free;
       end;
-
     finally
-      Canvas.Handle := 0;
-      Canvas.Free;
+      if OrgDC = 0 then
+        EndPaint(SysControl.Handle, PS);
     end;
     Handled := True;
   end;

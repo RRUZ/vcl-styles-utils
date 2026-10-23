@@ -179,6 +179,10 @@ begin
   { NB: The ClassName is always in lowercase . }
   LInfo := Info^;
   Result := True;
+  // Style only the shell's monochrome Up and address-action toolbars.
+  if SameText(LInfo.ClassName, TOOLBARCLASSNAME) and
+    (ShellToolbarKind(LInfo.Parent) in [stkUp, stkAddress]) then
+    Exit;
   Root := GetAncestor(LInfo.Parent, GA_ROOT);
   if FindWinFromRoot(Root, 'DirectUIHWND') > 0 then
   begin
