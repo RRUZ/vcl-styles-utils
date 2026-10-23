@@ -160,12 +160,14 @@ begin
     Exit(Trampoline_user32_FillRect(hDC, lprc, hbr));
 end;
 
+function GetStyleHighLightColor: TColor; forward;
+
 function Detour_GetSysColor(nIndex: Integer): DWORD; stdcall;
 begin
   if not (ExecutingInMainThread) or StyleServices.IsSystemStyle or not (TSysStyleManager.Enabled) then
     Result := Trampoline_user32_GetSysColor(nIndex)
   else if nIndex = COLOR_HOTLIGHT then
-    Result := DWORD(StyleServices.GetSystemColor(clHighlight))
+    Result := DWORD(GetStyleHighLightColor)
   else
     Result := DWORD(StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000))));
 end;
@@ -207,7 +209,7 @@ begin
         else
         begin
           if nIndex = COLOR_HOTLIGHT then
-            LColor := StyleServices.GetSystemColor(clHighlight)
+            LColor := GetStyleHighLightColor
           else
             LColor := StyleServices.GetSystemColor(TColor(nIndex or Integer($FF000000)));
 

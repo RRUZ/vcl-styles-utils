@@ -234,7 +234,37 @@ implementation
 
 uses
   Vcl.Styles.Utils.Misc,
-  Vcl.Styles.Utils.SysControls, Vcl.Styles.Utils.Graphics, Winapi.UxTheme;
+  Vcl.Styles.Utils.SysControls, Vcl.Styles.Utils.Graphics, Winapi.UxTheme,
+  Winapi.CommCtrl;
+
+{$IFDEF HOOK_TaskDialog}
+function TaskDialogLinkColorProc(Wnd: HWND; Msg: UINT; WParam: WPARAM;
+  LParam: LPARAM; ID: UINT_PTR; Data: DWORD_PTR): LRESULT; stdcall;
+begin
+  if Msg = WM_NCDESTROY then
+    RemoveWindowSubclass(Wnd, @TaskDialogLinkColorProc, ID);
+  Result := DefSubclassProc(Wnd, Msg, WParam, LParam);
+  if (Msg = WM_CTLCOLORSTATIC) and ExecutingInMainThread and
+    TSysStyleManager.Enabled and not StyleServices.IsSystemStyle and
+    SameText(GetWindowClassName(HWND(LParam)), 'SysLink') then
+    // The sink supplies the background; only replace its cached native text color.
+    SetTextColor(HDC(WParam), ColorToRGB(StyleServices.GetSystemColor(clWindowText)));
+end;
+
+function StyleTaskDialogLink(Wnd: HWND; Data: LPARAM): BOOL; stdcall;
+var
+  Parent: HWND;
+begin
+  if SameText(GetWindowClassName(Wnd), 'SysLink') then
+  begin
+    Parent := GetParent(Wnd);
+    if SameText(GetWindowClassName(Parent), 'CtrlNotifySink') then
+      SetWindowSubclass(Parent, @TaskDialogLinkColorProc,
+        UINT_PTR(@TaskDialogLinkColorProc), 0);
+  end;
+  Result := True;
+end;
+{$ENDIF}
 
 // -----------------------------------------------------------------------------------
 procedure FillDC(const DC: HDC; const R: TRect; const Color: TColor);
@@ -1409,6 +1439,28 @@ begin
   // Addlog(Format('TSysDialogStyleHook $0x%x %s', [SysControl.Handle, WM_To_String(Message.Msg)]));
   case Message.msg of
 
+    {$IFDEF HOOK_TaskDialog}
+    TDM_NAVIGATE_PAGE, TDM_SET_ELEMENT_TEXT, TDM_UPDATE_ELEMENT_TEXT:
+      begin
+        Message.Result := CallDefaultProc(Message);
+        // Navigation and text updates can replace the native link/sink windows.
+        EnumChildWindows(Handle, @StyleTaskDialogLink, 0);
+        Handled := True;
+        Exit;
+      end;
+
+    TDM_UPDATE_ICON:
+      begin
+        Message.Result := CallDefaultProc(Message);
+        // DirectUI invalidates only its native icon layer.  Repaint the styled
+        // task dialog as well so its cached surface shows the replacement icon.
+        RedrawWindow(Handle, nil, 0, RDW_INVALIDATE or RDW_UPDATENOW or
+          RDW_ALLCHILDREN or RDW_FRAME);
+        Handled := True;
+        Exit;
+      end;
+    {$ENDIF}
+
     WM_WINDOWPOSCHANGED:
       begin
         FSysCloseButtonDisabled := IsSysCloseButtonDisabled;
@@ -1417,6 +1469,11 @@ begin
     WM_SHOWWINDOW:
       begin
         Message.Result := CallDefaultProc(Message);
+        {$IFDEF HOOK_TaskDialog}
+        // DirectUI task dialogs host SysLink in a sink rather than directly on the dialog.
+        if Message.WParam <> 0 then
+          EnumChildWindows(Handle, @StyleTaskDialogLink, 0);
+        {$ENDIF}
         { DFBW =Default Frame Border Width }
         DFBW := GetSysMetrics(SM_CXSIZEFRAME) * 2;
         //Inc(DFBW);

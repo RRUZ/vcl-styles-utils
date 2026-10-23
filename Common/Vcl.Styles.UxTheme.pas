@@ -1312,6 +1312,7 @@ var
   plf: LOGFONTW;
   {$IF Defined(HOOK_Menu) or Defined(HOOK_DateTimePicker)}LText: string;{$ENDIF}
   LRect: TRect;
+  LTextOptions: TDTTOpts;
 begin
   if not(ExecutingInMainThread) then
     exit(Trampoline_UxTheme_DrawThemeText(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags,
@@ -1662,27 +1663,16 @@ begin
               CMDLS_DEFAULTED_ANIMATING: LDetails := StyleServices.GetElementDetails(tbPushButtonDefaultedAnimating);
             end;
 
-            LCanvas := TCanvas.Create;
-            SaveIndex := SaveDC(hdc);
-            try
-              LCanvas.Handle := hdc;
-              ZeroMemory(@plf, SizeOf(plf));
-              plf.lfHeight := 14;
-              plf.lfCharSet := DEFAULT_CHARSET;
-              StrCopy(plf.lfFaceName, 'Tahoma');
-              LCanvas.Font.Handle := CreateFontIndirect(plf);
-              if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
-                ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
-              LRect := pRect;
-              StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), LRect,
-                TTextFormatFlags(dwTextFlags), ThemeTextColor);
-            finally
-              LCanvas.Handle := 0;
-              LCanvas.Free;
-              RestoreDC(hdc, SaveIndex);
-            end;
-
-            exit(S_OK);
+            // Use the native renderer rather than substituting a fixed pixel font.
+            ZeroMemory(@LTextOptions, SizeOf(LTextOptions));
+            LTextOptions.dwSize := SizeOf(LTextOptions);
+            LTextOptions.dwFlags := DTT_TEXTCOLOR;
+            if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
+              ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
+            LTextOptions.crText := ColorToRGB(ThemeTextColor);
+            LRect := pRect;
+            Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId,
+              pszText, iCharCount, dwTextFlags, @LRect, LTextOptions));
           end
       else
         begin
@@ -1711,9 +1701,7 @@ var
   LCanvas: TCanvas;
   LThemeClass: string;
   plf: LOGFONTW;
-  {$IF Defined(HOOK_ListView) or Defined(HOOK_TreeView) or Defined(HOOK_Menu)}
   LTextOptions: TDTTOpts;
-  {$ENDIF}
 begin
   if not(ExecutingInMainThread) then
     Exit(Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags, pRect, pOptions));
@@ -1858,28 +1846,12 @@ begin
           if not StyleServices.GetElementColor(LDetails, ecTextColor, ThemeTextColor) then
             ThemeTextColor := StyleServices.GetSystemColor(clBtnText);
 
-          LCanvas := TCanvas.Create;
-          SaveIndex := SaveDC(hdc);
-          try
-            LCanvas.Handle := hdc;
-            if pOptions.dwFlags AND DTT_FONTPROP <> 0 then
-            begin
-              // GetThemeSysFont(hTheme, pOptions.iFontPropId, plf);  // is not working
-              ZeroMemory(@plf, SizeOf(plf));
-              plf.lfHeight := 13;
-              plf.lfCharSet := DEFAULT_CHARSET;
-              StrCopy(plf.lfFaceName, 'Tahoma');
-              LCanvas.Font.Handle := CreateFontIndirect(plf);
-            end;
-            StyleServices.DrawText(LCanvas.Handle, LDetails, string(pszText), pRect^, TTextFormatFlags(dwTextFlags),
-              ThemeTextColor);
-          finally
-            LCanvas.Handle := 0;
-            LCanvas.Free;
-            RestoreDC(hdc, SaveIndex);
-          end;
-
-          Result := S_OK;
+          // Preserve the native title/note font, DPI metrics, length and draw options.
+          LTextOptions := pOptions;
+          LTextOptions.dwFlags := (LTextOptions.dwFlags and not DTT_COLORPROP) or DTT_TEXTCOLOR;
+          LTextOptions.crText := ColorToRGB(ThemeTextColor);
+          Result := Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId,
+            pszText, cchText, dwTextFlags, pRect, LTextOptions);
         end
     else
       Result := Trampoline_UxTheme_DrawThemeTextEx(hTheme, hdc, iPartId, iStateId, pszText, cchText, dwTextFlags,
@@ -3270,16 +3242,153 @@ end;
 {$ENDIF}
 
 {$IF Defined(HOOK_Button) or Defined(HOOK_AllButtons)}
+function GetButtonDCLayout(DC: HDC): DWORD; stdcall;
+  external 'gdi32.dll' name 'GetLayout';
+
+function SetButtonDCLayout(DC: HDC; Layout: DWORD): DWORD; stdcall;
+  external 'gdi32.dll' name 'SetLayout';
+
+procedure DrawButtonStyleElement(DC: HDC; const Details: TThemedElementDetails;
+  const Bounds: TRect);
+const
+  LAYOUT_BITMAPORIENTATIONPRESERVED = $00000008;
+var
+  Layout: DWORD;
+  Buffer: TBitmap;
+  LocalRect: TRect;
+  RTLPoints: array[0..1] of TPoint;
+  LTRPoints: array[0..1] of TPoint;
+  RTLBounds: TRect;
+  LTRBounds: TRect;
+  WindowExt: TSize;
+  ViewportExt: TSize;
+  WindowOrg: TPoint;
+  ViewportOrg: TPoint;
+  MapMode: Integer;
+  SaveIndex: Integer;
+  Drawn: Boolean;
+  Value: Integer;
+begin
+  Layout := GetButtonDCLayout(DC);
+  if (Layout = DWORD(-1)) or (Layout and 1 = 0) then
+  begin
+    DrawStyleElement(DC, Details, Bounds);
+    Exit;
+  end;
+  if (Bounds.Width <= 0) or (Bounds.Height <= 0) then
+    Exit;
+
+  if (GetGraphicsMode(DC) <> GM_COMPATIBLE) or
+    (not GetWindowExtEx(DC, WindowExt)) or
+    (not GetViewportExtEx(DC, ViewportExt)) or
+    (not GetWindowOrgEx(DC, WindowOrg)) or
+    (not GetViewportOrgEx(DC, ViewportOrg)) or
+    (WindowExt.cx <= 0) or (WindowExt.cy <= 0) or
+    (ViewportExt.cx <= 0) or (ViewportExt.cy <= 0) then
+  begin
+    DrawStyleElement(DC, Details, Bounds);
+    Exit;
+  end;
+  MapMode := GetMapMode(DC);
+  RTLPoints[0] := Point(Bounds.Left - 1, Bounds.Top);
+  RTLPoints[1] := Point(Bounds.Right - 1, Bounds.Bottom);
+  if not LPtoDP(DC, RTLPoints, Length(RTLPoints)) then
+  begin
+    DrawStyleElement(DC, Details, Bounds);
+    Exit;
+  end;
+  RTLBounds := Rect(RTLPoints[0].X, RTLPoints[0].Y, RTLPoints[1].X,
+    RTLPoints[1].Y);
+  if RTLBounds.Left > RTLBounds.Right then
+  begin
+    Value := RTLBounds.Left;
+    RTLBounds.Left := RTLBounds.Right;
+    RTLBounds.Right := Value;
+  end;
+  if RTLBounds.Top > RTLBounds.Bottom then
+  begin
+    Value := RTLBounds.Top;
+    RTLBounds.Top := RTLBounds.Bottom;
+    RTLBounds.Bottom := Value;
+  end;
+  if (RTLBounds.Width <= 0) or (RTLBounds.Height <= 0) then
+    Exit;
+
+  Buffer := TBitmap.Create;
+  SaveIndex := 0;
+  Drawn := False;
+  try
+    SaveIndex := SaveDC(DC);
+    if (SaveIndex <> 0) and (SetButtonDCLayout(DC, 0) <> DWORD(-1)) then
+    begin
+      LTRPoints[0] := Point(Bounds.Left, Bounds.Top);
+      LTRPoints[1] := Point(Bounds.Right, Bounds.Bottom);
+      if LPtoDP(DC, LTRPoints, Length(LTRPoints)) then
+      begin
+        LTRBounds := Rect(LTRPoints[0].X, LTRPoints[0].Y,
+          LTRPoints[1].X, LTRPoints[1].Y);
+        if (LTRBounds.Right > LTRBounds.Left) and
+          (LTRBounds.Bottom > LTRBounds.Top) then
+        begin
+          // Copy and restore through MM_TEXT device pixels, then recreate the
+          // caller's LTR scale and fractional phase in the intermediate bitmap.
+          SetMapMode(DC, MM_TEXT);
+          SetWindowOrgEx(DC, 0, 0, nil);
+          SetViewportOrgEx(DC, 0, 0, nil);
+          Buffer.PixelFormat := pf24bit;
+          Buffer.SetSize(RTLBounds.Width, RTLBounds.Height);
+          if Layout and LAYOUT_BITMAPORIENTATIONPRESERVED <> 0 then
+            Drawn := BitBlt(Buffer.Canvas.Handle, 0, 0, RTLBounds.Width,
+              RTLBounds.Height, DC, RTLBounds.Left, RTLBounds.Top, SRCCOPY)
+          else
+            Drawn := StretchBlt(Buffer.Canvas.Handle, RTLBounds.Width - 1, 0,
+              -RTLBounds.Width, RTLBounds.Height, DC, RTLBounds.Left,
+              RTLBounds.Top, RTLBounds.Width, RTLBounds.Height, SRCCOPY);
+          if Drawn then
+          begin
+            SetMapMode(Buffer.Canvas.Handle, MapMode);
+            SetWindowExtEx(Buffer.Canvas.Handle, WindowExt.cx,
+              WindowExt.cy, nil);
+            SetViewportExtEx(Buffer.Canvas.Handle, ViewportExt.cx,
+              ViewportExt.cy, nil);
+            SetWindowOrgEx(Buffer.Canvas.Handle, WindowOrg.X, WindowOrg.Y,
+              nil);
+            SetViewportOrgEx(Buffer.Canvas.Handle,
+              ViewportOrg.X - LTRBounds.Left,
+              ViewportOrg.Y - LTRBounds.Top, nil);
+            LocalRect := Bounds;
+            DrawStyleElement(Buffer.Canvas.Handle, Details, LocalRect);
+
+            SetMapMode(Buffer.Canvas.Handle, MM_TEXT);
+            SetWindowOrgEx(Buffer.Canvas.Handle, 0, 0, nil);
+            SetViewportOrgEx(Buffer.Canvas.Handle, 0, 0, nil);
+            if Layout and LAYOUT_BITMAPORIENTATIONPRESERVED <> 0 then
+              Drawn := BitBlt(DC, RTLBounds.Left, RTLBounds.Top,
+                RTLBounds.Width, RTLBounds.Height, Buffer.Canvas.Handle, 0,
+                0, SRCCOPY)
+            else
+              Drawn := StretchBlt(DC, RTLBounds.Right - 1, RTLBounds.Top,
+                -RTLBounds.Width, RTLBounds.Height, Buffer.Canvas.Handle, 0,
+                0, RTLBounds.Width, RTLBounds.Height, SRCCOPY);
+          end;
+        end;
+      end;
+    end;
+  finally
+    if SaveIndex <> 0 then
+      RestoreDC(DC, SaveIndex);
+    Buffer.Free;
+  end;
+  if not Drawn then
+    DrawStyleElement(DC, Details, Bounds);
+end;
+
 function UxTheme_Button(hTheme: hTheme; hndc: hdc; iPartId, iStateId: Integer;
     const pRect: TRect; Foo: Pointer; Trampoline: TDrawThemeBackground;
     LThemeClass: string; hwnd: hwnd): HRESULT; stdcall;
 var
   LDetails: TThemedElementDetails;
   SaveIndex: Integer;
-  LBtnBmp: TBitmap;
-  LDC: HDC;
-  LColor: TColor;
-  LCanvas: TCanvas;
 begin
   case iPartId of
 
@@ -3296,26 +3405,10 @@ begin
 
         SaveIndex := SaveDC(hndc);
         try
-          LBtnBmp := TBitmap.Create;
-          LCanvas := TCanvas.Create;
-          try
-            LCanvas.Handle := hndc;
-            LBtnBmp.PixelFormat := pf24bit;
-            LBtnBmp.Transparent := True;
-            LBtnBmp.SetSize(pRect.Width, pRect.Height);
-            LDC := LBtnBmp.Canvas.Handle;
-            LColor := StyleServices.GetSystemColor(clBtnFace);
-            DrawStyleFillRect(LDC, pRect, LColor);
-
-            if hwnd <> 0 then
-              DrawStyleParentBackground(hwnd, hndc, pRect);
-            DrawStyleElement(LDC, LDetails, pRect);
-
-            LCanvas.Draw(0, 0, LBtnBmp);
-          finally
-            LCanvas.Free;
-            LBtnBmp.Free;
-          end;
+          // DirectUI can supply a rectangle with a nonzero destination origin.
+          if hwnd <> 0 then
+            DrawStyleParentBackground(hwnd, hndc, pRect);
+          DrawButtonStyleElement(hndc, LDetails, pRect);
         finally
           RestoreDC(hndc, SaveIndex);
         end;
@@ -3337,26 +3430,10 @@ begin
 
         SaveIndex := SaveDC(hndc);
         try
-          LBtnBmp := TBitmap.Create;
-          LCanvas := TCanvas.Create;
-          try
-            LCanvas.Handle := hndc;
-            LBtnBmp.PixelFormat := pf24bit;
-            LBtnBmp.Transparent := True;
-            LBtnBmp.SetSize(pRect.Width, pRect.Height);
-            LDC := LBtnBmp.Canvas.Handle;
-            LColor := StyleServices.GetSystemColor(clBtnFace);
-            DrawStyleFillRect(LDC, pRect, LColor);
-
-            if hwnd <> 0 then
-              DrawStyleParentBackground(hwnd, hndc, pRect);
-            DrawStyleElement(LDC, LDetails, pRect);
-
-            LCanvas.Draw(0, 0, LBtnBmp);
-          finally
-            LCanvas.Free;
-            LBtnBmp.Free;
-          end;
+          // DirectUI can supply a rectangle with a nonzero destination origin.
+          if hwnd <> 0 then
+            DrawStyleParentBackground(hwnd, hndc, pRect);
+          DrawButtonStyleElement(hndc, LDetails, pRect);
         finally
           RestoreDC(hndc, SaveIndex);
         end;
@@ -3378,7 +3455,7 @@ begin
         try
           if hwnd <> 0 then
             DrawStyleParentBackground(hwnd, hndc, pRect);
-          DrawStyleElement(hndc, LDetails, pRect);
+          DrawButtonStyleElement(hndc, LDetails, pRect);
         finally
           RestoreDC(hndc, SaveIndex);
         end;
